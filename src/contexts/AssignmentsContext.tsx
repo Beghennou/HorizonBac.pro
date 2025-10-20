@@ -2,6 +2,7 @@
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { students as initialStudents } from '@/lib/mock-data';
+import { classes as initialClasses } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { allBlocs } from '@/lib/data-manager';
 
@@ -16,8 +17,11 @@ const xpPerLevel: Record<EvaluationStatus, number> = {
 
 type AssignmentsContextType = {
   students: Student[];
+  setStudents: React.Dispatch<React.SetStateAction<Student[]>>;
+  classes: Record<string, string[]>;
+  setClasses: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
   assignedTps: Record<string, number[]>;
-  evaluations: Record<string, Record<string, EvaluationStatus>>; // { [studentName]: { [competenceId]: status } }
+  evaluations: Record<string, Record<string, EvaluationStatus>>;
   assignTp: (studentNames: string[], tpId: number) => void;
   saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>) => void;
 };
@@ -26,6 +30,7 @@ const AssignmentsContext = createContext<AssignmentsContextType | undefined>(und
 
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [students, setStudents] = useState<Student[]>(initialStudents);
+  const [classes, setClasses] = useState<Record<string, string[]>>(initialClasses);
   const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({
     'BAKHTAR Adam': [101, 102],
     'BELKAID Rayan': [101],
@@ -46,7 +51,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const saveEvaluation = (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>) => {
-    // 1. Save the new evaluations for the student
     setEvaluations(prev => ({
       ...prev,
       [studentName]: {
@@ -55,7 +59,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       }
     }));
 
-    // 2. Calculate total XP for that student
     setStudents(prevStudents => {
       const studentToUpdate = prevStudents.find(s => s.name === studentName);
       if (!studentToUpdate) return prevStudents;
@@ -79,7 +82,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AssignmentsContext.Provider value={{ students, assignedTps, evaluations, assignTp, saveEvaluation }}>
+    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, assignTp, saveEvaluation }}>
       {children}
     </AssignmentsContext.Provider>
   );

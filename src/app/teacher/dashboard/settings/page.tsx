@@ -1,14 +1,17 @@
 'use client';
 
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Database, FileUp, Save, Settings2, Trash2 } from "lucide-react";
+import { useAssignments } from '@/contexts/AssignmentsContext';
 
 export default function SettingsPage() {
   const { toast } = useToast();
+  const { setStudents, setClasses } = useAssignments();
 
   const handleSaveSettings = () => {
     toast({
@@ -17,14 +20,26 @@ export default function SettingsPage() {
     });
     console.log("Sauvegarde des paramètres...");
   };
+  
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const handleImport = () => {
-    toast({
-      title: "Fonctionnalité à venir",
-      description: "L'importation de listes d'élèves sera bientôt disponible.",
-    });
-    console.log("Importation des élèves...");
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const csvData = event.target?.result as string;
+      // Ici, vous auriez la logique pour parser le CSV et mettre à jour l'état.
+      // Pour l'instant, on simule avec un toast.
+      console.log('CSV Data:', csvData);
+      
+      toast({
+        title: "Fichier importé",
+        description: `${file.name} a été chargé. La logique de mise à jour des élèves est à implémenter.`,
+      });
+    };
+    reader.readAsText(file);
   };
+
 
   const handleBackup = () => {
      toast({
@@ -79,10 +94,13 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             <p className="text-sm">Ces actions peuvent être irréversibles. Veuillez procéder avec prudence.</p>
             <div className="flex flex-wrap gap-4">
-                 <Button variant="outline" onClick={handleImport}>
-                    <FileUp className="mr-2 h-4 w-4" />
-                    Importer une liste d'élèves (.csv)
-                </Button>
+                 <Button variant="outline" asChild>
+                    <Label htmlFor="csv-upload" className="cursor-pointer">
+                      <FileUp className="mr-2 h-4 w-4" />
+                      Importer une liste d'élèves (.csv)
+                      <Input id="csv-upload" type="file" accept=".csv" className="hidden" onChange={handleFileUpload} />
+                    </Label>
+                 </Button>
                 <Button variant="outline" onClick={handleBackup}>
                     <Save className="mr-2 h-4 w-4" />
                     Sauvegarder les données
