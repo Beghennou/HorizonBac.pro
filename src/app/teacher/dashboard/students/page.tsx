@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ import { useAssignments } from '@/contexts/AssignmentsContext';
 
 export default function StudentsPage() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const { students, assignTp, classes } = useAssignments();
     const { toast } = useToast();
 
@@ -61,12 +63,23 @@ export default function StudentsPage() {
         });
     };
 
+    const handleCardClick = (studentName: string, e: React.MouseEvent<HTMLDivElement>) => {
+      // Prevent navigation if clicking on checkbox
+      if ((e.target as HTMLElement).closest('[role="checkbox"]')) {
+        return;
+      }
+      
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      newSearchParams.set('student', studentName);
+      router.push(`/teacher/dashboard/student/${studentName}?${newSearchParams.toString()}`);
+    }
+
     return (
       <div className="space-y-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-3 font-headline">
-                  <Users /> Sélectionner un ou plusieurs élèves de la classe : {className}
+                  <Users /> Élèves de la classe : {className}
                 </CardTitle>
                 {selectedStudents.length > 0 && (
                       <DropdownMenu>
@@ -97,17 +110,18 @@ export default function StudentsPage() {
                         key={studentName} 
                         className={cn(
                           "p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all border-2",
-                          isSelected ? "border-accent shadow-accent/50 shadow-lg" : "border-primary/20 hover:border-accent/70"
+                          "border-primary/20 hover:border-accent/70"
                         )}
-                        onClick={() => handleStudentSelection(studentName, !isSelected)}
+                        onClick={(e) => handleCardClick(studentName, e)}
                       >
-                        <div className="relative w-full">
+                        <div className="relative w-full flex justify-between items-start">
+                           <h3 className="font-headline tracking-wide text-lg text-left">{studentName}</h3>
                           <Checkbox
-                              className="absolute top-1 left-1 z-10"
+                              className="z-10"
                               checked={isSelected}
                               onCheckedChange={(checked) => handleStudentSelection(studentName, !!checked)}
+                              onClick={(e) => e.stopPropagation()} // Prevent card click
                           />
-                          <h3 className="font-headline tracking-wide text-lg">{studentName}</h3>
                         </div>
                         <div className="w-full mt-2">
                           <Progress value={student.progress} className="h-2 bg-muted/30" indicatorClassName="bg-gradient-to-r from-xp-color to-green-400" />

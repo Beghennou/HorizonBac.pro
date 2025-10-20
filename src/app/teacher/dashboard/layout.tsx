@@ -16,9 +16,9 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { AssignmentsProvider } from '@/contexts/AssignmentsContext';
+import { AssignmentsProvider, useAssignments } from '@/contexts/AssignmentsContext';
 
-export default function TeacherDashboardLayout({
+function DashboardLayoutContent({
   children,
 }: {
   children: React.ReactNode;
@@ -26,9 +26,10 @@ export default function TeacherDashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { classes: dynamicClasses } = useAssignments();
 
   const [niveau, setNiveau] = useState<Niveau>((searchParams.get('level') as Niveau) ||'seconde');
-  const [selectedClass, setSelectedClass] = useState<string>(searchParams.get('class') || Object.keys(classes).find(c => c.startsWith('2')) || '2MV1');
+  const [selectedClass, setSelectedClass] = useState<string>(searchParams.get('class') || Object.keys(dynamicClasses).find(c => c.startsWith('2')) || '2MV1');
   
   useEffect(() => {
     const classFromUrl = searchParams.get('class');
@@ -42,17 +43,18 @@ export default function TeacherDashboardLayout({
   }, [searchParams, selectedClass, niveau]);
 
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
+  const selectedStudent = searchParams.get('student');
   
   const tps = getTpsByNiveau(niveau);
 
   const handleNiveauChange = (newNiveau: Niveau) => {
     setNiveau(newNiveau);
-    const firstClassForLevel = Object.keys(classes).find(c => {
+    const firstClassForLevel = Object.keys(dynamicClasses).find(c => {
         if (newNiveau === 'seconde') return c.startsWith('2');
         if (newNiveau === 'premiere') return c.startsWith('1');
         if (newNiveau === 'terminale') return c.startsWith('T');
         return false;
-    }) || Object.keys(classes)[0];
+    }) || Object.keys(dynamicClasses)[0];
     
     setSelectedClass(firstClassForLevel);
 
@@ -60,9 +62,12 @@ export default function TeacherDashboardLayout({
     newSearchParams.set('level', newNiveau);
     newSearchParams.set('class', firstClassForLevel);
     
-    // Preserve student selection if it exists
+    // Preserve student and TP selection if they exist
     if (searchParams.has('student')) {
         newSearchParams.set('student', searchParams.get('student')!);
+    }
+    if (searchParams.has('tp')) {
+        newSearchParams.set('tp', searchParams.get('tp')!);
     }
 
     router.push(`${pathname}?${newSearchParams.toString()}`);
@@ -71,34 +76,23 @@ export default function TeacherDashboardLayout({
   const handleTpSelect = (id: number) => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('tp', id.toString());
-    
-    const targetPath = (pathname.startsWith('/teacher/dashboard/students') || pathname.startsWith('/teacher/dashboard/competences'))
-      ? pathname
-      : '/teacher/dashboard';
-
-    router.push(`${targetPath}?${newSearchParams.toString()}`);
+    router.push(`${pathname}?${newSearchParams.toString()}`);
   }
 
   const handleClassChange = (className: string) => {
     setSelectedClass(className);
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('class', className);
+    newSearchParams.delete('student'); // Remove student when class changes
     
-    // Construct the path ensuring we don't carry over irrelevant query params
-    // like 'student' when changing class.
-    const basePath = pathname;
-    const finalParams = new URLSearchParams();
-    finalParams.set('level', searchParams.get('level') || niveau);
-    finalParams.set('class', className);
-    if (searchParams.has('tp')) {
-        finalParams.set('tp', searchParams.get('tp')!);
-    }
-    
-    router.push(`${basePath}?${finalParams.toString()}`);
+    const basePath = pathname.startsWith('/teacher/dashboard/student') 
+        ? '/teacher/dashboard/students' // Redirect to student list if on a specific student page
+        : pathname;
+
+    router.push(`${basePath}?${newSearchParams.toString()}`);
   }
 
   return (
-    <AssignmentsProvider>
       <SidebarProvider>
         <div className="bg-background min-h-screen">
           <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl">
@@ -149,7 +143,7 @@ export default function TeacherDashboardLayout({
                             <SelectValue placeholder="Choisir une classe..." />
                           </SelectTrigger>
                           <SelectContent>
-                            {Object.keys(classes)
+                            {Object.keys(dynamicClasses)
                               .filter(c => {
                                 if (niveau === 'seconde') return c.startsWith('2');
                                 if (niveau === 'premiere') return c.startsWith('1');
@@ -187,6 +181,17 @@ export default function TeacherDashboardLayout({
           </SidebarInset>
         </div>
       </SidebarProvider>
+  );
+}
+
+export default function TeacherDashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AssignmentsProvider>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
     </AssignmentsProvider>
   );
 }
