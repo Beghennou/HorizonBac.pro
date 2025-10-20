@@ -26,41 +26,52 @@ type AssignmentsContextType = {
   saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>) => void;
   teacherName: string;
   setTeacherName: React.Dispatch<React.SetStateAction<string>>;
+  resetStudentData: () => void;
 };
 
 const AssignmentsContext = createContext<AssignmentsContextType | undefined>(undefined);
 
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
-  const [students, setStudents] = useState<Student[]>(initialStudents);
-  const [classes, setClasses] = useState<Record<string, string[]>>(initialClasses);
-  const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({
-    'BAKHTAR Adam': [101, 102],
-    'BELKAID Rayan': [101],
-  });
+  const [students, setStudents] = useState<Student[]>([]);
+  const [classes, setClasses] = useState<Record<string, string[]>>({});
+  const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({});
   const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus>>>({});
   const [teacherName, setTeacherName] = useState<string>('M. Dubois');
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const savedStudents = localStorage.getItem('students');
-      if (savedStudents) setStudents(JSON.parse(savedStudents));
+    if (typeof window !== 'undefined') {
+      try {
+        const savedStudents = localStorage.getItem('students');
+        setStudents(savedStudents ? JSON.parse(savedStudents) : initialStudents);
 
-      const savedClasses = localStorage.getItem('classes');
-      if (savedClasses) setClasses(JSON.parse(savedClasses));
+        const savedClasses = localStorage.getItem('classes');
+        setClasses(savedClasses ? JSON.parse(savedClasses) : initialClasses);
 
-      const savedAssignedTps = localStorage.getItem('assignedTps');
-      if (savedAssignedTps) setAssignedTps(JSON.parse(savedAssignedTps));
+        const savedAssignedTps = localStorage.getItem('assignedTps');
+        setAssignedTps(savedAssignedTps ? JSON.parse(savedAssignedTps) : {
+          'BAKHTAR Adam': [101, 102],
+          'BELKAID Rayan': [101],
+        });
 
-      const savedEvaluations = localStorage.getItem('evaluations');
-      if (savedEvaluations) setEvaluations(JSON.parse(savedEvaluations));
-      
-      const savedTeacherName = localStorage.getItem('teacherName');
-      if (savedTeacherName) setTeacherName(JSON.parse(savedTeacherName));
-    } catch (error) {
-      console.error("Failed to load data from localStorage", error);
+        const savedEvaluations = localStorage.getItem('evaluations');
+        setEvaluations(savedEvaluations ? JSON.parse(savedEvaluations) : {});
+        
+        const savedTeacherName = localStorage.getItem('teacherName');
+        setTeacherName(savedTeacherName ? JSON.parse(savedTeacherName) : 'M. Dubois');
+      } catch (error) {
+        console.error("Failed to load data from localStorage, using initial data.", error);
+        setStudents(initialStudents);
+        setClasses(initialClasses);
+        setAssignedTps({
+          'BAKHTAR Adam': [101, 102],
+          'BELKAID Rayan': [101],
+        });
+        setEvaluations({});
+        setTeacherName('M. Dubois');
+      }
+      setIsLoaded(true);
     }
-    setIsLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -99,7 +110,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         const studentToUpdate = prevStudents.find(s => s.name === studentName);
         if (!studentToUpdate) return prevStudents;
 
-        // Recalculer le total des XP et la progression à partir de *toutes* les évaluations enregistrées pour cet élève
         const allStudentEvaluations = { ...(evaluations[studentName] || {}), ...currentEvals };
         
         let totalXp = 0;
@@ -109,7 +119,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         }
 
         const allCompetencesCount = Object.values(allBlocs).reduce((acc, bloc) => acc + Object.keys(bloc.items).length, 0);
-        // Calcule le XP maximum possible en se basant sur le fait que toutes les compétences sont maîtrisées
         const maxPossibleXp = allCompetencesCount * xpPerLevel['M'];
         const progressPercentage = maxPossibleXp > 0 ? Math.round((totalXp / maxPossibleXp) * 100) : 0;
 
@@ -118,9 +127,32 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         return prevStudents.map(s => s.name === studentName ? updatedStudent : s);
     });
   };
+  
+  const resetStudentData = () => {
+    setStudents([]);
+    setAssignedTps({});
+    setEvaluations({});
+    // Conserve les noms de classe mais vide les listes d'élèves
+    setClasses(prevClasses => {
+        const clearedClasses: Record<string, string[]> = {};
+        for (const className in prevClasses) {
+            clearedClasses[className] = [];
+        }
+        return clearedClasses;
+    });
+
+    toast({
+        title: "Données réinitialisées",
+        description: "Tous les élèves, leurs TP assignés et leurs évaluations ont été effacés.",
+    });
+  };
+
+  if (!isLoaded) {
+    return null; // or a loading spinner
+  }
 
   return (
-    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, assignTp, saveEvaluation, teacherName, setTeacherName }}>
+    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, assignTp, saveEvaluation, teacherName, setTeacherName, resetStudentData }}>
       {children}
     </AssignmentsContext.Provider>
   );

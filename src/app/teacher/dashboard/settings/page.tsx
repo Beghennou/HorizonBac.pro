@@ -6,14 +6,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings2, UserPlus, Save } from "lucide-react";
+import { Settings2, UserPlus, Save, AlertTriangle, Trash2 } from "lucide-react";
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Student } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { students, classes, setStudents, setClasses, teacherName, setTeacherName } = useAssignments();
+  const { students, classes, setStudents, setClasses, teacherName, setTeacherName, resetStudentData } = useAssignments();
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
@@ -22,6 +33,7 @@ export default function SettingsPage() {
   const [lastName, setLastName] = useState('');
   const [newClassName, setNewClassName] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
+  const [resetPassword, setResetPassword] = useState('');
 
   useEffect(() => {
     setLocalTeacherName(teacherName);
@@ -81,13 +93,24 @@ export default function SettingsPage() {
 
   const handleSaveSettings = () => {
     setTeacherName(localTeacherName);
-    // Ici, on pourrait aussi sauvegarder le nom de l'école si nécessaire
     toast({
       title: "Paramètres sauvegardés",
       description: "Le nom de l'enseignant a été mis à jour.",
     });
   };
 
+  const handleReset = () => {
+    if (resetPassword === 'Mongy') {
+        resetStudentData();
+        setResetPassword('');
+    } else {
+        toast({
+            variant: 'destructive',
+            title: "Mot de passe incorrect",
+            description: "La réinitialisation a été annulée.",
+        });
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -164,6 +187,53 @@ export default function SettingsPage() {
             </div>
         </CardContent>
       </Card>
+
+      <Card className="border-destructive">
+          <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive"><AlertTriangle/> Zone de danger</CardTitle>
+              <CardDescription>Ces actions sont irréversibles. Soyez certain avant de continuer.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-between items-center">
+              <p>Réinitialiser toutes les données des élèves (évaluations, TP assignés, etc.) mais conserver les classes vides.</p>
+               <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                      <Button variant="destructive">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Réinitialiser les données
+                      </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                      <AlertDialogHeader>
+                          <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                              Cette action est irréversible. Toutes les données des élèves seront supprimées. Pour confirmer, veuillez taper <strong>Mongy</strong> dans le champ ci-dessous.
+                          </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <div className="space-y-2">
+                        <Label htmlFor="reset-password">Mot de passe de confirmation</Label>
+                        <Input 
+                            id="reset-password" 
+                            type="password"
+                            value={resetPassword}
+                            onChange={(e) => setResetPassword(e.target.value)}
+                            placeholder="Entrez le mot de passe..."
+                        />
+                      </div>
+                      <AlertDialogFooter>
+                          <AlertDialogCancel onClick={() => setResetPassword('')}>Annuler</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={handleReset} 
+                            disabled={resetPassword !== 'Mongy'}
+                            className="bg-destructive hover:bg-destructive/90"
+                          >
+                            Confirmer la réinitialisation
+                          </AlertDialogAction>
+                      </AlertDialogFooter>
+                  </AlertDialogContent>
+              </AlertDialog>
+          </CardContent>
+      </Card>
+
     </div>
   );
 }
