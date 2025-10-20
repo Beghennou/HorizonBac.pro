@@ -1,14 +1,14 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useAssignments } from '@/contexts/AssignmentsContext';
-import { getTpById, allBlocs, classes } from '@/lib/data-manager';
-import { students as allStudents } from '@/lib/mock-data';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getTpById, allBlocs, classes, TP } from '@/lib/data-manager';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, CheckSquare, Users } from 'lucide-react';
+import { User, CheckSquare, Users, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 const evaluationLevels: EvaluationStatus[] = ['NA', 'EC', 'A', 'M'];
@@ -17,33 +17,63 @@ export default function CompetencesPage() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const { assignedTps } = useAssignments();
+    const { toast } = useToast();
+    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation } = useAssignments();
 
     const studentName = searchParams.get('student');
     const className = searchParams.get('class') || Object.keys(classes).find(c => c.startsWith('2')) || '2MV1';
     
     const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
-    const [evaluations, setEvaluations] = useState<Record<string, EvaluationStatus>>({});
+    const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
     const studentNamesInClass = classes[className as keyof typeof classes] || [];
-    const studentsInClass = allStudents.filter(student => studentNamesInClass.includes(student.name));
-
+    const studentsInClass = students.filter(student => studentNamesInClass.includes(student.name));
 
     const studentTpsIds = studentName ? assignedTps[studentName] || [] : [];
-    const studentTps = studentTpsIds.map(id => getTpById(id)).filter(tp => tp !== undefined);
+    const studentTps = studentTpsIds.map(id => getTpById(id)).filter((tp): tp is TP => tp !== undefined);
+
+    useEffect(() => {
+        if (studentName) {
+            setCurrentEvaluations(savedEvaluations[studentName] || {});
+        } else {
+            setCurrentEvaluations({});
+            setSelectedTpId(null);
+        }
+    }, [studentName, savedEvaluations]);
+
+    useEffect(() => {
+        if (!studentTps.some(tp => tp.id === selectedTpId)) {
+            setSelectedTpId(null);
+        }
+    }, [studentTps, selectedTpId]);
 
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
-        setEvaluations(prev => ({
+        setCurrentEvaluations(prev => ({
             ...prev,
             [competenceId]: status,
         }));
     };
 
-    const handleStudentSelect = (studentName: string) => {
+    const handleStudentSelect = (studentNameToSelect: string) => {
         const newSearchParams = new URLSearchParams(searchParams.toString());
-        newSearchParams.set('student', studentName);
+        newSearchParams.set('student', studentNameToSelect);
         router.push(`${pathname}?${newSearchParams.toString()}`);
     }
+
+    const handleSave = () => {
+        if (!studentName || !selectedTpId) return;
+
+        const tpCompetences = Object.values(allBlocs).flatMap(bloc => Object.keys(bloc.items));
+        const evalsToSave = Object.fromEntries(
+            Object.entries(currentEvaluations).filter(([competenceId]) => tpCompetences.includes(competenceId))
+        );
+
+        saveEvaluation(studentName, selectedTpId, evalsToSave);
+        toast({
+            title: "Évaluation enregistrée",
+            description: `Les compétences pour ${studentName} ont été mises à jour.`,
+        });
+    };
     
     const selectedTp = selectedTpId ? getTpById(selectedTpId) : null;
 
@@ -86,12 +116,12 @@ export default function CompetencesPage() {
                         {studentTps.length > 0 ? (
                             <div className="flex items-center gap-4">
                                 <span className="font-semibold">Sélectionner un TP assigné :</span>
-                                <Select onValueChange={(value) => setSelectedTpId(parseInt(value))}>
+                                <Select onValueChange={(value) => setSelectedTpId(parseInt(value))} value={selectedTpId?.toString() || ""}>
                                     <SelectTrigger className="w-[400px]">
                                         <SelectValue placeholder="Choisissez un TP..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {studentTps.map(tp => tp && (
+                                        {studentTps.map(tp => (
                                             <SelectItem key={tp.id} value={tp.id.toString()}>
                                                 TP {tp.id} - {tp.titre}
                                             </SelectItem>
@@ -127,11 +157,11 @@ export default function CompetencesPage() {
                                                     {evaluationLevels.map(level => (
                                                         <Button
                                                             key={level}
-                                                            variant={evaluations[id] === level ? 'default' : 'outline'}
+                                                            variant={currentEvaluations[id] === level ? 'default' : 'outline'}
                                                             size="sm"
                                                             className={cn(
                                                                 "font-mono w-12",
-                                                                evaluations[id] === level && 'bg-accent text-accent-foreground border-accent'
+                                                                currentEvaluations[id] === level && 'bg-accent text-accent-foreground border-accent'
                                                             )}
                                                             onClick={() => handleEvaluationChange(id, level)}
                                                         >
@@ -145,6 +175,12 @@ export default function CompetencesPage() {
                                 </div>
                             ))}
                         </CardContent>
+                        <CardFooter>
+                            <Button onClick={handleSave} className="ml-auto">
+                                <Save className="mr-2 h-4 w-4" />
+                                Enregistrer l'évaluation
+                            </Button>
+                        </CardFooter>
                     </Card>
                 )}
                 </>

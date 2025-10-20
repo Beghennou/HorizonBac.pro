@@ -60,6 +60,7 @@ export default function TeacherDashboardLayout({
     newSearchParams.set('level', newNiveau);
     newSearchParams.set('class', firstClassForLevel);
     
+    // Preserve student selection if it exists
     if (searchParams.has('student')) {
         newSearchParams.set('student', searchParams.get('student')!);
     }
@@ -71,17 +72,11 @@ export default function TeacherDashboardLayout({
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('tp', id.toString());
     
-    const targetPath = (pathname.startsWith('/teacher/dashboard/students'))
+    const targetPath = (pathname.startsWith('/teacher/dashboard/students') || pathname.startsWith('/teacher/dashboard/competences'))
       ? pathname
       : '/teacher/dashboard';
 
     router.push(`${targetPath}?${newSearchParams.toString()}`);
-  }
-
-  const handleStudentSelect = (studentName: string) => {
-      const newSearchParams = new URLSearchParams(searchParams.toString());
-      newSearchParams.set('student', studentName);
-      router.push(`/teacher/dashboard/students?${newSearchParams.toString()}`);
   }
 
   const handleClassChange = (className: string) => {
@@ -91,9 +86,6 @@ export default function TeacherDashboardLayout({
     newSearchParams.delete('student'); 
     router.push(`${pathname}?${newSearchParams.toString()}`);
   }
-
-  const studentsInClass = classes[selectedClass as keyof typeof classes] || [];
-
 
   return (
     <AssignmentsProvider>
@@ -188,4 +180,3 @@ export default function TeacherDashboardLayout({
     </AssignmentsProvider>
   );
 }
-    

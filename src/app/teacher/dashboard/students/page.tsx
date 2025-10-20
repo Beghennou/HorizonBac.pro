@@ -4,10 +4,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { students as allStudents } from '@/lib/mock-data';
 import { classes, getTpsByNiveau, Niveau } from '@/lib/data-manager';
-import { Badge } from '@/components/ui/badge';
-import { BookCheck, ChevronDown, User, Users } from 'lucide-react';
+import { ChevronDown, Users } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,15 +19,14 @@ import { useAssignments } from '@/contexts/AssignmentsContext';
 
 export default function StudentsPage() {
     const searchParams = useSearchParams();
-    const router = useRouter();
-    const { assignedTps, assignTp } = useAssignments();
+    const { students, assignTp } = useAssignments();
     const { toast } = useToast();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const className = searchParams.get('class') || Object.keys(classes).find(c => c.startsWith('2')) || '2MV1';
     
     const studentNamesInClass = classes[className as keyof typeof classes] || [];
-    const studentsInClass = allStudents.filter(student => studentNamesInClass.includes(student.name));
+    const studentsInClass = students.filter(student => studentNamesInClass.includes(student.name));
     
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
@@ -113,7 +110,7 @@ export default function StudentsPage() {
                         </div>
                         <div className="w-full mt-2">
                           <Progress value={student.progress} className="h-2 bg-muted/30" indicatorClassName="bg-gradient-to-r from-xp-color to-green-400" />
-                          <p className="text-xs text-muted-foreground mt-1 font-mono">{student.progress * 100} XP</p>
+                          <p className="text-xs text-muted-foreground mt-1 font-mono">{student.xp || 0} XP</p>
                         </div>
                       </Card>
                     )
