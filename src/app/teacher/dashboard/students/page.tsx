@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { students } from '@/lib/mock-data';
+import { students as allStudents } from '@/lib/mock-data';
+import { classes } from '@/lib/data-manager';
 import { Badge } from '@/components/ui/badge';
 import { Award, BookCheck, ChevronDown, User, Users } from 'lucide-react';
 import {
@@ -95,7 +96,13 @@ export default function StudentsPage() {
     const searchParams = useSearchParams();
     const studentName = searchParams.get('student');
     const level = (searchParams.get('level') as Niveau) || 'seconde';
+    const className = searchParams.get('class') || Object.keys(classes)[0];
     
+    // Filter students based on the selected class
+    const studentNamesInClass = classes[className as keyof typeof classes] || [];
+    const studentsInClass = allStudents.filter(student => studentNamesInClass.includes(student.name));
+
+
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
     
     const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({
@@ -143,7 +150,7 @@ export default function StudentsPage() {
         });
     };
 
-    const selectedStudentDetails = students.find(s => s.id === studentName);
+    const selectedStudentDetails = allStudents.find(s => s.name === studentName);
 
 
     return (
@@ -151,7 +158,7 @@ export default function StudentsPage() {
             <div className="lg:col-span-2">
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="flex items-center gap-3"><Users /> Vue de la classe</CardTitle>
+                        <CardTitle className="flex items-center gap-3"><Users /> Vue de la classe: {className}</CardTitle>
                         {selectedStudents.length > 0 && (
                              <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -182,13 +189,13 @@ export default function StudentsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {students.sort((a,b) => b.progress - a.progress).map((student, index) => (
+                                {studentsInClass.sort((a,b) => b.progress - a.progress).map((student, index) => (
                                     <TableRow key={student.id}>
                                         <TableCell>
                                             <Checkbox
                                                 id={`select-${student.id}`}
-                                                onCheckedChange={(checked) => handleStudentSelection(student.id, !!checked)}
-                                                checked={selectedStudents.includes(student.id)}
+                                                onCheckedChange={(checked) => handleStudentSelection(student.name, !!checked)}
+                                                checked={selectedStudents.includes(student.name)}
                                             />
                                         </TableCell>
                                         <TableCell className="font-bold text-lg text-accent">
@@ -221,12 +228,20 @@ export default function StudentsPage() {
                     <StudentDetails 
                         student={selectedStudentDetails} 
                         level={level}
-                        assignedTps={assignedTps[selectedStudentDetails.id] || []}
-                        onAssignTp={(tpId) => {
-                            setAssignedTps(prev => ({
-                                ...prev,
-                                [selectedStudentDetails.id]: [...(prev[selectedStudentDetails.id] || []), tpId]
-                            }));
+                        assignedTps={assignedTps[selectedStudentDetails.name] || []}
+                        onAssignTp={(tpId, tpTitle) => {
+                             setAssignedTps(prev => {
+                                const currentTps = prev[selectedStudentDetails.name] || [];
+                                if (currentTps.includes(tpId)) return prev; // Do not add if already assigned
+                                return {
+                                    ...prev,
+                                    [selectedStudentDetails.name]: [...currentTps, tpId]
+                                };
+                            });
+                            toast({
+                                title: "TP Assigné",
+                                description: `Le TP "${tpTitle}" a été assigné à ${selectedStudentDetails.name}.`,
+                            });
                         }}
                     />
                 ) : (

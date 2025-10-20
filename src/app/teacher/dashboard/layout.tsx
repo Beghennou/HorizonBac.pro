@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
@@ -12,7 +12,6 @@ import { DashboardNav } from '@/components/dashboard-nav';
 import {
   SidebarProvider,
   Sidebar,
-  SidebarHeader,
   SidebarContent,
   SidebarTrigger,
   SidebarInset,
@@ -28,11 +27,25 @@ export default function TeacherDashboardLayout({
   const searchParams = useSearchParams();
 
   const [niveau, setNiveau] = useState<Niveau>('seconde');
-  const [selectedClass, setSelectedClass] = useState<string>(Object.keys(classes)[0]);
+  const [selectedClass, setSelectedClass] = useState<string>(searchParams.get('class') || Object.keys(classes)[0]);
   
+  useEffect(() => {
+    // Sync selectedClass with URL search param on component mount and when searchParams change
+    const classFromUrl = searchParams.get('class');
+    if (classFromUrl && classFromUrl !== selectedClass) {
+      setSelectedClass(classFromUrl);
+    }
+  }, [searchParams]);
+
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
   
   const tps = getTpsByNiveau(niveau);
+
+  const updateQueryParam = (key: string, value: string) => {
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set(key, value);
+    return newSearchParams.toString();
+  }
 
   const handleNiveauChange = (newNiveau: Niveau) => {
     setNiveau(newNiveau);
@@ -42,10 +55,13 @@ export default function TeacherDashboardLayout({
         if (newNiveau === 'terminale') return c.startsWith('Term');
         return false;
     }) || Object.keys(classes)[0];
+    
+    // setSelectedClass will trigger the useEffect below to update URL
     setSelectedClass(firstClassForLevel);
 
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.delete('tp');
+    newSearchParams.set('class', firstClassForLevel);
     if (!pathname.includes('competences')) {
         newSearchParams.delete('student');
     }
@@ -57,7 +73,6 @@ export default function TeacherDashboardLayout({
     newSearchParams.set('tp', id.toString());
     newSearchParams.set('level', niveau);
     
-    // Only redirect to main dashboard if we are not on a student/competence page
     const targetPath = (pathname.startsWith('/teacher/dashboard/students') || pathname.startsWith('/teacher/dashboard/competences'))
       ? pathname
       : '/teacher/dashboard';
@@ -69,10 +84,20 @@ export default function TeacherDashboardLayout({
       const newSearchParams = new URLSearchParams(searchParams.toString());
       newSearchParams.set('student', studentName);
       newSearchParams.set('level', niveau);
+      newSearchParams.set('class', selectedClass);
+
       const targetPath = pathname.startsWith('/teacher/dashboard/students') || pathname.startsWith('/teacher/dashboard/competences')
         ? pathname
         : '/teacher/dashboard/students';
       router.push(`${targetPath}?${newSearchParams.toString()}`);
+  }
+
+  const handleClassChange = (className: string) => {
+    setSelectedClass(className);
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set('class', className);
+    newSearchParams.delete('student'); // Reset student when class changes
+    router.push(`${pathname}?${newSearchParams.toString()}`);
   }
 
   const studentsInClass = classes[selectedClass as keyof typeof classes] || [];
@@ -123,12 +148,19 @@ export default function TeacherDashboardLayout({
 
                         <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
                             <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Sélection de la classe</h3>
-                            <Select value={selectedClass} onValueChange={setSelectedClass}>
+                            <Select value={selectedClass} onValueChange={handleClassChange}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Choisir une classe..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {Object.keys(classes).map(className => (
+                                    {Object.keys(classes)
+                                      .filter(c => {
+                                        if (niveau === 'seconde') return c.startsWith('2nde');
+                                        if (niveau === 'premiere') return c.startsWith('1ere');
+                                        if (niveau === 'terminale') return c.startsWith('Term');
+                                        return true;
+                                      })
+                                      .map(className => (
                                         <SelectItem key={className} value={className}>{className}</SelectItem>
                                     ))}
                                 </SelectContent>
