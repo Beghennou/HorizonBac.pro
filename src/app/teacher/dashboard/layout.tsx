@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { LogoutButton } from '@/components/logout-button';
 import { Logo } from '@/components/logo';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { classes, getTpsByNiveau, Niveau } from '@/lib/data-manager';
+import { LogoutButton } from '@/components/logout-button';
 
 export default function TeacherDashboardLayout({
   children,
@@ -16,15 +16,20 @@ export default function TeacherDashboardLayout({
 }) {
   const [niveau, setNiveau] = useState<Niveau>('seconde');
   const [selectedClass, setSelectedClass] = useState<string>(Object.keys(classes)[0]);
-  
-  // Note: La vérification du cookie doit être faite dans un middleware ou un composant serveur parent
-  // Pour l'instant, on suppose que l'utilisateur est authentifié.
+  const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
 
   const tps = getTpsByNiveau(niveau);
 
   const handleNiveauChange = (newNiveau: Niveau) => {
     setNiveau(newNiveau);
+    setSelectedTpId(null);
   };
+  
+  const handleTpSelect = (id: number) => {
+    setSelectedTpId(id);
+  }
+
+  const selectedTp = selectedTpId ? tps.find(tp => tp.id === selectedTpId) : null;
 
   return (
     <div className="bg-background min-h-screen">
@@ -77,7 +82,9 @@ export default function TeacherDashboardLayout({
             <ScrollArea className="h-96">
                 <div className="space-y-2">
                     {tps.map(tp => (
-                        <div key={tp.id} className="p-3 rounded-md bg-background/50 hover:bg-primary/10 border border-transparent hover:border-primary/50 cursor-pointer">
+                        <div key={tp.id} 
+                             onClick={() => handleTpSelect(tp.id)}
+                             className={`p-3 rounded-md bg-background/50 hover:bg-primary/10 border border-transparent hover:border-primary/50 cursor-pointer transition-all ${selectedTpId === tp.id ? 'bg-primary/20 border-accent' : ''}`}>
                             <p className="font-bold text-sm text-accent">TP {tp.id}</p>
                             <p className="text-sm text-foreground/80">{tp.titre}</p>
                         </div>
