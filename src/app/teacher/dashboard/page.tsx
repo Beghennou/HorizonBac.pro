@@ -1,10 +1,12 @@
 'use client';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { getTpById, TP } from "@/lib/data-manager";
 import { useSearchParams } from "next/navigation";
+import { Printer } from "lucide-react";
 
 const EtapeCard = ({ etape, index }: { etape: any, index: number }) => (
-    <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50">
+    <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
         <h4 className="font-headline text-lg text-accent">Étape {index + 1}: {etape.titre} <span className="text-sm text-muted-foreground font-body">({etape.duree})</span></h4>
         <ul className="list-disc pl-5 mt-2 space-y-1 text-foreground/90">
             {etape.etapes.map((e: string, i: number) => <li key={i}>{e}</li>)}
@@ -13,12 +15,22 @@ const EtapeCard = ({ etape, index }: { etape: any, index: number }) => (
 );
 
 const TpDetailView = ({ tp }: { tp: TP }) => {
+    const handlePrint = () => {
+        window.print();
+    };
+
     return (
-        <div className="space-y-6">
-            <div>
-                <p className="text-sm uppercase tracking-wider font-semibold text-accent">TP {tp.id}</p>
-                <h1 className="font-headline text-4xl tracking-wide">{tp.titre}</h1>
-                <p className="text-muted-foreground mt-1 text-lg">{tp.objectif}</p>
+        <div className="space-y-6" id="printable-tp">
+            <div className="flex justify-between items-start">
+                <div>
+                    <p className="text-sm uppercase tracking-wider font-semibold text-accent">TP {tp.id}</p>
+                    <h1 className="font-headline text-4xl tracking-wide">{tp.titre}</h1>
+                    <p className="text-muted-foreground mt-1 text-lg">{tp.objectif}</p>
+                </div>
+                <Button onClick={handlePrint} className="print-hidden">
+                    <Printer className="mr-2" />
+                    Imprimer la fiche
+                </Button>
             </div>
             
             <Card>
@@ -41,18 +53,24 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="break-before-page">
                 <CardHeader>
                     <CardTitle>Étude Préliminaire</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-4">
                     {tp.etudePrelim.map((item, i) => (
-                        <div key={i}><strong>Q:</strong> {item.q}</div>
+                        <div key={i}>
+                            <p><strong>Q{i+1}:</strong> {item.q}</p>
+                            <div className="border-l-2 border-dashed border-accent/50 pl-4 ml-4 mt-2">
+                                <p className="text-muted-foreground italic">Votre réponse :</p>
+                                <div className="h-12"></div>
+                            </div>
+                        </div>
                     ))}
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="break-before-page">
                 <CardHeader>
                     <CardTitle>Activité Pratique</CardTitle>
                 </CardHeader>
@@ -63,7 +81,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="break-before-page">
                 <CardHeader>
                     <CardTitle>Points Clés & Sécurité</CardTitle>
                 </CardHeader>
@@ -97,7 +115,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full text-center">
+    <div className="flex flex-col items-center justify-center h-full text-center print-hidden">
       <h1 className="font-headline text-5xl tracking-wide">Bienvenue</h1>
       <p className="text-muted-foreground text-xl mt-2">Veuillez sélectionner un TP dans la liste de gauche pour afficher ses détails.</p>
     </div>

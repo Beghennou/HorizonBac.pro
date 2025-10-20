@@ -63,3 +63,50 @@
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  
+  .print-hidden {
+    display: none !important;
+  }
+  
+  main {
+    display: block !important;
+    padding: 0 !important;
+  }
+
+  section {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  
+  .card {
+     border: 1px solid #ccc !important;
+     box-shadow: none !important;
+  }
+
+  .break-before-page {
+    break-before: page;
+  }
+
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+  
+  h1,h2,h3,h4 {
+    color: #000 !important;
+  }
+  
+  .text-muted-foreground {
+    color: #555 !important;
+  }
+  
+  .text-accent {
+      color: #000 !important;
+  }
+}
