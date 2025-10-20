@@ -3,20 +3,63 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getTpById, TP } from "@/lib/data-manager";
 import { useSearchParams } from "next/navigation";
-import { Printer, User, Users } from "lucide-react";
+import { Mail, User, Users } from "lucide-react";
 import { useAssignments } from "@/contexts/AssignmentsContext";
 
-const PrintButton = () => {
-    const handlePrint = () => {
-        window.print();
+const SendEmailButton = ({ tp, studentName }: { tp: TP, studentName: string | null }) => {
+    const { students } = useAssignments();
+    const student = students.find(s => s.name === studentName);
+
+    const handleSendEmail = () => {
+        if (!student || !student.email) {
+            alert("Impossible de trouver l'e-mail de l'élève.");
+            return;
+        }
+
+        const subject = `Votre Fiche TP: ${tp.titre}`;
+        
+        // Temporarily show a printable version for the email link
+        const printableContent = document.getElementById('printable-tp')?.innerHTML;
+        const newWindow = window.open();
+        if (newWindow) {
+            newWindow.document.write(`
+                <html>
+                    <head>
+                        <title>${subject}</title>
+                        <link rel="stylesheet" href="/path/to/your/globals.css">
+                        <style>
+                            /* Simple print styles */
+                            body { font-family: sans-serif; }
+                            .print-hidden { display: none; }
+                            .card { border: 1px solid #ccc; margin-bottom: 1rem; border-radius: 0.5rem; }
+                            .card-header { padding: 1rem; background-color: #f0f0f0; }
+                            .card-content { padding: 1rem; }
+                            .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+                        </style>
+                    </head>
+                    <body>
+                        ${printableContent || 'Contenu non disponible'}
+                    </body>
+                </html>
+            `);
+            newWindow.document.close();
+            
+            const printableUrl = newWindow.location.href;
+            
+            const body = `Bonjour ${student.name},\n\nVeuillez trouver ci-joint un lien vers votre fiche de travail pratique (TP).\n\nTitre: ${tp.titre}\nObjectif: ${tp.objectif}\n\nPour consulter la fiche, veuillez cliquer sur ce lien: ${printableUrl}\n\nCordialement.`;
+
+            window.location.href = `mailto:${student.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
     };
+
     return (
-        <Button onClick={handlePrint} className="print-hidden">
-            <Printer className="mr-2" />
-            Imprimer la fiche
+        <Button onClick={handleSendEmail} className="print-hidden" disabled={!student}>
+            <Mail className="mr-2" />
+            Envoyer par E-mail
         </Button>
-    )
-}
+    );
+};
+
 
 const EtapeCard = ({ etape, index }: { etape: any, index: number }) => (
     <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
@@ -41,7 +84,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                     <h1 className="font-headline text-4xl tracking-wide">{tp.titre}</h1>
                     <p className="text-muted-foreground mt-1 text-lg">{tp.objectif}</p>
                 </div>
-                <PrintButton />
+                <SendEmailButton tp={tp} studentName={studentName} />
             </div>
             
             <div className="border-t border-b border-primary/20 py-2 mb-4">
