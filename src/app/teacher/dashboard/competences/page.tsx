@@ -6,12 +6,40 @@ import { getTpById, allBlocs, TP } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, CheckSquare, Users, Save } from 'lucide-react';
+import { User, CheckSquare, Users, Save, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 const evaluationLevels: EvaluationStatus[] = ['NA', 'EC', 'A', 'M'];
+
+const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: string | null }) => {
+    const { students } = useAssignments();
+    
+    if (!tp || !studentName) return null;
+
+    const student = students.find(s => s.name === studentName);
+
+    const handleSendEmail = () => {
+        if (!student || !student.email) {
+            alert("Impossible de trouver l'e-mail de l'élève.");
+            return;
+        }
+
+        const subject = `Votre Fiche TP: ${tp.titre}`;
+        const body = `Bonjour ${student.name},\n\nVeuillez trouver ci-joint un lien vers votre fiche de travail pratique (TP) pour la session "${tp.titre}".\n\nObjectif: ${tp.objectif}\n\nVous pouvez consulter la fiche et vous préparer pour l'atelier.\n\nCordialement.`;
+
+        window.location.href = `mailto:${student.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    };
+
+    return (
+        <Button onClick={handleSendEmail} variant="outline" size="sm" disabled={!student}>
+            <Mail className="mr-2 h-4 w-4" />
+            Renvoyer le TP par E-mail
+        </Button>
+    );
+};
+
 
 export default function CompetencesPage() {
     const router = useRouter();
@@ -63,7 +91,19 @@ export default function CompetencesPage() {
     const handleSave = () => {
         if (!studentName || !selectedTpId) return;
 
-        const tpCompetences = Object.values(allBlocs).flatMap(bloc => Object.keys(bloc.items));
+        const tp = getTpById(selectedTpId);
+        if (!tp) return;
+
+        const tpCompetences: string[] = [];
+        if (tp.id >= 101 && tp.id <= 137) { // Seconde
+            Object.values(allBlocs).filter(b => b.title.includes('Bloc 1')).forEach(bloc => tpCompetences.push(...Object.keys(bloc.items)));
+        } else if (tp.id >= 1 && tp.id <= 38) { // Premiere
+             Object.values(allBlocs).filter(b => b.title.includes('Bloc 2')).forEach(bloc => tpCompetences.push(...Object.keys(bloc.items)));
+        } else if (tp.id >= 100) { // Terminale
+            Object.values(allBlocs).filter(b => b.title.includes('Bloc 3')).forEach(bloc => tpCompetences.push(...Object.keys(bloc.items)));
+        }
+
+
         const evalsToSave = Object.fromEntries(
             Object.entries(currentEvaluations).filter(([competenceId]) => tpCompetences.includes(competenceId))
         );
@@ -76,6 +116,7 @@ export default function CompetencesPage() {
     };
     
     const selectedTp = selectedTpId ? getTpById(selectedTpId) : null;
+    const currentBlocs = selectedTpId ? allBlocs : {};
 
     return (
         <div className="space-y-6">
@@ -138,10 +179,13 @@ export default function CompetencesPage() {
                 {selectedTp && (
                     <Card>
                         <CardHeader>
-                            <CardTitle>Grille d'évaluation pour le TP {selectedTp.id}: <span className="text-accent">{selectedTp.titre}</span></CardTitle>
+                            <div className="flex justify-between items-center">
+                                <CardTitle>Grille d'évaluation pour le TP {selectedTp.id}: <span className="text-accent">{selectedTp.titre}</span></CardTitle>
+                                <SendEmailButton tp={selectedTp} studentName={studentName} />
+                            </div>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            {Object.values(allBlocs).map(bloc => (
+                            {Object.values(currentBlocs).map(bloc => (
                                 <div key={bloc.title}>
                                     <h3 className={cn("font-headline text-2xl p-3 rounded-t-md text-white", bloc.colorClass)}>
                                         {bloc.title}

@@ -3,11 +3,27 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getTpById, TP } from "@/lib/data-manager";
 import { useSearchParams } from "next/navigation";
-import { Mail, User, Users } from "lucide-react";
+import { Mail, User, Users, Printer } from "lucide-react";
 import { useAssignments } from "@/contexts/AssignmentsContext";
 
-const SendEmailButton = ({ tp, studentName }: { tp: TP, studentName: string | null }) => {
+const PrintButton = () => {
+    const handlePrint = () => {
+        window.print();
+    };
+
+    return (
+        <Button onClick={handlePrint} className="print-hidden">
+            <Printer className="mr-2" />
+            Imprimer la fiche
+        </Button>
+    );
+}
+
+const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: string | null }) => {
     const { students } = useAssignments();
+    
+    if (!tp || !studentName) return null;
+
     const student = students.find(s => s.name === studentName);
 
     const handleSendEmail = () => {
@@ -17,43 +33,13 @@ const SendEmailButton = ({ tp, studentName }: { tp: TP, studentName: string | nu
         }
 
         const subject = `Votre Fiche TP: ${tp.titre}`;
-        
-        // Temporarily show a printable version for the email link
-        const printableContent = document.getElementById('printable-tp')?.innerHTML;
-        const newWindow = window.open();
-        if (newWindow) {
-            newWindow.document.write(`
-                <html>
-                    <head>
-                        <title>${subject}</title>
-                        <link rel="stylesheet" href="/path/to/your/globals.css">
-                        <style>
-                            /* Simple print styles */
-                            body { font-family: sans-serif; }
-                            .print-hidden { display: none; }
-                            .card { border: 1px solid #ccc; margin-bottom: 1rem; border-radius: 0.5rem; }
-                            .card-header { padding: 1rem; background-color: #f0f0f0; }
-                            .card-content { padding: 1rem; }
-                            .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-                        </style>
-                    </head>
-                    <body>
-                        ${printableContent || 'Contenu non disponible'}
-                    </body>
-                </html>
-            `);
-            newWindow.document.close();
-            
-            const printableUrl = newWindow.location.href;
-            
-            const body = `Bonjour ${student.name},\n\nVeuillez trouver ci-joint un lien vers votre fiche de travail pratique (TP).\n\nTitre: ${tp.titre}\nObjectif: ${tp.objectif}\n\nPour consulter la fiche, veuillez cliquer sur ce lien: ${printableUrl}\n\nCordialement.`;
+        const body = `Bonjour ${student.name},\n\nVeuillez trouver ci-joint un lien vers votre fiche de travail pratique (TP) pour la session "${tp.titre}".\n\nObjectif: ${tp.objectif}\n\nVous pouvez consulter la fiche et vous préparer pour l'atelier.\n\nCordialement.`;
 
-            window.location.href = `mailto:${student.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        }
+        window.location.href = `mailto:${student.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     };
 
     return (
-        <Button onClick={handleSendEmail} className="print-hidden" disabled={!student}>
+        <Button onClick={handleSendEmail} className="print-hidden">
             <Mail className="mr-2" />
             Envoyer par E-mail
         </Button>
@@ -84,7 +70,10 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                     <h1 className="font-headline text-4xl tracking-wide">{tp.titre}</h1>
                     <p className="text-muted-foreground mt-1 text-lg">{tp.objectif}</p>
                 </div>
-                <SendEmailButton tp={tp} studentName={studentName} />
+                 <div className="flex gap-2">
+                    <SendEmailButton tp={tp} studentName={studentName} />
+                    <PrintButton />
+                </div>
             </div>
             
             <div className="border-t border-b border-primary/20 py-2 mb-4">
