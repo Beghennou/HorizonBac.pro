@@ -8,10 +8,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Database, FileUp, Save, Settings2, Trash2 } from "lucide-react";
 import { useAssignments } from '@/contexts/AssignmentsContext';
+import { Student } from '@/lib/types';
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { setStudents, setClasses } = useAssignments();
+  const { setStudents, setClasses, students, classes: currentClasses } = useAssignments();
 
   const handleSaveSettings = () => {
     toast({
@@ -27,30 +28,118 @@ export default function SettingsPage() {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const csvData = event.target?.result as string;
-      // Ici, vous auriez la logique pour parser le CSV et mettre à jour l'état.
-      // Pour l'instant, on simule avec un toast.
-      console.log('CSV Data:', csvData);
-      
-      toast({
-        title: "Fichier importé",
-        description: `${file.name} a été chargé. La logique de mise à jour des élèves est à implémenter.`,
-      });
+      try {
+        const csvData = event.target?.result as string;
+        const rows = csvData.split('\n').filter(row => row.trim() !== '');
+        const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+        
+        const prenomIndex = headers.indexOf('prénom');
+        const nomIndex = headers.indexOf('nom');
+        const classeIndex = headers.indexOf('classe');
+
+        if (prenomIndex === -1 || nomIndex === -1 || classeIndex === -1) {
+            toast({
+                variant: 'destructive',
+                title: "Format CSV incorrect",
+                description: "Le fichier doit contenir les colonnes 'Prénom', 'Nom' et 'Classe'."
+            });
+            return;
+        }
+        
+        const newStudents: Student[] = [];
+        const newClasses: Record<string, string[]> = {};
+
+        for (let i = 1; i < rows.length; i++) {
+          const rowData = rows[i].split(',').map(d => d.trim());
+          const prenom = rowData[prenomIndex];
+          const nom = rowData[nomIndex];
+          const classe = rowData[classeIndex];
+          
+          if (prenom && nom && classe) {
+              const studentName = `${nom.toUpperCase()} ${prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase()}`;
+              const student: Student = {
+                  id: `student-${i}`,
+                  name: studentName,
+                  email: `${prenom.toLowerCase()}.${nom.toLowerCase()}@school.com`,
+                  progress: 0,
+                  xp: 0
+              };
+              newStudents.push(student);
+
+              if (!newClasses[classe]) {
+                  newClasses[classe] = [];
+              }
+              newClasses[classe].push(studentName);
+          }
+        }
+
+        setStudents(newStudents);
+        setClasses(newClasses);
+
+        toast({
+          title: "Importation réussie",
+          description: `${newStudents.length} élèves ont été importés et répartis dans ${Object.keys(newClasses).length} classe(s).`,
+        });
+
+      } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Erreur lors de l'importation",
+            description: "Le fichier n'a pas pu être lu. Vérifiez son format.",
+        });
+        console.error("Erreur d'importation CSV:", error);
+      }
     };
-    reader.readAsText(file);
+    reader.readAsText(file, 'UTF-8');
   };
 
 
   const handleBackup = () => {
-     toast({
-      title: "Sauvegarde effectuée",
-      description: "Une sauvegarde de vos données a été créée.",
-    });
-    console.log("Sauvegarde des données...");
+    try {
+        const studentData = students.map(({id, name, email, progress, xp}) => ({
+            prénom: name.split(' ')[1] || '',
+            nom: name.split(' ')[0] || '',
+            classe: Object.keys(currentClasses).find(c => currentClasses[c].includes(name)) || '',
+            email,
+            progress,
+            xp
+        }));
+
+        const csvHeader = "Prénom,Nom,Classe,Email,Progress,XP\n";
+        const csvRows = studentData.map(s => `${s.prénom},${s.nom},${s.classe},${s.email},${s.progress},${s.xp}`).join('\n');
+        const csvContent = csvHeader + csvRows;
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            const date = new Date().toISOString().slice(0,10);
+            link.setAttribute("download", `sauvegarde_eleves_${date}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        toast({
+          title: "Sauvegarde effectuée",
+          description: "Le fichier de sauvegarde des élèves a été téléchargé.",
+        });
+    } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Erreur lors de la sauvegarde",
+          description: "Les données n'ont pas pu être exportées.",
+        });
+    }
   };
 
   const handleReset = () => {
     if (window.confirm("Êtes-vous sûr de vouloir réinitialiser toutes les données ? Cette action est irréversible.")) {
+      setStudents([]);
+      setClasses({});
+      // Vous voudrez peut-être aussi réinitialiser les TPs et évaluations
       toast({
         variant: "destructive",
         title: "Données réinitialisées",
