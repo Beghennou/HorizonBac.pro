@@ -47,56 +47,97 @@ export const simulations = [
 ]
 
 export const students = [
-  {
-    id: 'student-1',
-    name: 'Alex Dubois',
-    email: 'alex.dubois@school.com',
-    avatar: '/avatars/01.png',
-    progress: 85,
-    lastActive: 'Hier',
-    performanceData: `Résultats TP Aérodynamique : 92%
-Résultats TP Moteur : 78%
-Simulation Monza : 1:22.503
-Forces : Très bonne compréhension des principes aérodynamiques. Rapide en ligne droite.
-Faiblesses : Difficultés à maintenir une vitesse constante dans les virages longs. Tendance à freiner trop tard.`,
-  },
-  {
-    id: 'student-2',
-    name: 'Léa Martin',
-    email: 'lea.martin@school.com',
-    avatar: '/avatars/02.png',
-    progress: 72,
-    lastActive: 'Il y a 3 jours',
-    performanceData: `Résultats TP Suspension : 88%
-Résultats TP Stratégie : 65%
-Simulation Spa : 1:46.112
-Forces : Excellente gestion de l'usure des pneus. Trajectoires très précises.
-Faiblesses : Manque de réactivité aux changements météo. Prise de décision sous pression à améliorer.`,
-  },
-  {
-    id: 'student-3',
-    name: 'Omar Cissé',
-    email: 'omar.cisse@school.com',
-    avatar: '/avatars/03.png',
-    progress: 91,
-    lastActive: 'Aujourd\'hui',
-    performanceData: `Résultats TP Moteur : 95%
-Résultats TP Données : 90%
-Simulation Monza : 1:21.890
-Forces : Optimisation moteur exceptionnelle. Analyse de la télémétrie très fine.
-Faiblesses : Agressivité en piste menant à des collisions occasionnelles.`,
-  },
-    {
-    id: 'student-4',
-    name: 'Clara Petit',
-    email: 'clara.petit@school.com',
-    avatar: '/avatars/04.png',
-    progress: 68,
-    lastActive: 'Il y a 1 semaine',
-    performanceData: `Résultats TP Aérodynamique : 70%
-Résultats TP Suspension : 65%
-Simulation Spa : 1:48.320
-Forces : Pilotage fluide et régulier.
-Faiblesses : Manque de vitesse pure. Difficulté à exploiter tout le potentiel de la voiture.`,
-  },
+  // 2MV1
+  { id: 'student-mv1-1', name: 'BAKHTAR Adam', email: 'adam.bakhtar@school.com', progress: 85 },
+  { id: 'student-mv1-2', name: 'BELKAID Rayan', email: 'rayan.belkaid@school.com', progress: 72 },
+  { id: 'student-mv1-3', name: 'BIGO Rayan', email: 'rayan.bigo@school.com', progress: 91 },
+  { id: 'student-mv1-4', name: 'BLONDIAUX Mathéo', email: 'matheo.blondiaux@school.com', progress: 68 },
+  // 2MV2
+  { id: 'student-mv2-1', name: 'ALGOET-VERHAEGHE Tom', email: 'tom.algoet@school.com', progress: 75 },
+  { id: 'student-mv2-2', name: 'AMOUSSOU Enzo', email: 'enzo.amoussou@school.com', progress: 80 },
+  { id: 'student-mv2-3', name: 'ANSART-ROBIC Romain', email: 'romain.ansart@school.com', progress: 65 },
+  { id: 'student-mv2-4', name: 'ARRAB Yassin', email: 'yassin.arrab@school.com', progress: 88 },
+  { id: 'student-mv2-5', name: 'BENATALLAH Ryan', email: 'ryan.benatallah@school.com', progress: 70 },
+  { id: 'student-mv2-6', name: 'BENSAAD Issa', email: 'issa.bensaad@school.com', progress: 92 },
+  { id: 'student-mv2-7', name: 'CLARISSE Noah', email: 'noah.clarisse@school.com', progress: 78 },
+  { id: 'student-mv2-8', name: 'DECOTTIGNIES Louis', email: 'louis.decottignies@school.com', progress: 85 },
+  { id: 'student-mv2-9', name: 'DENDANE Ilyes', email: 'ilyes.dendane@school.com', progress: 60 },
+  { id: 'student-mv2-10', name: 'DESPLANCKE Mathis', email: 'mathis.desplancke@school.com', progress: 95 },
+  { id: 'student-mv2-11', name: 'DEVAUX Nicolas', email: 'nicolas.devaux@school.com', progress: 82 },
+  { id: 'student-mv2-12', name: 'EL AMMARI Naïm', email: 'naim.elammari@school.com', progress: 77 },
+  { id: 'student-mv2-13', name: 'FERRIER Nolan', email: 'nolan.ferrier@school.com', progress: 69 },
+  { id: 'student-mv2-14', name: 'KONIECZNY Léo', email: 'leo.konieczny@school.com', progress: 83 },
+  { id: 'student-mv2-15', name: 'KWASIBA Charlie', email: 'charlie.kwasiba@school.com', progress: 74 },
+  { id: 'student-mv2-16', name: 'LABZAE Yassin', email: 'yassin.labzae@school.com', progress: 90 },
+  { id: 'student-mv2-17', name: 'LEGROS Jules', email: 'jules.legros@school.com', progress: 66 },
+  { id: 'student-mv2-18', name: 'MAHIEUX Kais', email: 'kais.mahieux@school.com', progress: 89 },
+  { id: 'student-mv2-19', name: 'RACOVITA Alexandre', email: 'alexandre.racovita@school.com', progress: 81 },
+  { id: 'student-mv2-20', name: 'SERROUX Théo', email: 'theo.serroux@school.com', progress: 76 },
+  { id: 'student-mv2-21', name: 'THOLAS Ugo', email: 'ugo.tholas@school.com', progress: 67 },
+  { id: 'student-mv2-22', name: 'UCHAN Yanis', email: 'yanis.uchan@school.com', progress: 86 },
+  { id: 'student-mv2-23', name: 'VANWONTERGHEM Théo', email: 'theo.vanwonterghem@school.com', progress: 93 },
+  // 2MV3
+  { id: 'student-mv3-1', name: 'BEATSE Téo', email: 'teo.beatse@school.com', progress: 85 },
+  { id: 'student-mv3-2', name: 'BELHARIR Elias', email: 'elias.belharir@school.com', progress: 78 },
+  { id: 'student-mv3-3', name: 'BENHISSEN Adam', email: 'adam.benhissen@school.com', progress: 92 },
+  { id: 'student-mv3-4', name: 'BETROUNI Lyes', email: 'lyes.betrouni@school.com', progress: 70 },
+  { id: 'student-mv3-5', name: 'BIPATH Naor', email: 'naor.bipath@school.com', progress: 88 },
+  { id: 'student-mv3-6', name: 'DAIBOUN-SAID Sami', email: 'sami.daiboun@school.com', progress: 75 },
+  { id: 'student-mv3-7', name: 'DIZLIK Léo', email: 'leo.dizlik@school.com', progress: 90 },
+  { id: 'student-mv3-8', name: 'DJALO Mohamed', email: 'mohamed.djalo@school.com', progress: 65 },
+  { id: 'student-mv3-9', name: 'DUJARDIN Titouan', email: 'titouan.dujardin@school.com', progress: 89 },
+  { id: 'student-mv3-10', name: 'DURTESTE Oscar', email: 'oscar.durteste@school.com', progress: 81 },
+  { id: 'student-mv3-11', name: 'FROIDURE-HENNEBERT Hugo', email: 'hugo.froidure@school.com', progress: 72 },
+  { id: 'student-mv3-12', name: 'GRESS Jaden', email: 'jaden.gress@school.com', progress: 95 },
+  { id: 'student-mv3-13', name: 'HAMDANE Remy', email: 'remy.hamdane@school.com', progress: 83 },
+  { id: 'student-mv3-14', name: 'MAZINGUE Mathis', email: 'mathis.mazingue@school.com', progress: 77 },
+  { id: 'student-mv3-15', name: 'MEKRANFAR Karim', email: 'karim.mekranfar@school.com', progress: 68 },
+  { id: 'student-mv3-16', name: 'MENDES Ilan', email: 'ilan.mendes@school.com', progress: 86 },
+  { id: 'student-mv3-17', name: 'POUILLY Méline', email: 'meline.pouilly@school.com', progress: 91 },
+  { id: 'student-mv3-18', name: 'PRESSE-HIMBERT Paul', email: 'paul.presse@school.com', progress: 79 },
+  { id: 'student-mv3-19', name: 'ROMAN Hugo', email: 'hugo.roman@school.com', progress: 84 },
+  { id: 'student-mv3-20', name: 'SEHIMI Asha', email: 'asha.sehimi@school.com', progress: 73 },
+  { id: 'student-mv3-21', name: 'TABARY Julie', email: 'julie.tabary@school.com', progress: 93 },
+  { id: 'student-mv3-22', name: 'TONFACK NGUEFACK Chris', email: 'chris.tonfack@school.com', progress: 69 },
+  { id: 'student-mv3-23', name: 'VALENTIN Samuel', email: 'samuel.valentin@school.com', progress: 87 },
+  // 2MV4
+  { id: 'student-mv4-1', name: 'DELATTRE Clément', email: 'clement.delattre@school.com', progress: 60 },
+  { id: 'student-mv4-2', name: 'DESCAMPS Baptiste', email: 'baptiste.descamps@school.com', progress: 55 },
+  { id: 'student-mv4-3', name: 'DUBOIS Océane', email: 'oceane.dubois@school.com', progress: 70 },
+  { id: 'student-mv4-4', name: 'DUPONT Léo', email: 'leo.dupont@school.com', progress: 80 },
+  // 2MV5
+  { id: 'student-mv5-1', name: 'DURAND Clara', email: 'clara.durand@school.com', progress: 75 },
+  { id: 'student-mv5-2', name: 'EL FAKIR Ayoub', email: 'ayoub.elfakir@school.com', progress: 82 },
+  { id: 'student-mv5-3', name: 'FERNANDEZ Hugo', email: 'hugo.fernandez@school.com', progress: 68 },
+  { id: 'student-mv5-4', name: 'FOURNIER Tom', email: 'tom.fournier@school.com', progress: 90 },
+  // 1VP1
+  { id: 'student-vp1-1', name: 'Alice Lemoine', email: 'alice.lemoine@school.com', progress: 88 },
+  { id: 'student-vp1-2', name: 'Bob Marley', email: 'bob.marley@school.com', progress: 76 },
+  { id: 'student-vp1-3', name: 'Charlie Chaplin', email: 'charlie.chaplin@school.com', progress: 92 },
+  { id: 'student-vp1-4', name: 'Diana Ross', email: 'diana.ross@school.com', progress: 81 },
+  // 1VP2
+  { id: 'student-vp2-1', name: 'David Bowie', email: 'david.bowie@school.com', progress: 95 },
+  { id: 'student-vp2-2', name: 'Elon Musk', email: 'elon.musk@school.com', progress: 60 },
+  { id: 'student-vp2-3', name: 'Frank Zappa', email: 'frank.zappa@school.com', progress: 85 },
+  { id: 'student-vp2-4', name: 'Gloria Gaynor', email: 'gloria.gaynor@school.com', progress: 78 },
+  // 1VP3
+  { id: 'student-vp3-1', name: 'Henri Matisse', email: 'henri.matisse@school.com', progress: 82 },
+  { id: 'student-vp3-2', name: 'Ingrid Bergman', email: 'ingrid.bergman@school.com', progress: 93 },
+  { id: 'student-vp3-3', name: 'John Lennon', email: 'john.lennon@school.com', progress: 89 },
+  { id: 'student-vp3-4', name: 'Kate Bush', email: 'kate.bush@school.com', progress: 77 },
+  // TVP1
+  { id: 'student-tvp1-1', name: 'Grace Hopper', email: 'grace.hopper@school.com', progress: 98 },
+  { id: 'student-tvp1-2', name: 'Heidi Lamar', email: 'heidi.lamar@school.com', progress: 85 },
+  { id: 'student-tvp1-3', name: 'Isaac Newton', email: 'isaac.newton@school.com', progress: 99 },
+  { id: 'student-tvp1-4', name: 'Jacque Fresco', email: 'jacque.fresco@school.com', progress: 80 },
+  // TVP2
+  { id: 'student-tvp2-1', name: 'Karl Benz', email: 'karl.benz@school.com', progress: 91 },
+  { id: 'student-tvp2-2', name: 'Leonardo da Vinci', email: 'leonardo.davinci@school.com', progress: 96 },
+  { id: 'student-tvp2-3', name: 'Marie Curie', email: 'marie.curie@school.com', progress: 97 },
+  { id: 'student-tvp2-4', name: 'Nikola Tesla', email: 'nikola.tesla@school.com', progress: 94 },
+  // TVP3
+  { id: 'student-tvp3-1', name: 'Oprah Winfrey', email: 'oprah.winfrey@school.com', progress: 84 },
+  { id: 'student-tvp3-2', name: 'Pablo Picasso', email: 'pablo.picasso@school.com', progress: 88 },
+  { id: 'student-tvp3-3', name: 'Queen Latifah', email: 'queen.latifah@school.com', progress: 86 },
+  { id: 'student-tvp3-4', name: 'Rosalind Franklin', email: 'rosalind.franklin@school.com', progress: 90 },
 ];
