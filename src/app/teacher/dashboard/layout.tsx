@@ -49,7 +49,10 @@ export default function TeacherDashboardLayout({
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('tp', id.toString());
     newSearchParams.set('level', niveau);
-    router.push(`/teacher/dashboard?${newSearchParams.toString()}`);
+    
+    // Only redirect to the main dashboard page if we are not on a sub-page like students or competences
+    const targetPath = pathname === '/teacher/dashboard' ? '/teacher/dashboard' : pathname;
+    router.push(`${targetPath}?${newSearchParams.toString()}`);
   }
 
   const handleStudentSelect = (studentName: string) => {
