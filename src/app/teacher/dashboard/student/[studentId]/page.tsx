@@ -41,7 +41,7 @@ const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: stri
 };
 
 
-export default function StudentDetailPage({ params }: { params: { studentId: string } }) {
+export default async function StudentDetailPage({ params }: { params: { studentId: string } }) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
