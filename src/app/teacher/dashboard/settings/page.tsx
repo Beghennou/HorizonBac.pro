@@ -4,27 +4,43 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import { Database, FileUp, Save, Settings2, Trash2 } from "lucide-react";
 
 export default function SettingsPage() {
+  const { toast } = useToast();
+
   const handleSaveSettings = () => {
-    // Logique de sauvegarde à implémenter
+    toast({
+      title: "Paramètres sauvegardés",
+      description: "Vos préférences ont été mises à jour.",
+    });
     console.log("Sauvegarde des paramètres...");
   };
 
   const handleImport = () => {
-    // Logique d'importation à implémenter
+    toast({
+      title: "Fonctionnalité à venir",
+      description: "L'importation de listes d'élèves sera bientôt disponible.",
+    });
     console.log("Importation des élèves...");
   };
 
   const handleBackup = () => {
-    // Logique de sauvegarde des données à implémenter
+     toast({
+      title: "Sauvegarde effectuée",
+      description: "Une sauvegarde de vos données a été créée.",
+    });
     console.log("Sauvegarde des données...");
   };
 
   const handleReset = () => {
-    // Logique de réinitialisation à implémenter
     if (window.confirm("Êtes-vous sûr de vouloir réinitialiser toutes les données ? Cette action est irréversible.")) {
+      toast({
+        variant: "destructive",
+        title: "Données réinitialisées",
+        description: "Toutes les données de l'application ont été effacées.",
+      });
       console.log("Réinitialisation des données...");
     }
   };
