@@ -48,4 +48,5 @@ export const getTpById = (id: number): TP | undefined => {
 export const classes = {
     "2nde A": ["Jean Dupont", "Marie Curie", "Pierre Martin"],
     "2nde B": ["Alice Lemoine", "Bob Marley", "Charlie Chaplin"],
-    "1ere A": ["David Bowie", "Elon Musk", "Frank Zappa"],
+    "1ere A": ["David Bowie", "Elon Musk", "Frank Zappa"]
+};
