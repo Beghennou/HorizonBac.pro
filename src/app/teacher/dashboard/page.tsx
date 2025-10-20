@@ -1,6 +1,7 @@
 'use client';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { getTpById, TP } from "@/lib/data-manager";
+import { useSearchParams } from "next/navigation";
 
 const EtapeCard = ({ etape, index }: { etape: any, index: number }) => (
     <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50">
@@ -86,8 +87,9 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
 };
 
 
-export default function DashboardPage({ searchParams }: { searchParams: { tp: string } }) {
-  const tpId = searchParams.tp ? parseInt(searchParams.tp, 10) : null;
+export default function DashboardPage() {
+  const searchParams = useSearchParams();
+  const tpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
   const tp = tpId ? getTpById(tpId) : null;
 
   if (tp) {

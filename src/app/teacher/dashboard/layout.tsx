@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { redirect } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,22 +14,29 @@ export default function TeacherDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [niveau, setNiveau] = useState<Niveau>('seconde');
   const [selectedClass, setSelectedClass] = useState<string>(Object.keys(classes)[0]);
-  const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
+  
+  const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
 
   const tps = getTpsByNiveau(niveau);
 
   const handleNiveauChange = (newNiveau: Niveau) => {
     setNiveau(newNiveau);
-    setSelectedTpId(null);
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.delete('tp');
+    router.push(`${pathname}?${newSearchParams.toString()}`);
   };
   
   const handleTpSelect = (id: number) => {
-    setSelectedTpId(id);
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set('tp', id.toString());
+    router.push(`${pathname}?${newSearchParams.toString()}`);
   }
-
-  const selectedTp = selectedTpId ? tps.find(tp => tp.id === selectedTpId) : null;
 
   return (
     <div className="bg-background min-h-screen">
