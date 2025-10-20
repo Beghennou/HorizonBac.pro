@@ -1,56 +1,95 @@
-import { cookies } from 'next/headers';
+'use client';
+
+import { useState } from 'react';
 import { redirect } from 'next/navigation';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { DashboardNav } from '@/components/dashboard-nav';
 import { LogoutButton } from '@/components/logout-button';
 import { Logo } from '@/components/logo';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { classes, getTpsByNiveau, Niveau } from '@/lib/data-manager';
 
 export default function TeacherDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const authCookie = cookies().get('teacher-auth');
-  if (authCookie?.value !== 'true') {
-    return redirect('/');
-  }
+  const [niveau, setNiveau] = useState<Niveau>('seconde');
+  const [selectedClass, setSelectedClass] = useState<string>(Object.keys(classes)[0]);
+  
+  // Note: La vérification du cookie doit être faite dans un middleware ou un composant serveur parent
+  // Pour l'instant, on suppose que l'utilisateur est authentifié.
+
+  const tps = getTpsByNiveau(niveau);
+
+  const handleNiveauChange = (newNiveau: Niveau) => {
+    setNiveau(newNiveau);
+  };
 
   return (
-    <div className="bg-background">
-        <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl">
-            <div className="container flex h-20 items-center justify-between">
-                 <Link href="/teacher/dashboard" className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-md bg-gradient-to-br from-primary to-racing-orange border-2 border-accent">
-                        <Logo className="w-7 h-7 text-white" />
-                    </div>
-                    <div>
-                         <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
-                            Racing Performance
-                         </h1>
-                         <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Rénovation 2025 • Seconde ▸ Première ▸ Terminale</p>
-                    </div>
-                </Link>
-                <div className="flex items-center gap-4">
-                    {/* Level Toggle and other actions will go here */}
-                    <LogoutButton />
-                </div>
+    <div className="bg-background min-h-screen">
+      <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl">
+        <div className="container flex h-20 items-center justify-between">
+          <Link href="/teacher/dashboard" className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-md bg-gradient-to-br from-primary to-racing-orange border-2 border-accent">
+              <Logo className="w-7 h-7 text-white" />
             </div>
-        </header>
-        <main className="container grid grid-cols-1 md:grid-cols-[340px_1fr] gap-6 py-8">
-            <aside className="space-y-6">
-                {/* Sidebar content for TP filtering will go here */}
-                <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
-                    <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Filtres</h3>
+            <div>
+              <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
+                Racing Performance
+              </h1>
+              <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Rénovation 2025 • Seconde ▸ Première ▸ Terminale</p>
+            </div>
+          </Link>
+          <div className="flex items-center gap-4">
+            <div className="flex border-2 border-primary rounded-md overflow-hidden bg-card">
+                 {(['seconde', 'premiere', 'terminale'] as Niveau[]).map((lvl) => (
+                    <button
+                        key={lvl}
+                        onClick={() => handleNiveauChange(lvl)}
+                        className={`px-4 py-2 font-headline uppercase tracking-wider text-sm transition-colors ${niveau === lvl ? 'bg-gradient-to-r from-primary to-racing-orange text-white' : 'hover:bg-primary/20'}`}
+                    >
+                        {lvl}
+                    </button>
+                ))}
+            </div>
+            <LogoutButton />
+          </div>
+        </div>
+      </header>
+      <main className="container grid grid-cols-1 md:grid-cols-[340px_1fr] gap-6 py-8">
+        <aside className="space-y-6">
+          <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
+            <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Sélection de la classe</h3>
+            <Select value={selectedClass} onValueChange={setSelectedClass}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Choisir une classe..." />
+                </SelectTrigger>
+                <SelectContent>
+                    {Object.keys(classes).map(className => (
+                        <SelectItem key={className} value={className}>{className}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+          </div>
+          <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
+            <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Liste des TP ({niveau})</h3>
+            <ScrollArea className="h-96">
+                <div className="space-y-2">
+                    {tps.map(tp => (
+                        <div key={tp.id} className="p-3 rounded-md bg-background/50 hover:bg-primary/10 border border-transparent hover:border-primary/50 cursor-pointer">
+                            <p className="font-bold text-sm text-accent">TP {tp.id}</p>
+                            <p className="text-sm text-foreground/80">{tp.titre}</p>
+                        </div>
+                    ))}
                 </div>
-                 <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
-                    <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Liste des TP</h3>
-                </div>
-            </aside>
-            <section className="bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6">
-                {children}
-            </section>
-        </main>
+            </ScrollArea>
+          </div>
+        </aside>
+        <section className="bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6">
+          {children}
+        </section>
+      </main>
     </div>
   );
 }
