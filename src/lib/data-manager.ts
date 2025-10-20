@@ -46,15 +46,8 @@ export const getTpById = (id: number): TP | undefined => {
 };
 
 export const classes = {
-    "Classe_1VP1": ["Jean Dupont", "Marie Curie", "Pierre Martin"],
-    "Classe_1VP2": ["Alice Lemoine", "Bob Marley", "Charlie Chaplin"],
-    "Classe_1VP3": ["David Bowie", "Elon Musk", "Frank Zappa"],
-    "Classe_2MV1": ["Grace Hopper", "Heidi Lamar", "Isaac Newton"],
-    "Classe_2MV2": ["Jane Austen", "John Lennon", "Leonardo da Vinci"],
-    "Classe_2MV3": ["Marie Skłodowska", "Nikola Tesla", "Oscar Wilde"],
-    "Classe_2MV4": ["Pablo Picasso", "Queen Victoria", "Raphael"],
-    "Classe_2MV5": ["Salvador Dali", "Thomas Edison", "Vincent van Gogh"],
-    "Classe_TVP1": ["William Shakespeare", "Wolfgang Amadeus Mozart", "Yann Martel"],
-    "Classe_TVP2": ["Zinedine Zidane", "Albert Einstein", "Blaise Pascal"],
-    "Classe_TVP3": ["Charles Darwin", "Galileo Galilei", "Stephen Hawking"]
+    "Seconde_MV_A": ["Jean Dupont", "Marie Curie", "Pierre Martin"],
+    "Seconde_MV_B": ["Alice Lemoine", "Bob Marley", "Charlie Chaplin"],
+    "Premiere_MV_A": ["David Bowie", "Elon Musk", "Frank Zappa"],
+    "Terminale_MV_A": ["Grace Hopper", "Heidi Lamar", "Isaac Newton"],
 };

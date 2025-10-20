@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { students } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
-import { Award, ChevronDown, User, Users } from 'lucide-react';
+import { Award, BookCheck, ChevronDown, User, Users } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,20 +18,23 @@ import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { useToast } from '@/hooks/use-toast';
 
 
-const StudentDetails = ({ student }: { student: any }) => {
-    const searchParams = useSearchParams();
-    const level = (searchParams.get('level') as Niveau) || 'seconde';
+const StudentDetails = ({ student, level, assignedTps, onAssignTp }: { student: any, level: Niveau, assignedTps: number[], onAssignTp: (tpId: number, tpTitle: string) => void }) => {
     const tps = getTpsByNiveau(level);
     const { toast } = useToast();
 
-    const handleAssignTp = (tpId: number, tpTitle: string) => {
-        // Logic to assign TP to student will be implemented here
-        console.log(`Assigning TP ${tpId} to ${student.name}`);
+    const handleAssign = (tpId: number, tpTitle: string) => {
+        onAssignTp(tpId, tpTitle);
         toast({
             title: "TP Assigné",
             description: `Le TP "${tpTitle}" a été assigné à ${student.name}.`,
         });
     };
+
+    const assignedTpsDetails = assignedTps.map(id => {
+        const tp = tps.find(t => t.id === id);
+        return tp ? { ...tp, status: 'Non commencé' } : null; // Statut mocké
+    }).filter(Boolean);
+
 
     return (
         <Card>
@@ -41,20 +44,23 @@ const StudentDetails = ({ student }: { student: any }) => {
                     Détails de {student.name}
                 </CardTitle>
             </CardHeader>
-            <CardContent>
-                <p><strong>Email:</strong> {student.email}</p>
-                <p><strong>Progression:</strong> {student.progress}%</p>
-                <div className="mt-4 space-y-2">
+            <CardContent className="space-y-6">
+                <div>
+                    <p><strong>Email:</strong> {student.email}</p>
+                    <p><strong>Progression:</strong> {student.progress}%</p>
+                </div>
+
+                <div className="space-y-2">
                     <h4 className="font-bold">Assigner un TP:</h4>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="w-full justify-between">
-                                Choisir un TP <ChevronDown/>
+                                Choisir un TP ({level}) <ChevronDown/>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto">
                             {tps.map(tp => (
-                                <DropdownMenuItem key={tp.id} onSelect={() => handleAssignTp(tp.id, tp.titre)}>
+                                <DropdownMenuItem key={tp.id} onSelect={() => handleAssign(tp.id, tp.titre)} disabled={assignedTps.includes(tp.id)}>
                                     <span className="font-bold mr-2">TP {tp.id}</span>
                                     <span>{tp.titre}</span>
                                 </DropdownMenuItem>
@@ -62,6 +68,23 @@ const StudentDetails = ({ student }: { student: any }) => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
+                
+                <div className="space-y-4">
+                     <h4 className="font-bold flex items-center gap-2"><BookCheck /> TPs Assignés</h4>
+                     {assignedTpsDetails.length > 0 ? (
+                        <div className="space-y-2">
+                            {assignedTpsDetails.map(tp => tp && (
+                                <div key={tp.id} className="flex justify-between items-center p-2 rounded-md bg-background/50">
+                                    <p className="text-sm font-semibold">{tp.titre}</p>
+                                    <Badge variant="secondary">{tp.status}</Badge>
+                                </div>
+                            ))}
+                        </div>
+                     ) : (
+                        <p className="text-sm text-muted-foreground">Aucun TP assigné pour le moment.</p>
+                     )}
+                </div>
+
             </CardContent>
         </Card>
     );
@@ -70,7 +93,20 @@ const StudentDetails = ({ student }: { student: any }) => {
 export default function StudentsPage() {
     const searchParams = useSearchParams();
     const studentName = searchParams.get('student');
+    const level = (searchParams.get('level') as Niveau) || 'seconde';
     const selectedStudent = students.find(s => s.name === studentName);
+
+    const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({
+        'Alex Dubois': [101], // Mock initial data
+    });
+
+    const handleAssignTp = (studentId: string, tpId: number) => {
+        setAssignedTps(prev => ({
+            ...prev,
+            [studentId]: [...(prev[studentId] || []), tpId]
+        }));
+    };
+
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -119,7 +155,12 @@ export default function StudentsPage() {
             </div>
             <div>
                 {selectedStudent ? (
-                    <StudentDetails student={selectedStudent} />
+                    <StudentDetails 
+                        student={selectedStudent} 
+                        level={level}
+                        assignedTps={assignedTps[selectedStudent.id] || []}
+                        onAssignTp={(tpId) => handleAssignTp(selectedStudent.id, tpId)}
+                    />
                 ) : (
                     <Card className="flex items-center justify-center h-64">
                         <CardContent className="text-center text-muted-foreground">
