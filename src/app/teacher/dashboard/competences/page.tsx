@@ -1,20 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { competencesParNiveau, getTpById, Niveau, TP } from "@/lib/data-manager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-
-// Mock pour les TPs assignés, car pas encore de DB
-// NOTE: This is now managed in the students page and passed via context or props if needed.
-// For now, we will simulate it being passed or fetched.
-const assignedTpsByStudent: Record<string, number[]> = {
-    "BAKHTAR Adam": [101, 102],
-    "Marie Curie": [101, 103, 109],
-    "Charles Darwin": [120],
-};
-
+import { useToast } from '@/hooks/use-toast';
 
 const CompetenceBloc = ({ bloc, onRate, studentId }: { bloc: any, onRate: any, studentId: string }) => {
   return (
@@ -70,13 +62,24 @@ const TpEvaluation = ({ tp, onRate, studentId }: { tp: TP; onRate: any; studentI
 export default function CompetencesPage() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
+  const { toast } = useToast();
+
+  // Utilisation d'un état local pour simuler la base de données, comme sur la page élèves
+  const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({
+    'BAKHTAR Adam': [101],
+    'Marie Curie': [101, 103, 109],
+    "Charles Darwin": [120],
+  });
   
-  // We use the same mock as students page for consistency until a DB is introduced.
-  const assignedTps = studentName ? (assignedTpsByStudent[decodeURIComponent(studentName)] || []) : [];
-  const tpsDetails = assignedTps.map(id => getTpById(id)).filter((tp): tp is TP => !!tp);
+  const studentAssignedTps = studentName ? (assignedTps[decodeURIComponent(studentName)] || []) : [];
+  const tpsDetails = studentAssignedTps.map(id => getTpById(id)).filter((tp): tp is TP => !!tp);
 
   const handleRating = (studentId: string, competenceCode: string, level: string) => {
     console.log(`Évaluation pour ${studentId}: Compétence ${competenceCode} -> Niveau ${level}`);
+    toast({
+      title: "Évaluation enregistrée",
+      description: `La compétence ${competenceCode} a été évaluée au niveau ${level} pour ${studentId}.`,
+    });
     // Ici on ajoutera la logique pour sauvegarder la notation et calculer les XP
   };
 
@@ -108,9 +111,9 @@ export default function CompetencesPage() {
                     </AccordionItem>
                 ))}
             </Accordion>
-        ) : studentName && (
+        ) : studentName ? (
              <p className="text-muted-foreground">Aucun TP n'a encore été assigné à cet élève. Sélectionnez un élève et assignez-lui un TP depuis la page "Élèves".</p>
-        )}
+        ) : null}
 
     </div>
   );
