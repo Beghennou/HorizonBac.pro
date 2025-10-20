@@ -3,7 +3,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getTpById, TP } from "@/lib/data-manager";
 import { useSearchParams } from "next/navigation";
-import { Printer } from "lucide-react";
+import { Printer, User, Users } from "lucide-react";
+import { useAssignments } from "@/contexts/AssignmentsContext";
 
 const EtapeCard = ({ etape, index }: { etape: any, index: number }) => (
     <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
@@ -15,6 +16,11 @@ const EtapeCard = ({ etape, index }: { etape: any, index: number }) => (
 );
 
 const TpDetailView = ({ tp }: { tp: TP }) => {
+    const searchParams = useSearchParams();
+    const studentName = searchParams.get('student');
+    const className = searchParams.get('class');
+    const { teacherName } = useAssignments();
+
     const handlePrint = () => {
         window.print();
     };
@@ -33,6 +39,23 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                 </Button>
             </div>
             
+            <div className="border-t border-b border-primary/20 py-2 mb-4">
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-accent"/>
+                        <strong>Enseignant:</strong> {teacherName || 'Non défini'}
+                    </div>
+                    <div className="flex items-center gap-2">
+                         <User className="w-4 h-4 text-accent"/>
+                        <strong>Élève:</strong> {studentName || 'Non sélectionné'}
+                    </div>
+                    <div className="flex items-center gap-2">
+                         <Users className="w-4 h-4 text-accent"/>
+                        <strong>Classe:</strong> {className || 'Non sélectionnée'}
+                    </div>
+                </div>
+            </div>
+
             <Card>
                 <CardHeader>
                     <CardTitle>Situation Professionnelle</CardTitle>

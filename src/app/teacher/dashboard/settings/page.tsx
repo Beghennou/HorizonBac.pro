@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,12 +13,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { students, classes, setStudents, setClasses } = useAssignments();
+  const { students, classes, setStudents, setClasses, teacherName, setTeacherName } = useAssignments();
 
+  const [localTeacherName, setLocalTeacherName] = useState(teacherName);
+  const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
+  
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [newClassName, setNewClassName] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
+
+  useEffect(() => {
+    setLocalTeacherName(teacherName);
+  }, [teacherName]);
   
   const handleAddStudent = () => {
     if (!firstName || !lastName || (!newClassName && !selectedClass)) {
@@ -32,6 +39,16 @@ export default function SettingsPage() {
 
     const finalClassName = newClassName || selectedClass;
     const studentName = `${lastName.toUpperCase()} ${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}`;
+    
+    if (students.some(s => s.name === studentName)) {
+      toast({
+        variant: 'destructive',
+        title: "Élève déjà existant",
+        description: `${studentName} est déjà inscrit.`
+      });
+      return;
+    }
+
     const newStudent: Student = {
         id: `student-${Date.now()}`,
         name: studentName,
@@ -40,10 +57,8 @@ export default function SettingsPage() {
         xp: 0
     };
 
-    // Update students list
     setStudents(prevStudents => [...prevStudents, newStudent]);
 
-    // Update classes list
     setClasses(prevClasses => {
         const updatedClasses = { ...prevClasses };
         if (!updatedClasses[finalClassName]) {
@@ -58,12 +73,21 @@ export default function SettingsPage() {
       description: `${studentName} a été ajouté à la classe ${finalClassName}.`,
     });
 
-    // Reset form
     setFirstName('');
     setLastName('');
     setNewClassName('');
     setSelectedClass('');
   };
+
+  const handleSaveSettings = () => {
+    setTeacherName(localTeacherName);
+    // Ici, on pourrait aussi sauvegarder le nom de l'école si nécessaire
+    toast({
+      title: "Paramètres sauvegardés",
+      description: "Le nom de l'enseignant a été mis à jour.",
+    });
+  };
+
 
   return (
     <div className="space-y-8">
@@ -126,14 +150,14 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
            <div className="space-y-2">
               <Label htmlFor="teacher-name">Nom de l'enseignant</Label>
-              <Input id="teacher-name" placeholder="ex: M. Dubois" />
+              <Input id="teacher-name" placeholder="ex: M. Dubois" value={localTeacherName} onChange={(e) => setLocalTeacherName(e.target.value)} />
           </div>
            <div className="space-y-2">
               <Label htmlFor="school-name">Nom de l'établissement</Label>
-              <Input id="school-name" placeholder="ex: Lycée des Métiers de l'Automobile" />
+              <Input id="school-name" value={schoolName} onChange={(e) => setSchoolName(e.target.value)} />
           </div>
            <div className="flex justify-end">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-racing-orange text-white hover:brightness-110">
+                <Button size="lg" className="bg-gradient-to-r from-primary to-racing-orange text-white hover:brightness-110" onClick={handleSaveSettings}>
                     <Save className="mr-2 h-4 w-4" />
                     Sauvegarder les paramètres
                 </Button>
