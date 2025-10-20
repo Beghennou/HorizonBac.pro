@@ -1,3 +1,6 @@
+'use client';
+
+import { useSearchParams } from 'next/navigation';
 import { competencesParNiveau, Niveau } from "@/lib/data-manager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,8 +32,10 @@ const CompetenceBloc = ({ bloc }: { bloc: any }) => {
   );
 };
 
-export default function CompetencesPage({ searchParams }: { searchParams: { student: string, level: Niveau } }) {
-  const { student, level = 'seconde' } = searchParams;
+export default function CompetencesPage() {
+  const searchParams = useSearchParams();
+  const student = searchParams.get('student');
+  const level = (searchParams.get('level') as Niveau) || 'seconde';
   const competences = competencesParNiveau[level];
 
   return (
@@ -48,7 +53,7 @@ export default function CompetencesPage({ searchParams }: { searchParams: { stud
         )}
        </div>
 
-       {Object.values(competences).map((bloc, i) => (
+       {competences && Object.values(competences).map((bloc, i) => (
           <CompetenceBloc key={i} bloc={bloc} />
        ))}
 

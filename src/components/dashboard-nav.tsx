@@ -2,40 +2,46 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
-import { LayoutDashboard, Users, DraftingCompass, Settings } from 'lucide-react';
+import { Book, Cog, DraftingCompass, Home, Users } from 'lucide-react';
+import { Button } from './ui/button';
+import { cn } from '@/lib/utils';
 import { SteeringWheel } from './icons';
 
 const navItems = [
-  { href: '/teacher/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+  { href: '/teacher/dashboard', label: 'Fiches TP', icon: Book },
   { href: '/teacher/dashboard/students', label: 'Élèves', icon: Users },
-  { href: '/teacher/dashboard/tp-designer', label: 'Concepteur de TP', icon: DraftingCompass },
+  { href: '/teacher/dashboard/competences', label: 'Compétences', icon: DraftingCompass },
   { href: '/teacher/dashboard/simulations', label: 'Simulations', icon: SteeringWheel },
-  { href: '/teacher/dashboard/settings', label: 'Paramètres', icon: Settings },
+  { href: '/teacher/dashboard/settings', label: 'Paramètres', icon: Cog },
 ];
 
 export function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <SidebarMenu>
+    <nav className="flex flex-col gap-2">
       {navItems.map((item) => {
         const Icon = item.icon;
+        const isActive = pathname === item.href;
         return (
-          <SidebarMenuItem key={item.href}>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname === item.href}
-              tooltip={item.label}
-            >
-              <Link href={item.href}>
-                <Icon />
-                <span>{item.label}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <Button
+            key={item.href}
+            asChild
+            variant={isActive ? 'default' : 'ghost'}
+            className={cn(
+              'justify-start gap-3 text-base h-12 px-4',
+              isActive
+                ? 'bg-gradient-to-r from-primary to-racing-orange text-white'
+                : 'hover:bg-primary/10 hover:text-accent'
+            )}
+          >
+            <Link href={item.href}>
+              <Icon className="h-5 w-5" />
+              <span className="font-headline tracking-wider">{item.label}</span>
+            </Link>
+          </Button>
         );
       })}
-    </SidebarMenu>
+    </nav>
   );
 }

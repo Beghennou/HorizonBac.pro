@@ -46,10 +46,15 @@ export const getTpById = (id: number): TP | undefined => {
 };
 
 export const classes = {
-    "2nde A": ["Jean Dupont", "Marie Curie", "Pierre Martin", "Alice Lemoine"],
-    "2nde B": ["Bob Marley", "Charlie Chaplin", "David Bowie", "Elon Musk"],
-    "1ere A": ["Frank Zappa", "Grace Hopper", "Heidi Lamar"],
-    "1ere B": ["Isaac Newton", "Jane Austen", "John Lennon"],
-    "Term A": ["Leonardo da Vinci", "Marie Skłodowska", "Nikola Tesla"],
-    "Term B": ["Oscar Wilde", "Pablo Picasso", "Queen Victoria"]
+    "Classe_1VP1": ["Jean Dupont", "Marie Curie", "Pierre Martin"],
+    "Classe_1VP2": ["Alice Lemoine", "Bob Marley", "Charlie Chaplin"],
+    "Classe_1VP3": ["David Bowie", "Elon Musk", "Frank Zappa"],
+    "Classe_2MV1": ["Grace Hopper", "Heidi Lamar", "Isaac Newton"],
+    "Classe_2MV2": ["Jane Austen", "John Lennon", "Leonardo da Vinci"],
+    "Classe_2MV3": ["Marie Skłodowska", "Nikola Tesla", "Oscar Wilde"],
+    "Classe_2MV4": ["Pablo Picasso", "Queen Victoria", "Raphael"],
+    "Classe_2MV5": ["Salvador Dali", "Thomas Edison", "Vincent van Gogh"],
+    "Classe_TVP1": ["William Shakespeare", "Wolfgang Amadeus Mozart", "Yann Martel"],
+    "Classe_TVP2": ["Zinedine Zidane", "Albert Einstein", "Blaise Pascal"],
+    "Classe_TVP3": ["Charles Darwin", "Galileo Galilei", "Stephen Hawking"]
 };
