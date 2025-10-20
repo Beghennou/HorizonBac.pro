@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { competencesParNiveau, getTpById, Niveau, TP } from "@/lib/data-manager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useToast } from '@/hooks/use-toast';
+import { useAssignments } from '@/contexts/AssignmentsContext';
 
 const CompetenceBloc = ({ bloc, onRate, studentId }: { bloc: any, onRate: any, studentId: string }) => {
   return (
@@ -63,14 +63,8 @@ export default function CompetencesPage() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
   const { toast } = useToast();
+  const { assignedTps } = useAssignments();
 
-  // Utilisation d'un état local pour simuler la base de données, comme sur la page élèves
-  const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({
-    'BAKHTAR Adam': [101],
-    'Marie Curie': [101, 103, 109],
-    "Charles Darwin": [120],
-  });
-  
   const studentAssignedTps = studentName ? (assignedTps[decodeURIComponent(studentName)] || []) : [];
   const tpsDetails = studentAssignedTps.map(id => getTpById(id)).filter((tp): tp is TP => !!tp);
 

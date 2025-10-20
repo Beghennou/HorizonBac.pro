@@ -17,26 +17,21 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
+import { useAssignments } from '@/contexts/AssignmentsContext';
 
 export default function StudentsPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { assignedTps, assignTp } = useAssignments();
+    const { toast } = useToast();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const className = searchParams.get('class') || Object.keys(classes).find(c => c.startsWith('2')) || '2MV1';
     
     const studentNamesInClass = classes[className as keyof typeof classes] || [];
-    
-    // Correction de la logique de filtrage
     const studentsInClass = allStudents.filter(student => studentNamesInClass.includes(student.name));
-
-    const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
     
-    const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({
-        'BAKHTAR Adam': [101], 
-    });
-
-    const { toast } = useToast();
+    const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
     const tps = getTpsByNiveau(level);
 
@@ -50,16 +45,7 @@ export default function StudentsPage() {
             return;
         }
 
-        setAssignedTps(prev => {
-            const newAssignedTps = { ...prev };
-            selectedStudents.forEach(studentName => {
-                const studentTps = newAssignedTps[studentName] || [];
-                if (!studentTps.includes(tpId)) {
-                    newAssignedTps[studentName] = [...studentTps, tpId];
-                }
-            });
-            return newAssignedTps;
-        });
+        assignTp(selectedStudents, tpId);
 
         toast({
             title: "TP Assigné",
@@ -103,11 +89,11 @@ export default function StudentsPage() {
                 )}
             </CardHeader>
             <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {studentNamesInClass.length > 0 ? (
-                  studentNamesInClass.map((studentName) => {
+                {studentsInClass.length > 0 ? (
+                  studentsInClass.map((student) => {
+                    const studentName = student.name;
                     const isSelected = selectedStudents.includes(studentName);
-                    const studentDetails = allStudents.find(s => s.name === studentName);
-
+                    
                     return (
                       <Card 
                         key={studentName} 
@@ -125,12 +111,10 @@ export default function StudentsPage() {
                           />
                           <h3 className="font-headline tracking-wide text-lg">{studentName}</h3>
                         </div>
-                        {studentDetails && (
-                          <div className="w-full mt-2">
-                            <Progress value={studentDetails.progress} className="h-2 bg-muted/30" indicatorClassName="bg-gradient-to-r from-xp-color to-green-400" />
-                            <p className="text-xs text-muted-foreground mt-1 font-mono">{studentDetails.progress * 100} XP</p>
-                          </div>
-                        )}
+                        <div className="w-full mt-2">
+                          <Progress value={student.progress} className="h-2 bg-muted/30" indicatorClassName="bg-gradient-to-r from-xp-color to-green-400" />
+                          <p className="text-xs text-muted-foreground mt-1 font-mono">{student.progress * 100} XP</p>
+                        </div>
                       </Card>
                     )
                   })
