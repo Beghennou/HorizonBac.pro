@@ -2,22 +2,21 @@
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { students as allStudents } from '@/lib/mock-data';
-import { classes } from '@/lib/data-manager';
+import { classes, getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { Badge } from '@/components/ui/badge';
-import { Award, BookCheck, ChevronDown, User, Users } from 'lucide-react';
+import { BookCheck, Check, ChevronDown, User, Users } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
 
 const StudentDetails = ({ student, level, assignedTps, onAssignTp }: { student: any, level: Niveau, assignedTps: number[], onAssignTp: (tpId: number, tpTitle: string) => void }) => {
@@ -33,27 +32,33 @@ const StudentDetails = ({ student, level, assignedTps, onAssignTp }: { student: 
     };
 
     const assignedTpsDetails = assignedTps.map(id => {
-        const tp = getTpsByNiveau(level).find(t => t.id === id) || getTpsByNiveau('seconde').find(t => t.id === id) || getTpsByNiveau('premiere').find(t => t.id === id) || getTpsByNiveau('terminale').find(t => t.id === id);
+        const tp = getTpsByNiveau('seconde').find(t => t.id === id) || getTpsByNiveau('premiere').find(t => t.id === id) || getTpsByNiveau('terminale').find(t => t.id === id);
         return tp ? { ...tp, status: 'Non commencé' } : null; // Statut mocké
     }).filter(Boolean);
 
 
     return (
-        <Card>
+        <Card className="h-full">
             <CardHeader>
-                <CardTitle className="flex items-center gap-3">
+                <CardTitle className="flex items-center gap-3 font-headline">
                     <User />
-                    Détails de {student.name}
+                    {student.name}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div>
-                    <p><strong>Email:</strong> {student.email}</p>
-                    <p><strong>Progression:</strong> {student.progress}%</p>
+                    <p className="text-sm text-muted-foreground"><strong>Email:</strong> {student.email}</p>
+                    <div className="mt-4">
+                      <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-bold text-xp-color">Progression</span>
+                          <span className="font-mono text-sm text-xp-color">{student.progress * 100} XP</span>
+                      </div>
+                      <Progress value={student.progress} className="w-full bg-muted/50 h-3" indicatorClassName="bg-gradient-to-r from-xp-color to-green-400"/>
+                    </div>
                 </div>
 
                 <div className="space-y-2">
-                    <h4 className="font-bold">Assigner un TP:</h4>
+                    <h4 className="font-headline text-accent tracking-wider">Assigner un TP</h4>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="w-full justify-between">
@@ -72,7 +77,7 @@ const StudentDetails = ({ student, level, assignedTps, onAssignTp }: { student: 
                 </div>
                 
                 <div className="space-y-4">
-                     <h4 className="font-bold flex items-center gap-2"><BookCheck /> TPs Assignés</h4>
+                     <h4 className="font-headline text-accent tracking-wider flex items-center gap-2"><BookCheck /> TPs Assignés</h4>
                      {assignedTpsDetails.length > 0 ? (
                         <div className="space-y-2">
                             {assignedTpsDetails.map(tp => tp && (
@@ -96,9 +101,8 @@ export default function StudentsPage() {
     const searchParams = useSearchParams();
     const studentName = searchParams.get('student');
     const level = (searchParams.get('level') as Niveau) || 'seconde';
-    const className = searchParams.get('class') || Object.keys(classes)[0];
+    const className = searchParams.get('class') || Object.keys(classes).find(c => c.startsWith('2')) || '2MV1';
     
-    // Filter students based on the selected class
     const studentNamesInClass = classes[className as keyof typeof classes] || [];
     const studentsInClass = allStudents.filter(student => studentNamesInClass.includes(student.name));
 
@@ -106,7 +110,7 @@ export default function StudentsPage() {
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
     
     const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({
-        'Alex Dubois': [101], // Mock initial data
+        'BAKHTAR Adam': [101], 
     });
 
     const { toast } = useToast();
@@ -154,104 +158,59 @@ export default function StudentsPage() {
 
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="flex items-center gap-3"><Users /> Vue de la classe: {className}</CardTitle>
-                        {selectedStudents.length > 0 && (
-                             <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline">
-                                        Assigner un TP à {selectedStudents.length} élève(s) <ChevronDown/>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto">
-                                    {tps.map(tp => (
-                                        <DropdownMenuItem key={tp.id} onSelect={() => handleAssignTpToSelected(tp.id, tp.titre)}>
-                                            <span className="font-bold mr-2">TP {tp.id}</span>
-                                            <span>{tp.titre}</span>
-                                        </DropdownMenuItem>
-                                    ))}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        )}
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead></TableHead>
-                                    <TableHead>Classement</TableHead>
-                                    <TableHead>Élève</TableHead>
-                                    <TableHead>XP / Progression</TableHead>
-                                    <TableHead className="text-center">Statut</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {studentsInClass.sort((a,b) => b.progress - a.progress).map((student, index) => (
-                                    <TableRow key={student.id}>
-                                        <TableCell>
-                                            <Checkbox
-                                                id={`select-${student.id}`}
-                                                onCheckedChange={(checked) => handleStudentSelection(student.name, !!checked)}
-                                                checked={selectedStudents.includes(student.name)}
-                                            />
-                                        </TableCell>
-                                        <TableCell className="font-bold text-lg text-accent">
-                                            {index === 0 && <Award className="inline-block text-yellow-400 mr-2"/>}
-                                            {index === 1 && <Award className="inline-block text-gray-400 mr-2"/>}
-                                            {index === 2 && <Award className="inline-block text-orange-400 mr-2"/>}
-                                            #{index + 1}
-                                        </TableCell>
-                                        <TableCell className="font-semibold">{student.name}</TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <Progress value={student.progress} className="w-40 bg-muted/50" indicatorClassName="bg-gradient-to-r from-xp-color to-green-400"/>
-                                                <span className="font-mono text-sm text-xp-color">{student.progress * 100} XP</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <Badge variant={student.lastActive === 'Aujourd\'hui' ? 'default' : 'secondary'} className={student.lastActive === 'Aujourd\'hui' ? 'bg-green-500/20 text-green-300 border-green-500/50' : ''}>
-                                                {student.lastActive}
-                                            </Badge>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-            </div>
-            <div>
-                {selectedStudentDetails ? (
-                    <StudentDetails 
-                        student={selectedStudentDetails} 
-                        level={level}
-                        assignedTps={assignedTps[selectedStudentDetails.name] || []}
-                        onAssignTp={(tpId, tpTitle) => {
-                             setAssignedTps(prev => {
-                                const currentTps = prev[selectedStudentDetails.name] || [];
-                                if (currentTps.includes(tpId)) return prev; // Do not add if already assigned
-                                return {
-                                    ...prev,
-                                    [selectedStudentDetails.name]: [...currentTps, tpId]
-                                };
-                            });
-                            toast({
-                                title: "TP Assigné",
-                                description: `Le TP "${tpTitle}" a été assigné à ${selectedStudentDetails.name}.`,
-                            });
-                        }}
-                    />
-                ) : (
-                    <Card className="flex items-center justify-center h-full">
-                        <CardContent className="text-center text-muted-foreground p-6">
-                            <p>Sélectionnez un ou plusieurs élèves dans la liste pour leur assigner des TPs.</p>
-                        </CardContent>
-                    </Card>
+      <div className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-3 font-headline">
+                  <Users /> Sélectionner un ou plusieurs élèves
+                </CardTitle>
+                {selectedStudents.length > 0 && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline">
+                                Assigner un TP à {selectedStudents.length} élève(s) <ChevronDown/>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto">
+                            {tps.map(tp => (
+                                <DropdownMenuItem key={tp.id} onSelect={() => handleAssignTpToSelected(tp.id, tp.titre)}>
+                                    <span className="font-bold mr-2">TP {tp.id}</span>
+                                    <span>{tp.titre}</span>
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 )}
-            </div>
-        </div>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {studentsInClass.sort((a,b) => b.progress - a.progress).map((student, index) => {
+                  const isSelected = selectedStudents.includes(student.name);
+                  return (
+                    <Card 
+                      key={student.id} 
+                      className={cn(
+                        "p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all border-2",
+                        isSelected ? "border-accent shadow-accent/50 shadow-lg" : "border-primary/20 hover:border-accent/70"
+                      )}
+                      onClick={() => handleStudentSelection(student.name, !isSelected)}
+                    >
+                      <div className="relative w-full">
+                        <Checkbox
+                            className="absolute top-1 left-1 z-10"
+                            checked={isSelected}
+                            onCheckedChange={(checked) => handleStudentSelection(student.name, !!checked)}
+                        />
+                        <h3 className="font-headline tracking-wide text-lg">{student.name}</h3>
+                      </div>
+                      <div className="w-full mt-2">
+                        <Progress value={student.progress} className="h-2 bg-muted/30" indicatorClassName="bg-gradient-to-r from-xp-color to-green-400" />
+                        <p className="text-xs text-muted-foreground mt-1 font-mono">{student.progress * 100} XP</p>
+                      </div>
+                    </Card>
+                  )
+                })}
+            </CardContent>
+        </Card>
+      </div>
     );
 }
