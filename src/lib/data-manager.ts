@@ -1,8 +1,8 @@
 import { tpSeconde, TP as TPSeconde } from './tp-seconde';
 import { tpPremiere, TP as TPPremiere } from './tp-premiere';
-// Importations pour Terminale seront ajoutées ici
+import { tpTerminale, TP as TPTerminale } from './tp-terminale';
 
-export type TP = TPSeconde | TPPremiere; // Union des types de TP
+export type TP = TPSeconde | TPPremiere | TPTerminale; // Union des types de TP
 
 export type Niveau = 'seconde' | 'premiere' | 'terminale';
 
@@ -28,13 +28,13 @@ export const competencesParNiveau: Record<Niveau, Record<string, CompetenceBloc>
 const allTPs: Record<number, TP> = {
   ...tpSeconde,
   ...tpPremiere,
-  // Les TPs de terminale seront ajoutés ici
+  ...tpTerminale,
 };
 
 const tpsByNiveau: Record<Niveau, TP[]> = {
   seconde: Object.values(tpSeconde),
   premiere: Object.values(tpPremiere),
-  terminale: [], // Sera rempli avec les TPs de terminale
+  terminale: Object.values(tpTerminale),
 };
 
 export const getTpsByNiveau = (niveau: Niveau): TP[] => {
@@ -46,7 +46,10 @@ export const getTpById = (id: number): TP | undefined => {
 };
 
 export const classes = {
-    "2nde A": ["Jean Dupont", "Marie Curie", "Pierre Martin"],
-    "2nde B": ["Alice Lemoine", "Bob Marley", "Charlie Chaplin"],
-    "1ere A": ["David Bowie", "Elon Musk", "Frank Zappa"]
+    "2nde A": ["Jean Dupont", "Marie Curie", "Pierre Martin", "Alice Lemoine"],
+    "2nde B": ["Bob Marley", "Charlie Chaplin", "David Bowie", "Elon Musk"],
+    "1ere A": ["Frank Zappa", "Grace Hopper", "Heidi Lamar"],
+    "1ere B": ["Isaac Newton", "Jane Austen", "John Lennon"],
+    "Term A": ["Leonardo da Vinci", "Marie Skłodowska", "Nikola Tesla"],
+    "Term B": ["Oscar Wilde", "Pablo Picasso", "Queen Victoria"]
 };
