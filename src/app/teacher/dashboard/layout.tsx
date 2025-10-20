@@ -129,57 +129,60 @@ export default function TeacherDashboardLayout({
             </div>
           </div>
         </header>
-        <SidebarInset className="container grid md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-8 py-8">
-            <Sidebar className="w-full">
-              <SidebarContent className="flex flex-col gap-4 p-0">
-                <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
-                  <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Navigation</h3>
-                  <DashboardNav />
-                </div>
-
-                <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
-                  <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Sélection de la classe</h3>
-                  <Select value={selectedClass} onValueChange={handleClassChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choisir une classe..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.keys(classes)
-                        .filter(c => {
-                          if (niveau === 'seconde') return c.startsWith('2');
-                          if (niveau === 'premiere') return c.startsWith('1');
-                          if (niveau === 'terminale') return c.startsWith('T');
-                          return true;
-                        })
-                        .map(className => (
-                          <SelectItem key={className} value={className}>{className}</SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              
-                <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
-                  <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Liste des TP ({niveau})</h3>
-                  <ScrollArea className="h-96">
-                    <div className="space-y-2">
-                      {tps.map(tp => (
-                        <div key={tp.id} 
-                          onClick={() => handleTpSelect(tp.id)}
-                          className={`p-3 rounded-md bg-background/50 hover:bg-primary/10 border border-transparent hover:border-primary/50 cursor-pointer transition-all ${selectedTpId === tp.id ? 'bg-primary/20 border-accent' : ''}`}>
-                          <p className="font-bold text-sm text-accent">TP {tp.id}</p>
-                          <p className="text-sm text-foreground/80">{tp.titre}</p>
-                        </div>
-                      ))}
+        <SidebarInset>
+            <div className="container grid md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-8 py-8">
+                <Sidebar>
+                  <SidebarContent className="flex flex-col gap-4 p-0">
+                    <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
+                      <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Navigation</h3>
+                      <DashboardNav />
                     </div>
-                  </ScrollArea>
-                </div>
-              </SidebarContent>
-            </Sidebar>
-            <main className="bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6">
-              {children}
-            </main>
+
+                    <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
+                      <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Sélection de la classe</h3>
+                      <Select value={selectedClass} onValueChange={handleClassChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choisir une classe..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.keys(classes)
+                            .filter(c => {
+                              if (niveau === 'seconde') return c.startsWith('2');
+                              if (niveau === 'premiere') return c.startsWith('1');
+                              if (niveau === 'terminale') return c.startsWith('T');
+                              return true;
+                            })
+                            .map(className => (
+                              <SelectItem key={className} value={className}>{className}</SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  
+                    <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
+                      <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Liste des TP ({niveau})</h3>
+                      <ScrollArea className="h-96">
+                        <div className="space-y-2">
+                          {tps.map(tp => (
+                            <div key={tp.id} 
+                              onClick={() => handleTpSelect(tp.id)}
+                              className={`p-3 rounded-md bg-background/50 hover:bg-primary/10 border border-transparent hover:border-primary/50 cursor-pointer transition-all ${selectedTpId === tp.id ? 'bg-primary/20 border-accent' : ''}`}>
+                              <p className="font-bold text-sm text-accent">TP {tp.id}</p>
+                              <p className="text-sm text-foreground/80">{tp.titre}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  </SidebarContent>
+                </Sidebar>
+                <main className="bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6">
+                  {children}
+                </main>
+            </div>
         </SidebarInset>
       </div>
     </SidebarProvider>
   );
 }
+    
