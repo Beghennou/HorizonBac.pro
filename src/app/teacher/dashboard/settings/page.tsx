@@ -35,6 +35,10 @@ export default function SettingsPage() {
   const [newClassName, setNewClassName] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [resetPassword, setResetPassword] = useState('');
+  
+  const [importClassName, setImportClassName] = useState('');
+  const [newImportClassName, setNewImportClassName] = useState('');
+
 
   useEffect(() => {
     setLocalTeacherName(teacherName);
@@ -115,8 +119,16 @@ export default function SettingsPage() {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) {
-      return;
+    const finalImportClassName = newImportClassName || importClassName;
+
+    if (!file) return;
+    if (!finalImportClassName) {
+        toast({
+            variant: 'destructive',
+            title: 'Classe non sélectionnée',
+            description: "Veuillez choisir ou créer une classe pour l'importation."
+        });
+        return;
     }
 
     Papa.parse(file, {
@@ -137,12 +149,13 @@ export default function SettingsPage() {
             return;
         }
 
-        const existingStudentNames = new Set(students.map(s => s.name));
         let addedCount = 0;
-
         const studentsToAdd: Student[] = [];
+        const studentNamesToAddToClass: string[] = [];
+        const existingStudentNames = new Set(students.map(s => s.name));
 
         newStudentNames.forEach(name => {
+          studentNamesToAddToClass.push(name);
           if (!existingStudentNames.has(name)) {
             const nameParts = name.split(' ');
             const lastName = nameParts[0] || '';
@@ -156,7 +169,6 @@ export default function SettingsPage() {
               xp: 0,
             };
             studentsToAdd.push(newStudent);
-            existingStudentNames.add(name);
             addedCount++;
           }
         });
@@ -164,11 +176,28 @@ export default function SettingsPage() {
         if (studentsToAdd.length > 0) {
             setStudents(prev => [...prev, ...studentsToAdd]);
         }
+        
+        setClasses(prevClasses => {
+            const updatedClasses = { ...prevClasses };
+            if (!updatedClasses[finalImportClassName]) {
+                updatedClasses[finalImportClassName] = [];
+            }
+            const existingStudentsInClass = new Set(updatedClasses[finalImportClassName]);
+            studentNamesToAddToClass.forEach(name => {
+                if (!existingStudentsInClass.has(name)) {
+                    updatedClasses[finalImportClassName].push(name);
+                }
+            });
+            return updatedClasses;
+        });
 
         toast({
           title: "Importation terminée",
-          description: `${addedCount} élève(s) ont été ajoutés. ${newStudentNames.length - addedCount} doublon(s) ignoré(s).`,
+          description: `${addedCount} élève(s) ont été ajouté(s). ${studentNamesToAddToClass.length} élève(s) ont été assigné(s) à la classe ${finalImportClassName}.`,
         });
+
+        setImportClassName('');
+        setNewImportClassName('');
       },
       error: (error: any) => {
         toast({
@@ -180,7 +209,6 @@ export default function SettingsPage() {
       }
     });
     
-    // Reset file input
     event.target.value = '';
   };
 
@@ -240,21 +268,43 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Upload /> Importer des élèves</CardTitle>
-          <CardDescription>Ajoutez des élèves en masse à partir d'un fichier CSV. Seule la première colonne (nom de l'élève) sera importée.</CardDescription>
+          <CardDescription>
+              Sélectionnez ou créez une classe, puis importez un fichier CSV. Seule la première colonne (nom de l'élève) sera utilisée.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="space-y-2">
+                      <Label htmlFor="import-select-class">Choisir une classe de destination</Label>
+                      <Select onValueChange={setImportClassName} value={importClassName} disabled={!!newImportClassName}>
+                          <SelectTrigger id="import-select-class">
+                              <SelectValue placeholder="Choisir une classe..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                              {Object.keys(classes).sort().map(c => (
+                                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                              ))}
+                          </SelectContent>
+                      </Select>
+                  </div>
+                  <div className="space-y-2">
+                      <Label htmlFor="import-new-class">Ou créer une nouvelle classe</Label>
+                      <Input id="import-new-class" placeholder="ex: 2MV6" value={newImportClassName} onChange={(e) => setNewImportClassName(e.target.value)} disabled={!!importClassName} />
+                  </div>
+              </div>
+
           <div className="flex items-center gap-4">
             <Label htmlFor="csv-upload" className="flex-grow">
-              <Button asChild className="w-full cursor-pointer">
+              <Button asChild className="w-full cursor-pointer" disabled={!importClassName && !newImportClassName}>
                 <label>
                   <Upload className="mr-2 h-4 w-4" />
-                  Choisir un fichier CSV
-                  <Input id="csv-upload" type="file" accept=".csv" className="sr-only" onChange={handleFileUpload} />
+                  Choisir un fichier CSV et Importer
+                  <Input id="csv-upload" type="file" accept=".csv" className="sr-only" onChange={handleFileUpload} disabled={!importClassName && !newImportClassName}/>
                 </label>
               </Button>
             </Label>
-            <p className="text-sm text-muted-foreground">Les élèves existants seront ignorés.</p>
           </div>
+           <p className="text-sm text-muted-foreground text-center">Les élèves existants seront ignorés mais ajoutés à la classe si besoin.</p>
         </CardContent>
       </Card>
 

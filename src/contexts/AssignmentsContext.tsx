@@ -5,6 +5,8 @@ import { students as initialStudents } from '@/lib/mock-data';
 import { classes as initialClasses } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { allBlocs } from '@/lib/data-manager';
+import { useToast } from '@/hooks/use-toast';
+
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
@@ -36,8 +38,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [classes, setClasses] = useState<Record<string, string[]>>({});
   const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({});
   const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus>>>({});
-  const [teacherName, setTeacherName] = useState<string>('M. Dubois');
+  const [teacherName, setTeacherName] = useState<string>('');
   const [isLoaded, setIsLoaded] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
