@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { simulations, tpModules } from '@/lib/mock-data';
+import { simulations } from '@/lib/mock-data';
+import { tpSeconde } from '@/lib/tp-seconde';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,14 @@ import { Badge } from '@/components/ui/badge';
 import { CheckeredFlag, RacingHelmet } from '@/components/icons';
 
 export default function StudentPage() {
+  const tpModules = Object.values(tpSeconde).map(tp => ({
+    id: `tp-${tp.id}`,
+    title: tp.titre,
+    description: tp.objectif,
+    category: 'Mécanique', // Catégorie générique pour l'instant
+    imageId: 'tp-engine', // imageId générique pour l'instant
+  }));
+
   return (
     <div className="space-y-12">
       <section>
@@ -23,7 +32,7 @@ export default function StudentPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tpModules.map((module) => {
-            const image = PlaceHolderImages.find(p => p.id === module.imageId);
+            const image = PlaceHolderImages.find(p => p.id === module.imageId) || PlaceHolderImages.find(p => p.id === 'tp-engine');
             return (
               <Card key={module.id} className="flex flex-col overflow-hidden bg-card border-primary/30 hover:border-accent/50 transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-accent/20">
                 <CardHeader className="p-0">
