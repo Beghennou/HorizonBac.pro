@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useAssignments } from '@/contexts/AssignmentsContext';
-import { getTpById, allBlocs, classes, TP } from '@/lib/data-manager';
+import { getTpById, allBlocs, TP } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,7 +18,7 @@ export default function CompetencesPage() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const { toast } = useToast();
-    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation } = useAssignments();
+    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation, classes } = useAssignments();
 
     const studentName = searchParams.get('student');
     const className = searchParams.get('class') || Object.keys(classes).find(c => c.startsWith('2')) || '2MV1';

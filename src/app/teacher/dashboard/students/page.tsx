@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { classes, getTpsByNiveau, Niveau } from '@/lib/data-manager';
+import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { ChevronDown, Users } from 'lucide-react';
 import {
   DropdownMenu,
@@ -19,7 +19,7 @@ import { useAssignments } from '@/contexts/AssignmentsContext';
 
 export default function StudentsPage() {
     const searchParams = useSearchParams();
-    const { students, assignTp } = useAssignments();
+    const { students, assignTp, classes } = useAssignments();
     const { toast } = useToast();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
