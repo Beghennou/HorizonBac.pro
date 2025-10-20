@@ -648,7 +648,9 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Véhicule calé', 'Procédures constructeur', 'Limiter sollicitations', 'Ranger outils'],
     pointsCles: ['PIDs essentiels', 'Apprentissage obligatoire', 'Actionneurs OK']
   }
+
 });
 
+// Ajoute les titres au pool global
 window.TITRES = window.TITRES || {};
 Object.assign(window.TITRES, TITRES_TERM);
