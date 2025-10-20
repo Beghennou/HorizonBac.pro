@@ -1,3 +1,70 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "f1-hero",
+      "description": "A formula 1 car speeding on a race track with motion blur",
+      "imageUrl": "https://images.unsplash.com/photo-1723505614212-1bf22dbf6080?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb3JtdWxhJTIwMSUyMHJhY2luZ3xlbnwwfHx8fDE3NjA5ODUxOTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "formula 1 racing"
+    },
+    {
+      "id": "avatar1",
+      "description": "Portrait of a male student",
+      "imageUrl": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjA5MjcyMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "avatar2",
+      "description": "Portrait of a female student",
+      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjA5MjcyMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "avatar3",
+      "description": "Portrait of a student",
+      "imageUrl": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjA5MjcyMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "avatar4",
+      "description": "Portrait of a student",
+      "imageUrl": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjA5MjcyMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "avatar5",
+      "description": "Portrait of a student",
+      "imageUrl": "https://images.unsplash.com/photo-1535643302794-19c3804b874b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjA5MjcyMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "tp-aero",
+      "description": "A wind tunnel showing airflow over a car body",
+      "imageUrl": "https://images.unsplash.com/photo-1551293822-6b199505be62?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx3aW5kJTIwdHVubmVsfGVufDB8fHx8MTc2MDk0NjQ4NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wind tunnel"
+    },
+    {
+      "id": "tp-engine",
+      "description": "Close up of a high performance engine",
+      "imageUrl": "https://images.unsplash.com/photo-1708063785769-43da3123684d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjYXIlMjBlbmdpbmV8ZW58MHx8fHwxNzYwOTc0NzkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "car engine"
+    },
+    {
+      "id": "tp-suspension",
+      "description": "Close up of a car's suspension system",
+      "imageUrl": "https://images.unsplash.com/photo-1669136048337-5daa3adef7b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjYXIlMjBzdXNwZW5zaW9ufGVufDB8fHx8MTc2MDk1Nzk1MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "car suspension"
+    },
+    {
+      "id": "sim-monza",
+      "description": "Aerial view of the Monza race track",
+      "imageUrl": "https://images.unsplash.com/photo-1572359642202-3cc832e60700?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxyYWNlJTIwdHJhY2t8ZW58MHx8fHwxNzYwOTg1MTk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "race track"
+    },
+    {
+      "id": "sim-spa",
+      "description": "A famous corner on the Spa-Francorchamps circuit",
+      "imageUrl": "https://images.unsplash.com/photo-1561444490-aa8f9fb571bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyYWNlJTIwdHJhY2t8ZW58MHx8fHwxNzYwOTg1MTk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "race track"
+    }
+  ]
 }
