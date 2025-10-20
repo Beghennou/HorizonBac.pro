@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 // Mock pour les TPs assignés, car pas encore de DB
+// NOTE: This is now managed in the students page and passed via context or props if needed.
+// For now, we will simulate it being passed or fetched.
 const assignedTpsByStudent: Record<string, number[]> = {
-    "Jean Dupont": [101, 102],
+    "BAKHTAR Adam": [101, 102],
     "Marie Curie": [101, 103, 109],
     "Charles Darwin": [120],
 };
@@ -47,7 +49,9 @@ const TpEvaluation = ({ tp, onRate, studentId }: { tp: TP; onRate: any; studentI
     // Pour l'instant, on suppose que le niveau du TP correspond au niveau des compétences
     let level: Niveau = 'seconde';
     if (tp.id >= 1 && tp.id <= 38) level = 'premiere';
-    if (tp.id >= 100) level = 'terminale';
+    if (tp.id >= 100 && tp.id <= 137) level = 'seconde'; // Correction pour la plage Seconde
+    if (tp.id >= 200 && tp.id <= 300) level = 'premiere'; // Correction pour la plage Premiere
+    if (tp.id >= 400) level = 'terminale'; // Logique à affiner pour terminale
 
     const competences = competencesParNiveau[level];
 
@@ -66,8 +70,8 @@ const TpEvaluation = ({ tp, onRate, studentId }: { tp: TP; onRate: any; studentI
 export default function CompetencesPage() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const level = (searchParams.get('level') as Niveau) || 'seconde';
   
+  // We use the same mock as students page for consistency until a DB is introduced.
   const assignedTps = studentName ? (assignedTpsByStudent[decodeURIComponent(studentName)] || []) : [];
   const tpsDetails = assignedTps.map(id => getTpById(id)).filter((tp): tp is TP => !!tp);
 
@@ -105,7 +109,7 @@ export default function CompetencesPage() {
                 ))}
             </Accordion>
         ) : studentName && (
-             <p className="text-muted-foreground">Aucun TP n'a encore été assigné à cet élève.</p>
+             <p className="text-muted-foreground">Aucun TP n'a encore été assigné à cet élève. Sélectionnez un élève et assignez-lui un TP depuis la page "Élèves".</p>
         )}
 
     </div>
