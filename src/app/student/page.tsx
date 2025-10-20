@@ -66,7 +66,7 @@ export default function StudentPage() {
       <section>
         <h2 className="font-headline text-4xl tracking-wide flex items-center gap-3 mb-6">
             <CheckeredFlag className="w-8 h-8 text-accent" />
-            Évaluations & Compétences
+            Évaluations &amp; Compétences
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {simulations.map((sim) => {

@@ -150,7 +150,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
 
             <Card className="break-before-page">
                 <CardHeader>
-                    <CardTitle>Points Clés & Sécurité</CardTitle>
+                    <CardTitle>Points Clés &amp; Sécurité</CardTitle>
                 </CardHeader>
                 <CardContent className="grid md:grid-cols-2 gap-6">
                     <div>
