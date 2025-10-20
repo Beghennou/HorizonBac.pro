@@ -17,11 +17,11 @@ export async function login(prevState: { error: string | undefined }, formData: 
     });
     redirect('/teacher/dashboard');
   } else {
-    return { error: 'Invalid password. Please try again.' };
+    return { error: 'Mot de passe incorrect.' };
   }
 }
 
 export async function logout() {
   cookies().set(AUTH_COOKIE_NAME, '', { expires: new Date(0), path: '/' });
-  redirect('/teacher');
+  redirect('/');
 }

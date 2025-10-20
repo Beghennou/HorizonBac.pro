@@ -13,9 +13,9 @@ import { AlertTriangle, KeyRound, Loader2 } from 'lucide-react';
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full font-bold uppercase tracking-wider" disabled={pending}>
+    <Button type="submit" variant="default" size="lg" className="w-full font-headline uppercase tracking-wider text-base border-2 border-accent bg-gradient-to-br from-primary to-racing-orange hover:brightness-110" disabled={pending}>
       {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
-      Accéder au tableau de bord
+      Entrer
     </Button>
   );
 }
@@ -24,18 +24,18 @@ export function LoginForm() {
   const [state, formAction] = useActionState(login, { error: undefined });
 
   return (
-    <Card className="bg-card/80 backdrop-blur-lg border-border/50">
+    <Card className="bg-gradient-to-br from-card to-background border-2 border-primary shadow-2xl">
       <CardHeader className="text-center">
-        <CardTitle className="font-headline text-4xl tracking-wider text-primary">
-          Portail Enseignant
+        <CardTitle className="font-headline text-3xl font-black uppercase tracking-widest text-accent">
+          Accès Sécurisé
         </CardTitle>
-        <CardDescription>Entrez votre mot de passe pour accéder au tableau de bord.</CardDescription>
+        <CardDescription>Veuillez entrer le mot de passe pour accéder à l'application.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-4">
+        <form action={formAction} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="password">Mot de passe</Label>
-            <Input id="password" name="password" type="password" required />
+            <Label htmlFor="password" className="text-accent font-headline tracking-wider uppercase">Mot de passe</Label>
+            <Input id="password" name="password" type="password" required className="text-center text-lg"/>
           </div>
           {state?.error && (
             <Alert variant="destructive">
