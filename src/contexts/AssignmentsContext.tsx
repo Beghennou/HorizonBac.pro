@@ -31,61 +31,47 @@ type AssignmentsContextType = {
 const AssignmentsContext = createContext<AssignmentsContextType | undefined>(undefined);
 
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
-  const [students, setStudents] = useState<Student[]>(() => {
-    if (typeof window !== 'undefined') {
-      const savedStudents = localStorage.getItem('students');
-      return savedStudents ? JSON.parse(savedStudents) : initialStudents;
-    }
-    return initialStudents;
+  const [students, setStudents] = useState<Student[]>(initialStudents);
+  const [classes, setClasses] = useState<Record<string, string[]>>(initialClasses);
+  const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({
+    'BAKHTAR Adam': [101, 102],
+    'BELKAID Rayan': [101],
   });
-
-  const [classes, setClasses] = useState<Record<string, string[]>>(() => {
-    if (typeof window !== 'undefined') {
-      const savedClasses = localStorage.getItem('classes');
-      return savedClasses ? JSON.parse(savedClasses) : initialClasses;
-    }
-    return initialClasses;
-  });
-
-  const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>(() => {
-    if (typeof window !== 'undefined') {
-      const savedAssignedTps = localStorage.getItem('assignedTps');
-      return savedAssignedTps ? JSON.parse(savedAssignedTps) : {
-        'BAKHTAR Adam': [101, 102],
-        'BELKAID Rayan': [101],
-      };
-    }
-    return {
-      'BAKHTAR Adam': [101, 102],
-      'BELKAID Rayan': [101],
-    };
-  });
-
-  const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus>>>(() => {
-    if (typeof window !== 'undefined') {
-      const savedEvaluations = localStorage.getItem('evaluations');
-      return savedEvaluations ? JSON.parse(savedEvaluations) : {};
-    }
-    return {};
-  });
-
-  const [teacherName, setTeacherName] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const savedTeacherName = localStorage.getItem('teacherName');
-      return savedTeacherName ? JSON.parse(savedTeacherName) : 'M. Dubois';
-    }
-    return 'M. Dubois';
-  });
+  const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus>>>({});
+  const [teacherName, setTeacherName] = useState<string>('M. Dubois');
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    try {
+      const savedStudents = localStorage.getItem('students');
+      if (savedStudents) setStudents(JSON.parse(savedStudents));
+
+      const savedClasses = localStorage.getItem('classes');
+      if (savedClasses) setClasses(JSON.parse(savedClasses));
+
+      const savedAssignedTps = localStorage.getItem('assignedTps');
+      if (savedAssignedTps) setAssignedTps(JSON.parse(savedAssignedTps));
+
+      const savedEvaluations = localStorage.getItem('evaluations');
+      if (savedEvaluations) setEvaluations(JSON.parse(savedEvaluations));
+      
+      const savedTeacherName = localStorage.getItem('teacherName');
+      if (savedTeacherName) setTeacherName(JSON.parse(savedTeacherName));
+    } catch (error) {
+      console.error("Failed to load data from localStorage", error);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
       localStorage.setItem('students', JSON.stringify(students));
       localStorage.setItem('classes', JSON.stringify(classes));
       localStorage.setItem('assignedTps', JSON.stringify(assignedTps));
       localStorage.setItem('evaluations', JSON.stringify(evaluations));
       localStorage.setItem('teacherName', JSON.stringify(teacherName));
     }
-  }, [students, classes, assignedTps, evaluations, teacherName]);
+  }, [students, classes, assignedTps, evaluations, teacherName, isLoaded]);
 
   const assignTp = (studentNames: string[], tpId: number) => {
     setAssignedTps(prev => {
