@@ -12,9 +12,9 @@ const PrintButton = () => {
     };
 
     return (
-        <Button onClick={handlePrint} className="print-hidden">
+        <Button onClick={handlePrint} variant="outline" className="print-hidden">
             <Printer className="mr-2" />
-            Imprimer la fiche
+            Imprimer
         </Button>
     );
 }
@@ -22,7 +22,14 @@ const PrintButton = () => {
 const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: string | null }) => {
     const { students } = useAssignments();
     
-    if (!tp || !studentName) return null;
+    if (!tp || !studentName) {
+        return (
+             <Button disabled className="print-hidden">
+                <Mail className="mr-2" />
+                Envoyer par E-mail
+            </Button>
+        )
+    };
 
     const student = students.find(s => s.name === studentName);
 
@@ -39,7 +46,7 @@ const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: stri
     };
 
     return (
-        <Button onClick={handleSendEmail} className="print-hidden">
+        <Button onClick={handleSendEmail} className="print-hidden" disabled={!student}>
             <Mail className="mr-2" />
             Envoyer par E-mail
         </Button>
