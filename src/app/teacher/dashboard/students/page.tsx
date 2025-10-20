@@ -129,10 +129,10 @@ export default function StudentsPage() {
 
         setAssignedTps(prev => {
             const newAssignedTps = { ...prev };
-            selectedStudents.forEach(studentId => {
-                const studentTps = newAssignedTps[studentId] || [];
+            selectedStudents.forEach(studentName => {
+                const studentTps = newAssignedTps[studentName] || [];
                 if (!studentTps.includes(tpId)) {
-                    newAssignedTps[studentId] = [...studentTps, tpId];
+                    newAssignedTps[studentName] = [...studentTps, tpId];
                 }
             });
             return newAssignedTps;
@@ -144,12 +144,12 @@ export default function StudentsPage() {
         });
     };
     
-    const handleStudentSelection = (studentId: string, isSelected: boolean) => {
+    const handleStudentSelection = (studentName: string, isSelected: boolean) => {
         setSelectedStudents(prev => {
             if (isSelected) {
-                return [...prev, studentId];
+                return [...prev, studentName];
             } else {
-                return prev.filter(id => id !== studentId);
+                return prev.filter(name => name !== studentName);
             }
         });
     };
@@ -183,7 +183,7 @@ export default function StudentsPage() {
                 )}
             </CardHeader>
             <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {studentsInClass.sort((a,b) => b.progress - a.progress).map((student, index) => {
+                {studentsInClass.sort((a,b) => b.progress - a.progress).map((student) => {
                   const isSelected = selectedStudents.includes(student.name);
                   return (
                     <Card 
