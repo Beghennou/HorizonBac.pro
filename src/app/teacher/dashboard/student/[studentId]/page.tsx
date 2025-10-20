@@ -41,7 +41,7 @@ const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: stri
 };
 
 
-export default async function StudentDetailPage({ params }: { params: { studentId: string } }) {
+export default function StudentDetailPage({ params }: { params: { studentId: string } }) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -129,7 +129,7 @@ export default async function StudentDetailPage({ params }: { params: { studentI
     };
     
     const selectedTp = selectedTpId ? getTpById(selectedTpId) : null;
-    let currentBlocs = {};
+    let currentBlocs: Record<string, any> = {};
     if (selectedTp) {
         const tpLevel = selectedTp.id >= 1000 ? 'terminale' : selectedTp.id >= 100 ? 'seconde' : 'premiere';
         if (tpLevel === 'seconde') currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_1')));
