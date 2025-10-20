@@ -48,6 +48,7 @@ export default function StudentsPage() {
             title: "TP Assigné",
             description: `Le TP "${tpTitle}" a été assigné à ${selectedStudents.length} élève(s).`,
         });
+        setSelectedStudents([]);
     };
     
     const handleStudentSelection = (studentName: string, isSelected: boolean) => {
