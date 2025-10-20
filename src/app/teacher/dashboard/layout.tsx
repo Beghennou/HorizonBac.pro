@@ -26,26 +26,24 @@ export default function TeacherDashboardLayout({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [niveau, setNiveau] = useState<Niveau>('seconde');
-  const [selectedClass, setSelectedClass] = useState<string>(searchParams.get('class') || Object.keys(classes)[0]);
+  const [niveau, setNiveau] = useState<Niveau>((searchParams.get('level') as Niveau) ||'seconde');
+  const [selectedClass, setSelectedClass] = useState<string>(searchParams.get('class') || '2nde MVA');
   
   useEffect(() => {
-    // Sync selectedClass with URL search param on component mount and when searchParams change
+    // Sync state with URL search params on component mount and when searchParams change
     const classFromUrl = searchParams.get('class');
     if (classFromUrl && classFromUrl !== selectedClass) {
       setSelectedClass(classFromUrl);
     }
-  }, [searchParams]);
+    const levelFromUrl = searchParams.get('level') as Niveau;
+     if (levelFromUrl && levelFromUrl !== niveau) {
+      setNiveau(levelFromUrl);
+    }
+  }, [searchParams, selectedClass, niveau]);
 
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
   
   const tps = getTpsByNiveau(niveau);
-
-  const updateQueryParam = (key: string, value: string) => {
-    const newSearchParams = new URLSearchParams(searchParams.toString());
-    newSearchParams.set(key, value);
-    return newSearchParams.toString();
-  }
 
   const handleNiveauChange = (newNiveau: Niveau) => {
     setNiveau(newNiveau);
@@ -56,22 +54,23 @@ export default function TeacherDashboardLayout({
         return false;
     }) || Object.keys(classes)[0];
     
-    // setSelectedClass will trigger the useEffect below to update URL
     setSelectedClass(firstClassForLevel);
 
-    const newSearchParams = new URLSearchParams(searchParams.toString());
-    newSearchParams.delete('tp');
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set('level', newNiveau);
     newSearchParams.set('class', firstClassForLevel);
-    if (!pathname.includes('competences')) {
-        newSearchParams.delete('student');
+    
+    // Preserve student only if on competences page
+    if (pathname.includes('competences') && searchParams.has('student')) {
+        newSearchParams.set('student', searchParams.get('student')!);
     }
+
     router.push(`${pathname}?${newSearchParams.toString()}`);
   };
   
   const handleTpSelect = (id: number) => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('tp', id.toString());
-    newSearchParams.set('level', niveau);
     
     const targetPath = (pathname.startsWith('/teacher/dashboard/students') || pathname.startsWith('/teacher/dashboard/competences'))
       ? pathname
@@ -83,13 +82,7 @@ export default function TeacherDashboardLayout({
   const handleStudentSelect = (studentName: string) => {
       const newSearchParams = new URLSearchParams(searchParams.toString());
       newSearchParams.set('student', studentName);
-      newSearchParams.set('level', niveau);
-      newSearchParams.set('class', selectedClass);
-
-      const targetPath = pathname.startsWith('/teacher/dashboard/students') || pathname.startsWith('/teacher/dashboard/competences')
-        ? pathname
-        : '/teacher/dashboard/students';
-      router.push(`${targetPath}?${newSearchParams.toString()}`);
+      router.push(`${pathname}?${newSearchParams.toString()}`);
   }
 
   const handleClassChange = (className: string) => {
