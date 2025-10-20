@@ -28,12 +28,6 @@ export default function StudentLayout({
             >
               Mes TP
             </Link>
-             <Link
-              href="/student/competences"
-              className="transition-colors hover:text-accent text-foreground/60"
-            >
-              Mes Compétences
-            </Link>
           </nav>
         </div>
       </header>

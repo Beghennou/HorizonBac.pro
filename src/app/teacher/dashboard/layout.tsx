@@ -60,7 +60,7 @@ export default function TeacherDashboardLayout({
     newSearchParams.set('level', newNiveau);
     newSearchParams.set('class', firstClassForLevel);
     
-    if (pathname.includes('competences') && searchParams.has('student')) {
+    if (searchParams.has('student')) {
         newSearchParams.set('student', searchParams.get('student')!);
     }
 
@@ -71,7 +71,7 @@ export default function TeacherDashboardLayout({
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('tp', id.toString());
     
-    const targetPath = (pathname.startsWith('/teacher/dashboard/students') || pathname.startsWith('/teacher/dashboard/competences'))
+    const targetPath = (pathname.startsWith('/teacher/dashboard/students'))
       ? pathname
       : '/teacher/dashboard';
 
@@ -132,7 +132,7 @@ export default function TeacherDashboardLayout({
             </div>
           </header>
           <SidebarInset>
-              <div className="container grid md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-8 py-8">
+              <div className="container flex flex-1">
                   <Sidebar>
                     <SidebarContent className="flex flex-col gap-4 p-0">
                       <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
@@ -178,7 +178,7 @@ export default function TeacherDashboardLayout({
                       </div>
                     </SidebarContent>
                   </Sidebar>
-                  <main className="bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6">
+                  <main className="flex-1 bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6 ml-8">
                     {children}
                   </main>
               </div>

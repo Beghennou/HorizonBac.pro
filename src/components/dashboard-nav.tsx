@@ -1,26 +1,28 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Book, Cog, DraftingCompass, Users } from 'lucide-react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Book, Cog, Users } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 
-const navItems = [
-  { href: '/teacher/dashboard', label: 'Fiches TP', icon: Book },
-  { href: '/teacher/dashboard/students', label: 'Élèves', icon: Users },
-  { href: '/teacher/dashboard/competences', label: 'Compétences', icon: DraftingCompass },
-  { href: '/teacher/dashboard/settings', label: 'Paramètres', icon: Cog },
-];
-
 export function DashboardNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const navItems = [
+    { href: `/teacher/dashboard?${searchParams.toString()}`, label: 'Fiches TP', icon: Book },
+    { href: `/teacher/dashboard/students?${searchParams.toString()}`, label: 'Élèves', icon: Users },
+    { href: `/teacher/dashboard/settings?${searchParams.toString()}`, label: 'Paramètres', icon: Cog },
+  ];
 
   return (
     <nav className="flex flex-col gap-2">
       {navItems.map((item) => {
         const Icon = item.icon;
-        const isActive = pathname === item.href;
+        // Check if the current pathname starts with the item's href
+        const isActive = item.href.startsWith('/teacher/dashboard/settings') ? pathname === item.href.split('?')[0] : pathname === item.href.split('?')[0];
+        
         return (
           <Button
             key={item.href}
