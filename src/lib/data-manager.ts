@@ -106,3 +106,9 @@ export const classes = {
     "TVP2": ["Karl Benz", "Leonardo da Vinci", "Marie Curie", "Nikola Tesla"],
     "TVP3": ["Oprah Winfrey", "Pablo Picasso", "Queen Latifah", "Rosalind Franklin"],
 };
+
+export const allBlocs: Record<string, CompetenceBloc> = {
+    ...competencesParNiveau.seconde,
+    ...competencesParNiveau.premiere,
+    ...competencesParNiveau.terminale
+};
