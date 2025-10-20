@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { getTpById, allBlocs, TP } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,14 +41,15 @@ const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: stri
 };
 
 
-export default function StudentDetailPage({ params }: { params: { studentId: string } }) {
+export default function StudentDetailPage() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const params = useParams();
     const { toast } = useToast();
     const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation, classes } = useAssignments();
 
-    const studentName = decodeURIComponent(params.studentId);
+    const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     
     const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
     const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
@@ -73,15 +74,18 @@ export default function StudentDetailPage({ params }: { params: { studentId: str
     }, [studentName, savedEvaluations]);
 
     useEffect(() => {
-        if (!studentTps.some(tp => tp.id === selectedTpId)) {
-            setSelectedTpId(studentTps[0]?.id || null);
-             const newSearchParams = new URLSearchParams(searchParams.toString());
-             if (studentTps[0]) {
-                newSearchParams.set('tp', studentTps[0].id.toString());
-             } else {
+        if (studentTps.length > 0 && !studentTps.some(tp => tp.id === selectedTpId)) {
+            const newTpId = studentTps[0]?.id || null;
+            setSelectedTpId(newTpId);
+            const newSearchParams = new URLSearchParams(searchParams.toString());
+            if (newTpId) {
+                newSearchParams.set('tp', newTpId.toString());
+            } else {
                 newSearchParams.delete('tp');
-             }
-             router.replace(`${pathname}?${newSearchParams.toString()}`);
+            }
+            router.replace(`${pathname}?${newSearchParams.toString()}`);
+        } else if (studentTps.length === 0) {
+            setSelectedTpId(null);
         }
     }, [studentTps, selectedTpId, pathname, router, searchParams]);
 
