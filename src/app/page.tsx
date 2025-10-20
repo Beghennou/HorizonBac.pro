@@ -1,5 +1,8 @@
 import { LoginForm } from '@/app/teacher/login-form';
 import { Logo } from '@/components/logo';
+import { Button } from '@/components/ui/button';
+import { BookOpen } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
 
@@ -12,6 +15,14 @@ export default function Home() {
           </div>
         </div>
         <LoginForm />
+        <div className="mt-6 text-center">
+            <Button asChild variant="outline" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                <Link href="/tutorial">
+                    <BookOpen className="mr-2"/>
+                    Comment ça marche ? (Tutoriel)
+                </Link>
+            </Button>
+        </div>
       </div>
     </div>
   );
