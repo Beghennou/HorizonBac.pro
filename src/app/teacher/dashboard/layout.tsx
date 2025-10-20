@@ -83,8 +83,18 @@ export default function TeacherDashboardLayout({
     setSelectedClass(className);
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('class', className);
-    newSearchParams.delete('student'); 
-    router.push(`${pathname}?${newSearchParams.toString()}`);
+    
+    // Construct the path ensuring we don't carry over irrelevant query params
+    // like 'student' when changing class.
+    const basePath = pathname;
+    const finalParams = new URLSearchParams();
+    finalParams.set('level', searchParams.get('level') || niveau);
+    finalParams.set('class', className);
+    if (searchParams.has('tp')) {
+        finalParams.set('tp', searchParams.get('tp')!);
+    }
+    
+    router.push(`${basePath}?${finalParams.toString()}`);
   }
 
   return (
