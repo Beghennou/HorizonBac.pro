@@ -1,9 +1,9 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Users, CheckCircle, TrendingUp, PlusCircle, Settings, FileText } from "lucide-react";
+import { BarChart as BarChartIcon, Users, CheckCircle, TrendingUp, PlusCircle, Settings, FileText } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart"
-import { Bar, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -64,7 +64,7 @@ export default function DashboardPage() {
         <Card className="bg-primary/10 border-primary/40">
            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-primary">Alerte IA : lacunes</CardTitle>
-            <BarChart className="h-4 w-4 text-primary" />
+            <BarChartIcon className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">3 Élèves</div>
