@@ -650,11 +650,5 @@ export const tpTerminale: Record<number, TP> = {
   }
 });
 
-// S'assure que les TP de Première existent
-(function ensurePremiereTPs() {
-    for (let id = 1; id <= 38; id++) {
-        if (!window.TP_DETAILS[id]) {
-            window.TP_DETAILS[id] = { titre: `TP ${id} - Première (manquant)`, duree: '—', situation: '', objectif: '', materiel: [], etudePrelim: [], activitePratique: [], securiteRangement: [], pointsCles: [] };
-        }
-    }
-})();
+window.TITRES = window.TITRES || {};
+Object.assign(window.TITRES, TITRES_TERM);
