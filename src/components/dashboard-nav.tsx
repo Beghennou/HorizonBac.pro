@@ -2,16 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Book, Cog, DraftingCompass, Home, Users } from 'lucide-react';
+import { Book, Cog, DraftingCompass, Users } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { SteeringWheel } from './icons';
 
 const navItems = [
   { href: '/teacher/dashboard', label: 'Fiches TP', icon: Book },
   { href: '/teacher/dashboard/students', label: 'Élèves', icon: Users },
   { href: '/teacher/dashboard/competences', label: 'Compétences', icon: DraftingCompass },
-  { href: '/teacher/dashboard/simulations', label: 'Simulations', icon: SteeringWheel },
   { href: '/teacher/dashboard/settings', label: 'Paramètres', icon: Cog },
 ];
 
