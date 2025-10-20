@@ -14,7 +14,7 @@ function SubmitButton() {
   return (
     <Button type="submit" className="w-full font-bold uppercase tracking-wider" disabled={pending}>
       {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
-      Access Dashboard
+      Accéder au tableau de bord
     </Button>
   );
 }
@@ -26,14 +26,14 @@ export function LoginForm() {
     <Card className="bg-card/80 backdrop-blur-lg border-border/50">
       <CardHeader className="text-center">
         <CardTitle className="font-headline text-4xl tracking-wider text-primary">
-          Teacher Portal
+          Portail Enseignant
         </CardTitle>
-        <CardDescription>Enter your password to access the dashboard.</CardDescription>
+        <CardDescription>Entrez votre mot de passe pour accéder au tableau de bord.</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Mot de passe</Label>
             <Input id="password" name="password" type="password" required />
           </div>
           {state?.error && (

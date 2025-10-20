@@ -10,7 +10,7 @@ export function LogoutButton() {
     <form action={logout}>
        <SidebarMenuButton type="submit" className="w-full">
          <LogOut />
-         <span>Logout</span>
+         <span>Se déconnecter</span>
        </SidebarMenuButton>
     </form>
   );

@@ -13,7 +13,7 @@ export default function TeacherLoginPage() {
       <div className="absolute inset-0">
         <Image
           src={heroImage?.imageUrl || "https://picsum.photos/seed/f1hero/1920/1080"}
-          alt={heroImage?.description || "Racing car on a track"}
+          alt={heroImage?.description || "Voiture de course sur un circuit"}
           fill
           className="object-cover"
           data-ai-hint={heroImage?.imageHint}
@@ -25,7 +25,7 @@ export default function TeacherLoginPage() {
       <Button asChild variant="ghost" className="absolute top-4 left-4 z-10 text-white hover:text-primary hover:bg-white/10">
         <Link href="/">
           <ChevronLeft className="mr-2 h-4 w-4" />
-          Back to Home
+          Retour à l'accueil
         </Link>
       </Button>
 

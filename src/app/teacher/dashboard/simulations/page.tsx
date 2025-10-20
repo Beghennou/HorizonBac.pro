@@ -15,7 +15,7 @@ async function AdaptiveDifficultyForm() {
     const student = students.find(s => s.id === studentId);
     if (!student) return;
 
-    // In a real app, this would be dynamic simulation data
+    // Dans une vraie application, ce seraient des données de simulation dynamiques
     const performanceData = {
         averageLapTime: 92.5,
         numCompletedLaps: 10,
@@ -25,10 +25,10 @@ async function AdaptiveDifficultyForm() {
     
     try {
         const result = await adaptSimulationDifficulty({ studentId, performanceData });
-        // Here you would update the student's simulation settings in the database
-        console.log('AI Recommended adjustments:', result);
+        // Ici, vous mettriez à jour les paramètres de simulation de l'élève dans la base de données
+        console.log('Ajustements recommandés par l\'IA:', result);
     } catch (error) {
-        console.error("Error adapting simulation difficulty:", error);
+        console.error("Erreur lors de l'adaptation de la difficulté de la simulation:", error);
     }
   }
 
@@ -37,19 +37,19 @@ async function AdaptiveDifficultyForm() {
         <CardHeader>
             <CardTitle className="flex items-center gap-2">
                 <Bot />
-                Adaptive Difficulty AI
+                IA de difficulté adaptative
             </CardTitle>
             <CardDescription>
-                Select a student to let the AI analyze their latest performance and suggest new difficulty settings.
+                Sélectionnez un élève pour que l'IA analyse ses dernières performances et suggère de nouveaux paramètres de difficulté.
             </CardDescription>
         </CardHeader>
         <CardContent>
             <form action={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                    <Label htmlFor="student">Student</Label>
+                    <Label htmlFor="student">Élève</Label>
                     <Select name="studentId">
                         <SelectTrigger id="student">
-                            <SelectValue placeholder="Select a student" />
+                            <SelectValue placeholder="Sélectionnez un élève" />
                         </SelectTrigger>
                         <SelectContent>
                             {students.map(student => (
@@ -59,7 +59,7 @@ async function AdaptiveDifficultyForm() {
                     </Select>
                 </div>
                 <Button type="submit" className="w-full">
-                    Analyze and Adapt Difficulty
+                    Analyser et adapter la difficulté
                 </Button>
             </form>
         </CardContent>
@@ -71,38 +71,38 @@ export default function SimulationsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-headline text-5xl tracking-wide">Simulations Hub</h1>
+        <h1 className="font-headline text-5xl tracking-wide">Hub de simulations</h1>
         <p className="text-muted-foreground">
-          Configure racing simulations and manage adaptive difficulty settings.
+          Configurez les simulations de course et gérez les paramètres de difficulté adaptative.
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><SlidersHorizontal/>Global Simulation Parameters</CardTitle>
-                    <CardDescription>These settings apply to all students unless overridden by adaptive difficulty.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><SlidersHorizontal/>Paramètres de simulation globaux</CardTitle>
+                    <CardDescription>Ces paramètres s'appliquent à tous les élèves, sauf s'ils sont remplacés par la difficulté adaptative.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label>AI Opponent Skill (1-100)</Label>
+                        <Label>Niveau de l'adversaire IA (1-100)</Label>
                         <Input type="number" defaultValue="85" />
                     </div>
                      <div className="space-y-2">
-                        <Label>Traction Control</Label>
+                        <Label>Antipatinage</Label>
                         <Select defaultValue="medium">
                             <SelectTrigger>
                                 <SelectValue/>
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="high">High</SelectItem>
-                                <SelectItem value="medium">Medium</SelectItem>
-                                <SelectItem value="low">Low</SelectItem>
-                                <SelectItem value="off">Off</SelectItem>
+                                <SelectItem value="high">Élevé</SelectItem>
+                                <SelectItem value="medium">Moyen</SelectItem>
+                                <SelectItem value="low">Faible</SelectItem>
+                                <SelectItem value="off">Désactivé</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
-                    <Button>Save Global Settings</Button>
+                    <Button>Sauvegarder les paramètres globaux</Button>
                 </CardContent>
             </Card>
         </div>

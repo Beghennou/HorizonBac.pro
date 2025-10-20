@@ -6,16 +6,16 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 const chartData = [
-  { module: "Aero", progress: 82 },
-  { module: "Engine", progress: 75 },
-  { module: "Chassis", progress: 68 },
-  { module: "Strategy", progress: 91 },
-  { module: "Data", progress: 78 },
+  { module: "Aéro", progress: 82 },
+  { module: "Moteur", progress: 75 },
+  { module: "Châssis", progress: 68 },
+  { module: "Stratégie", progress: 91 },
+  { module: "Données", progress: 78 },
 ];
 
 const chartConfig = {
   progress: {
-    label: "Progress",
+    label: "Progression",
     color: "hsl(var(--primary))",
   },
 } satisfies ChartConfig
@@ -24,49 +24,49 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
        <div>
-        <h1 className="font-headline text-5xl tracking-wide">Dashboard Cockpit</h1>
-        <p className="text-muted-foreground">Live overview of your students' performance and progress.</p>
+        <h1 className="font-headline text-5xl tracking-wide">Tableau de bord</h1>
+        <p className="text-muted-foreground">Aperçu en direct des performances et de la progression de vos élèves.</p>
        </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Students</CardTitle>
+            <CardTitle className="text-sm font-medium">Élèves actifs</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">34</div>
-            <p className="text-xs text-muted-foreground">+5 from last semester</p>
+            <p className="text-xs text-muted-foreground">+5 par rapport au dernier semestre</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Competence</CardTitle>
+            <CardTitle className="text-sm font-medium">Compétence moyenne</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">78%</div>
-            <p className="text-xs text-muted-foreground">+3.2% this month</p>
+            <p className="text-xs text-muted-foreground">+3.2% ce mois-ci</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Most Improved</CardTitle>
+            <CardTitle className="text-sm font-medium">Meilleure progression</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">Emily White</div>
-            <p className="text-xs text-muted-foreground">+15% progress this week</p>
+            <p className="text-xs text-muted-foreground">+15% de progression cette semaine</p>
           </CardContent>
         </Card>
         <Card className="bg-primary/10 border-primary/40">
            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-primary">AI Skill Gap Alert</CardTitle>
+            <CardTitle className="text-sm font-medium text-primary">Alerte IA : lacunes</CardTitle>
             <BarChart className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3 Students</div>
-            <p className="text-xs text-primary/80">Identified for personalized paths</p>
+            <div className="text-2xl font-bold">3 Élèves</div>
+            <p className="text-xs text-primary/80">Parcours personnalisés identifiés</p>
           </CardContent>
         </Card>
       </div>
@@ -74,7 +74,7 @@ export default function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline tracking-wider text-2xl">Module Progress Overview</CardTitle>
+            <CardTitle className="font-headline tracking-wider text-2xl">Aperçu de la progression des modules</CardTitle>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="h-64 w-full">
@@ -92,31 +92,31 @@ export default function DashboardPage() {
         </Card>
          <Card>
           <CardHeader>
-            <CardTitle className="font-headline tracking-wider text-2xl">Quick Actions</CardTitle>
+            <CardTitle className="font-headline tracking-wider text-2xl">Actions rapides</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
              <Button variant="outline" asChild className="h-auto py-4 flex-col gap-2">
                 <Link href="/teacher/dashboard/students">
                     <Users className="w-6 h-6 text-primary"/>
-                    <span className="font-semibold">Manage Students</span>
+                    <span className="font-semibold">Gérer les élèves</span>
                 </Link>
              </Button>
              <Button variant="outline" asChild className="h-auto py-4 flex-col gap-2">
                 <Link href="/teacher/dashboard/tp-designer">
                     <PlusCircle className="w-6 h-6 text-primary"/>
-                    <span className="font-semibold">Create New TP</span>
+                    <span className="font-semibold">Créer un nouveau TP</span>
                 </Link>
              </Button>
              <Button variant="outline" asChild className="h-auto py-4 flex-col gap-2">
                 <Link href="#">
                     <FileText className="w-6 h-6 text-primary"/>
-                    <span className="font-semibold">Generate Reports</span>
+                    <span className="font-semibold">Générer des rapports</span>
                 </Link>
              </Button>
              <Button variant="outline" asChild className="h-auto py-4 flex-col gap-2">
                 <Link href="/teacher/dashboard/settings">
                     <Settings className="w-6 h-6 text-primary"/>
-                    <span className="font-semibold">Adjust Parameters</span>
+                    <span className="font-semibold">Ajuster les paramètres</span>
                 </Link>
              </Button>
           </CardContent>

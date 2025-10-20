@@ -13,7 +13,7 @@ export default function StudentLayout({
           <Link href="/" className="flex items-center gap-2 mr-6">
             <SteeringWheel className="h-8 w-8 text-primary" />
             <span className="font-headline text-2xl font-bold tracking-wider text-primary">
-              Formula Skills Garage
+              Garage F1 Pédagogique
             </span>
           </Link>
           <nav className="flex items-center gap-6 text-sm">
@@ -21,7 +21,7 @@ export default function StudentLayout({
               href="/student"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
-              Dashboard
+              Tableau de bord
             </Link>
           </nav>
         </div>

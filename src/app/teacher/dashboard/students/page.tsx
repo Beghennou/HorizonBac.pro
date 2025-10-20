@@ -14,28 +14,28 @@ export default function StudentsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-headline text-5xl tracking-wide">Student Roster</h1>
-          <p className="text-muted-foreground">Track, evaluate, and manage your students.</p>
+          <h1 className="font-headline text-5xl tracking-wide">Liste des élèves</h1>
+          <p className="text-muted-foreground">Suivez, évaluez et gérez vos élèves.</p>
         </div>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Add Student
+          Ajouter un élève
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Students</CardTitle>
-          <CardDescription>A list of all students in the current semester.</CardDescription>
+          <CardTitle>Tous les élèves</CardTitle>
+          <CardDescription>Liste de tous les élèves du semestre en cours.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Student</TableHead>
+                <TableHead>Élève</TableHead>
                 <TableHead className="hidden md:table-cell">Email</TableHead>
-                <TableHead>Progress</TableHead>
-                <TableHead className="hidden lg:table-cell">Last Active</TableHead>
+                <TableHead>Progression</TableHead>
+                <TableHead className="hidden lg:table-cell">Dernière activité</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
@@ -68,10 +68,10 @@ export default function StudentsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuItem asChild>
-                          <Link href={`/teacher/dashboard/students/${student.id}`}>View Details & AI Analysis</Link>
+                          <Link href={`/teacher/dashboard/students/${student.id}`}>Voir détails & Analyse IA</Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>Reset Data</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive focus:text-destructive">Remove Student</DropdownMenuItem>
+                        <DropdownMenuItem>Réinitialiser les données</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive focus:text-destructive">Supprimer l'élève</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

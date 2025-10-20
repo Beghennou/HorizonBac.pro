@@ -10,9 +10,9 @@ export default function TPDesignerPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-headline text-5xl tracking-wide">TP Module Designer</h1>
+        <h1 className="font-headline text-5xl tracking-wide">Concepteur de modules TP</h1>
         <p className="text-muted-foreground">
-          Create and share customized TP modules with integrated racing simulations.
+          Créez et partagez des modules TP personnalisés avec des simulations de course intégrées.
         </p>
       </div>
 
@@ -20,58 +20,58 @@ export default function TPDesignerPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <DraftingCompass />
-            New TP Module
+            Nouveau Module TP
           </CardTitle>
           <CardDescription>
-            Fill in the details below to create a new practical module for your students.
+            Remplissez les détails ci-dessous pour créer un nouveau module pratique pour vos élèves.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div className="space-y-2">
-                    <Label htmlFor="title">Module Title</Label>
-                    <Input id="title" placeholder="e.g., Advanced Aerodynamics" />
+                    <Label htmlFor="title">Titre du module</Label>
+                    <Input id="title" placeholder="ex: Aérodynamique avancée" />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="category">Catégorie</Label>
                     <Select>
                         <SelectTrigger id="category">
-                            <SelectValue placeholder="Select a category" />
+                            <SelectValue placeholder="Sélectionnez une catégorie" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="aerodynamics">Aerodynamics</SelectItem>
-                            <SelectItem value="powertrain">Powertrain</SelectItem>
-                            <SelectItem value="chassis">Chassis</SelectItem>
-                            <SelectItem value="strategy">Race Strategy</SelectItem>
+                            <SelectItem value="aerodynamics">Aérodynamique</SelectItem>
+                            <SelectItem value="powertrain">Groupe motopropulseur</SelectItem>
+                            <SelectItem value="chassis">Châssis</SelectItem>
+                            <SelectItem value="strategy">Stratégie de course</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
             </div>
             <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
-                <Textarea id="description" placeholder="Describe the learning objectives of this module." />
+                <Textarea id="description" placeholder="Décrivez les objectifs d'apprentissage de ce module." />
             </div>
              <div className="space-y-2">
-                <Label htmlFor="simulation">Integrated Simulation</Label>
+                <Label htmlFor="simulation">Simulation intégrée</Label>
                  <Select>
                     <SelectTrigger id="simulation">
-                        <SelectValue placeholder="Link a simulation (optional)" />
+                        <SelectValue placeholder="Lier une simulation (optionnel)" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="sim-1">Monza Circuit</SelectItem>
+                        <SelectItem value="sim-1">Circuit de Monza</SelectItem>
                         <SelectItem value="sim-2">Spa-Francorchamps</SelectItem>
-                         <SelectItem value="none">None</SelectItem>
+                         <SelectItem value="none">Aucune</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
             <div className="flex justify-end gap-4">
                 <Button variant="outline">
                     <Save className="mr-2 h-4 w-4" />
-                    Save as Draft
+                    Sauvegarder en brouillon
                 </Button>
                 <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Create Module
+                    Créer le module
                 </Button>
             </div>
         </CardContent>

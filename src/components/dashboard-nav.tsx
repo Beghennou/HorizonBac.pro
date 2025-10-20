@@ -7,11 +7,11 @@ import { LayoutDashboard, Users, DraftingCompass, Settings } from 'lucide-react'
 import { SteeringWheel } from './icons';
 
 const navItems = [
-  { href: '/teacher/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/teacher/dashboard/students', label: 'Students', icon: Users },
-  { href: '/teacher/dashboard/tp-designer', label: 'TP Designer', icon: DraftingCompass },
+  { href: '/teacher/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+  { href: '/teacher/dashboard/students', label: 'Élèves', icon: Users },
+  { href: '/teacher/dashboard/tp-designer', label: 'Concepteur de TP', icon: DraftingCompass },
   { href: '/teacher/dashboard/simulations', label: 'Simulations', icon: SteeringWheel },
-  { href: '/teacher/dashboard/settings', label: 'Settings', icon: Settings },
+  { href: '/teacher/dashboard/settings', label: 'Paramètres', icon: Settings },
 ];
 
 export function DashboardNav() {
