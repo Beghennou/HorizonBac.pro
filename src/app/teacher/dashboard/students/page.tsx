@@ -183,7 +183,7 @@ export default function StudentsPage() {
                 )}
             </CardHeader>
             <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {studentsInClass.sort((a,b) => b.progress - a.progress).map((student) => {
+                {studentsInClass.map((student) => {
                   const isSelected = selectedStudents.includes(student.name);
                   return (
                     <Card 
