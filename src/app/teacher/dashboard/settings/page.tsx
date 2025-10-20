@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings2, UserPlus, Save, AlertTriangle, Trash2 } from "lucide-react";
+import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload } from "lucide-react";
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Student } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import Papa from 'papaparse';
 
 export default function SettingsPage() {
   const { toast } = useToast();
@@ -112,12 +113,83 @@ export default function SettingsPage() {
     }
   };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    Papa.parse(file, {
+      header: false,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const newStudentNames = results.data
+          .slice(1) // Skip header row
+          .map((row: any) => row[0])
+          .filter(name => typeof name === 'string' && name.trim() !== '');
+
+        if (newStudentNames.length === 0) {
+            toast({
+                variant: "destructive",
+                title: "Aucun élève trouvé",
+                description: "Le fichier CSV semble vide ou mal formaté.",
+            });
+            return;
+        }
+
+        const existingStudentNames = new Set(students.map(s => s.name));
+        let addedCount = 0;
+
+        const studentsToAdd: Student[] = [];
+
+        newStudentNames.forEach(name => {
+          if (!existingStudentNames.has(name)) {
+            const nameParts = name.split(' ');
+            const lastName = nameParts[0] || '';
+            const firstName = nameParts.slice(1).join(' ') || 'Prénom';
+
+            const newStudent: Student = {
+              id: `student-${Date.now()}-${Math.random()}`,
+              name: name,
+              email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`,
+              progress: 0,
+              xp: 0,
+            };
+            studentsToAdd.push(newStudent);
+            existingStudentNames.add(name);
+            addedCount++;
+          }
+        });
+
+        if (studentsToAdd.length > 0) {
+            setStudents(prev => [...prev, ...studentsToAdd]);
+        }
+
+        toast({
+          title: "Importation terminée",
+          description: `${addedCount} élève(s) ont été ajoutés. ${newStudentNames.length - addedCount} doublon(s) ignoré(s).`,
+        });
+      },
+      error: (error: any) => {
+        toast({
+          variant: "destructive",
+          title: "Erreur d'importation",
+          description: "Impossible de lire le fichier CSV. Veuillez vérifier son format.",
+        });
+        console.error("CSV Parsing Error:", error);
+      }
+    });
+    
+    // Reset file input
+    event.target.value = '';
+  };
+
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-headline text-4xl lg:text-5xl tracking-wide">Paramètres &amp; Configuration</h1>
         <p className="text-muted-foreground mt-2">
-          Gérez les paramètres de l'application et ajoutez de nouveaux élèves.
+          Gérez les paramètres de l'application, ajoutez de nouveaux élèves et importez des listes.
         </p>
       </div>
 
@@ -162,6 +234,27 @@ export default function SettingsPage() {
                     Ajouter l'élève
                 </Button>
             </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Upload /> Importer des élèves</CardTitle>
+          <CardDescription>Ajoutez des élèves en masse à partir d'un fichier CSV. Seule la première colonne (nom de l'élève) sera importée.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <Label htmlFor="csv-upload" className="flex-grow">
+              <Button asChild className="w-full cursor-pointer">
+                <label>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Choisir un fichier CSV
+                  <Input id="csv-upload" type="file" accept=".csv" className="sr-only" onChange={handleFileUpload} />
+                </label>
+              </Button>
+            </Label>
+            <p className="text-sm text-muted-foreground">Les élèves existants seront ignorés.</p>
+          </div>
         </CardContent>
       </Card>
 
