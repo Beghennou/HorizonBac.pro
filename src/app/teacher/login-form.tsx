@@ -1,7 +1,8 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import { login } from './actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, KeyRound, Loader2 } from 'lucide-react';
+import { TachometerAnimation } from '@/components/TachometerAnimation';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -21,7 +23,23 @@ function SubmitButton() {
 }
 
 export function LoginForm() {
-  const [state, formAction] = useActionState(login, { error: undefined });
+  const router = useRouter();
+  const [showAnimation, setShowAnimation] = useState(false);
+
+  const [state, formAction] = useActionState(async (prevState: any, formData: FormData) => {
+    const result = await login(prevState, formData);
+    if (result.success) {
+      setShowAnimation(true);
+      setTimeout(() => {
+        router.push('/teacher/dashboard');
+      }, 2800); // Durée de l'animation
+    }
+    return result;
+  }, { error: undefined, success: false });
+
+  if (showAnimation) {
+    return <TachometerAnimation />;
+  }
 
   return (
     <Card className="bg-gradient-to-br from-card to-background border-2 border-primary shadow-2xl">

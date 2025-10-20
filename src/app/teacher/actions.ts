@@ -15,9 +15,9 @@ export async function login(prevState: { error: string | undefined }, formData: 
       maxAge: 60 * 60 * 24, // 1 day
       path: '/',
     });
-    redirect('/teacher/dashboard');
+    return { success: true, error: undefined };
   } else {
-    return { error: 'Mot de passe incorrect.' };
+    return { success: false, error: 'Mot de passe incorrect.' };
   }
 }
 
