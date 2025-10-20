@@ -40,10 +40,8 @@ const TpEvaluation = ({ tp, onRate, studentId }: { tp: TP; onRate: any; studentI
     // Cette fonction devrait mapper les compétences du TP aux blocs de compétences
     // Pour l'instant, on suppose que le niveau du TP correspond au niveau des compétences
     let level: Niveau = 'seconde';
-    if (tp.id >= 1 && tp.id <= 38) level = 'premiere';
-    if (tp.id >= 100 && tp.id <= 137) level = 'seconde'; // Correction pour la plage Seconde
-    if (tp.id >= 200 && tp.id <= 300) level = 'premiere'; // Correction pour la plage Premiere
-    if (tp.id >= 400) level = 'terminale'; // Logique à affiner pour terminale
+    if (tp.id >= 200 && tp.id < 400) level = 'premiere';
+    if (tp.id >= 400) level = 'terminale';
 
     const competences = competencesParNiveau[level];
 
