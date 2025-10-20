@@ -36,9 +36,17 @@ export default function TeacherDashboardLayout({
 
   const handleNiveauChange = (newNiveau: Niveau) => {
     setNiveau(newNiveau);
+    // Find first class for that level
+    const firstClassForLevel = Object.keys(classes).find(c => {
+        if (newNiveau === 'seconde') return c.startsWith('2nde');
+        if (newNiveau === 'premiere') return c.startsWith('1ere');
+        if (newNiveau === 'terminale') return c.startsWith('Term');
+        return false;
+    }) || Object.keys(classes)[0];
+    setSelectedClass(firstClassForLevel);
+
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.delete('tp');
-    // Keep student param if on competences page
     if (!pathname.includes('competences')) {
         newSearchParams.delete('student');
     }
@@ -50,16 +58,17 @@ export default function TeacherDashboardLayout({
     newSearchParams.set('tp', id.toString());
     newSearchParams.set('level', niveau);
     
-    // Only redirect to the main dashboard page if we are not on a sub-page like students or competences
-    const targetPath = pathname === '/teacher/dashboard' ? '/teacher/dashboard' : pathname;
-    router.push(`${targetPath}?${newSearchParams.toString()}`);
+    router.push(`/teacher/dashboard?${newSearchParams.toString()}`);
   }
 
   const handleStudentSelect = (studentName: string) => {
       const newSearchParams = new URLSearchParams(searchParams.toString());
       newSearchParams.set('student', studentName);
       newSearchParams.set('level', niveau);
-      router.push(pathname.startsWith('/teacher/dashboard/competences') ? `/teacher/dashboard/competences?${newSearchParams.toString()}` : `/teacher/dashboard/students?${newSearchParams.toString()}`);
+      const targetPath = pathname.startsWith('/teacher/dashboard/students') || pathname.startsWith('/teacher/dashboard/competences')
+        ? pathname
+        : '/teacher/dashboard/students';
+      router.push(`${targetPath}?${newSearchParams.toString()}`);
   }
 
   const studentsInClass = classes[selectedClass as keyof typeof classes] || [];
@@ -115,13 +124,13 @@ export default function TeacherDashboardLayout({
                   </SelectTrigger>
                   <SelectContent>
                       {Object.keys(classes).map(className => (
-                          <SelectItem key={className} value={className}>{className.replace(/_/g, ' ')}</SelectItem>
+                          <SelectItem key={className} value={className}>{className}</SelectItem>
                       ))}
                   </SelectContent>
               </Select>
             </div>
              <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
-                <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Élèves de {selectedClass.replace(/_/g, ' ')}</h3>
+                <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Élèves de {selectedClass}</h3>
                  <ScrollArea className="h-60">
                     <div className="space-y-2">
                         {studentsInClass.map(student => (

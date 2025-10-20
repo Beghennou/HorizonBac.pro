@@ -46,8 +46,8 @@ export const getTpById = (id: number): TP | undefined => {
 };
 
 export const classes = {
-    "Seconde_MV_A": ["Jean Dupont", "Marie Curie", "Pierre Martin"],
-    "Seconde_MV_B": ["Alice Lemoine", "Bob Marley", "Charlie Chaplin"],
-    "Premiere_MV_A": ["David Bowie", "Elon Musk", "Frank Zappa"],
-    "Terminale_MV_A": ["Grace Hopper", "Heidi Lamar", "Isaac Newton"],
+    "2nde MVA": ["Jean Dupont", "Marie Curie", "Pierre Martin"],
+    "2nde MVB": ["Alice Lemoine", "Bob Marley", "Charlie Chaplin"],
+    "1ere MVA": ["David Bowie", "Elon Musk", "Frank Zappa"],
+    "Term MVA": ["Grace Hopper", "Heidi Lamar", "Isaac Newton"],
 };

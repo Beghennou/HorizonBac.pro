@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
 
 
 const StudentDetails = ({ student, level, assignedTps, onAssignTp }: { student: any, level: Niveau, assignedTps: number[], onAssignTp: (tpId: number, tpTitle: string) => void }) => {
@@ -31,7 +32,7 @@ const StudentDetails = ({ student, level, assignedTps, onAssignTp }: { student: 
     };
 
     const assignedTpsDetails = assignedTps.map(id => {
-        const tp = tps.find(t => t.id === id);
+        const tp = getTpsByNiveau(level).find(t => t.id === id) || getTpsByNiveau('seconde').find(t => t.id === id) || getTpsByNiveau('premiere').find(t => t.id === id) || getTpsByNiveau('terminale').find(t => t.id === id);
         return tp ? { ...tp, status: 'Non commencé' } : null; // Statut mocké
     }).filter(Boolean);
 
@@ -94,31 +95,86 @@ export default function StudentsPage() {
     const searchParams = useSearchParams();
     const studentName = searchParams.get('student');
     const level = (searchParams.get('level') as Niveau) || 'seconde';
-    const selectedStudent = students.find(s => s.name === studentName);
-
+    
+    const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+    
     const [assignedTps, setAssignedTps] = useState<Record<string, number[]>>({
         'Alex Dubois': [101], // Mock initial data
     });
 
-    const handleAssignTp = (studentId: string, tpId: number) => {
-        setAssignedTps(prev => ({
-            ...prev,
-            [studentId]: [...(prev[studentId] || []), tpId]
-        }));
+    const { toast } = useToast();
+
+    const tps = getTpsByNiveau(level);
+
+    const handleAssignTpToSelected = (tpId: number, tpTitle: string) => {
+        if (selectedStudents.length === 0) {
+            toast({
+                variant: 'destructive',
+                title: "Aucun élève sélectionné",
+                description: "Veuillez sélectionner au moins un élève pour assigner un TP.",
+            });
+            return;
+        }
+
+        setAssignedTps(prev => {
+            const newAssignedTps = { ...prev };
+            selectedStudents.forEach(studentId => {
+                const studentTps = newAssignedTps[studentId] || [];
+                if (!studentTps.includes(tpId)) {
+                    newAssignedTps[studentId] = [...studentTps, tpId];
+                }
+            });
+            return newAssignedTps;
+        });
+
+        toast({
+            title: "TP Assigné",
+            description: `Le TP "${tpTitle}" a été assigné à ${selectedStudents.length} élève(s).`,
+        });
     };
+    
+    const handleStudentSelection = (studentId: string, isSelected: boolean) => {
+        setSelectedStudents(prev => {
+            if (isSelected) {
+                return [...prev, studentId];
+            } else {
+                return prev.filter(id => id !== studentId);
+            }
+        });
+    };
+
+    const selectedStudentDetails = students.find(s => s.id === studentName);
 
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
                  <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="flex items-center gap-3"><Users /> Vue de la classe</CardTitle>
+                        {selectedStudents.length > 0 && (
+                             <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline">
+                                        Assigner un TP à {selectedStudents.length} élève(s) <ChevronDown/>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto">
+                                    {tps.map(tp => (
+                                        <DropdownMenuItem key={tp.id} onSelect={() => handleAssignTpToSelected(tp.id, tp.titre)}>
+                                            <span className="font-bold mr-2">TP {tp.id}</span>
+                                            <span>{tp.titre}</span>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
                     </CardHeader>
                     <CardContent>
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead></TableHead>
                                     <TableHead>Classement</TableHead>
                                     <TableHead>Élève</TableHead>
                                     <TableHead>XP / Progression</TableHead>
@@ -128,6 +184,13 @@ export default function StudentsPage() {
                             <TableBody>
                                 {students.sort((a,b) => b.progress - a.progress).map((student, index) => (
                                     <TableRow key={student.id}>
+                                        <TableCell>
+                                            <Checkbox
+                                                id={`select-${student.id}`}
+                                                onCheckedChange={(checked) => handleStudentSelection(student.id, !!checked)}
+                                                checked={selectedStudents.includes(student.id)}
+                                            />
+                                        </TableCell>
                                         <TableCell className="font-bold text-lg text-accent">
                                             {index === 0 && <Award className="inline-block text-yellow-400 mr-2"/>}
                                             {index === 1 && <Award className="inline-block text-gray-400 mr-2"/>}
@@ -154,17 +217,22 @@ export default function StudentsPage() {
                 </Card>
             </div>
             <div>
-                {selectedStudent ? (
+                {selectedStudentDetails ? (
                     <StudentDetails 
-                        student={selectedStudent} 
+                        student={selectedStudentDetails} 
                         level={level}
-                        assignedTps={assignedTps[selectedStudent.id] || []}
-                        onAssignTp={(tpId) => handleAssignTp(selectedStudent.id, tpId)}
+                        assignedTps={assignedTps[selectedStudentDetails.id] || []}
+                        onAssignTp={(tpId) => {
+                            setAssignedTps(prev => ({
+                                ...prev,
+                                [selectedStudentDetails.id]: [...(prev[selectedStudentDetails.id] || []), tpId]
+                            }));
+                        }}
                     />
                 ) : (
-                    <Card className="flex items-center justify-center h-64">
-                        <CardContent className="text-center text-muted-foreground">
-                            <p>Sélectionnez un élève pour voir les détails et assigner des TPs.</p>
+                    <Card className="flex items-center justify-center h-full">
+                        <CardContent className="text-center text-muted-foreground p-6">
+                            <p>Sélectionnez un ou plusieurs élèves dans la liste pour leur assigner des TPs.</p>
                         </CardContent>
                     </Card>
                 )}
