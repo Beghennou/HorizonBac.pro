@@ -6,6 +6,18 @@ import { useSearchParams } from "next/navigation";
 import { Printer, User, Users } from "lucide-react";
 import { useAssignments } from "@/contexts/AssignmentsContext";
 
+const PrintButton = () => {
+    const handlePrint = () => {
+        window.print();
+    };
+    return (
+        <Button onClick={handlePrint} className="print-hidden">
+            <Printer className="mr-2" />
+            Imprimer la fiche
+        </Button>
+    )
+}
+
 const EtapeCard = ({ etape, index }: { etape: any, index: number }) => (
     <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
         <h4 className="font-headline text-lg text-accent">Étape {index + 1}: {etape.titre} <span className="text-sm text-muted-foreground font-body">({etape.duree})</span></h4>
@@ -21,10 +33,6 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
     const className = searchParams.get('class');
     const { teacherName } = useAssignments();
 
-    const handlePrint = () => {
-        window.print();
-    };
-
     return (
         <div className="space-y-6" id="printable-tp">
             <div className="flex justify-between items-start">
@@ -33,10 +41,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                     <h1 className="font-headline text-4xl tracking-wide">{tp.titre}</h1>
                     <p className="text-muted-foreground mt-1 text-lg">{tp.objectif}</p>
                 </div>
-                <Button onClick={handlePrint} className="print-hidden">
-                    <Printer className="mr-2" />
-                    Imprimer la fiche
-                </Button>
+                <PrintButton />
             </div>
             
             <div className="border-t border-b border-primary/20 py-2 mb-4">
