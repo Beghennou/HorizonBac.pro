@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LyceeLogo } from '@/components/lycee-logo';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
-import { Home } from 'lucide-react';
+import { Home, UserCircle, BookOpen } from 'lucide-react';
+import { Award } from '@/components/icons';
 
 export default function StudentLayoutContent({
   children,
@@ -24,7 +25,7 @@ export default function StudentLayoutContent({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl">
+      <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl print-hidden">
         <div className="container flex h-20 items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-4 mr-6">
@@ -51,9 +52,17 @@ export default function StudentLayoutContent({
             </Link>
             <Link
               href="/student/select"
-              className="transition-colors hover:text-accent text-foreground/80"
+              className="flex items-center gap-2 transition-colors hover:text-accent text-foreground/80"
             >
+              <BookOpen />
               Mes TP
+            </Link>
+             <Link
+              href="/student/portfolio"
+              className="flex items-center gap-2 transition-colors hover:text-accent text-foreground/80"
+            >
+              <Award className="h-5 w-5"/>
+              Mon Portfolio
             </Link>
           </nav>
         </div>
