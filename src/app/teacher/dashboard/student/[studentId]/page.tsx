@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
@@ -6,7 +7,7 @@ import { getTpById, allBlocs, TP, EtudePrelimQCM, EtudePrelimText } from '@/lib/
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, CheckSquare, Save, Mail, Bot, Loader2, Check, X } from 'lucide-react';
+import { User, CheckSquare, Save, Mail, Bot, Loader2, MessageSquare, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -128,7 +129,13 @@ const AiAnalysisHub = ({ studentName, evaluations }: { studentName: string, eval
     );
 };
 
-const PrelimCorrection = ({ tp, studentAnswers }: { tp: TP; studentAnswers: Record<number, string | string[]> }) => {
+const PrelimCorrection = ({ tp, studentAnswers, studentFeedback, teacherFeedback, onFeedbackChange }: { 
+    tp: TP; 
+    studentAnswers: Record<number, string | string[]>;
+    studentFeedback: string;
+    teacherFeedback: string;
+    onFeedbackChange: (feedback: string) => void;
+}) => {
     const [correction, setCorrection] = useState<{ score: number, total: number, details: boolean[] } | null>(null);
 
     const handleCorrection = () => {
@@ -138,8 +145,7 @@ const PrelimCorrection = ({ tp, studentAnswers }: { tp: TP; studentAnswers: Reco
             if (studentAnswer === undefined) return false;
 
             if (question.type === 'text') {
-                // For open questions, we consider it correct if answered. A real implementation would need NLP.
-                const isCorrect = (studentAnswer as string).trim() !== '';
+                const isCorrect = (studentAnswer as string).trim().toLowerCase() === question.r.toLowerCase();
                 if(isCorrect) score++;
                 return isCorrect;
             } else if (question.type === 'qcm') {
@@ -175,6 +181,12 @@ const PrelimCorrection = ({ tp, studentAnswers }: { tp: TP; studentAnswers: Reco
                 </div>
             </CardHeader>
             <CardContent className="space-y-6">
+                {studentFeedback && (
+                    <div className="p-4 border-l-2 border-sky-400 bg-background/50 rounded-r-lg">
+                        <h4 className="font-bold flex items-center gap-2"><MessageSquare className="text-sky-400"/> Commentaire de l'élève :</h4>
+                        <p className="mt-2 italic">"{studentFeedback}"</p>
+                    </div>
+                )}
                 {tp.etudePrelim.map((item, i) => {
                      const studentAnswer = studentAnswers[i] || "Aucune réponse";
                      const isCorrect = correction?.details[i];
@@ -195,6 +207,16 @@ const PrelimCorrection = ({ tp, studentAnswers }: { tp: TP; studentAnswers: Reco
                         </div>
                     )
                 })}
+                <div className="p-4 border-t border-primary/20">
+                     <Label htmlFor="teacher-feedback" className="font-bold flex items-center gap-2 mb-2"><MessageSquare className="text-accent"/>Feedback de l'enseignant :</Label>
+                    <Textarea 
+                        id="teacher-feedback"
+                        placeholder="Ajoutez votre commentaire pour l'élève ici..."
+                        value={teacherFeedback}
+                        onChange={(e) => onFeedbackChange(e.target.value)}
+                        rows={4}
+                    />
+                </div>
             </CardContent>
         </Card>
     );
@@ -207,7 +229,7 @@ export default function StudentDetailPage() {
     const searchParams = useSearchParams();
     const params = useParams();
     const { toast } = useToast();
-    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers } = useAssignments();
+    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback } = useAssignments();
 
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     
@@ -275,9 +297,9 @@ export default function StudentDetailPage() {
     
     let currentBlocs: Record<string, any> = {};
     if (selectedTp) {
-        if (selectedTp.id >= 1000) { // Terminale
+        if (selectedTp.id >= 301) { // Terminale
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_3')));
-        } else if (selectedTp.id >= 100) { // Seconde
+        } else if (selectedTp.id >= 101) { // Seconde
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_1')));
         } else { // Premiere
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_2')));
@@ -295,6 +317,15 @@ export default function StudentDetailPage() {
                 <p className="text-muted-foreground text-lg mt-2">Veuillez retourner à la liste et sélectionner un élève.</p>
             </div>
         )
+    }
+
+    const studentFeedback = (selectedTpId && feedbacks[studentName]?.[selectedTpId]?.student) || '';
+    const teacherFeedback = (selectedTpId && feedbacks[studentName]?.[selectedTpId]?.teacher) || '';
+    
+    const handleTeacherFeedbackChange = (feedback: string) => {
+        if (studentName && selectedTpId) {
+            saveFeedback(studentName, selectedTpId, feedback, 'teacher');
+        }
     }
 
     return (
@@ -334,7 +365,13 @@ export default function StudentDetailPage() {
             {selectedTp && (
                 <>
                     {selectedTp.id >= 301 && prelimAnswers[studentName]?.[selectedTp.id] && (
-                        <PrelimCorrection tp={selectedTp} studentAnswers={prelimAnswers[studentName][selectedTp.id]} />
+                        <PrelimCorrection 
+                            tp={selectedTp} 
+                            studentAnswers={prelimAnswers[studentName][selectedTp.id]}
+                            studentFeedback={studentFeedback}
+                            teacherFeedback={teacherFeedback}
+                            onFeedbackChange={handleTeacherFeedbackChange}
+                        />
                     )}
 
                     <Card>

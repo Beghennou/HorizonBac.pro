@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -5,7 +6,7 @@ import { getTpById, TP, Etape, EtudePrelimQCM, EtudePrelimText } from '@/lib/dat
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Send, Loader2, Play, CheckCircle } from 'lucide-react';
+import { Bot, Send, Loader2, Play, CheckCircle, MessageSquare } from 'lucide-react';
 import { guideStudent, GuideStudentOutput } from '@/ai/flows/tp-assistant';
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Badge } from '@/components/ui/badge';
@@ -111,17 +112,25 @@ export default function TPPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { assignedTps, updateTpStatus, prelimAnswers, savePrelimAnswer } = useAssignments();
+  const { assignedTps, updateTpStatus, prelimAnswers, savePrelimAnswer, feedbacks, saveFeedback } = useAssignments();
 
   const tpId = typeof params.tpId === 'string' ? parseInt(params.tpId, 10) : null;
   const tp = tpId ? getTpById(tpId) : null;
 
   const assignedTp = studentName && tpId ? assignedTps[studentName]?.find(t => t.id === tpId) : null;
+  const studentFeedback = (studentName && tpId && feedbacks[studentName]?.[tpId]?.student) || '';
+  const teacherFeedback = (studentName && tpId && feedbacks[studentName]?.[tpId]?.teacher) || '';
   
   const handleAnswerChange = (qIndex: number, answer: string | string[]) => {
       if (studentName && tpId) {
           savePrelimAnswer(studentName, tpId, qIndex, answer);
       }
+  }
+
+  const handleStudentFeedbackChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (studentName && tpId) {
+      saveFeedback(studentName, tpId, e.target.value, 'student');
+    }
   }
 
   if (!tp) {
@@ -258,6 +267,37 @@ export default function TPPage() {
             ))}
           </CardContent>
         </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare /> Commentaire sur le TP
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea 
+              placeholder="Tes impressions, difficultés ou points à discuter avec ton enseignant..."
+              value={studentFeedback}
+              onChange={handleStudentFeedbackChange}
+              disabled={assignedTp.status === 'terminé'}
+              rows={4}
+            />
+          </CardContent>
+        </Card>
+
+        {assignedTp.status === 'terminé' && teacherFeedback && (
+          <Card className="border-accent">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-accent">
+                <MessageSquare /> Feedback de l'Enseignant
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="p-4 bg-background/50 rounded-md whitespace-pre-wrap">{teacherFeedback}</p>
+            </CardContent>
+          </Card>
+        )}
+
 
         <Card>
             <CardHeader>

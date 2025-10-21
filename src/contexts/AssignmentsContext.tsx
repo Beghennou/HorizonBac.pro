@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
@@ -23,6 +24,11 @@ const xpPerLevel: Record<EvaluationStatus, number> = {
 
 type PrelimAnswer = string | string[];
 
+type Feedback = {
+  student?: string;
+  teacher?: string;
+}
+
 type AssignmentsContextType = {
   students: Student[];
   setStudents: React.Dispatch<React.SetStateAction<Student[]>>;
@@ -31,10 +37,12 @@ type AssignmentsContextType = {
   assignedTps: Record<string, AssignedTp[]>;
   evaluations: Record<string, Record<string, EvaluationStatus>>;
   prelimAnswers: Record<string, Record<number, Record<number, PrelimAnswer>>>;
+  feedbacks: Record<string, Record<number, Feedback>>;
   assignTp: (studentNames: string[], tpId: number) => void;
   saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>) => void;
   updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => void;
   savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => void;
+  saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
   teacherName: string;
   setTeacherName: React.Dispatch<React.SetStateAction<string>>;
   resetStudentData: () => void;
@@ -51,6 +59,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
   const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus>>>({});
   const [prelimAnswers, setPrelimAnswers] = useState<Record<string, Record<number, Record<number, PrelimAnswer>>>>({});
+  const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
   const [teacherName, setTeacherName] = useState<string>('');
   const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
@@ -74,6 +83,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         const savedPrelimAnswers = localStorage.getItem('prelimAnswers');
         setPrelimAnswers(savedPrelimAnswers ? JSON.parse(savedPrelimAnswers) : {});
         
+        const savedFeedbacks = localStorage.getItem('feedbacks');
+        setFeedbacks(savedFeedbacks ? JSON.parse(savedFeedbacks) : {});
+
         const updatedStudents = studentsData.map((student: Student) => {
           const studentEvaluations = evaluationsData[student.name] || {};
           let totalXp = 0;
@@ -94,6 +106,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
             setAssignedTps({});
             setEvaluations({});
             setPrelimAnswers({});
+            setFeedbacks({});
             toast({
                 title: "Réinitialisation effectuée",
                 description: "Les classes et les élèves ont été mis à jour.",
@@ -112,6 +125,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         setAssignedTps({});
         setEvaluations({});
         setPrelimAnswers({});
+        setFeedbacks({});
         setTeacherName('M. Dubois');
       }
       setIsLoaded(true);
@@ -125,9 +139,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('assignedTps', JSON.stringify(assignedTps));
       localStorage.setItem('evaluations', JSON.stringify(evaluations));
       localStorage.setItem('prelimAnswers', JSON.stringify(prelimAnswers));
+      localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
       localStorage.setItem('teacherName', JSON.stringify(teacherName));
     }
-  }, [students, classes, assignedTps, evaluations, prelimAnswers, teacherName, isLoaded]);
+  }, [students, classes, assignedTps, evaluations, prelimAnswers, feedbacks, teacherName, isLoaded]);
 
   const assignTp = (studentNames: string[], tpId: number) => {
     setAssignedTps(prev => {
@@ -208,12 +223,30 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       };
     });
   };
+
+  const saveFeedback = (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
+    setFeedbacks(prev => {
+      const studentFeedbacks = prev[studentName] || {};
+      const tpFeedback = studentFeedbacks[tpId] || {};
+      return {
+        ...prev,
+        [studentName]: {
+          ...studentFeedbacks,
+          [tpId]: {
+            ...tpFeedback,
+            [author]: feedback,
+          },
+        },
+      };
+    });
+  };
   
   const resetStudentData = () => {
     setStudents([]);
     setAssignedTps({});
     setEvaluations({});
     setPrelimAnswers({});
+    setFeedbacks({});
     setClasses(prevClasses => {
         const clearedClasses: Record<string, string[]> = {};
         for (const className in prevClasses) {
@@ -252,6 +285,11 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       delete newAnswers[studentName];
       return newAnswers;
     })
+    setFeedbacks(prev => {
+      const newFeedbacks = {...prev};
+      delete newFeedbacks[studentName];
+      return newFeedbacks;
+    });
     toast({
         title: "Élève supprimé",
         description: `${studentName} a été retiré de l'application.`,
@@ -284,6 +322,11 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
           const newAnswers = {...prev};
           delete newAnswers[studentName];
           return newAnswers;
+        });
+        setFeedbacks(prev => {
+          const newFeedbacks = {...prev};
+          delete newFeedbacks[studentName];
+          return newFeedbacks;
         });
     });
 
@@ -343,7 +386,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, prelimAnswers, assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv }}>
+    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, prelimAnswers, feedbacks, assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer, saveFeedback, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv }}>
       {children}
     </AssignmentsContext.Provider>
   );
