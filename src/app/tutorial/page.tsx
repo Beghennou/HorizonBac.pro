@@ -1,6 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot } from 'lucide-react';
+import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -51,8 +51,19 @@ export default function TutorialPage() {
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
+                                 <AccordionItem value="item-5">
+                                    <AccordionTrigger className="text-xl font-headline">2. Mise à Jour Annuelle des Classes</AccordionTrigger>
+                                    <AccordionContent className="text-base text-muted-foreground p-4">
+                                        <p className="mb-4">Pour préparer la rentrée, la page <strong>Paramètres</strong> contient une section "Mise à Jour Annuelle des Classes" :</p>
+                                        <ul className="list-disc pl-6 space-y-2">
+                                            <li><strong>Importez vos listes :</strong> Pour chaque niveau (Seconde, Première, Terminale), importez votre nouvelle liste de classe au format CSV.</li>
+                                            <li><strong>Conservation des données :</strong> Si un élève importé existe déjà, il est simplement déplacé dans sa nouvelle classe. Toutes ses évaluations et sa progression sont conservées.</li>
+                                            <li><strong>Création automatique :</strong> Un nouvel élève dans votre fichier CSV sera automatiquement créé dans l'application.</li>
+                                        </ul>
+                                    </AccordionContent>
+                                </AccordionItem>
                                 <AccordionItem value="item-2">
-                                    <AccordionTrigger className="text-xl font-headline">2. Assignation des Travaux Pratiques (TP)</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">3. Assignation des Travaux Pratiques (TPs)</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <strong>Suivi des Classes</strong> :</p>
                                         <ul className="list-disc pl-6 space-y-2">
@@ -63,7 +74,7 @@ export default function TutorialPage() {
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-3">
-                                    <AccordionTrigger className="text-xl font-headline">3. Évaluation et Suivi</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">4. Évaluation et Suivi</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">Le cœur du suivi se fait dans le dossier de l'élève :</p>
                                         <ul className="list-disc pl-6 space-y-2">
@@ -76,7 +87,7 @@ export default function TutorialPage() {
                                     </AccordionContent>
                                 </AccordionItem>
                                  <AccordionItem value="item-4">
-                                    <AccordionTrigger className="text-xl font-headline">4. Visualisation des Fiches TP</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">5. Visualisation des Fiches TP</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                        <p className="mb-4">Pour consulter, imprimer ou envoyer une fiche TP vierge :</p>
                                         <ul className="list-disc pl-6 space-y-2">
@@ -96,7 +107,7 @@ export default function TutorialPage() {
                      <Card>
                         <CardHeader>
                             <CardTitle>Guide pour l'Élève</CardTitle>
-                            <CardDescription>Découvrez comment accéder à vos TP et utiliser les outils à votre disposition.</CardDescription>
+                            <CardDescription>Découvrez comment accéder à vos TPs et utiliser les outils à votre disposition.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Accordion type="single" collapsible className="w-full">
@@ -113,9 +124,9 @@ export default function TutorialPage() {
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-2">
-                                    <AccordionTrigger className="text-xl font-headline">2. Consulter ses TP</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">2. Consulter ses TPs</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Ton tableau de bord te montre tous les TP que ton enseignant t'a assignés.</p>
+                                        <p className="mb-4">Ton tableau de bord te montre tous les TPs que ton enseignant t'a assignés.</p>
                                         <ul className="list-disc pl-6 space-y-2">
                                             <li>Chaque TP a un statut : "Non commencé", "En cours" ou "Terminé".</li>
                                             <li>Clique sur "Commencer le TP" pour ouvrir la fiche de travail.</li>
