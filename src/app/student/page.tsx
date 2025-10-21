@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 function StudentDashboard() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { assignedTps } = useAssignments();
+  const { assignedTps, evaluations } = useAssignments();
 
   if (!studentName) {
     return (
@@ -32,14 +32,17 @@ function StudentDashboard() {
   }
 
   const studentTps = assignedTps[studentName] || [];
+  const studentEvaluations = evaluations[studentName] || {};
+
   const tpModules = studentTps.map(assignedTp => {
     const tp = getTpById(assignedTp.id);
-    return tp ? { ...tp, status: assignedTp.status } : null;
-  }).filter((tp): tp is TP & { status: string } => tp !== null);
+    const isEvaluated = studentEvaluations[tp?.id.toString()] !== undefined;
+    return tp ? { ...tp, status: assignedTp.status, isEvaluated } : null;
+  }).filter((tp): tp is TP & { status: string; isEvaluated: boolean } => tp !== null);
 
   const getTpCategory = (tpId: number): string => {
-    if (tpId >= 1000) return 'Terminale / Diagnostic Avancé';
-    if (tpId >= 100) return 'Seconde / Entretien Périodique';
+    if (tpId >= 301) return 'Terminale / Diagnostic Avancé';
+    if (tpId >= 101) return 'Seconde / Entretien Périodique';
     if (tpId >= 1) return 'Première / Maintenance Corrective';
     return 'Général';
   };
@@ -48,7 +51,7 @@ function StudentDashboard() {
     'non-commencé': { text: 'Non commencé', icon: <ArrowRight className="ml-2"/>, buttonText: 'Commencer le TP', variant: 'default' as const, className: 'bg-gradient-to-r from-primary to-racing-orange hover:brightness-110'},
     'en-cours': { text: 'En cours', icon: <Clock className="mr-2" />, buttonText: 'Continuer le TP', variant: 'outline' as const, className: 'border-accent text-accent hover:bg-accent hover:text-black'},
     'terminé': { text: 'Terminé', icon: <CheckCircle className="mr-2" />, buttonText: 'Revoir le TP', variant: 'outline' as const, className: 'border-green-500 text-green-400 hover:bg-green-500 hover:text-black'},
-  }
+  };
 
   return (
     <div className="space-y-12">
@@ -80,7 +83,12 @@ function StudentDashboard() {
                           data-ai-hint={image.imageHint}
                         />
                      )}
-                     <Badge className={cn("absolute top-2 right-2", currentStatusInfo.className)}>{currentStatusInfo.text}</Badge>
+                     <div className="absolute top-2 right-2 flex gap-2">
+                        {module.status === 'terminé' && module.isEvaluated && (
+                            <Badge className="bg-sky-500 text-white">Évalué</Badge>
+                        )}
+                        <Badge className={cn(currentStatusInfo.className)}>{currentStatusInfo.text}</Badge>
+                     </div>
                   </CardHeader>
                   <div className="p-6 flex-grow flex flex-col">
                     <Badge variant="outline" className="w-fit mb-2 border-accent text-accent">{getTpCategory(module.id)}</Badge>
