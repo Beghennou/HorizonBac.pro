@@ -276,15 +276,11 @@ export default function StudentDetailPage() {
         } else if (studentAssignedTps.length > 0) {
             const firstTpId = studentAssignedTps[0].id;
              setSelectedTpId(firstTpId);
-             // Update URL to reflect the default selected TP
-             const newSearchParams = new URLSearchParams(searchParams.toString());
-             newSearchParams.set('tp', firstTpId.toString());
-             router.replace(`${pathname}?${newSearchParams.toString()}`);
         } else {
             setSelectedTpId(null);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchParams, studentName, studentAssignedTps.length]);
+    }, [studentName, studentAssignedTps.length]);
 
     useEffect(() => {
         if (studentName && savedEvaluations[studentName]) {
