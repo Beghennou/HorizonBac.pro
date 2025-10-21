@@ -57,7 +57,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         const studentsData = savedStudents ? JSON.parse(savedStudents) : initialStudents;
         
         const savedClasses = localStorage.getItem('classes');
-        setClasses(savedClasses ? JSON.parse(savedClasses) : initialClasses);
+        const classesData = savedClasses ? JSON.parse(savedClasses) : initialClasses;
 
         const savedAssignedTps = localStorage.getItem('assignedTps');
         setAssignedTps(savedAssignedTps ? JSON.parse(savedAssignedTps) : {});
@@ -78,7 +78,21 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
           const progressPercentage = maxPossibleXp > 0 ? Math.round((totalXp / maxPossibleXp) * 100) : 0;
           return { ...student, xp: totalXp, progress: progressPercentage };
         });
-        setStudents(updatedStudents);
+
+        // Force reset if the classes list doesn't match the new one
+        if(JSON.stringify(Object.keys(classesData).sort()) !== JSON.stringify(Object.keys(initialClasses).sort())){
+            setStudents(initialStudents);
+            setClasses(initialClasses);
+            setAssignedTps({});
+            setEvaluations({});
+            toast({
+                title: "Réinitialisation effectuée",
+                description: "Les classes et les élèves ont été mis à jour.",
+            });
+        } else {
+             setStudents(updatedStudents);
+             setClasses(classesData);
+        }
 
         const savedTeacherName = localStorage.getItem('teacherName');
         setTeacherName(savedTeacherName ? JSON.parse(savedTeacherName) : 'M. Dubois');
