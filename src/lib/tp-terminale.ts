@@ -28,8 +28,8 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 }
 
 export const tpTerminale: Record<number, TP> = {
-  100: {
-    id: 100,
+  301: {
+    id: 301,
     duree: '2h30',
     titre: 'CA 301 • Contrôle des pressions. Recharge d\'une climatisation',
     situation: 'Contrôle du bon fonctionnement du circuit de climatisation et procédure de recharge selon normes environnementales.',
@@ -60,8 +60,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Gants et lunettes', 'Ventiler atelier', 'Traçabilité fluide obligatoire'],
     pointsCles: ['Pressions nominales', 'Étanchéité', 'Dossier réglementaire']
   },
-  200: {
-    id: 200,
+  302: {
+    id: 302,
     duree: '2h00',
     titre: 'CA 306 • Diagnostic et remplacement airbag',
     situation: 'Diagnostic et remplacement d’un airbag suite à déclenchement ou défaut.',
@@ -92,8 +92,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Ne pas heurter airbag', 'Stocker face vers le haut', 'Filière agréée'],
     pointsCles: ['Attente 5 min', 'Couples serrage', 'Effacement défauts']
   },
-  300: {
-    id: 300,
+  303: {
+    id: 303,
     duree: '2h00',
     titre: 'CA 305 • Essuyage automatique des vitres. Allumage automatique',
     situation: 'Diagnostic des systèmes essuyage automatique et allumage auto des feux.',
@@ -124,8 +124,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Nettoyer pare-brise capteurs', 'Rebrancher connecteurs', 'Tracer paramètres'],
     pointsCles: ['Propreté zone', 'Calibration', 'Test réel']
   },
-  400: {
-    id: 400,
+  304: {
+    id: 304,
     duree: '1h30',
     titre: 'CA 303 • Reconnaissance des valves de roues',
     situation: 'Identification et diagnostic des valves TPMS.',
@@ -156,8 +156,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Couples respectés', 'Étiqueter IDs', 'Ranger outil TPMS'],
     pointsCles: ['Apprentissage', 'Ordre roues', 'Pressions correctes']
   },
-  500: {
-    id: 500,
+  305: {
+    id: 305,
     duree: '2h00',
     titre: 'CA 311 • Phares au xénon',
     situation: 'Diagnostic et réglage des phares au xénon.',
@@ -188,8 +188,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Jamais manipuler sous tension', 'Élimination spécifique ampoules', 'Tracer réglage'],
     pointsCles: ['HT danger', 'Correcteur OK', 'Réglage anti-éblouissement']
   },
-  600: {
-    id: 600,
+  306: {
+    id: 306,
     duree: '3h00',
     titre: 'MTE 303 • Remplacement distribution et pompe à eau',
     situation: 'Remplacement distribution + pompe à eau.',
@@ -220,8 +220,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Batterie off', 'Couples stricts', 'Plans de joint propres'],
     pointsCles: ['Calage exact', 'Tension correcte', 'Purge LR']
   },
-  700: {
-    id: 700,
+  307: {
+    id: 307,
     duree: '1h45',
     titre: 'MA 305 • Relevé de pressions de suralimentation',
     situation: 'Relevé/analyse pressions de suralimentation.',
@@ -253,8 +253,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Remettre durite d’origine', 'Serrer colliers', 'Tracer relevés'],
     pointsCles: ['Pression cible', 'Fuites = perte', 'Commande OK']
   },
-  800: {
-    id: 800,
+  308: {
+    id: 308,
     duree: '2h00',
     titre: 'MA 307 • Contrôle du circuit basse pression diesel',
     situation: 'Contrôle basse pression gasoil jusqu’à pompe HP.',
@@ -284,11 +284,11 @@ export const tpTerminale: Record<number, TP> = {
         'Remplacer filtre si colmaté.'
       ])
     ],
-    securiteRangement: ['Nettoyer gasoil', 'Élimination déchets', 'Tracer'],
+    securiteRangement: ['Nettoyer gasoil', 'Éliminer déchets', 'Tracer'],
     pointsCles: ['Pas d’air', 'Pression correcte', 'Filtre propre']
   },
-  900: {
-    id: 900,
+  309: {
+    id: 309,
     duree: '2h00',
     titre: 'L 307 • Diagnostic géométrie',
     situation: 'Diagnostic géométrie trains roulants.',
@@ -324,8 +324,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Descendre du banc', 'Ranger capteurs', 'Archiver fiches'],
     pointsCles: ['Pressions base', 'Symétrie G/D', 'Réglage fin']
   },
-  1000: {
-    id: 1000,
+  310: {
+    id: 310,
     duree: '2h30',
     titre: 'MA 303 • Diagnostic système injection diesel',
     situation: 'Diagnostic injection diesel common rail.',
@@ -362,8 +362,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Déconnexions propres', 'Ranger outils', 'Archiver relevés'],
     pointsCles: ['Pression rampe clé', 'Codes + PIDs', 'Actionneurs confirment']
   },
-  1100: {
-    id: 1100,
+  311: {
+    id: 311,
     duree: '2h00',
     titre: 'MP 303 • Diagnostic et mesures de paramètres antipollution',
     situation: 'Diagnostic dispositifs antipollution (lambda, EGR, catalyseur, FAP).',
@@ -394,8 +394,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Ventilation atelier', 'Précautions température', 'Archiver mesures'],
     pointsCles: ['Normes respectées', 'Lambda/EGR', 'FAP OK']
   },
-  1200: {
-    id: 1200,
+  312: {
+    id: 312,
     duree: '2h00',
     titre: 'UE 304 • Utilisation d\'un oscilloscope',
     situation: 'Prise en main oscilloscope automobile.',
@@ -431,8 +431,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Protéger sondes', 'Ne pas dépasser Vmax', 'Sauvegarder et ranger'],
     pointsCles: ['Réglages nets', 'Trigger stable', 'Lecture formes']
   },
-  1300: {
-    id: 1300,
+  313: {
+    id: 313,
     duree: '2h00',
     titre: 'MA 306 • Contrôle des injecteurs moteur à rampe commune 1',
     situation: 'Contrôle injecteurs common rail — partie 1 (électrique/retours).',
@@ -463,8 +463,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Protéger zone', 'Éliminer gasoil', 'Tracer injecteurs'],
     pointsCles: ['Retours homogènes', 'Isolation OK', 'Joints sains']
   },
-  1400: {
-    id: 1400,
+  314: {
+    id: 314,
     duree: '2h00',
     titre: 'MA 311 • Contrôle des injecteurs moteur à rampe commune 2',
     situation: 'Contrôle injecteurs common rail — partie 2 (banc et codage).',
@@ -495,8 +495,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Joints neufs', 'Purge HP', 'Ranger banc'],
     pointsCles: ['Débit homogène', 'Codage fait', 'Étanchéité OK']
   },
-  1500: {
-    id: 1500,
+  315: {
+    id: 315,
     duree: '2h30',
     titre: 'F 307 • Diagnostic du système ABS (contrôle des éléments)',
     situation: 'Diagnostic complet ABS: capteurs, ECU, groupe hydraulique et essais.',
@@ -532,8 +532,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Roues calées', 'Électricité sécurisée', 'Tracer'],
     pointsCles: ['Capteurs cohérents', 'Actionneurs OK', 'Voyant OFF']
   },
-  1600: {
-    id: 1600,
+  316: {
+    id: 316,
     duree: '2h00',
     titre: 'L 311 • Direction assistée électrique et hydraulique',
     situation: 'Direction assistée électrique/hydraulique: découverte et diag.',
@@ -570,8 +570,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Compléter fluide', 'Serrer raccords', 'Ranger mano'],
     pointsCles: ['Type identifié', 'Pression OK', 'Capteurs étalonnés']
   },
-  1700: {
-    id: 1700,
+  317: {
+    id: 317,
     duree: '2h00',
     titre: 'L 312 • Diagnostiquer un système de suspension pilotée',
     situation: 'Suspension pilotée (amortissement variable/pneumatique).',
@@ -610,8 +610,8 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Dépressuriser avant intervention', 'Protéger soufflets', 'Ranger outils'],
     pointsCles: ['Modes fonctionnels', 'Correction active', 'Pas de fuites']
   },
-  1800: {
-    id: 1800,
+  318: {
+    id: 318,
     duree: '2h30',
     titre: 'T 307 • Diagnostic BV robotisée',
     situation: 'BV robotisée: commande embrayage et sélection pilotée.',
@@ -650,3 +650,5 @@ export const tpTerminale: Record<number, TP> = {
     pointsCles: ['PIDs essentiels', 'Apprentissage obligatoire', 'Actionneurs OK']
   }
 };
+
+    

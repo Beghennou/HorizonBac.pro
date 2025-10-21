@@ -158,7 +158,7 @@ export default function StudentDetailPage() {
         } else {
             setSelectedTpId(null);
         }
-    }, [searchParams, studentName, assignedTps]);
+    }, [searchParams, studentName, studentAssignedTps.length]);
 
     useEffect(() => {
         if (studentName) {
@@ -200,7 +200,7 @@ export default function StudentDetailPage() {
     
     let currentBlocs: Record<string, any> = {};
     if (selectedTp) {
-        if (selectedTp.id >= 1000) { // Terminale
+        if (selectedTp.id >= 300) { // Terminale
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_3')));
         } else if (selectedTp.id >= 100) { // Seconde
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_1')));
@@ -319,3 +319,5 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+
+    
