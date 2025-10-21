@@ -110,5 +110,5 @@ export const classes = {
 export const allBlocs: Record<string, CompetenceBloc> = {
     ...competencesParNiveau.seconde,
     ...competencesParNiveau.premiere,
-    ...competencesParNiveau.terminale
+    ...competencesParNiveau.terminale,
 };
