@@ -171,7 +171,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'CA 311 • Phares au xénon',
     situation: 'Un client se plaint d\'un éclairage faible sur son véhicule équipé de phares au xénon. De plus, le faisceau semble trop bas. Vous devez diagnostiquer le système haute tension et le correcteur d\'assiette automatique.',
-    objectif: 'Contrôler ballasts, ampoules, correcteur auto et réglage faisceau. (Compétences C3.2, C3.3)',
+    objectif: 'Contrôler ballasts, ampoules, correcteur auto et réglage faisceau. (Compétence C3.2)',
     materiel: ['Valise diag', 'Régloscope', 'EPIs diélectriques'],
     etudePrelim: [
       { q: 'Quelle est la tension d\'amorçage d\'une ampoule au xénon et pourquoi est-elle si dangereuse ?', r: 'Environ 20 000 Volts. C\'est une tension mortelle qui nécessite des gants et des précautions d\'isolation.', type: 'text' },
@@ -235,7 +235,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '1h45',
     titre: 'MA 305 • Relevé de pressions de suralimentation',
     situation: 'Un client rapporte une perte de puissance significative et un sifflement anormal à l\'accélération sur son moteur turbo. Vous êtes chargé de contrôler le circuit de suralimentation pour identifier la cause du problème.',
-    objectif: 'Comparer pressions aux valeurs constructeur, identifier fuites/wastegate/VGT. (Compétences C3.1, C3.4)',
+    objectif: 'Comparer pressions aux valeurs constructeur, identifier fuites/wastegate/VGT. (Compétence C3.4)',
     materiel: ['Mano turbo', 'Valise diag', 'T de dérivation', 'Fumigène'],
     etudePrelim: [
       { q: 'Quelle est la pression de suralimentation typique en pleine charge pour un moteur standard ?', r: 'Généralement entre 0.8 et 1.5 bar de pression relative (au-dessus de la pression atmosphérique).', type: 'text' },
@@ -268,7 +268,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'MA 307 • Contrôle du circuit basse pression diesel',
     situation: 'Un moteur diesel présente des difficultés de démarrage et des coupures moteur intermittentes. Vous suspectez un problème d\'alimentation et devez contrôler le circuit basse pression pour confirmer votre diagnostic.',
-    objectif: 'Mesurer pression/dépression, détecter bulles et colmatage. (Compétences C3.1, C3.3)',
+    objectif: 'Mesurer pression/dépression, détecter bulles et colmatage. (Compétence C3.3)',
     materiel: ['Mano BP', 'Tuyau transparent', 'Filtre gasoil', 'Valise diag'],
     etudePrelim: [
       { q: 'Quelle est la pression typique du circuit de gavage (basse pression) sur un diesel moderne ?', r: 'Entre 3 et 6 bars, pour garantir une alimentation constante de la pompe haute pression.', type: 'text' },
@@ -377,7 +377,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'MP 303 • Diagnostic et mesures de paramètres antipollution',
     situation: 'Le véhicule a été refusé au contrôle technique pour pollution excessive. Vous devez diagnostiquer les systèmes antipollution (lambda, EGR, FAP) pour trouver la cause et valider la conformité après réparation.',
-    objectif: 'Mesurer émissions et vérifier fonctionnement des organes. (Compétences C3.1, C3.2)',
+    objectif: 'Mesurer émissions et vérifier fonctionnement des organes. (Compétence C3.2)',
     materiel: ['Analyseur 4/5 gaz', 'Opacimètre', 'Valise diag', 'Thermo IR'],
     etudePrelim: [
       { q: 'Quel est le rôle d\'un catalyseur 3 voies ? Et celui des sondes lambda amont et aval ?', r: 'Le catalyseur transforme les gaz nocifs (CO, HC, NOx) en gaz inoffensifs. La sonde amont mesure l\'oxygène pour réguler le mélange. La sonde aval vérifie l\'efficacité du catalyseur.', type: 'text' },
@@ -510,7 +510,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h30',
     titre: 'F 307 • Diagnostic du système ABS (contrôle des éléments)',
     situation: 'Le témoin ABS est allumé. Le client signale une sensation étrange à la pédale. Vous devez mener un diagnostic complet pour assurer la sécurité du système de freinage antiblocage.',
-    objectif: 'Identifier défauts par codes, mesures et tests actionneurs. (Compétences C3.2, C3.3)',
+    objectif: 'Identifier défauts par codes, mesures et tests actionneurs. (Compétence C3.2)',
     materiel: ['Valise ABS', 'Multimètre', 'Oscillo', 'Banc freinage'],
     etudePrelim: [
       { q: 'Quel est le rôle des capteurs de roue dans le système ABS ?', r: 'Ils mesurent la vitesse de rotation de chaque roue en temps réel et transmettent cette information au calculateur ABS pour qu\'il détecte tout début de blocage.', type: 'text' },
@@ -547,7 +547,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'L 311 • Direction assistée électrique et hydraulique',
     situation: 'Un client se plaint d\'une direction dure par moments et de bruits au braquage. Vous devez identifier le type de direction assistée (hydraulique ou électrique) et mener le diagnostic approprié.',
-    objectif: 'Identifier système, lire codes, mesurer pression/params et valider. (Compétence C3.2)',
+    objectif: 'Identifier système, lire codes, mesurer pression/params et valider. (Compétence C3.4)',
     materiel: ['Valise DAE', 'Mano 0–150 bar', 'Multimètre', 'Fluide DA'],
     etudePrelim: [
       { q: 'Listez deux avantages de la direction assistée électrique (DAE) par rapport à l\'hydraulique.', r: '1. Économie de carburant (pas de pompe entraînée en permanence). 2. Possibilité d\'assistances variables et de fonctions avancées (parking auto, maintien de voie).', type: 'text' },
@@ -625,7 +625,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h30',
     titre: 'T 307 • Diagnostic BV robotisée',
     situation: 'Les vitesses passent mal sur une boîte robotisée : passages lents, à-coups, ou blocage sur un rapport. Vous devez diagnostiquer le système de commande électro-hydraulique et effectuer les apprentissages nécessaires.',
-    objectif: 'Lire paramètres, tester actionneurs, réaliser apprentissages et valider passages. (Compétences C3.2, C3.4)',
+    objectif: 'Lire paramètres, tester actionneurs, réaliser apprentissages et valider passages. (Compétence C3.4)',
     materiel: ['Valise constructeur', 'Multimètre', 'Schéma BV robotisée', 'EPIs'],
     etudePrelim: [
       { q: 'Quelle est la différence majeure entre une boîte robotisée et une boîte automatique classique à convertisseur ?', r: 'La boîte robotisée est une boîte manuelle sur laquelle des actionneurs électro-hydrauliques gèrent l\'embrayage et le passage des rapports. La boîte auto a un convertisseur de couple hydraulique et des trains épicycloïdaux.', type: 'text' },
