@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
@@ -342,7 +343,7 @@ export default function StudentDetailPage() {
     }
     
     const competenceRegex = /\(Compétence (C\d\.\d)\)/;
-    const evaluatedCompetence = selectedTp?.objectif.match(competenceRegex)?.[1];
+    const evaluatedCompetenceId = selectedTp?.objectif.match(competenceRegex)?.[1] || null;
 
     if (!studentName || !students.some(s => s.name === studentName)) {
         return (
@@ -414,10 +415,10 @@ export default function StudentDetailPage() {
                             <div className="flex justify-between items-center">
                                 <div>
                                     <CardTitle className="flex items-center gap-2"><CheckSquare />Grille d'évaluation pour le TP {selectedTp.id}: <span className="text-accent">{selectedTp.titre}</span></CardTitle>
-                                    {evaluatedCompetence && (
+                                    {evaluatedCompetenceId && (
                                         <CardDescription className="mt-2">
                                             <Badge variant="outline" className="border-accent text-accent font-semibold">
-                                                Compétence évaluée : {evaluatedCompetence}
+                                                Compétence principalement évaluée : {evaluatedCompetenceId}
                                             </Badge>
                                         </CardDescription>
                                     )}
@@ -432,30 +433,41 @@ export default function StudentDetailPage() {
                                         {bloc.title}
                                     </h3>
                                     <div className="border border-t-0 border-primary/30 rounded-b-md p-4 space-y-2 bg-card">
-                                        {Object.entries(bloc.items).map(([id, description]: [string, any]) => (
-                                            <div key={id} className="flex items-center justify-between p-3 bg-background/50 rounded-md">
-                                                <div className="flex items-baseline gap-4">
-                                                    <span className="font-mono text-accent font-bold">{id}:</span>
-                                                    <p>{description}</p>
+                                        {Object.entries(bloc.items).map(([id, description]: [string, any]) => {
+                                            const isMainCompetence = id === evaluatedCompetenceId;
+                                            return (
+                                                <div 
+                                                    key={id} 
+                                                    className={cn(
+                                                        "flex items-center justify-between p-3 rounded-md transition-all",
+                                                        isMainCompetence 
+                                                            ? "bg-accent/10 border-l-4 border-accent" 
+                                                            : "bg-background/50"
+                                                    )}
+                                                >
+                                                    <div className="flex items-baseline gap-4">
+                                                        <span className="font-mono text-accent font-bold">{id}:</span>
+                                                        <p>{description}</p>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        {evaluationLevels.map(level => (
+                                                            <Button
+                                                                key={level}
+                                                                variant={currentEvaluations[id] === level ? 'default' : 'outline'}
+                                                                size="sm"
+                                                                className={cn(
+                                                                    "font-mono w-12",
+                                                                    currentEvaluations[id] === level && 'bg-accent text-accent-foreground border-accent'
+                                                                )}
+                                                                onClick={() => handleEvaluationChange(id, level)}
+                                                            >
+                                                                {level}
+                                                            </Button>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    {evaluationLevels.map(level => (
-                                                        <Button
-                                                            key={level}
-                                                            variant={currentEvaluations[id] === level ? 'default' : 'outline'}
-                                                            size="sm"
-                                                            className={cn(
-                                                                "font-mono w-12",
-                                                                currentEvaluations[id] === level && 'bg-accent text-accent-foreground border-accent'
-                                                            )}
-                                                            onClick={() => handleEvaluationChange(id, level)}
-                                                        >
-                                                            {level}
-                                                        </Button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )) : <p className="text-muted-foreground text-center py-8">Aucun bloc de compétences n'est défini pour ce niveau de TP.</p>}
@@ -472,5 +484,3 @@ export default function StudentDetailPage() {
         </div>
     );
 }
-
-    
