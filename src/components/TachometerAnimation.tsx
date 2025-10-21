@@ -1,9 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-
-// Engine sound URL - Switched from Base64 to a reliable remote URL
-const engineSound = "https://storage.googleapis.com/tfweb/test-dat/engine-sound.mp3";
+import React from 'react';
 
 const Tachometer = () => {
     return (
@@ -96,22 +93,12 @@ const Tachometer = () => {
 };
 
 export const TachometerAnimation = () => {
-    const audioRef = useRef<HTMLAudioElement>(null);
-
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = 0.5;
-            audioRef.current.play().catch(error => console.error("Audio play failed:", error));
-        }
-    }, []);
-
     return (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-sm animate-fade-in">
              <div className="w-full max-w-sm">
                 <Tachometer />
             </div>
             <p className="mt-4 font-headline text-2xl tracking-widest text-accent animate-pulse">ACCÈS AUTORISÉ</p>
-            <audio ref={audioRef} src={engineSound} preload="auto" />
             <style jsx>{`
                 @keyframes fade-in {
                     from { opacity: 0; }
