@@ -23,7 +23,7 @@ export default function TutorialPage() {
             <section className="text-center">
                 <h2 className="font-headline text-5xl tracking-wide text-accent">Bienvenue sur Horizon Bacpro</h2>
                 <p className="text-muted-foreground text-lg mt-4 max-w-4xl mx-auto">
-                    Conçue par <strong>Hamed BEGHENNOU</strong>, Horizon Bacpro est votre plateforme tout-en-un pour le suivi des compétences en maintenance automobile. Le nom "Horizon Bacpro" a été choisi pour évoquer la progression, l'avenir et le parcours de formation des élèves. Choisissez votre profil pour démarrer.
+                    Conçue par des enseignants en maintenance des véhicules, Horizon Bacpro est votre plateforme tout-en-un pour le suivi des compétences en maintenance automobile. Le nom "Horizon Bacpro" a été choisi pour évoquer la progression, l'avenir et le parcours de formation des élèves. Choisissez votre profil pour démarrer.
                 </p>
             </section>
 
