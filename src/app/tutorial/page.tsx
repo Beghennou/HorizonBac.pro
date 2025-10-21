@@ -40,7 +40,7 @@ export default function TutorialPage() {
                         <CardTitle className="flex items-center gap-2"><BookCopy className="text-accent"/>Assignation des TP</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p>Assignez des travaux pratiques (TPs) à vos élèves en quelques clics. Sélectionnez une ou plusieurs personnes et choisissez un TP dans la liste correspondant à leur niveau.</p>
+                        <p>Assignez des travaux pratiques (TP) à vos élèves en quelques clics. Sélectionnez une ou plusieurs personnes et choisissez un TP dans la liste correspondant à leur niveau.</p>
                     </CardContent>
                 </Card>
                  <Card>
@@ -75,7 +75,7 @@ export default function TutorialPage() {
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2">
-                        <AccordionTrigger className="text-xl font-headline">2. Assignation des Travaux Pratiques (TPs)</AccordionTrigger>
+                        <AccordionTrigger className="text-xl font-headline">2. Assignation des Travaux Pratiques (TP)</AccordionTrigger>
                         <AccordionContent className="text-base text-muted-foreground p-4">
                             <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <strong>Élèves</strong> :</p>
                             <ul className="list-disc pl-6 space-y-2">

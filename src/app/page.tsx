@@ -43,7 +43,7 @@ export default function Home() {
           </CardHeader>
           <CardContent>
              <Button asChild size="lg" className="w-full font-headline uppercase tracking-wider text-base border-accent text-accent" variant="outline">
-              <Link href="/student">Consulter mes TPs</Link>
+              <Link href="/student/select">Consulter mes TP</Link>
             </Button>
           </CardContent>
         </Card>

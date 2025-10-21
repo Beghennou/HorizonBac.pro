@@ -159,7 +159,7 @@ export default function StudentsPage() {
                               </div>
                               {studentAssignedTps.length > 0 && (
                                   <div>
-                                      <p className="text-xs text-muted-foreground text-center mb-2">TPs Assignés</p>
+                                      <p className="text-xs text-muted-foreground text-center mb-2">TP Assignés</p>
                                       <div className="flex flex-wrap gap-2 justify-center">
                                           {studentAssignedTps.map(tpId => {
                                                const tp = getTpsByNiveau(level).find(t => t.id === tpId);
