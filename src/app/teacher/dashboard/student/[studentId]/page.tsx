@@ -383,7 +383,7 @@ export default function StudentDetailPage() {
 
             {selectedTp && (
                 <>
-                    {selectedTp.id >= 301 && prelimAnswers[studentName]?.[selectedTp.id] && (
+                    {(selectedTp.id >= 1) && prelimAnswers[studentName]?.[selectedTp.id] && (
                         <PrelimCorrection 
                             tp={selectedTp} 
                             studentAnswers={prelimAnswers[studentName][selectedTp.id]}
