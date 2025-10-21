@@ -44,7 +44,7 @@ export const tpSeconde: Record<number, TP> = {
         duree: '2h00',
         titre: 'Sécurité et Organisation du Poste de Travail',
         situation: 'Un nouveau mécanicien intègre l\'équipe. Avant sa première intervention, le chef d\'atelier lui demande de préparer son poste et de réviser les règles de sécurité fondamentales.',
-        objectif: 'Organiser son espace de travail de manière sûre et efficace, en identifiant les risques et en utilisant les Équipements de Protection Individuelle (EPI). (Compétence C1.1)',
+        objectif: 'Organiser son espace de travail de manière sûre et efficace, en identifiant les risques et en utilisant les Équipements de Protection Individuelle (EPI). (Compétences C1.1, C1.4)',
         materiel: ['Bleu de travail', 'Chaussures de sécurité', 'Lunettes de protection', 'Gants', 'Chariot à outils', 'Extincteur (localisation)', 'Zone de tri des déchets'],
         etudePrelim: [],
         activitePratique: [
@@ -199,7 +199,7 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h00',
         titre: 'Découverte du Poste de Conduite et des Témoins',
         situation: 'Un client vient de récupérer son véhicule après une longue immobilisation et s\'interroge sur la signification des différents témoins lumineux qui apparaissent au tableau de bord.',
-        objectif: 'Identifier toutes les commandes usuelles et interpréter correctement les témoins d\'alerte pour informer et rassurer le client. (Compétence C1.4)',
+        objectif: 'Identifier toutes les commandes usuelles et interpréter correctement les témoins d\'alerte pour informer et rassurer le client. (Compétences C1.1, C1.4)',
         materiel: ['Véhicule en état de fonctionnement', 'Manuel utilisateur du constructeur', 'Fiche de relevé des témoins', 'Stylo'],
         etudePrelim: [],
         activitePratique: [
@@ -243,7 +243,7 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h00',
         titre: 'Contrôle des Niveaux et Appoint des Fluides',
         situation: 'Lors d\'une réception véhicule pour un entretien courant, vous devez effectuer les contrôles systématiques des niveaux des différents fluides du compartiment moteur selon la check-list atelier.',
-        objectif: 'Identifier les anomalies et réaliser les ajustements. (Compétence C1.2)',
+        objectif: 'Identifier les anomalies et réaliser les ajustements. (Compétences C1.1, C1.2, C1.3, C1.4)',
         materiel: ['Liquide de refroidissement spécifié', 'Produit lave-glace concentré', 'Liquide de frein DOT4 ou 5.1', 'Entonnoirs de différentes tailles', 'Chiffons propres non pelucheux'],
         etudePrelim: [],
         activitePratique: [
@@ -289,7 +289,7 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h45',
         titre: 'Contrôle et Remplacement des Ampoules',
         situation: 'Un client a été alerté par les forces de l\'ordre d\'un feu stop défectueux. Il demande un contrôle complet de l\'éclairage et le remplacement de toutes les ampoules nécessaires.',
-        objectif: 'Identifier et remplacer les ampoules défectueuses. (Compétence C1.2)',
+        objectif: 'Identifier et remplacer les ampoules défectueuses. (Compétences C1.1, C1.2, C1.3)',
         materiel: ['Jeu d\'ampoules de rechange variées', 'Tournevis adaptés', 'Chiffon microfibre propre', 'Gants de protection', 'Assistant pour les tests'],
         etudePrelim: [],
         activitePratique: [
@@ -338,7 +338,7 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h00',
         titre: 'Contrôle et Remplacement des Balais d\'Essuie-Glace',
         situation: 'Un client se plaint d\'une mauvaise visibilité sous la pluie, avec des traces laissées par les essuie-glaces. Un remplacement est nécessaire avant un long trajet.',
-        objectif: 'Réaliser le remplacement des balais d\'essuie-glace et conseiller le client. (Compétence C1.3)',
+        objectif: 'Réaliser le remplacement des balais d\'essuie-glace et conseiller le client. (Compétences C1.1, C1.3)',
         materiel: ['Jeu de balais neufs', 'Chiffon', 'Produit de nettoyage vitre'],
         etudePrelim: [],
         activitePratique: [
@@ -375,7 +375,7 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h30',
         titre: 'Contrôle de l\'État et de la Pression des Pneus',
         situation: 'Dans le cadre d\'une révision systématique, vous devez contrôler l\'ensemble des pneumatiques du véhicule, y compris la roue de secours.',
-        objectif: 'Identifier les anomalies d\'usure et de pression et y remédier. (Compétence C1.3)',
+        objectif: 'Identifier les anomalies d\'usure et de pression et y remédier. (Compétences C1.2, C1.3)',
         materiel: ['Manomètre de pression', 'Jauge de profondeur', 'Documentation technique (pressions préconisées)'],
         etudePrelim: [],
         activitePratique: [
@@ -413,7 +413,7 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h30',
         titre: 'Vidange Huile Moteur et Remplacement du Filtre',
         situation: 'Un véhicule se présente pour sa vidange annuelle. Vous devez effectuer l\'opération en respectant les procédures, le type d\'huile et le recyclage des déchets.',
-        objectif: 'Réaliser une vidange moteur dans les règles de l\'art. (Compétence C1.4)',
+        objectif: 'Réaliser une vidange moteur dans les règles de l\'art. (Compétences C1.2, C1.4)',
         materiel: ['Huile moteur préconisée', 'Filtre à huile neuf', 'Joint de vidange neuf', 'Clé à filtre', 'Récupérateur d\'huile usagée', 'Clé dynamométrique'],
         etudePrelim: [],
         activitePratique: [
@@ -453,7 +453,7 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h00',
         titre: 'Contrôle et Remplacement du Filtre à Air',
         situation: 'Lors d\'un entretien, vous devez vérifier l\'état du filtre à air et le remplacer si nécessaire pour garantir une bonne respiration du moteur.',
-        objectif: 'Évaluer l\'état du filtre à air et le remplacer si besoin. (Compétence C1.3)',
+        objectif: 'Évaluer l\'état du filtre à air et le remplacer si besoin. (Compétences C1.2, C1.3, C1.4)',
         materiel: ['Filtre à air neuf', 'Soufflette (optionnel, pour nettoyage boîtier)', 'Tournevis ou clés adaptés'],
         etudePrelim: [],
         activitePratique: [
@@ -485,5 +485,8 @@ export const tpSeconde: Record<number, TP> = {
         ]
     }
 };
+
+    
+
 
     

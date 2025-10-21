@@ -335,15 +335,15 @@ export default function StudentDetailPage() {
     if (selectedTp) {
         if (selectedTp.id >= 301) { // Terminale
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_3')));
-        } else if (selectedTp.id >= 101) { // Seconde
-            currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_1')));
-        } else { // Premiere
+        } else if (selectedTp.id >= 1) { // Premiere
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_2')));
+        }
+        if (selectedTp.id >= 101 && selectedTp.id < 301) { // Seconde
+             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_1')));
         }
     }
     
-    const competenceRegex = /\(Compétence (C\d\.\d)\)/;
-    const evaluatedCompetenceId = selectedTp?.objectif.match(competenceRegex)?.[1] || null;
+    const evaluatedCompetenceIds = selectedTp?.objectif.match(/C\d\.\d/g) || [];
 
     if (!studentName || !students.some(s => s.name === studentName)) {
         return (
@@ -363,6 +363,8 @@ export default function StudentDetailPage() {
             saveFeedback(studentName, selectedTpId, feedback, 'teacher');
         }
     }
+
+    const hasPrelimAnswers = selectedTp && prelimAnswers[studentName]?.[selectedTp.id] && Object.keys(prelimAnswers[studentName][selectedTp.id]).length > 0;
 
     return (
         <div className="space-y-6">
@@ -400,7 +402,7 @@ export default function StudentDetailPage() {
 
             {selectedTp && (
                 <>
-                    {(selectedTp.id >= 1) && prelimAnswers[studentName]?.[selectedTp.id] && (
+                    {hasPrelimAnswers && (
                         <PrelimCorrection 
                             tp={selectedTp} 
                             studentAnswers={prelimAnswers[studentName][selectedTp.id]}
@@ -415,11 +417,14 @@ export default function StudentDetailPage() {
                             <div className="flex justify-between items-center">
                                 <div>
                                     <CardTitle className="flex items-center gap-2"><CheckSquare />Grille d'évaluation pour le TP {selectedTp.id}: <span className="text-accent">{selectedTp.titre}</span></CardTitle>
-                                    {evaluatedCompetenceId && (
-                                        <CardDescription className="mt-2">
-                                            <Badge variant="outline" className="border-accent text-accent font-semibold">
-                                                Compétence principalement évaluée : {evaluatedCompetenceId}
-                                            </Badge>
+                                    {evaluatedCompetenceIds.length > 0 && (
+                                        <CardDescription className="mt-2 flex gap-2 flex-wrap">
+                                            <span className="font-semibold">Compétences évaluées :</span>
+                                            {evaluatedCompetenceIds.map(id => (
+                                                <Badge key={id} variant="outline" className="border-accent text-accent font-semibold">
+                                                    {id}
+                                                </Badge>
+                                            ))}
                                         </CardDescription>
                                     )}
                                 </div>
@@ -434,7 +439,7 @@ export default function StudentDetailPage() {
                                     </h3>
                                     <div className="border border-t-0 border-primary/30 rounded-b-md p-4 space-y-2 bg-card">
                                         {Object.entries(bloc.items).map(([id, description]: [string, any]) => {
-                                            const isMainCompetence = id === evaluatedCompetenceId;
+                                            const isMainCompetence = evaluatedCompetenceIds.includes(id);
                                             return (
                                                 <div 
                                                     key={id} 
@@ -484,3 +489,5 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+
+    
