@@ -9,7 +9,7 @@ import { Bot, Send, Loader2 } from 'lucide-react';
 import { guideStudent, GuideStudentOutput } from '@/ai/flows/tp-assistant';
 
 const EtapeCard = ({ etape, index }: { etape: Etape; index: number }) => (
-  <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50">
+  <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
     <h4 className="font-headline text-lg text-accent">
       Étape {index + 1}: {etape.titre}{' '}
       <span className="text-sm text-muted-foreground font-body">({etape.duree})</span>
@@ -138,6 +138,33 @@ export default function TPPage() {
 
         <Card>
           <CardHeader>
+              <CardTitle>Matériel Requis</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+              {tp.materiel.map((item, i) => (
+                  <span key={i} className="bg-muted text-muted-foreground text-sm font-medium px-3 py-1 rounded-full">{item}</span>
+              ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Étude Préliminaire</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {tp.etudePrelim.map((item, i) => (
+                    <div key={i}>
+                        <p><strong>Q{i+1}:</strong> {item.q}</p>
+                        <div className="border-l-2 border-dashed border-accent/50 pl-4 ml-4 mt-2">
+                            <Textarea placeholder="Votre réponse..." className="bg-background/50" />
+                        </div>
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>Activité Pratique</CardTitle>
           </CardHeader>
           <CardContent>
@@ -145,6 +172,26 @@ export default function TPPage() {
               <EtapeCard key={i} etape={etape} index={i} />
             ))}
           </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Points Clés &amp; Sécurité</CardTitle>
+            </CardHeader>
+            <CardContent className="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 className="font-bold text-accent mb-2">Points Clés</h4>
+                    <ul className="list-disc pl-5 space-y-1">
+                        {tp.pointsCles.map((pt, i) => <li key={i}>{pt}</li>)}
+                    </ul>
+                </div>
+                 <div>
+                    <h4 className="font-bold text-destructive mb-2">Sécurité</h4>
+                    <ul className="list-disc pl-5 space-y-1">
+                        {tp.securiteRangement.map((sec, i) => <li key={i}>{sec}</li>)}
+                    </ul>
+                </div>
+            </CardContent>
         </Card>
       </div>
       <div className="md:col-span-1">
