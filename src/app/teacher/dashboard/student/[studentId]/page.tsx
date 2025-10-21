@@ -399,7 +399,7 @@ export default function StudentDetailPage() {
 
             {selectedTp && (
                 <>
-                    {((selectedTp.id >= 1 && selectedTp.id < 101) || (selectedTp.id >= 301)) && prelimAnswers[studentName]?.[selectedTp.id] && (
+                    {(selectedTp.id >= 1) && prelimAnswers[studentName]?.[selectedTp.id] && (
                         <PrelimCorrection 
                             tp={selectedTp} 
                             studentAnswers={prelimAnswers[studentName][selectedTp.id]}
@@ -472,3 +472,5 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+
+    
