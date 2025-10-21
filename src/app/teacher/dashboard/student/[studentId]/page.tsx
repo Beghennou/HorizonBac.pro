@@ -6,9 +6,11 @@ import { getTpById, allBlocs, TP } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, CheckSquare, Users, Save, Mail } from 'lucide-react';
+import { User, CheckSquare, Save, Mail, Bot, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { analyzeSkillGaps, SkillGapAnalysisOutput } from '@/ai/flows/skill-gap-analysis';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 const evaluationLevels: EvaluationStatus[] = ['NA', 'EC', 'A', 'M'];
@@ -37,6 +39,88 @@ const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: stri
             <Mail className="mr-2 h-4 w-4" />
             Renvoyer le TP par E-mail
         </Button>
+    );
+};
+
+const AiAnalysisHub = ({ studentName, evaluations }: { studentName: string, evaluations: Record<string, EvaluationStatus> }) => {
+    const [analysisResult, setAnalysisResult] = useState<SkillGapAnalysisOutput | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleAnalysis = async () => {
+        setIsLoading(true);
+        setAnalysisResult(null);
+        try {
+            const competenceMap: Record<string, string> = {};
+            Object.values(allBlocs).forEach(bloc => {
+                Object.assign(competenceMap, bloc.items);
+            });
+
+            const result = await analyzeSkillGaps({
+                studentName,
+                evaluationData: JSON.stringify(evaluations),
+                competenceMap: JSON.stringify(competenceMap),
+            });
+            setAnalysisResult(result);
+        } catch (error) {
+            console.error("AI analysis failed", error);
+            setAnalysisResult({
+                identifiedSkillGaps: ["Erreur lors de l'analyse."],
+                suggestedLearningPaths: "L'analyse par l'IA n'a pas pu être complétée. Veuillez réessayer plus tard.",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline" size="sm" onClick={handleAnalysis}>
+                    <Bot className="mr-2 h-4 w-4" />
+                    Analyser les compétences (IA)
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 font-headline text-2xl text-accent">
+                        <Bot /> Hub d'Analyse IA pour {studentName}
+                    </DialogTitle>
+                    <DialogDescription>
+                        L'IA identifie les lacunes de compétences et suggère des pistes de progression personnalisées.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="py-4 space-y-6">
+                    {isLoading && (
+                        <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                            <span>Analyse en cours...</span>
+                        </div>
+                    )}
+                    {analysisResult && (
+                        <>
+                            <div>
+                                <h3 className="font-headline text-lg text-primary mb-2">Lacunes Identifiées</h3>
+                                {analysisResult.identifiedSkillGaps.length > 0 ? (
+                                    <ul className="list-disc pl-5 space-y-1 text-foreground/90">
+                                        {analysisResult.identifiedSkillGaps.map((gap, index) => (
+                                            <li key={index}>{gap}</li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-muted-foreground">Aucune lacune majeure identifiée. Bravo !</p>
+                                )}
+                            </div>
+                            <div>
+                                <h3 className="font-headline text-lg text-accent mb-2">Pistes de Progression Suggérées</h3>
+                                <p className="text-foreground/90 bg-background/50 p-4 rounded-md border border-primary/20">
+                                    {analysisResult.suggestedLearningPaths}
+                                </p>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 
@@ -156,9 +240,12 @@ export default function StudentDetailPage() {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-3 font-headline">
-                        <CheckSquare /> Dossier d'évaluation de : <span className="text-accent">{studentName}</span>
-                    </CardTitle>
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="flex items-center gap-3 font-headline">
+                          <User className="w-6 h-6 text-primary" /> Dossier d'évaluation de : <span className="text-accent">{studentName}</span>
+                      </CardTitle>
+                      <AiAnalysisHub studentName={studentName} evaluations={savedEvaluations[studentName] || {}} />
+                    </div>
                 </CardHeader>
                 <CardContent>
                     {studentTps.length > 0 ? (
@@ -187,7 +274,7 @@ export default function StudentDetailPage() {
                 <Card>
                     <CardHeader>
                         <div className="flex justify-between items-center">
-                            <CardTitle>Grille d'évaluation pour le TP {selectedTp.id}: <span className="text-accent">{selectedTp.titre}</span></CardTitle>
+                            <CardTitle className="flex items-center gap-2"><CheckSquare />Grille d'évaluation pour le TP {selectedTp.id}: <span className="text-accent">{selectedTp.titre}</span></CardTitle>
                             <SendEmailButton tp={selectedTp} studentName={studentName} />
                         </div>
                     </CardHeader>
@@ -237,3 +324,4 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+```
