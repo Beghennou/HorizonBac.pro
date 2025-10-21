@@ -1,8 +1,20 @@
 import { tpSeconde, TP as TPSeconde } from './tp-seconde';
 import { tpPremiere, TP as TPPremiere } from './tp-premiere';
 import { tpTerminale, TP as TPTerminale } from './tp-terminale';
+import type { EtudePrelim as EtudePrelimSeconde } from './tp-seconde';
+import type { EtudePrelim as EtudePrelimPremiere } from './tp-premiere';
+import type { EtudePrelimQCM as EtudePrelimQCMTerminale, EtudePrelimText as EtudePrelimTextTerminale } from './tp-terminale';
 
-export type TP = TPSeconde | TPPremiere | TPTerminale; // Union des types de TP
+
+export type EtudePrelimQCM = EtudePrelimQCMTerminale;
+export type EtudePrelimText = EtudePrelimTextTerminale;
+
+export type Etape = TPSeconde['activitePratique'][0];
+export type EtudePrelim = EtudePrelimSeconde | EtudePrelimPremiere | EtudePrelimQCM | EtudePrelimText;
+
+export type TP = Omit<TPSeconde, 'etudePrelim'> & {
+    etudePrelim: EtudePrelim[];
+};
 
 export type Niveau = 'seconde' | 'premiere' | 'terminale';
 
@@ -26,15 +38,15 @@ export const competencesParNiveau: Record<Niveau, Record<string, CompetenceBloc>
 
 
 const allTPs: Record<number, TP> = {
-  ...tpSeconde,
-  ...tpPremiere,
-  ...tpTerminale,
+  ...(tpSeconde as Record<number, TP>),
+  ...(tpPremiere as Record<number, TP>),
+  ...(tpTerminale as Record<number, TP>),
 };
 
 const tpsByNiveau: Record<Niveau, TP[]> = {
-  seconde: Object.values(tpSeconde),
-  premiere: Object.values(tpPremiere),
-  terminale: Object.values(tpTerminale),
+  seconde: Object.values(tpSeconde) as TP[],
+  premiere: Object.values(tpPremiere) as TP[],
+  terminale: Object.values(tpTerminale) as TP[],
 };
 
 export const getTpsByNiveau = (niveau: Niveau): TP[] => {

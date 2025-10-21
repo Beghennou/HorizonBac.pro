@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import { getTpById, TP, Etape } from '@/lib/data-manager';
+import { getTpById, TP, Etape, EtudePrelimQCM, EtudePrelimText } from '@/lib/data-manager';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +10,8 @@ import { guideStudent, GuideStudentOutput } from '@/ai/flows/tp-assistant';
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Badge } from '@/components/ui/badge';
 import { CheckeredFlag } from '@/components/icons';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 const EtapeCard = ({ etape, index }: { etape: Etape; index: number }) => (
   <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
@@ -109,12 +111,18 @@ export default function TPPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { assignedTps, updateTpStatus } = useAssignments();
+  const { assignedTps, updateTpStatus, prelimAnswers, savePrelimAnswer } = useAssignments();
 
   const tpId = typeof params.tpId === 'string' ? parseInt(params.tpId, 10) : null;
   const tp = tpId ? getTpById(tpId) : null;
 
   const assignedTp = studentName && tpId ? assignedTps[studentName]?.find(t => t.id === tpId) : null;
+  
+  const handleAnswerChange = (qIndex: number, answer: string | string[]) => {
+      if (studentName && tpId) {
+          savePrelimAnswer(studentName, tpId, qIndex, answer);
+      }
+  }
 
   if (!tp) {
     return (
@@ -149,6 +157,9 @@ export default function TPPage() {
         updateTpStatus(studentName, tpId, 'terminé');
     }
   }
+  
+  const studentTpAnswers = (studentName && tpId && prelimAnswers[studentName]?.[tpId]) || {};
+
 
   return (
     <div className="grid md:grid-cols-3 gap-8 items-start">
@@ -200,13 +211,34 @@ export default function TPPage() {
             <CardHeader>
                 <CardTitle>Étude Préliminaire</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
                 {tp.etudePrelim.map((item, i) => (
-                    <div key={i}>
-                        <p><strong>Q{i+1}:</strong> {item.q}</p>
-                        <div className="border-l-2 border-dashed border-accent/50 pl-4 ml-4 mt-2">
-                            <Textarea placeholder="Votre réponse..." className="bg-background/50" />
-                        </div>
+                    <div key={i} className="p-4 border-l-2 border-accent/30 bg-background/50 rounded-r-lg">
+                        <p className="font-bold">Question {i+1}:</p>
+                        <p className="mb-4">{item.q}</p>
+                        
+                        {item.type === 'text' && (
+                            <Textarea 
+                                placeholder="Votre réponse..." 
+                                className="bg-card" 
+                                value={(studentTpAnswers[i] as string) || ''}
+                                onChange={(e) => handleAnswerChange(i, e.target.value)}
+                            />
+                        )}
+
+                        {item.type === 'qcm' && (
+                            <RadioGroup 
+                                value={(studentTpAnswers[i] as string) || ''} 
+                                onValueChange={(value) => handleAnswerChange(i, value)}
+                            >
+                                {(item as EtudePrelimQCM).options.map((option, optIndex) => (
+                                    <div key={optIndex} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
+                                        <RadioGroupItem value={option} id={`q${i}-opt${optIndex}`} />
+                                        <Label htmlFor={`q${i}-opt${optIndex}`} className="flex-1 cursor-pointer">{option}</Label>
+                                    </div>
+                                ))}
+                            </RadioGroup>
+                        )}
                     </div>
                 ))}
             </CardContent>

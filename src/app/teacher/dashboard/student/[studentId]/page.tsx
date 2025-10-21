@@ -2,16 +2,19 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
 import { useAssignments } from '@/contexts/AssignmentsContext';
-import { getTpById, allBlocs, TP } from '@/lib/data-manager';
+import { getTpById, allBlocs, TP, EtudePrelimQCM, EtudePrelimText } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, CheckSquare, Save, Mail, Bot, Loader2 } from 'lucide-react';
+import { User, CheckSquare, Save, Mail, Bot, Loader2, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { analyzeSkillGaps, SkillGapAnalysisOutput } from '@/ai/flows/skill-gap-analysis';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 const evaluationLevels: EvaluationStatus[] = ['NA', 'EC', 'A', 'M'];
@@ -125,6 +128,78 @@ const AiAnalysisHub = ({ studentName, evaluations }: { studentName: string, eval
     );
 };
 
+const PrelimCorrection = ({ tp, studentAnswers }: { tp: TP; studentAnswers: Record<number, string | string[]> }) => {
+    const [correction, setCorrection] = useState<{ score: number, total: number, details: boolean[] } | null>(null);
+
+    const handleCorrection = () => {
+        let score = 0;
+        const details = tp.etudePrelim.map((question, index) => {
+            const studentAnswer = studentAnswers[index];
+            if (studentAnswer === undefined) return false;
+
+            if (question.type === 'text') {
+                // For open questions, we consider it correct if answered. A real implementation would need NLP.
+                const isCorrect = (studentAnswer as string).trim() !== '';
+                if(isCorrect) score++;
+                return isCorrect;
+            } else if (question.type === 'qcm') {
+                const isCorrect = studentAnswer === question.r;
+                if(isCorrect) score++;
+                return isCorrect;
+            }
+            return false;
+        });
+
+        setCorrection({ score, total: tp.etudePrelim.length, details });
+    };
+
+    const getBorderColor = (isCorrect: boolean | undefined) => {
+        if (isCorrect === true) return 'border-green-500';
+        if (isCorrect === false) return 'border-destructive';
+        return 'border-accent/30';
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <div className="flex justify-between items-center">
+                    <CardTitle>Correction - Étude Préliminaire</CardTitle>
+                    <div className="flex items-center gap-4">
+                        {correction && (
+                            <div className="text-xl font-bold font-headline">
+                                Note: <span className="text-accent">{(correction.score / correction.total * 10).toFixed(1)} / 10</span>
+                            </div>
+                        )}
+                        <Button onClick={handleCorrection}><CheckSquare className="mr-2"/>Auto-correction</Button>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                {tp.etudePrelim.map((item, i) => {
+                     const studentAnswer = studentAnswers[i] || "Aucune réponse";
+                     const isCorrect = correction?.details[i];
+                     const correctAnswer = item.r;
+                    return (
+                        <div key={i} className={`p-4 border-l-4 bg-background/50 rounded-r-lg ${getBorderColor(isCorrect)}`}>
+                            <p className="font-bold">Question {i+1}: {item.q}</p>
+                            <div className="mt-2 pl-4">
+                                <p className="text-sm text-muted-foreground">Réponse de l'élève :</p>
+                                <p className="font-semibold italic">"{Array.isArray(studentAnswer) ? studentAnswer.join(', ') : studentAnswer}"</p>
+                                {correction && !isCorrect && (
+                                     <div className="mt-2">
+                                        <p className="text-sm text-green-400">Réponse attendue :</p>
+                                        <p className="font-semibold text-green-300 italic">"{correctAnswer}"</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )
+                })}
+            </CardContent>
+        </Card>
+    );
+};
+
 
 export default function StudentDetailPage() {
     const router = useRouter();
@@ -132,7 +207,7 @@ export default function StudentDetailPage() {
     const searchParams = useSearchParams();
     const params = useParams();
     const { toast } = useToast();
-    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation } = useAssignments();
+    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers } = useAssignments();
 
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     
@@ -200,7 +275,7 @@ export default function StudentDetailPage() {
     
     let currentBlocs: Record<string, any> = {};
     if (selectedTp) {
-        if (selectedTp.id >= 300) { // Terminale
+        if (selectedTp.id >= 1000) { // Terminale
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_3')));
         } else if (selectedTp.id >= 100) { // Seconde
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_1')));
@@ -257,67 +332,71 @@ export default function StudentDetailPage() {
             </Card>
 
             {selectedTp && (
-                <Card>
-                    <CardHeader>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <CardTitle className="flex items-center gap-2"><CheckSquare />Grille d'évaluation pour le TP {selectedTp.id}: <span className="text-accent">{selectedTp.titre}</span></CardTitle>
-                                {evaluatedCompetence && (
-                                    <CardDescription className="mt-2">
-                                        <Badge variant="outline" className="border-accent text-accent font-semibold">
-                                            Compétence évaluée : {evaluatedCompetence}
-                                        </Badge>
-                                    </CardDescription>
-                                )}
-                            </div>
-                            <SendEmailButton tp={selectedTp} studentName={studentName} />
-                        </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        {Object.keys(currentBlocs).length > 0 ? Object.values(currentBlocs).map((bloc: any) => (
-                            <div key={bloc.title}>
-                                <h3 className={cn("font-headline text-xl p-3 rounded-t-md", bloc.colorClass)}>
-                                    {bloc.title}
-                                </h3>
-                                <div className="border border-t-0 border-primary/30 rounded-b-md p-4 space-y-2 bg-card">
-                                    {Object.entries(bloc.items).map(([id, description]: [string, any]) => (
-                                        <div key={id} className="flex items-center justify-between p-3 bg-background/50 rounded-md">
-                                            <div className="flex items-baseline gap-4">
-                                                <span className="font-mono text-accent font-bold">{id}:</span>
-                                                <p>{description}</p>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                {evaluationLevels.map(level => (
-                                                    <Button
-                                                        key={level}
-                                                        variant={currentEvaluations[id] === level ? 'default' : 'outline'}
-                                                        size="sm"
-                                                        className={cn(
-                                                            "font-mono w-12",
-                                                            currentEvaluations[id] === level && 'bg-accent text-accent-foreground border-accent'
-                                                        )}
-                                                        onClick={() => handleEvaluationChange(id, level)}
-                                                    >
-                                                        {level}
-                                                    </Button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
+                <>
+                    {selectedTp.id >= 301 && prelimAnswers[studentName]?.[selectedTp.id] && (
+                        <PrelimCorrection tp={selectedTp} studentAnswers={prelimAnswers[studentName][selectedTp.id]} />
+                    )}
+
+                    <Card>
+                        <CardHeader>
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <CardTitle className="flex items-center gap-2"><CheckSquare />Grille d'évaluation pour le TP {selectedTp.id}: <span className="text-accent">{selectedTp.titre}</span></CardTitle>
+                                    {evaluatedCompetence && (
+                                        <CardDescription className="mt-2">
+                                            <Badge variant="outline" className="border-accent text-accent font-semibold">
+                                                Compétence évaluée : {evaluatedCompetence}
+                                            </Badge>
+                                        </CardDescription>
+                                    )}
                                 </div>
+                                <SendEmailButton tp={selectedTp} studentName={studentName} />
                             </div>
-                        )) : <p className="text-muted-foreground text-center py-8">Aucun bloc de compétences n'est défini pour ce niveau de TP.</p>}
-                    </CardContent>
-                    <CardFooter>
-                        <Button onClick={handleSave} className="ml-auto">
-                            <Save className="mr-2 h-4 w-4" />
-                            Enregistrer l'évaluation
-                        </Button>
-                    </CardFooter>
-                </Card>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            {Object.keys(currentBlocs).length > 0 ? Object.values(currentBlocs).map((bloc: any) => (
+                                <div key={bloc.title}>
+                                    <h3 className={cn("font-headline text-xl p-3 rounded-t-md", bloc.colorClass)}>
+                                        {bloc.title}
+                                    </h3>
+                                    <div className="border border-t-0 border-primary/30 rounded-b-md p-4 space-y-2 bg-card">
+                                        {Object.entries(bloc.items).map(([id, description]: [string, any]) => (
+                                            <div key={id} className="flex items-center justify-between p-3 bg-background/50 rounded-md">
+                                                <div className="flex items-baseline gap-4">
+                                                    <span className="font-mono text-accent font-bold">{id}:</span>
+                                                    <p>{description}</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    {evaluationLevels.map(level => (
+                                                        <Button
+                                                            key={level}
+                                                            variant={currentEvaluations[id] === level ? 'default' : 'outline'}
+                                                            size="sm"
+                                                            className={cn(
+                                                                "font-mono w-12",
+                                                                currentEvaluations[id] === level && 'bg-accent text-accent-foreground border-accent'
+                                                            )}
+                                                            onClick={() => handleEvaluationChange(id, level)}
+                                                        >
+                                                            {level}
+                                                        </Button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )) : <p className="text-muted-foreground text-center py-8">Aucun bloc de compétences n'est défini pour ce niveau de TP.</p>}
+                        </CardContent>
+                        <CardFooter>
+                            <Button onClick={handleSave} className="ml-auto">
+                                <Save className="mr-2 h-4 w-4" />
+                                Enregistrer l'évaluation
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </>
             )}
         </div>
     );
 }
-
-    
