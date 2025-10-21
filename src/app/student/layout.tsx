@@ -12,7 +12,7 @@ export default function StudentLayout({
       <div className="min-h-screen bg-background text-foreground">
         <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl">
           <div className="container flex h-20 items-center">
-            <Link href="/student/select" className="flex items-center gap-4 mr-6">
+            <Link href="/" className="flex items-center gap-4 mr-6">
               <div className="flex items-center justify-center w-12 h-12 rounded-md bg-gradient-to-br from-primary to-racing-orange border-2 border-accent">
                   <Logo className="w-7 h-7 text-white" />
               </div>
