@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload } from "lucide-react";
+import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus } from "lucide-react";
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Student } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,7 +25,7 @@ import Papa from 'papaparse';
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { students, classes, setStudents, setClasses, teacherName, setTeacherName, resetStudentData } = useAssignments();
+  const { students, classes, setStudents, setClasses, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass } = useAssignments();
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
@@ -39,6 +39,9 @@ export default function SettingsPage() {
   const [importClassName, setImportClassName] = useState('');
   const [newImportClassName, setNewImportClassName] = useState('');
 
+  const [deleteStudentClass, setDeleteStudentClass] = useState('');
+  const [studentToDelete, setStudentToDelete] = useState('');
+  const [classToDelete, setClassToDelete] = useState('');
 
   useEffect(() => {
     setLocalTeacherName(teacherName);
@@ -116,6 +119,19 @@ export default function SettingsPage() {
         });
     }
   };
+  
+  const handleDeleteStudent = () => {
+      if (!studentToDelete) return;
+      deleteStudent(studentToDelete);
+      setStudentToDelete('');
+      setDeleteStudentClass('');
+  }
+  
+  const handleDeleteClass = () => {
+      if (!classToDelete) return;
+      deleteClass(classToDelete);
+      setClassToDelete('');
+  }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -330,11 +346,97 @@ export default function SettingsPage() {
             </div>
         </CardContent>
       </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><UserMinus /> Gestion des données</CardTitle>
+          <CardDescription>Supprimez des élèves ou des classes entières de l'application.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div className="space-y-2">
+                    <Label htmlFor="delete-class-select">Classe</Label>
+                    <Select value={deleteStudentClass} onValueChange={setDeleteStudentClass}>
+                        <SelectTrigger id="delete-class-select">
+                            <SelectValue placeholder="Choisir une classe..."/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Object.keys(classes).sort().map(c => (
+                                <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="delete-student-select">Élève à supprimer</Label>
+                    <Select value={studentToDelete} onValueChange={setStudentToDelete} disabled={!deleteStudentClass}>
+                        <SelectTrigger id="delete-student-select">
+                            <SelectValue placeholder="Choisir un élève..."/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {(classes[deleteStudentClass] || []).sort().map(s => (
+                                <SelectItem key={s} value={s}>{s}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive" disabled={!studentToDelete}><UserMinus className="mr-2" /> Supprimer cet élève</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Êtes-vous sûr de vouloir supprimer l'élève <strong>{studentToDelete}</strong> ? Toutes ses données (TPs, évaluations) seront définitivement perdues.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDeleteStudent}>Supprimer</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div className="space-y-2 md:col-span-2">
+                     <Label htmlFor="delete-class-select-2">Classe à supprimer</Label>
+                      <Select value={classToDelete} onValueChange={setClassToDelete}>
+                        <SelectTrigger id="delete-class-select-2">
+                            <SelectValue placeholder="Choisir une classe..."/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Object.keys(classes).sort().map(c => (
+                                <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive" disabled={!classToDelete}><FolderMinus className="mr-2" /> Supprimer cette classe</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmer la suppression de la classe</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Êtes-vous sûr de vouloir supprimer la classe <strong>{classToDelete}</strong> ? Tous les élèves de cette classe et leurs données seront définitivement effacés. Cette action est irréversible.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDeleteClass}>Supprimer la classe</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
+        </CardContent>
+      </Card>
 
       <Card className="border-destructive">
           <CardHeader>
               <CardTitle className="flex items-center gap-2 text-destructive"><AlertTriangle/> Zone de danger</CardTitle>
-              <CardDescription>Ces actions sont irréversibles. Soyez certain avant de continuer.</CardDescription>
+              <CardDescription>Cette action est irréversible. Soyez certain avant de continuer.</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-between items-center">
               <p>Réinitialiser toutes les données des élèves (évaluations, TP assignés, etc.) mais conserver les classes vides.</p>

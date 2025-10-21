@@ -27,6 +27,8 @@ type AssignmentsContextType = {
   teacherName: string;
   setTeacherName: React.Dispatch<React.SetStateAction<string>>;
   resetStudentData: () => void;
+  deleteStudent: (studentName: string) => void;
+  deleteClass: (className: string) => void;
 };
 
 const AssignmentsContext = createContext<AssignmentsContextType | undefined>(undefined);
@@ -166,12 +168,70 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const deleteStudent = (studentName: string) => {
+    setStudents(prev => prev.filter(s => s.name !== studentName));
+    setClasses(prev => {
+      const newClasses = { ...prev };
+      for (const className in newClasses) {
+        newClasses[className] = newClasses[className].filter(name => name !== studentName);
+      }
+      return newClasses;
+    });
+    setAssignedTps(prev => {
+      const newAssignedTps = { ...prev };
+      delete newAssignedTps[studentName];
+      return newAssignedTps;
+    });
+    setEvaluations(prev => {
+        const newEvaluations = { ...prev };
+        delete newEvaluations[studentName];
+        return newEvaluations;
+    });
+    toast({
+        title: "Élève supprimé",
+        description: `${studentName} a été retiré de l'application.`,
+    });
+  };
+
+  const deleteClass = (className: string) => {
+    const studentsInClass = classes[className] || [];
+    
+    // Remove all students from that class
+    setStudents(prev => prev.filter(s => !studentsInClass.includes(s.name)));
+
+    // Remove the class itself
+    setClasses(prev => {
+        const newClasses = { ...prev };
+        delete newClasses[className];
+        return newClasses;
+    });
+    
+    // Remove data for each student in the class
+    studentsInClass.forEach(studentName => {
+        setAssignedTps(prev => {
+            const newAssignedTps = { ...prev };
+            delete newAssignedTps[studentName];
+            return newAssignedTps;
+        });
+        setEvaluations(prev => {
+            const newEvaluations = { ...prev };
+            delete newEvaluations[studentName];
+            return newEvaluations;
+        });
+    });
+
+    toast({
+        title: "Classe supprimée",
+        description: `La classe ${className} et tous ses élèves ont été supprimés.`,
+    });
+  };
+
   if (!isLoaded) {
     return null; // or a loading spinner
   }
 
   return (
-    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, assignTp, saveEvaluation, teacherName, setTeacherName, resetStudentData }}>
+    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, assignTp, saveEvaluation, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass }}>
       {children}
     </AssignmentsContext.Provider>
   );
