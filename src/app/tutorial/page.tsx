@@ -1,6 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight } from 'lucide-react';
+import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -27,7 +27,7 @@ export default function TutorialPage() {
                 </p>
             </section>
 
-            <Tabs defaultValue="enseignant" className="w-full max-w-4xl mx-auto">
+            <Tabs defaultValue="enseignant" className="w-full max-w-5xl mx-auto">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="enseignant" className="font-headline text-lg uppercase tracking-wider"><Users className="mr-2"/>Espace Enseignant</TabsTrigger>
                     <TabsTrigger value="eleve" className="font-headline text-lg uppercase tracking-wider"><GraduationCap className="mr-2"/>Espace Élève</TabsTrigger>
@@ -76,13 +76,13 @@ export default function TutorialPage() {
                                 <AccordionItem value="item-3">
                                     <AccordionTrigger className="text-xl font-headline">4. Évaluation et Suivi</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Le cœur du suivi se fait dans le dossier de l'élève :</p>
+                                        <p className="mb-4">Le cœur du suivi se fait dans le <strong>dossier de l'élève</strong>, accessible en cliquant sur sa carte depuis la page "Suivi des classes".</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li>Depuis la page "Suivi des Classes", cliquez sur un élève pour ouvrir son <strong>dossier personnel</strong>.</li>
-                                            <li>Dans son dossier, sélectionnez un TP assigné pour afficher la grille d'évaluation correspondante.</li>
-                                            <li>Évaluez chaque compétence (NA, EC, A, M). Les points d'expérience (XP) et la barre de progression se mettront à jour automatiquement.</li>
-                                            <li>Sauvegardez l'évaluation pour conserver la progression.</li>
-                                             <li>Vous pouvez envoyer ou renvoyer la fiche TP par e-mail directement depuis cette page.</li>
+                                            <li><strong>Sélectionnez un TP :</strong> Choisissez un TP assigné pour afficher la grille d'évaluation et les réponses de l'élève.</li>
+                                            <li><strong>Corrigez l'Étude Préliminaire :</strong> Si le TP en contient une, vous verrez les réponses de l'élève. Cliquez sur "Auto-correction" pour obtenir une note automatique. Vous pouvez ensuite **modifier cette note** si vous le souhaitez.</li>
+                                            <li><strong>Laissez un feedback :</strong> Vous verrez le commentaire de l'élève sur le TP et vous pourrez lui répondre dans le champ "Feedback de l'enseignant". Ce retour sera visible par l'élève.</li>
+                                            <li><strong>Évaluez les compétences :</strong> Remplissez la grille d'évaluation pour les compétences (NA, EC, A, M). L'expérience (XP) de l'élève se mettra à jour.</li>
+                                            <li><strong>Enregistrez :</strong> Cliquez sur "Enregistrer l'évaluation" pour sauvegarder la note, les feedbacks et les compétences. Le badge "Évalué" apparaîtra alors chez l'élève.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
@@ -107,7 +107,7 @@ export default function TutorialPage() {
                      <Card>
                         <CardHeader>
                             <CardTitle>Guide pour l'Élève</CardTitle>
-                            <CardDescription>Découvrez comment accéder à vos TPs et utiliser les outils à votre disposition.</CardDescription>
+                            <CardDescription>Découvrez comment accéder à tes TPs et utiliser les outils à ta disposition.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Accordion type="single" collapsible className="w-full">
@@ -124,13 +124,15 @@ export default function TutorialPage() {
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-2">
-                                    <AccordionTrigger className="text-xl font-headline">2. Consulter ses TPs</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">2. Réaliser un TP</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">Ton tableau de bord te montre tous les TPs que ton enseignant t'a assignés.</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li>Chaque TP a un statut : "Non commencé", "En cours" ou "Terminé".</li>
-                                            <li>Clique sur "Commencer le TP" pour ouvrir la fiche de travail.</li>
-                                            <li>Tu pourras voir tous les détails : objectif, matériel, étapes à suivre...</li>
+                                            <li>Chaque TP a un statut : "Non commencé", "En cours" ou "Terminé". Le badge **"Évalué"** apparaîtra une fois que ton professeur aura corrigé ton travail.</li>
+                                            <li>Clique sur "Commencer le TP". Le statut passe à "En cours".</li>
+                                            <li>Si le TP a une **Étude Préliminaire**, réponds aux questions (QCM ou texte) directement sur la page. Tes réponses sont sauvegardées automatiquement.</li>
+                                            <li>Laisse un commentaire sur le TP dans la section <MessageSquare className="inline h-4 w-4" /> **Commentaire sur le TP** pour partager tes impressions ou difficultés avec ton enseignant.</li>
+                                            <li>Une fois le travail pratique terminé, clique sur "Terminer le TP". Ton professeur sera notifié.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
@@ -142,6 +144,16 @@ export default function TutorialPage() {
                                             <li>Sur la page du TP, tu trouveras un encadré "Assistant Pédagogique IA".</li>
                                             <li>Pose ta question dans la zone de texte. Par exemple : "Je ne comprends pas l'étape 3".</li>
                                             <li>L'assistant te donnera un indice ou te posera une question pour te guider, **sans jamais donner la réponse directe**.</li>
+                                        </ul>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="item-4">
+                                    <AccordionTrigger className="text-xl font-headline">4. Consulter son Feedback</AccordionTrigger>
+                                    <AccordionContent className="text-base text-muted-foreground p-4">
+                                        <p className="mb-4">Une fois que ton enseignant a évalué ton TP :</p>
+                                        <ul className="list-disc pl-6 space-y-2">
+                                            <li>Le badge **"Évalué"** apparaîtra sur la carte du TP.</li>
+                                            <li>Retourne sur la page du TP pour lire le **feedback personnalisé** que ton enseignant t'a laissé. C'est un excellent moyen de progresser !</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
