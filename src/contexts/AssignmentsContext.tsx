@@ -36,6 +36,7 @@ type AssignmentsContextType = {
   resetStudentData: () => void;
   deleteStudent: (studentName: string) => void;
   deleteClass: (className: string) => void;
+  updateClassWithCsv: (className: string, studentNames: string[]) => void;
 };
 
 const AssignmentsContext = createContext<AssignmentsContextType | undefined>(undefined);
@@ -244,13 +245,58 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         description: `La classe ${className} et tous ses élèves ont été supprimés.`,
     });
   };
+  
+  const updateClassWithCsv = (className: string, studentNames: string[]) => {
+    setClasses(prevClasses => {
+      const updatedClasses = { ...prevClasses };
+
+      // Remove students from their old classes
+      Object.keys(updatedClasses).forEach(key => {
+        updatedClasses[key] = updatedClasses[key].filter(name => !studentNames.includes(name));
+      });
+
+      // Add students to the new class
+      updatedClasses[className] = studentNames;
+      return updatedClasses;
+    });
+
+    setStudents(prevStudents => {
+      const existingStudentNames = new Set(prevStudents.map(s => s.name));
+      const studentsToAdd: Student[] = [];
+
+      studentNames.forEach(name => {
+        if (!existingStudentNames.has(name)) {
+          const nameParts = name.split(' ');
+          const lastName = nameParts[0] || '';
+          const firstName = nameParts.slice(1).join(' ') || 'Prénom';
+
+          const newStudent: Student = {
+            id: `student-${Date.now()}-${Math.random()}`,
+            name: name,
+            email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`,
+            progress: 0,
+            xp: 0,
+          };
+          studentsToAdd.push(newStudent);
+        }
+      });
+      
+      return [...prevStudents, ...studentsToAdd];
+    });
+    
+    toast({
+      title: "Classe mise à jour",
+      description: `La classe ${className} a été mise à jour avec ${studentNames.length} élèves. Les données des élèves existants sont conservées.`,
+    });
+  };
+
 
   if (!isLoaded) {
     return null;
   }
 
   return (
-    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, assignTp, saveEvaluation, updateTpStatus, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass }}>
+    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, assignTp, saveEvaluation, updateTpStatus, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv }}>
       {children}
     </AssignmentsContext.Provider>
   );

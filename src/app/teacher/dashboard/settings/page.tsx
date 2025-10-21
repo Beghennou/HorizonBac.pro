@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus } from "lucide-react";
+import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight } from "lucide-react";
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Student } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -23,9 +23,58 @@ import {
 } from "@/components/ui/alert-dialog";
 import Papa from 'papaparse';
 
+const CsvImportSection = ({ title, onImport }: { title: string, onImport: (studentNames: string[]) => void }) => {
+    const { toast } = useToast();
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        Papa.parse(file, {
+            header: false,
+            skipEmptyLines: true,
+            complete: (results) => {
+                const studentNames = results.data
+                    .map((row: any) => typeof row === 'string' ? row.trim() : (row[0] || '').trim())
+                    .filter(name => name !== '');
+                
+                if (studentNames.length > 0) {
+                    onImport(studentNames);
+                } else {
+                    toast({
+                        variant: "destructive",
+                        title: "Fichier CSV vide ou invalide",
+                        description: "Aucun nom d'élève n'a été trouvé dans le fichier.",
+                    });
+                }
+            },
+            error: (error: any) => {
+                toast({
+                    variant: "destructive",
+                    title: "Erreur de lecture du CSV",
+                    description: "Impossible de lire le fichier. Veuillez vérifier son format.",
+                });
+            }
+        });
+        event.target.value = ''; // Reset file input
+    };
+
+    return (
+        <div className="flex items-center gap-4">
+            <Label className="flex-1 font-bold">{title}</Label>
+            <Button asChild variant="outline" className="w-48">
+                <label className="cursor-pointer">
+                    <Upload className="mr-2" /> Importer CSV
+                    <Input type="file" accept=".csv" className="sr-only" onChange={handleFileUpload} />
+                </label>
+            </Button>
+        </div>
+    );
+};
+
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { students, classes, setStudents, setClasses, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass } = useAssignments();
+  const { students, classes, setStudents, setClasses, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv } = useAssignments();
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
@@ -42,6 +91,10 @@ export default function SettingsPage() {
   const [deleteStudentClass, setDeleteStudentClass] = useState('');
   const [studentToDelete, setStudentToDelete] = useState('');
   const [classToDelete, setClassToDelete] = useState('');
+
+  const [newSecondeClassName, setNewSecondeClassName] = useState('2MV_NEW');
+  const [newPremiereClassName, setNewPremiereClassName] = useState('1VP_NEW');
+  const [newTerminaleClassName, setNewTerminaleClassName] = useState('TVP_NEW');
 
   useEffect(() => {
     setLocalTeacherName(teacherName);
@@ -233,9 +286,31 @@ export default function SettingsPage() {
       <div>
         <h1 className="font-headline text-4xl lg:text-5xl tracking-wide">Paramètres &amp; Configuration</h1>
         <p className="text-muted-foreground mt-2">
-          Gérez les paramètres de l'application, ajoutez de nouveaux élèves et importez des listes.
+          Gérez les paramètres de l'application, ajoutez de nouveaux élèves et mettez à jour les classes pour la nouvelle année.
         </p>
       </div>
+
+       <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><ChevronsRight /> Mise à Jour Annuelle des Classes</CardTitle>
+          <CardDescription>Importez les listes CSV pour chaque niveau. Les élèves existants seront déplacés dans leur nouvelle classe et leurs données (évaluations, TPs) seront conservées. Les nouveaux élèves seront créés automatiquement.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                <Input value={newSecondeClassName} onChange={(e) => setNewSecondeClassName(e.target.value)} placeholder="Nom classe Seconde..."/>
+                <CsvImportSection title="Nouvelles Classes de Seconde" onImport={(studentNames) => updateClassWithCsv(newSecondeClassName, studentNames)} />
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                <Input value={newPremiereClassName} onChange={(e) => setNewPremiereClassName(e.target.value)} placeholder="Nom classe Première..."/>
+                <CsvImportSection title="Nouvelles Classes de Première" onImport={(studentNames) => updateClassWithCsv(newPremiereClassName, studentNames)} />
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                <Input value={newTerminaleClassName} onChange={(e) => setNewTerminaleClassName(e.target.value)} placeholder="Nom classe Terminale..."/>
+                <CsvImportSection title="Nouvelles Classes de Terminale" onImport={(studentNames) => updateClassWithCsv(newTerminaleClassName, studentNames)} />
+            </div>
+        </CardContent>
+      </Card>
+
 
        <Card>
         <CardHeader>
@@ -283,7 +358,7 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Upload /> Importer des élèves</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Upload /> Importer des élèves (Ancienne méthode)</CardTitle>
           <CardDescription>
               Sélectionnez ou créez une classe, puis importez un fichier CSV. Seule la première colonne (nom de l'élève) sera utilisée.
           </CardDescription>
