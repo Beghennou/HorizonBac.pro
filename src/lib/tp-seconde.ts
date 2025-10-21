@@ -4,10 +4,21 @@ export type Etape = {
   etapes: string[];
 };
 
-export type EtudePrelim = {
-    q: string;
-    r: string;
+export type EtudePrelimText = {
+  type: 'text';
+  q: string;
+  r: string; // Correct answer
 };
+
+export type EtudePrelimQCM = {
+  type: 'qcm';
+  q: string;
+  options: string[];
+  r: string; // Correct answer
+};
+
+export type EtudePrelim = EtudePrelimText | EtudePrelimQCM;
+
 
 export type TP = {
   id: number;
@@ -35,11 +46,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Organiser son espace de travail de manière sûre et efficace, en identifiant les risques et en utilisant les Équipements de Protection Individuelle (EPI). (Compétence C1.1)',
         materiel: ['Bleu de travail', 'Chaussures de sécurité', 'Lunettes de protection', 'Gants', 'Chariot à outils', 'Extincteur (localisation)', 'Zone de tri des déchets'],
         etudePrelim: [
-            { q: 'Quels sont les principaux risques dans un atelier automobile (mécanique, chimique, électrique, incendie) ?', r: '' },
-            { q: 'À quoi correspondent les différentes couleurs des panneaux de sécurité (rouge, jaune, bleu, vert) ?', r: '' },
-            { q: 'Que signifie la procédure PASS pour utiliser un extincteur ?', r: '' },
-            { q: 'Pourquoi trier les déchets d\'atelier (huiles, filtres, batteries, chiffons souillés) ?', r: '' },
-            { q: 'Quels EPI sont obligatoires selon le type d\'intervention ?', r: '' }
+            { type: 'text', q: 'Citez au moins 3 des 5 types de risques majeurs présents dans un atelier automobile.', r: 'Risques mécaniques (pièces en mouvement), chimiques (fluides, vapeurs), électriques (haute tension), thermiques (pièces chaudes), et risques d\'incendie.' },
+            { type: 'qcm', q: 'Un panneau de sécurité de forme ronde avec un pictogramme barré de rouge indique :', options: ['Une obligation', 'Un danger', 'Une interdiction', 'Une information de sauvetage'], r: 'Une interdiction' },
+            { type: 'text', q: 'Que signifie l\'acronyme TMS et comment peut-on les prévenir dans un atelier ?', r: 'Troubles Musculo-Squelettiques. On les prévient en adoptant de bonnes postures, en utilisant des aides à la manutention et en faisant des pauses.' },
         ],
         activitePratique: [
             etape('Préparation et organisation de la zone', '30 min', [
@@ -91,11 +100,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Maîtriser la procédure de levage sécurisé pour permettre une intervention sous le véhicule en respectant les points de levage constructeur. (Compétence C1.1)',
         materiel: ['Cric rouleur hydraulique', 'Paire de chandelles (capacité adaptée)', 'Cales de roues', 'Documentation technique (points de levage)', 'Clé de roue'],
         etudePrelim: [
-            { q: 'Pourquoi est-il extrêmement dangereux de travailler uniquement sous un cric sans chandelles ?', r: '' },
-            { q: 'Comment identifier précisément les points de levage sur un véhicule ?', r: '' },
-            { q: 'Quelle est la capacité de charge minimale des chandelles pour un véhicule de 1,5 tonne ?', r: '' },
-            { q: 'Pourquoi faut-il obligatoirement caler les roues opposées au levage ?', r: '' },
-            { q: 'Que faire si le véhicule présente une instabilité une fois posé sur chandelles ?', r: '' }
+            { type: 'qcm', q: 'Pourquoi est-il absolument interdit de travailler sous un véhicule reposant uniquement sur un cric ?', options: ['Le cric pourrait se dégonfler lentement', 'Un cric n\'est pas un organe de maintien mais de levage', 'Le cric n\'est pas stable latéralement'], r: 'Un cric n\'est pas un organe de maintien mais de levage' },
+            { type: 'text', q: 'Où trouve-t-on l\'information fiable pour localiser les points de levage d\'un véhicule ?', r: 'Dans la documentation technique du constructeur (RTA ou logiciel de données techniques).' },
+            { type: 'qcm', q: 'Une fois le véhicule posé sur les chandelles, quelle est l\'action de sécurité impérative à réaliser avant toute intervention ?', options: ['Retirer le cric pour avoir plus de place', 'Secouer légèrement le véhicule pour tester sa stabilité', 'Lever une autre roue'], r: 'Secouer légèrement le véhicule pour tester sa stabilité' }
         ],
         activitePratique: [
             etape('Préparation et contrôles préalables', '20 min', [
@@ -148,11 +155,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Positionner et lever un véhicule avec un pont 2 colonnes en respectant les règles de centrage et de sécurité. (Compétence C1.1)',
         materiel: ['Pont élévateur 2 colonnes', 'Patins de levage adaptés au véhicule', 'Documentation technique constructeur', 'Télécommande pont'],
         etudePrelim: [
-            { q: 'Quels sont les avantages d\'un pont 2 colonnes par rapport au système cric et chandelles ?', r: '' },
-            { q: 'Comment identifier précisément le centre de gravité d\'un véhicule pour réussir le centrage ?', r: '' },
-            { q: 'Quel est le rôle crucial de la sécurité mécanique du pont (crans de verrouillage) ?', r: '' },
-            { q: 'Pourquoi faut-il impérativement lever de quelques centimètres et vérifier avant de poursuivre ?', r: '' },
-            { q: 'Quelles vérifications de sécurité effectuer avant chaque utilisation du pont ?', r: '' }
+            { type: 'text', q: 'Pourquoi le centrage longitudinal (avant/arrière) d\'un véhicule sur un pont 2 colonnes est-il si critique ?', r: 'Pour répartir correctement le poids par rapport au centre de gravité du véhicule et éviter un basculement vers l\'avant ou l\'arrière.' },
+            { type: 'qcm', q: 'Quelle est la première chose à faire juste après avoir levé le véhicule de quelques centimètres ?', options: ['Commencer à travailler', 'Monter le véhicule à hauteur d\'homme', 'Arrêter et vérifier la stabilité et le positionnement des patins'], r: 'Arrêter et vérifier la stabilité et le positionnement des patins' },
+            { type: 'text', q: 'Quel est le rôle des crans de sécurité mécaniques du pont élévateur ?', r: 'Ils servent de sécurité redondante en cas de défaillance hydraulique, en bloquant mécaniquement la descente du pont.' }
         ],
         activitePratique: [
             etape('Positionnement précis du véhicule', '30 min', [
@@ -208,11 +213,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Identifier toutes les commandes usuelles et interpréter correctement les témoins d\'alerte pour informer et rassurer le client. (Compétence C1.4)',
         materiel: ['Véhicule en état de fonctionnement', 'Manuel utilisateur du constructeur', 'Fiche de relevé des témoins', 'Stylo'],
         etudePrelim: [
-            { q: 'Quelle est la différence fondamentale entre un témoin rouge, orange et vert/bleu ?', r: '' },
-            { q: 'Que signifie précisément le témoin de pression d\'huile moteur et quelle est la conduite à tenir ?', r: '' },
-            { q: 'Pourquoi certains témoins s\'allument temporairement au démarrage (autotest) ?', r: '' },
-            { q: 'Qu\'est-ce qu\'un autotest du tableau de bord et pourquoi est-il important ?', r: '' },
-            { q: 'Comment réagir immédiatement si le témoin de température moteur passe au rouge ?', r: '' }
+            { type: 'qcm', q: 'Un témoin de couleur ORANGE qui reste allumé après démarrage indique :', options: ['Une panne grave nécessitant un arrêt immédiat', 'Une information de fonctionnement (ex: feux allumés)', 'Une anomalie à vérifier prochainement, sans urgence immédiate'], r: 'Une anomalie à vérifier prochainement, sans urgence immédiate' },
+            { type: 'qcm', q: 'Quel témoin impose un arrêt IMMÉDIAT du véhicule ?', options: ['Pression des pneus', 'Niveau de lave-glace', 'Pression d\'huile moteur'], r: 'Pression d\'huile moteur' },
+            { type: 'text', q: 'À quoi sert la phase d\'autotest des témoins lorsque l\'on met le contact ?', r: 'Elle permet de vérifier que toutes les ampoules des témoins fonctionnent correctement avant le démarrage du moteur.' }
         ],
         activitePratique: [
             etape('Identification systématique des commandes', '20 min', [
@@ -258,11 +261,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Identifier précisément tous les niveaux et réaliser les ajustements nécessaires pour maintenir le bon fonctionnement des systèmes. (Compétences C1.2, C1.3)',
         materiel: ['Liquide de refroidissement spécifié', 'Produit lave-glace concentré', 'Liquide de frein DOT4 ou 5.1', 'Entonnoirs de différentes tailles', 'Chiffons propres non pelucheux'],
         etudePrelim: [
-            { q: 'Pourquoi le niveau de liquide de refroidissement doit-il impérativement être contrôlé moteur froid ?', r: '' },
-            { q: 'Qu\'indique généralement un niveau de liquide de frein anormalement bas ?', r: '' },
-            { q: 'Quelle est la différence technique et d\'usage entre le liquide de frein DOT4 et DOT5.1 ?', r: '' },
-            { q: 'Pourquoi ne faut-il jamais mélanger différents types ou marques de liquide de refroidissement ?', r: '' },
-            { q: 'Comment interpréter la couleur du liquide de frein (clair, ambré, brun, noir) ?', r: '' }
+            { type: 'qcm', q: 'Pourquoi le niveau de liquide de refroidissement doit-il se contrôler moteur FROID ?', options: ['Le liquide chaud est moins visible', 'Pour éviter le risque de brûlure et parce que le niveau est faussé par la dilatation', 'C\'est une préférence de mécanicien'], r: 'Pour éviter le risque de brûlure et parce que le niveau est faussé par la dilatation' },
+            { type: 'text', q: 'Un niveau de liquide de frein qui a beaucoup baissé (mais est encore au-dessus du mini) indique le plus souvent...', r: 'Une usure normale mais avancée des plaquettes de frein (les pistons sont plus sortis).' },
+            { type: 'text', q: 'Peut-on mélanger un liquide de refroidissement de type "organique" (rose/jaune) avec un type "minéral" (bleu/vert) ? Pourquoi ?', r: 'Non, car leurs additifs sont incompatibles et le mélange peut créer des boues qui bouchent le circuit et annulent la protection anti-corrosion.' }
         ],
         activitePratique: [
             etape('Contrôle du système de refroidissement', '20 min', [
@@ -310,11 +311,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Identifier méthodiquement toutes les ampoules défectueuses et réaliser leur remplacement en respectant les bonnes pratiques. (Compétences C1.2, C1.3)',
         materiel: ['Jeu d\'ampoules de rechange variées', 'Tournevis adaptés', 'Chiffon microfibre propre', 'Gants de protection', 'Assistant pour les tests'],
         etudePrelim: [
-            { q: 'Quels sont les différents types d\'ampoules couramment utilisés sur un véhicule (H4, H7, H1, P21W, P21/5W, etc.) ?', r: '' },
-            { q: 'Pourquoi ne faut-il absolument jamais toucher le verre d\'une ampoule halogène avec les doigts nus ?', r: '' },
-            { q: 'Comment identifier précisément le type d\'ampoule à remplacer (marquage, culot, puissance) ?', r: '' },
-            { q: 'Quelle est la différence technique fondamentale entre une ampoule H4 et H7 ?', r: '' },
-            { q: 'Pourquoi est-il conseillé de remplacer les ampoules par paire sur les feux avant ?', r: '' }
+            { type: 'text', q: 'Pourquoi ne faut-il jamais toucher le verre d\'une ampoule halogène (H4, H7) avec les doigts ?', r: 'Le gras des doigts crée un point chaud sur le verre qui réduit considérablement la durée de vie de l\'ampoule et peut la faire éclater.' },
+            { type: 'qcm', q: 'Vous remplacez une ampoule de phare avant. Quelle est la meilleure pratique ?', options: ['Remplacer uniquement celle qui est grillée', 'Remplacer les deux ampoules (gauche et droite) en même temps', 'Attendre que l\'autre grille'], r: 'Remplacer les deux ampoules (gauche et droite) en même temps' },
+            { type: 'text', q: 'Comment différenciez-vous une ampoule P21W (un filament) d\'une P21/5W (deux filaments) ?', r: 'L\'ampoule P21/5W a deux filaments visibles à l\'intérieur et deux plots de contact au lieu d\'un seul sur son culot.' }
         ],
         activitePratique: [
             etape('Contrôle systématique complet de l\'éclairage', '30 min', [
@@ -365,11 +364,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Identifier une anomalie potentielle sur le circuit de démarrage et de charge à l\'aide d\'un multimètre. (Compétence C1.2)',
         materiel: ['Multimètre numérique de qualité', 'Nettoyant contact spécialisé', 'Clés plates de 10 et 13 mm', 'Gants isolants et lunettes de protection'],
         etudePrelim: [
-            { q: 'Quelle est la tension nominale exacte d\'une batterie 12V en parfait état au repos ?', r: '' },
-            { q: 'Quelle tension doit impérativement délivrer l\'alternateur moteur tournant au ralenti ?', r: '' },
-            { q: 'Quels sont les signes caractéristiques d\'une batterie déchargée ou en fin de vie ?', r: '' },
-            { q: 'Comment l\'oxydation et le desserrage des cosses affectent-ils les performances de démarrage ?', r: '' },
-            { q: 'Quelle est la durée de vie moyenne d\'une batterie automobile et les facteurs d\'usure ?', r: '' }
+            { type: 'qcm', q: 'Une batterie 12V en bonne santé, moteur arrêté depuis plusieurs heures, doit avoir une tension :', options: ['Inférieure à 12V', 'Entre 12V et 12,3V', 'Supérieure à 12,4V'], r: 'Supérieure à 12,4V' },
+            { type: 'qcm', q: 'Moteur tournant, vous mesurez 13,2V aux bornes de la batterie. Que concluez-vous ?', options: ['Le circuit de charge est parfait', 'L\'alternateur ne charge pas assez', 'L\'alternateur charge trop'], r: 'L\'alternateur ne charge pas assez' },
+            { type: 'text', q: 'Quel est le risque si vous mesurez plus de 15V aux bornes de la batterie moteur tournant ?', r: 'Une surcharge, qui peut "cuire" la batterie et endommager les calculateurs électroniques du véhicule.' }
         ],
         activitePratique: [
             etape('Contrôle approfondi de la batterie à l\'arrêt', '30 min', [
@@ -417,11 +414,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Identifier toute anomalie d\'usure et ajuster précisément les pressions pour garantir la sécurité et la performance optimale du véhicule. (Compétences C1.2, C1.3)',
         materiel: ['Contrôleur de pression numérique précis', 'Gonfleur d\'atelier', 'Jauge de profondeur de sculptures', 'Documentation constructeur (étiquette de porte)', 'Craie pour marquage'],
         etudePrelim: [
-            { q: 'Où trouver les pressions exactes préconisées par le constructeur pour chaque véhicule ?', r: '' },
-            { q: 'Quelle est la profondeur minimale légale des sculptures en France (exprimée en millimètres) ?', r: '' },
-            { q: 'Comment identifier une usure anormale des pneus révélatrice de problèmes de parallélisme ou carrossage ?', r: '' },
-            { q: 'Pourquoi les pressions doivent-elles absolument être contrôlées à froid ?', r: '' },
-            { q: 'Quels sont les risques et conséquences d\'un pneu sous-gonflé ou surgonflé ?', r: '' }
+            { type: 'text', q: 'Où se trouve l\'étiquette indiquant les pressions de pneus préconisées par le constructeur ?', r: 'Généralement dans l\'ouverture de la porte conducteur, la trappe à carburant ou le manuel du véhicule.' },
+            { type: 'qcm', q: 'La profondeur minimale légale des sculptures d\'un pneu en France est de :', options: ['1 mm', '1,6 mm', '2 mm'], r: '1,6 mm' },
+            { type: 'qcm', q: 'Une usure plus prononcée sur les deux bords (épaules) de la bande de roulement est typique d\'un roulage en :', options: ['Sous-gonflage', 'Surgonflage', 'Défaut de parallélisme'], r: 'Sous-gonflage' }
         ],
         activitePratique: [
             etape('Inspection visuelle complète et méthodique', '30 min', [
@@ -470,11 +465,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Réaliser le remplacement d\'un élément d\'usure du système de freinage en respectant scrupuleusement la méthode constructeur. (Compétence C1.3)',
         materiel: ['Jeu de plaquettes neuves certifiées', 'Repousse-piston d\'étrier', 'Nettoyant frein sans solvant chloré', 'Graisse au cuivre haute température', 'Clé dynamométrique', 'Outillage de base complet'],
         etudePrelim: [
-            { q: 'Quelle est l\'épaisseur minimale légale d\'une plaquette de frein avant remplacement ?', r: '' },
-            { q: 'Pourquoi faut-il impérativement repousser le piston avant de monter les nouvelles plaquettes ?', r: '' },
-            { q: 'À quoi sert précisément la graisse au cuivre appliquée sur les plaquettes ?', r: '' },
-            { q: 'Pourquoi faut-il absolument pomper la pédale après le remplacement ?', r: '' },
-            { q: 'Comment identifier visuellement un disque de frein usé, rayé ou voilé ?', r: '' }
+            { type: 'text', q: 'Quelle est l\'étape la plus importante à réaliser immédiatement après avoir remonté les roues, avant même de faire rouler le véhicule ?', r: 'Pomper plusieurs fois sur la pédale de frein jusqu\'à ce qu\'elle devienne dure, pour mettre les nouvelles plaquettes en contact avec le disque.' },
+            { type: 'qcm', q: 'Où doit-on appliquer la graisse au cuivre ?', options: ['Sur la surface de friction de la plaquette', 'Sur le disque de frein', 'Uniquement sur les points de contact métalliques entre la plaquette et le support d\'étrier'], r: 'Uniquement sur les points de contact métalliques entre la plaquette et le support d\'étrier' },
+            { type: 'text', q: 'Pendant que vous repoussez le piston de l\'étrier, quelle précaution devez-vous prendre concernant le réservoir de liquide de frein ?', r: 'Surveiller le niveau du liquide de frein pour qu\'il ne déborde pas. Si besoin, en aspirer une petite quantité.' }
         ],
         activitePratique: [
             etape('Préparation et démontage sécurisé', '30 min', [
@@ -524,11 +517,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Réaliser le remplacement des fluides et des éléments d\'usure conformément à la procédure constructeur et aux normes environnementales. (Compétence C1.3)',
         materiel: ['Huile moteur préconisée par constructeur', 'Filtre à huile neuf d\'origine', 'Joint de bouchon de vidange neuf', 'Clé de vidange adaptée', 'Clé à sangle pour filtre', 'Bac de récupération agréé', 'Entonnoir propre', 'Chiffons absorbants'],
         etudePrelim: [
-            { q: 'Comment déterminer précisément le type, la viscosité et la quantité d\'huile nécessaire ?', r: '' },
-            { q: 'Quelle est la différence technique entre une huile 5W30 et 10W40 (viscosité, usage) ?', r: '' },
-            { q: 'Pourquoi faut-il systématiquement changer le joint du bouchon de vidange ?', r: '' },
-            { q: 'Comment serrer correctement un filtre à huile (couple, méthode) ?', r: '' },
-            { q: 'À quelle fréquence exacte effectuer une vidange selon le constructeur (km/temps) ?', r: '' }
+            { type: 'text', q: 'Quelle est la viscosité d\'huile recommandée pour ce véhicule ? Où trouvez-vous cette information ?', r: 'L\'information se trouve dans la documentation technique (RTA) ou le carnet d\'entretien du véhicule.' },
+            { type: 'qcm', q: 'Quelle est la bonne méthode pour serrer un filtre à huile neuf ?', options: ['Le plus fort possible avec la clé à sangle', 'Serrer à la main jusqu\'au contact, puis ajouter 1/4 à 1/2 tour', 'Serrer au couple avec une clé dynamométrique spéciale'], r: 'Serrer à la main jusqu\'au contact, puis ajouter 1/4 à 1/2 tour' },
+            { type: 'qcm', q: 'Après avoir rempli l\'huile et démarré le moteur, le témoin de pression d\'huile s\'éteint. Vous coupez le moteur. Que faites-vous ensuite ?', options: ['Le niveau est bon, l\'intervention est finie', 'J\'attends 5 minutes, puis je contrôle le niveau à la jauge et je fais l\'appoint si nécessaire', 'Je complète avec 0.5L d\'huile supplémentaire par sécurité'], r: 'J\'attends 5 minutes, puis je contrôle le niveau à la jauge et je fais l\'appoint si nécessaire' }
         ],
         activitePratique: [
             etape('Préparation rigoureuse de l\'intervention', '20 min', [
@@ -580,11 +571,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Remplacer l\'élément filtrant en respectant la procédure pour optimiser l\'alimentation en air du moteur. (Compétence C1.3)',
         materiel: ['Filtre à air neuf d\'origine constructeur', 'Tournevis ou clés selon fixation', 'Chiffon propre non pelucheux', 'Aspirateur d\'atelier'],
         etudePrelim: [
-            { q: 'Quel est le rôle précis du filtre à air dans le fonctionnement moteur ?', r: '' },
-            { q: 'Quelles sont les conséquences d\'un filtre à air encrassé (consommation, performances, pollution) ?', r: '' },
-            { q: 'À quelle fréquence remplacer le filtre à air selon les conditions d\'utilisation ?', r: '' },
-            { q: 'Comment identifier visuellement un filtre à air nécessitant un remplacement ?', r: '' },
-            { q: 'Pourquoi ne faut-il jamais laisser entrer de poussière dans l\'admission ?', r: '' }
+            { type: 'qcm', q: 'Un filtre à air très encrassé va principalement provoquer :', options: ['Une surconsommation de carburant et une perte de puissance', 'Une usure prématurée des pneus', 'Un meilleur refroidissement moteur'], r: 'Une surconsommation de carburant et une perte de puissance' },
+            { type: 'text', q: 'Quelle est l\'étape la plus critique lors du remplacement d\'un filtre à air pour protéger le moteur ?', r: 'Nettoyer parfaitement l\'intérieur du boîtier de filtre pour s\'assurer qu\'aucune poussière ou débris ne puisse entrer dans le circuit d\'admission.' },
+            { type: 'text', q: 'Comment s\'assurer que le nouveau filtre est bien positionné et que le boîtier est étanche ?', r: 'Le filtre doit s\'insérer sans forcer dans ses guides et le couvercle du boîtier doit se fermer et se verrouiller parfaitement, sans jour.' }
         ],
         activitePratique: [
             etape('Localisation et accès au filtre à air', '15 min', [
@@ -631,11 +620,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Appliquer une méthode de diagnostic logique pour identifier et réparer une panne d\'éclairage. (Compétence C1.2)',
         materiel: ['Multimètre numérique', 'Jeu d\'ampoules de rechange', 'Schémas électriques véhicule', 'Lampe témoin 12V', 'Tournevis isolés'],
         etudePrelim: [
-            { q: 'Quelle est la méthode logique de diagnostic d\'une panne électrique (du général au particulier) ?', r: '' },
-            { q: 'Comment différencier une panne d\'ampoule, de fusible ou de faisceau ?', r: '' },
-            { q: 'À quoi sert un schéma électrique dans le diagnostic de panne ?', r: '' },
-            { q: 'Comment tester la continuité d\'un circuit avec un multimètre ?', r: '' },
-            { q: 'Quelles sont les précautions à prendre lors d\'un diagnostic électrique automobile ?', r: '' }
+            { type: 'qcm', q: 'Face à un feu qui ne s\'allume pas, quel est le PREMIER composant à vérifier ?', options: ['L\'ampoule', 'Le fusible', 'Le commodo'], r: 'Le fusible' },
+            { type: 'text', q: 'Vous testez le fusible : il est bon. Vous testez l\'ampoule : elle est bonne. Quelle est la prochaine étape de votre diagnostic ?', r: 'Vérifier avec un multimètre s\'il y a bien une tension de 12V qui arrive au connecteur de l\'ampoule.' },
+            { type: 'text', q: 'Pourquoi ne faut-il jamais remplacer un fusible grillé par un fusible de calibre supérieur ?', r: 'Car le fusible ne protégerait plus le circuit. En cas de surintensité, c\'est le faisceau ou le composant qui brûlera, provoquant un risque d\'incendie.' }
         ],
         activitePratique: [
             etape('Analyse initiale et identification de la panne', '20 min', [
@@ -684,11 +671,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Nettoyer le boîtier papillon pour restaurer un fonctionnement optimal du moteur et corriger les défauts de ralenti. (Compétence C1.3)',
         materiel: ['Nettoyant boîtier papillon spécialisé', 'Chiffons non pelucheux', 'Tournevis adaptés', 'Gants de protection', 'Lunettes de sécurité'],
         etudePrelim: [
-            { q: 'Quel est le rôle du boîtier papillon dans l\'alimentation du moteur essence ?', r: '' },
-            { q: 'Quelles sont les causes d\'encrassement du boîtier papillon ?', r: '' },
-            { q: 'Comment l\'encrassement affecte-t-il le fonctionnement moteur (ralenti, reprises) ?', r: '' },
-            { q: 'Pourquoi utiliser un produit spécialisé pour le nettoyage ?', r: '' },
-            { q: 'Quelle procédure de réapprentissage peut être nécessaire après nettoyage ?', r: '' }
+            { type: 'text', q: 'Quelle est la principale cause d\'encrassement d\'un boîtier papillon ?', r: 'Les vapeurs d\'huile recyclées par le système de réaspiration (reniflard) qui se déposent et se mélangent à la poussière.' },
+            { type: 'qcm', q: 'Après avoir débranché la batterie et nettoyé le boîtier, une procédure est parfois nécessaire. Laquelle ?', options: ['Une vidange', 'Un réapprentissage des butées du papillon', 'Un changement de filtre à air'], r: 'Un réapprentissage des butées du papillon' },
+            { type: 'qcm', q: 'Quel est le risque si on force ou gratte l\'intérieur d\'un boîtier papillon motorisé ?', options: ['Aucun risque', 'D\'améliorer le passage de l\'air', 'D\'endommager le revêtement spécial et de dérégler le capteur de position'], r: 'D\'endommager le revêtement spécial et de dérégler le capteur de position' }
         ],
         activitePratique: [
             etape('Préparation et accès au boîtier papillon', '20 min', [
@@ -739,11 +724,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Remplacer complètement le liquide de refroidissement et purger le circuit pour garantir un refroidissement optimal. (Compétence C1.3)',
         materiel: ['Liquide de refroidissement préconisé', 'Bac de récupération agréé', 'Entonnoir de remplissage', 'Clés pour durites et bouchons', 'Kit de purge sous pression'],
         etudePrelim: [
-            { q: 'Quels sont les rôles du liquide de refroidissement (refroidissement, antigel, anticorrosion) ?', r: '' },
-            { q: 'Pourquoi faut-il respecter impérativement les spécifications constructeur ?', r: '' },
-            { q: 'À quelle fréquence renouveler le liquide de refroidissement ?', r: '' },
-            { q: 'Que signifie \"purger\" le circuit de refroidissement ?', r: '' },
-            { q: 'Quels sont les signes d\'un liquide de refroidissement dégradé ?', r: '' }
+            { type: 'qcm', q: 'Quel est le risque principal si on ouvre le bouchon du radiateur quand le moteur est chaud ?', options: ['De renverser du liquide', 'Une dépressurisation brutale avec projection de liquide bouillant (brûlure grave)', 'D\'abîmer le bouchon'], r: 'Une dépressurisation brutale avec projection de liquide bouillant (brûlure grave)' },
+            { type: 'text', q: 'Qu\'est-ce que le "calorstat" (ou thermostat) et quel est son rôle dans le circuit de refroidissement ?', r: 'C\'est une vanne thermostatique qui reste fermée à froid pour que le moteur chauffe vite, et s\'ouvre à chaud pour laisser passer le liquide vers le radiateur.' },
+            { type: 'text', q: 'Pourquoi est-il important de mettre le chauffage de l\'habitacle sur "chaud" au maximum pendant la purge du circuit ?', r: 'Pour s\'assurer que le liquide de refroidissement circule aussi dans le radiateur de chauffage et que l\'air qui s\'y trouve soit également purgé.' }
         ],
         activitePratique: [
             etape('Vidange complète de l\'ancien liquide', '30 min', [
@@ -793,11 +776,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Remplacer les balais d\'essuie-glaces pour garantir une visibilité optimale et la sécurité de conduite. (Compétence C1.3)',
         materiel: ['Balais d\'essuie-glaces neufs adaptés', 'Chiffon microfibre', 'Produit nettoyant vitre', 'Mètre ruban pour mesures'],
         etudePrelim: [
-            { q: 'À quelle fréquence faut-il remplacer les balais d\'essuie-glaces ?', r: '' },
-            { q: 'Quels sont les signes d\'usure des balais (traces, sautillements, déchirures) ?', r: '' },
-            { q: 'Comment déterminer la taille correcte des balais pour un véhicule ?', r: '' },
-            { q: 'Quels sont les différents types de fixation des balais ?', r: '' },
-            { q: 'Pourquoi nettoyer le pare-brise lors du remplacement des balais ?', r: '' }
+            { type: 'qcm', q: 'Quel est le principal symptôme d\'un balai d\'essuie-glace usé ?', options: ['Il fait du bruit', 'Il laisse des zones non essuyées ou des traînées d\'eau', 'Il est décoloré par le soleil'], r: 'Il laisse des zones non essuyées ou des traînées d\'eau' },
+            { type: 'text', q: 'Quelle précaution simple mais cruciale faut-il prendre avec le bras d\'essuie-glace lors du remplacement du balai ?', r: 'Ne jamais le laisser retomber violemment sur le pare-brise, au risque de le fissurer. On peut placer un chiffon épais en protection.' },
+            { type: 'text', q: 'Pourquoi est-il important de bien nettoyer le pare-brise avant d\'utiliser les nouveaux balais ?', r: 'Pour enlever le film gras et les impuretés qui pourraient endommager prématurément le caoutchouc neuf et nuire à la qualité de l\'essuyage.' }
         ],
         activitePratique: [
             etape('Évaluation et préparation', '10 min', [
@@ -845,11 +826,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Réaliser un contrôle visuel méthodique de tout le système de freinage pour garantir la sécurité. (Compétence C1.2)',
         materiel: ['Lampe d\'inspection puissante', 'Miroir d\'inspection télescopique', 'Règle graduée', 'Fiche de contrôle système freinage', 'Gants de protection'],
         etudePrelim: [
-            { q: 'Quels sont les éléments principaux du système de freinage à contrôler ?', r: '' },
-            { q: 'Quels signes indiquent une usure anormale des disques de frein ?', r: '' },
-            { q: 'Comment identifier une fuite de liquide de frein dans le système ?', r: '' },
-            { q: 'Quelle est l\'épaisseur minimale d\'une plaquette avant remplacement obligatoire ?', r: '' },
-            { q: 'Quand considérer qu\'un flexible de frein doit être remplacé ?', r: '' }
+            { type: 'text', q: 'Quels sont les deux signes visuels d\'un disque de frein qui doit être remplacé ?', r: 'Une lèvre d\'usure prononcée sur le bord extérieur et/ou des rayures profondes sur la surface de friction.' },
+            { type: 'qcm', q: 'Vous inspectez un flexible de frein. Lequel de ces défauts impose un remplacement immédiat ?', options: ['Il est sale', 'Il présente des craquelures ou une hernie (gonflement)', 'Il est légèrement rigide'], r: 'Il présente des craquelures ou une hernie (gonflement)' },
+            { type: 'text', q: 'Quelle est l\'épaisseur minimale approximative d\'une plaquette de frein (garniture seule) avant de recommander son remplacement ?', r: 'Environ 2 à 3 millimètres.' }
         ],
         activitePratique: [
             etape('Contrôle du système de freinage avant', '25 min', [
@@ -899,11 +878,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Préparer le véhicule selon les standards qualité de l\'atelier pour une restitution professionnelle. (Compétence C1.4)',
         materiel: ['Produits de nettoyage automobile', 'Aspirateur puissant', 'Chiffons microfibres', 'Protections jetables', 'Fiche de contrôle final'],
         etudePrelim: [
-            { q: 'Quels sont les standards de propreté exigés avant restitution client ?', r: '' },
-            { q: 'Pourquoi protéger l\'intérieur du véhicule durant les interventions ?', r: '' },
-            { q: 'Quels éléments de sécurité vérifier avant la remise du véhicule ?', r: '' },
-            { q: 'Comment s\'assurer que tous les outils ont été récupérés ?', r: '' },
-            { q: 'Quelle est l\'importance de l\'image de l\'atelier lors de la restitution ?', r: '' }
+            { type: 'text', q: 'Pourquoi est-il si important de restituer un véhicule propre à un client ?', r: 'Cela donne une image professionnelle de l\'atelier, montre le respect pour le bien du client et le rassure sur la qualité du travail effectué.' },
+            { type: 'qcm', q: 'Quelle est la première chose à faire avant de nettoyer l\'intérieur du véhicule ?', options: ['Passer l\'aspirateur', 'Retirer toutes les protections (housses, tapis) mises en place', 'Nettoyer les vitres'], r: 'Retirer toutes les protections (housses, tapis) mises en place' },
+            { type: 'text', q: 'Citez 3 points de contrôle finaux à effectuer juste avant de garer le véhicule pour le client.', r: '1. Vérifier qu\'aucun voyant anormal n\'est allumé. 2. S\'assurer que les réglages (siège, radio) n\'ont pas été trop modifiés. 3. Contrôler que tous les documents sont prêts.' }
         ],
         activitePratique: [
             etape('Nettoyage extérieur du véhicule', '20 min', [
@@ -952,11 +929,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Remplacer la courroie d\'entraînement des accessoires en respectant la tension et l\'alignement corrects. (Compétence C1.3)',
         materiel: ['Courroie neuve de référence exacte', 'Clé de tension de courroie', 'Documentation technique constructeur', 'Schéma de montage', 'Clés et douilles diverses'],
         etudePrelim: [
-            { q: 'Quels accessoires sont généralement entraînés par la courroie d\'accessoires ?', r: '' },
-            { q: 'Comment identifier les signes d\'usure d\'une courroie (craquelures, déformation, bruit) ?', r: '' },
-            { q: 'Quelle est l\'importance de la tension correcte d\'une courroie ?', r: '' },
-            { q: 'Comment déterminer le sens de rotation et de montage d\'une courroie ?', r: '' },
-            { q: 'Quelles sont les conséquences d\'une rupture de courroie d\'accessoires ?', r: '' }
+            { type: 'text', q: 'Citez au moins 3 accessoires vitaux entraînés par cette courroie.', r: 'Alternateur, pompe de direction assistée, compresseur de climatisation, pompe à eau.' },
+            { type: 'qcm', q: 'Une courroie qui couine au démarrage est souvent le signe...', options: ['Qu\'elle est trop tendue', 'Qu\'elle n\'est pas assez tendue et patine', 'Qu\'elle est neuve'], r: 'Qu\'elle n\'est pas assez tendue et patine' },
+            { type: 'text', q: 'Quelle est la première chose à faire avant de commencer l\'intervention ?', r: 'Consulter le schéma de montage de la courroie pour bien comprendre son trajet complexe autour des différentes poulies.' }
         ],
         activitePratique: [
             etape('Analyse et préparation du remplacement', '20 min', [
@@ -1006,11 +981,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Identifier et localiser une défaillance du système d\'allumage en appliquant une méthode de diagnostic structurée. (Compétence C1.2)',
         materiel: ['Multimètre de précision', 'Clé à bougie', 'Testeur d\'étincelle', 'Bougies neuves de rechange', 'Schémas électriques', 'Lampe stroboscopique'],
         etudePrelim: [
-            { q: 'Quels sont les composants principaux du système d\'allumage électronique ?', r: '' },
-            { q: 'Comment différencier une panne de bougie, de bobine ou de calculateur ?', r: '' },
-            { q: 'Quelle est la méthode de diagnostic d\'un allumage défaillant ?', r: '' },
-            { q: 'Comment tester l\'étincelle de chaque bougie ?', r: '' },
-            { q: 'Quels sont les symptômes caractéristiques d\'une panne d\'allumage ?', r: '' }
+            { type: 'qcm', q: 'Un moteur 4 cylindres a un raté d\'allumage sur le cylindre n°2. Pour savoir si cela vient de la bougie ou de la bobine (si individuelle), quelle est la méthode la plus rapide ?', options: ['Changer les 4 bougies', 'Mesurer la compression', 'Inverser la bobine 2 avec la bobine 3 et voir si le défaut se déplace'], r: 'Inverser la bobine 2 avec la bobine 3 et voir si le défaut se déplace' },
+            { type: 'text', q: 'Vous démontez une bougie et son électrode est recouverte de suie noire et sèche. Qu\'est-ce que cela indique sur le mélange air/carburant ?', r: 'Un mélange trop riche en carburant.' },
+            { type: 'text', q: 'À quoi sert la partie en céramique blanche d\'une bougie d\'allumage ?', r: 'C\'est un isolant électrique qui empêche la haute tension de s\'échapper vers la masse (la culasse) avant d\'atteindre l\'électrode.' }
         ],
         activitePratique: [
             etape('Analyse des symptômes et diagnostic initial', '25 min', [
@@ -1061,51 +1034,49 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Démontrer l\'acquisition des compétences de base par un check-up complet et méthodique. (Compétences C1.1, C1.2, C1.3, C1.4)',
         materiel: ['Fiche de contrôle complète', 'Tous les outils d\'atelier', 'Multimètre', 'Contrôleur de pression', 'Documentation technique'],
         etudePrelim: [
-            { q: 'Quels sont les points essentiels d\'un contrôle complet véhicule ?', r: '' },
-            { q: 'Dans quel ordre logique organiser les vérifications ?', r: '' },
-            { q: 'Comment prioriser les anomalies détectées selon leur criticité ?', r: '' },
-            { q: 'Quelle méthode utiliser pour ne rien oublier lors du contrôle ?', r: '' },
-            { q: 'Comment présenter un bilan professionnel au client ?', r: '' }
+            { type: 'text', q: 'Listez les 5 points de contrôle les plus importants pour la sécurité d\'un véhicule.', r: 'Freinage, pneumatiques, direction, éclairage, liaison au sol (suspension).' },
+            { type: 'qcm', q: 'Quelle est la première source d\'information à consulter avant de commencer un entretien ?', options: ['Un forum sur internet', 'La documentation technique et le carnet d\'entretien du constructeur', 'L\'avis d\'un collègue'], r: 'La documentation technique et le carnet d\'entretien du constructeur' },
+            { type: 'text', q: 'Comment présentez-vous à un client une anomalie "non urgente mais à surveiller" ?', r: 'De manière factuelle, sans alarmer, en expliquant le rôle de la pièce, le symptôme d\'usure et en proposant un contrôle lors du prochain entretien.' }
         ],
         activitePratique: [
-            etape('Contrôles de sécurité prioritaires', '30 min', [
-                'Effectuer un contrôle complet du système de freinage (plaquettes, disques, liquide).',
-                'Vérifier l\'état et la pression des pneumatiques sur les 4 roues.',
-                'Contrôler l\'éclairage complet (feux, clignotants, témoins).',
-                'Tester le fonctionnement des essuie-glaces et lave-glace.',
-                'Vérifier les niveaux de tous les fluides (huile, refroidissement, frein).',
-                'Contrôler la batterie et le circuit de charge.',
-                'Noter scrupuleusement toutes les anomalies détectées.'
+            etape('Réception véhicule et planification', '20 min', [
+                'Accueillir le client et identifier ses demandes spécifiques.',
+                'Consulter le carnet d\'entretien et déterminer les opérations à effectuer.',
+                'Planifier l\'intervention en optimisant l\'organisation du travail.',
+                'Préparer tous les outils, équipements et consommables nécessaires.',
+                'Organiser le poste de travail selon les règles de sécurité.',
+                'Établir un planning réaliste et respectueux des délais.'
             ]),
-            etape('Contrôles de fonctionnement et d\'entretien', '45 min', [
-                'Examiner l\'état des filtres (air, huile, habitacle) et leur encrassement.',
-                'Contrôler les courroies d\'accessoires (usure, tension).',
-                'Inspecter le système d\'échappement (état, fixations, étanchéité).',
-                'Vérifier le bon fonctionnement de tous les équipements (climatisation, radio, accessoires).',
-                'Effectuer un diagnostic simple des systèmes électriques de base.',
-                'Contrôler la propreté générale et l\'état de l\'habitacle.',
-                'Compléter minutieusement la fiche de contrôle.'
+            etape('Réalisation de l\'entretien périodique', '80 min', [
+                'Effectuer la vidange moteur et le remplacement du filtre à huile avec traçabilité complète.',
+                'Remplacer le filtre à air et contrôler l\'état du boîtier d\'admission.',
+                'Contrôler et ajuster tous les niveaux de fluides selon les spécifications.',
+                'Vérifier l\'état et la pression des pneumatiques, effectuer les corrections.',
+                'Contrôler le système de freinage complet (plaquettes, disques, liquide).',
+                'Tester tous les systèmes d\'éclairage et remplacer les ampoules défectueuses.',
+                'Contrôler la batterie et le circuit de charge avec mesures précises.',
+                'Effectuer les contrôles visuels de sécurité (suspension, échappement, direction).'
             ]),
-            etape('Synthèse et conseil client simulé', '15 min', [
-                'Classer les anomalies par ordre de priorité (sécuritaire, réglementaire, confort).',
-                'Estimer les interventions nécessaires avec leur urgence.',
-                'Préparer une présentation claire des résultats du contrôle.',
-                'Simuler un entretien client en expliquant les points importants.',
-                'Proposer un planning d\'interventions selon les priorités.',
-                'Remplir un devis détaillé pour les réparations nécessaires.'
+            etape('Contrôles finaux et restitution client', '30 min', [
+                'Analyser les points forts et les axes d\'amélioration identifiés.',
+                'Compléter la fiche d\'intervention avec toutes les opérations réalisées.',
+                'Nettoyer et préparer le véhicule selon les standards de restitution.',
+                'Rédiger un rapport de synthèse sur les compétences démontrées.',
+                'Valider l\'atteinte des objectifs pédagogiques du référentiel.',
+                'Présenter le travail réalisé avec argumentation technique.'
             ])
         ],
         securiteRangement: [
-            'Appliquer toutes les règles de sécurité apprises',
-            'Utiliser correctement tous les équipements et outils',
-            'Respecter la méthodologie de contrôle enseignée',
-            'Présenter un travail professionnel et documenté'
+            'Application rigoureuse de toutes les règles de sécurité apprises',
+            'Respect de toutes les procédures et méthodologies enseignées',
+            'Autonomie démontrée avec demande d\'aide si nécessaire',
+            'Qualité professionnelle attendue sur tous les aspects'
         ],
         pointsCles: [
-            'Contrôle exhaustif et méthodique réalisé',
-            'Toutes les anomalies détectées et classées',
-            'Conseil client professionnel et adapté',
-            'Autonomie démontrée sur les compétences de base'
+            'Toutes les compétences C1.1 à C1.4 validées',
+            'Entretien complet réalisé en autonomie',
+            'Qualité technique et relationnelle démontrée',
+            'Aptitude confirmée pour la poursuite en Première'
         ]
     },
     121: {
@@ -1116,11 +1087,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Remplacer le filtre d\'habitacle selon la procédure pour garantir une filtration optimale de l\'air. (Compétence C1.3)',
         materiel: ['Filtre d\'habitacle neuf de référence exacte', 'Tournevis adaptés', 'Aspirateur d\'atelier', 'Chiffon propre', 'Gants de protection'],
         etudePrelim: [
-            { q: 'Quel est le rôle du filtre d\'habitacle dans le système de ventilation ?', r: '' },
-            { q: 'À quelle fréquence faut-il remplacer le filtre d\'habitacle (km ou temps) ?', r: '' },
-            { q: 'Où est généralement situé le filtre d\'habitacle sur un véhicule ?', r: '' },
-            { q: 'Quels sont les signes d\'un filtre d\'habitacle encrassé ?', r: '' },
-            { q: 'Quelle différence entre un filtre simple et un filtre au charbon actif ?', r: '' }
+            { type: 'qcm', q: 'Un filtre d\'habitacle bouché peut causer :', options: ['Une mauvaise odeur, de la buée et une ventilation faible', 'Une surconsommation de carburant', 'Une usure des pneus'], r: 'Une mauvaise odeur, de la buée et une ventilation faible' },
+            { type: 'text', q: 'Quelle est la différence entre un filtre à pollen simple et un filtre à charbon actif ?', r: 'Le filtre à charbon actif filtre en plus les mauvaises odeurs et certains gaz polluants, en plus des pollens et poussières.' },
+            { type: 'text', q: 'Sur beaucoup de véhicules, où se trouve le filtre d\'habitacle ?', r: 'Derrière ou en dessous de la boîte à gants.' }
         ],
         activitePratique: [
             etape('Localisation et accès au filtre', '15 min', [
@@ -1168,11 +1137,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Réaliser la purge complète du circuit de freinage pour obtenir une pédale ferme et un freinage optimal. (Compétence C1.3)',
         materiel: ['Liquide de frein DOT 4 ou 5.1 neuf', 'Kit de purge (bocal, tuyaux)', 'Clé de purge', 'Pompe de purge manuelle', 'Entonnoir', 'Chiffons absorbants'],
         etudePrelim: [
-            { q: 'Pourquoi faut-il purger le circuit de freinage après certaines interventions ?', r: '' },
-            { q: 'Dans quel ordre purger les freins (du plus éloigné au plus proche du maître-cylindre) ?', r: '' },
-            { q: 'Comment reconnaître la présence d\'air dans le circuit de freinage ?', r: '' },
-            { q: 'Quelles précautions prendre avec le liquide de frein (toxicité, corrosion) ?', r: '' },
-            { q: 'Comment éviter l\'entrée d\'air pendant la purge ?', r: '' }
+            { type: 'text', q: 'Pourquoi l\'air est-il l\'ennemi d\'un circuit de freinage hydraulique ?', r: 'Parce que l\'air est compressible. Quand on appuie sur la pédale, on comprime l\'air au lieu de pousser le liquide, ce qui rend la pédale "spongieuse" et le freinage inefficace.' },
+            { type: 'qcm', q: 'Quel est l\'ordre de purge standard sur la plupart des véhicules ?', options: ['De la roue la plus proche à la plus éloignée du maître-cylindre', 'De la roue la plus éloignée à la plus proche du maître-cylindre', 'N\'importe quel ordre'], r: 'De la roue la plus éloignée à la plus proche du maître-cylindre' },
+            { type: 'text', q: 'Quelle est la précaution la plus importante concernant le réservoir de liquide de frein pendant la purge ?', r: 'Ne jamais le laisser se vider complètement, sinon on réintroduit de l\'air dans le circuit et il faut tout recommencer.' }
         ],
         activitePratique: [
             etape('Préparation du circuit et du matériel', '20 min', [
@@ -1222,11 +1189,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Évaluer précisément l\'état des disques de frein selon les critères techniques pour déterminer leur conformité. (Compétence C1.2)',
         materiel: ['Pied à coulisse de précision', 'Comparateur de voile', 'Règle rigide', 'Lampe d\'inspection puissante', 'Fiche de mesures'],
         etudePrelim: [
-            { q: 'Quelles sont les cotes minimales d\'un disque de frein (épaisseur, diamètre) ?', r: '' },
-            { q: 'Comment mesurer le voile d\'un disque et quelle tolérance respecter ?', r: '' },
-            { q: 'Quels défauts visuels rendent un disque impropre à l\'usage ?', r: '' },
-            { q: 'Pourquoi les disques doivent-ils être remplacés par paire sur un même essieu ?', r: '' },
-            { q: 'Comment interpréter les rainures et l\'usure d\'un disque ?', r: '' }
+            { type: 'text', q: 'Où trouve-t-on la cote d\'épaisseur minimale (MIN TH) d\'un disque de frein ?', r: 'Elle est généralement gravée sur le bord du disque.' },
+            { type: 'qcm', q: 'Vous constatez que les disques avant sont usés mais le disque droit est 1mm plus fin que le gauche. Que suspectez-vous ?', options: ['Une usure normale', 'Un problème de qualité de disque', 'Un problème sur l\'étrier de frein droit (grippage)'], r: 'Un problème sur l\'étrier de frein droit (grippage)' },
+            { type: 'text', q: 'Qu\'est-ce que le "voile" d\'un disque de frein et quel symptôme provoque-t-il ?', r: 'Le voile est une déformation latérale du disque. Il provoque des vibrations dans le volant et la pédale de frein lors du freinage.' }
         ],
         activitePratique: [
             etape('Inspection visuelle détaillée', '20 min', [
@@ -1275,11 +1240,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Réaliser la dépose, le contrôle et l\'équilibrage d\'une roue pour éliminer les vibrations. (Compétence C1.3)',
         materiel: ['Démonte-pneu professionnel', 'Équilibreuse électronique', 'Masses d\'équilibrage', 'Clé dynamométrique', 'Contrôleur de pression', 'Produit d\'étanchéité'],
         etudePrelim: [
-            { q: 'Quelles sont les causes principales du déséquilibre d\'une roue ?', r: '' },
-            { q: 'Comment identifier les symptômes d\'un déséquilibrage (vibrations, usure) ?', r: '' },
-            { q: 'Quelle est la différence entre équilibrage statique et dynamique ?', r: '' },
-            { q: 'Où positionner les masses d\'équilibrage sur une jante ?', r: '' },
-            { q: 'Quelles vérifications effectuer sur une jante avant équilibrage ?', r: '' }
+            { type: 'qcm', q: 'Des vibrations ressenties dans le volant vers 110-130 km/h sont le symptôme typique d\'un problème...', options: ['De parallélisme', 'D\'équilibrage des roues avant', 'D\'équilibrage des roues arrière'], r: 'D\'équilibrage des roues avant' },
+            { type: 'text', q: 'Pourquoi doit-on nettoyer parfaitement la jante avant de la monter sur l\'équilibreuse ?', r: 'Parce que la boue ou les saletés collées à l\'intérieur de la jante agissent comme une masse et faussent complètement la mesure du déséquilibre.' },
+            { type: 'text', q: 'Après avoir serré les écrous de roue avec une clé à choc, quelle est l\'étape finale OBLIGATOIRE ?', r: 'Effectuer un serrage final au couple préconisé à l\'aide d\'une clé dynamométrique.' }
         ],
         activitePratique: [
             etape('Dépose et inspection de la roue', '30 min', [
@@ -1305,7 +1268,7 @@ export const tpSeconde: Record<number, TP> = {
                 'Lancer le cycle de mesure pour déterminer les déséquilibres.',
                 'Poser les masses d\'équilibrage aux positions indiquées par la machine.',
                 'Effectuer un contrôle de vérification après pose des masses.',
-                'Affiner l\'équilibrage si nécessaire pour obtenir un résultat optimal.',
+                'Affiner l\'équilibrage si nécessaire en ajoutant ou déplaçant des masses.',
                 'Remonter la roue sur le véhicule et serrer au couple préconisé.',
                 'Effectuer un essai routier pour valider l\'absence de vibrations.'
             ])
@@ -1331,11 +1294,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Remplacer un amortisseur avant en respectant les couples de serrage et les règles de sécurité. (Compétence C1.3)',
         materiel: ['Amortisseur neuf de référence exacte', 'Clé dynamométrique', 'Repousse-ressort', 'Clés et douilles diverses', 'Chandelles de sécurité'],
         etudePrelim: [
-            { q: 'Quel est le rôle précis d\'un amortisseur dans la suspension ?', r: '' },
-            { q: 'Comment identifier un amortisseur défectueux (fuite, efficacité, bruit) ?', r: '' },
-            { q: 'Pourquoi remplacer les amortisseurs par paire sur un même essieu ?', r: '' },
-            { q: 'Quelles précautions prendre avec un ressort sous compression ?', r: '' },
-            { q: 'Quels couples de serrage respecter lors du remontage ?', r: '' }
+            { type: 'qcm', q: 'Quel est le signe visuel le plus évident d\'un amortisseur HS ?', options: ['De la rouille', 'Des traces de fuite d\'huile sur le corps de l\'amortisseur', 'Il est sale'], r: 'Des traces de fuite d\'huile sur le corps de l\'amortisseur' },
+            { type: 'text', q: 'Pourquoi faut-il toujours remplacer les amortisseurs par paire sur un même essieu ?', r: 'Pour garantir un comportement symétrique et équilibré du véhicule en freinage et en virage. Un amortisseur neuf et un usé créeraient un déséquilibre dangereux.' },
+            { type: 'qcm', q: 'L\'utilisation d\'un compresseur de ressort est une opération très dangereuse. Quelle est la règle de sécurité la plus importante ?', options: ['Le faire rapidement', 'Bien positionner les griffes de manière opposée et symétrique sur le ressort', 'Mettre de l\'huile sur les vis'], r: 'Bien positionner les griffes de manière opposée et symétrique sur le ressort' }
         ],
         activitePratique: [
             etape('Préparation et accès à l\'amortisseur', '25 min', [
@@ -1387,11 +1348,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Remplacer le filtre à carburant diesel en respectant les règles de propreté et de purge. (Compétence C1.3)',
         materiel: ['Filtre à carburant diesel neuf', 'Clés spécifiques', 'Bac de récupération', 'Pompe d\'amorçage', 'Chiffons propres', 'Gants de protection'],
         etudePrelim: [
-            { q: 'Pourquoi le filtre à carburant est-il crucial sur un moteur diesel ?', r: '' },
-            { q: 'À quelle fréquence remplacer le filtre à carburant diesel ?', r: '' },
-            { q: 'Comment éviter l\'entrée d\'air lors du remplacement ?', r: '' },
-            { q: 'Quelle procédure d\'amorçage appliquer après remplacement ?', r: '' },
-            { q: 'Quelles précautions prendre avec le gazole (propreté, environnement) ?', r: '' }
+            { type: 'text', q: 'Quelle est la conséquence la plus grave de l\'entrée d\'impuretés dans un système d\'injection haute pression diesel ?', r: 'La destruction de la pompe haute pression et des injecteurs, dont les jeux de fonctionnement sont de l\'ordre du micron.' },
+            { type: 'qcm', q: 'Après avoir remplacé le filtre, quelle est l\'étape OBLIGATOIRE avant de tenter de démarrer le moteur ?', options: ['Accélérer à fond', 'Réamorcer et purger le circuit basse pression pour chasser l\'air', 'Faire la vidange'], r: 'Réamorcer et purger le circuit basse pression pour chasser l\'air' },
+            { type: 'text', q: 'De nombreux filtres à gazole ont une vis de purge en dessous. À quoi sert-elle ?', r: 'À purger l\'eau qui s\'est accumulée par décantation au fond du filtre, car l\'eau est plus dense que le gazole.' }
         ],
         activitePratique: [
             etape('Préparation et localisation du filtre', '15 min', [
@@ -1441,11 +1400,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Réparer le circuit de lave-glace pour restaurer une visibilité parfaite du pare-brise. (Compétence C1.3)',
         materiel: ['Multimètre', 'Pompe de lave-glace neuve', 'Gicleurs de remplacement', 'Durite souple', 'Produit lave-glace', 'Aiguille de débouchage'],
         etudePrelim: [
-            { q: 'Quels sont les composants principaux du circuit de lave-glace ?', r: '' },
-            { q: 'Comment diagnostiquer une panne de pompe de lave-glace ?', r: '' },
-            { q: 'Quelles sont les causes de bouchage des gicleurs ?', r: '' },
-            { q: 'Comment tester l\'alimentation électrique de la pompe ?', r: '' },
-            { q: 'Quel produit utiliser pour nettoyer les gicleurs bouchés ?', r: '' }
+            { type: 'qcm', q: 'Vous actionnez la commande de lave-glace et entendez le bruit de la pompe, mais rien ne sort. Quelle est la cause la plus probable ?', options: ['Un fusible grillé', 'Une pompe HS', 'Un gicleur ou une durite bouché(e)'], r: 'Un gicleur ou une durite bouché(e)' },
+            { type: 'text', q: 'Vous n\'entendez aucun bruit de pompe. Quel test simple faites-vous en premier ?', r: 'Vérifier le fusible correspondant et l\'alimentation 12V à la pompe avec un multimètre.' },
+            { type: 'text', q: 'Quelle est la méthode la plus simple pour déboucher un gicleur ?', r: 'Utiliser une aiguille fine ou un trombone pour retirer délicatement le bouchon de calcaire ou de saleté.' }
         ],
         activitePratique: [
             etape('Diagnostic de la panne', '20 min', [
@@ -1494,11 +1451,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Contrôler et réparer si nécessaire la ligne d\'échappement pour maintenir les performances et réduire la pollution. (Compétence C1.2, C1.3)',
         materiel: ['Pont élévateur', 'Lampe d\'inspection', 'Pâte d\'étanchéité haute température', 'Colliers d\'échappement', 'Clés adaptées', 'Gants thermiques'],
         etudePrelim: [
-            { q: 'Quels sont les éléments principaux d\'une ligne d\'échappement ?', r: '' },
-            { q: 'Comment identifier une fuite sur l\'échappement ?', r: '' },
-            { q: 'Quelles sont les conséquences d\'une fuite d\'échappement ?', r: '' },
-            { q: 'Quand remplacer un silencieux ou un catalyseur ?', r: '' },
-            { q: 'Comment réparer temporairement une petite fuite d\'échappement ?', r: '' }
+            { type: 'text', q: 'Quels sont les risques d\'une fuite sur la ligne d\'échappement, notamment si elle se situe avant le catalyseur ?', r: 'Bruit, pollution accrue, mais surtout risque d\'intoxication au monoxyde de carbone (CO) si les gaz entrent dans l\'habitacle.' },
+            { type: 'qcm', q: 'Comment repérer facilement une petite fuite sur une ligne d\'échappement froide ?', options: ['En regardant de loin', 'En passant la main pour sentir le souffle', 'En recherchant des traces de suie noire autour des jonctions'], r: 'En recherchant des traces de suie noire autour des jonctions' },
+            { type: 'text', q: 'À quoi servent les silentblocs en caoutchouc qui soutiennent la ligne d\'échappement ?', r: 'Ils absorbent les vibrations du moteur et les mouvements de la ligne pour éviter qu\'elle ne casse ou ne heurte la carrosserie.' }
         ],
         activitePratique: [
             etape('Inspection complète de la ligne', '25 min', [
@@ -1547,11 +1502,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Maîtriser l\'utilisation de la clé dynamométrique pour respecter les couples de serrage constructeur. (Compétence C1.1)',
         materiel: ['Clé dynamométrique étalonné', 'Douilles diverses', 'Documentation couples de serrage', 'Boulons d\'exercice', 'Huile de graissage'],
         etudePrelim: [
-            { q: 'Pourquoi est-il crucial de respecter les couples de serrage ?', r: '' },
-            { q: 'Quelles sont les unités de mesure du couple (Nm, daN.m, lb.ft) ?', r: '' },
-            { q: 'Comment régler correctement une clé dynamométrique ?', r: '' },
-            { q: 'Dans quel sens utiliser une clé dynamométrique (uniquement serrage) ?', r: '' },
-            { q: 'Quand étalonner une clé dynamométrique ?', r: '' }
+            { type: 'text', q: 'Quel est le risque si on serre trop fort les écrous d\'une roue ? Et si on ne serre pas assez ?', r: 'Trop fort : on risque de déformer la jante ou de casser un goujon. Pas assez : la roue risque de se desserrer et de se détacher en roulant.' },
+            { type: 'qcm', q: 'Après avoir utilisé une clé dynamométrique à déclenchement, que doit-on faire avant de la ranger ?', options: ['La laisser réglée sur le dernier couple utilisé', 'La mettre au couple maximum', 'La remettre à sa valeur la plus basse pour détendre le ressort interne'], r: 'La remettre à sa valeur la plus basse pour détendre le ressort interne' },
+            { type: 'text', q: 'Peut-on utiliser une clé dynamométrique pour desserrer un écrou très bloqué ? Pourquoi ?', r: 'Non, jamais. C\'est un instrument de mesure de précision qui serait endommagé. On utilise une clé à choc ou un bras de levier pour desserrer.' }
         ],
         activitePratique: [
             etape('Prise en main de la clé dynamométrique', '20 min', [
@@ -1600,11 +1553,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Choisir les lubrifiants conformes aux spécifications et maintenir la traçabilité obligatoire. (Compétence C1.1)',
         materiel: ['Échantillons d\'huiles diverses', 'Fiches techniques constructeur', 'Registre de traçabilité', 'Étiquettes d\'identification'],
         etudePrelim: [
-            { q: 'Comment décrypter les indices de viscosité d\'une huile (5W30, 10W40) ?', r: '' },
-            { q: 'Quelle différence entre huile minérale, semi-synthétique et synthétique ?', r: '' },
-            { q: 'Que signifient les normes ACEA, API pour les huiles moteur ?', r: '' },
-            { q: 'Pourquoi tracer l\'utilisation des lubrifiants (réglementation, garantie) ?', r: '' },
-            { q: 'Comment identifier l\'huile préconisée pour un véhicule donné ?', r: '' }
+            { type: 'qcm', q: 'L\'indice "5W" dans une huile 5W30 représente...', options: ['La viscosité à chaud', 'La viscosité à froid', 'La qualité de l\'huile'], r: 'La viscosité à froid' },
+            { type: 'text', q: 'Qu\'est-ce qu\'une norme constructeur (ex: VW 507.00) et pourquoi est-elle plus importante que l\'indice de viscosité ?', r: 'C\'est un cahier des charges très strict imposé par le constructeur. Elle garantit que l\'huile possède tous les additifs nécessaires pour protéger ce moteur spécifique (FAP, etc.).' },
+            { type: 'text', q: 'Pourquoi la traçabilité (noter quelle huile a été mise, quand et à quel kilométrage) est-elle si importante ?', r: 'Pour des raisons de garantie constructeur, de responsabilité légale de l\'atelier, et pour assurer un suivi correct de l\'entretien du véhicule.' }
         ],
         activitePratique: [
             etape('Identification des spécifications requises', '15 min', [
@@ -1652,11 +1603,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Utiliser efficacement la documentation technique pour obtenir les informations nécessaires aux interventions. (Compétence C1.1)',
         materiel: ['Revue Technique Automobile', 'Manuel constructeur', 'Documentation électronique', 'Ordinateur ou tablette'],
         etudePrelim: [
-            { q: 'Quelle est l\'utilité de la RTA pour un mécanicien ?', r: '' },
-            { q: 'Comment est organisée une fiche technique RTA ?', r: '' },
-            { q: 'Où trouver les couples de serrage dans la documentation ?', r: '' },
-            { q: 'Comment identifier la bonne procédure pour un véhicule donné ?', r: '' },
-            { q: 'Quelles informations complémentaires apporte la documentation constructeur ?', r: '' }
+            { type: 'text', q: 'Vous devez remplacer une courroie de distribution. Quelles sont les 3 informations capitales que vous devez trouver dans la RTA avant de commencer ?', r: '1. La procédure de calage du moteur. 2. Les couples de serrage des galets et supports. 3. La méthode de tension de la courroie neuve.' },
+            { type: 'qcm', q: 'Un schéma électrique représente les composants...', options: ['À leur emplacement réel dans la voiture', 'De manière symbolique pour montrer leurs connexions logiques', 'En 3D'], r: 'De manière symbolique pour montrer leurs connexions logiques' },
+            { type: 'text', q: 'Comment identifier précisément le modèle et la motorisation d\'un véhicule pour trouver la bonne documentation ?', r: 'En utilisant le numéro de série du véhicule (VIN) ou le type mine inscrit sur la carte grise.' }
         ],
         activitePratique: [
             etape('Navigation dans la documentation RTA', '25 min', [
@@ -1705,11 +1654,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Identifier, tester et remplacer les fusibles défectueux pour restaurer le fonctionnement des circuits électriques. (Compétence C1.2, C1.3)',
         materiel: ['Multimètre', 'Jeu de fusibles de rechange', 'Pince extracteur de fusibles', 'Lampe témoin 12V', 'Schéma des fusibles'],
         etudePrelim: [
-            { q: 'Quel est le rôle d\'un fusible dans un circuit électrique ?', r: '' },
-            { q: 'Comment identifier un fusible grillé visuellement ?', r: '' },
-            { q: 'Pourquoi respecter impérativement le calibre des fusibles ?', r: '' },
-            { q: 'Où sont généralement situés les boîtiers de fusibles ?', r: '' },
-            { q: 'Quelles sont les causes principales de fusion d\'un fusible ?', r: '' }
+            { type: 'text', q: 'Un fusible de 15A grille instantanément dès que vous le remplacez. Quelle est la conclusion la plus probable ?', r: 'Il y a un court-circuit à la masse sur ce circuit.' },
+            { type: 'qcm', q: 'Quelle est la méthode la plus fiable pour tester un fusible ?', options: ['Le regarder à la lumière', 'Le secouer', 'Tester sa continuité avec un multimètre en mode ohmmètre'], r: 'Tester sa continuité avec un multimètre en mode ohmmètre' },
+            { type: 'text', q: 'Pourquoi est-il important de consulter le schéma des fusibles avant toute intervention ?', r: 'Pour identifier rapidement le fusible correspondant au circuit en panne et connaître son calibre exact sans avoir à tous les tester un par un.' }
         ],
         activitePratique: [
             etape('Localisation et identification des fusibles', '20 min', [
@@ -1757,11 +1704,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Diagnostiquer et remplacer un relais défectueux pour rétablir le fonctionnement d\'un circuit électrique. (Compétence C1.2, C1.3)',
         materiel: ['Multimètre de précision', 'Relais de test', 'Schéma électrique', 'Lampe témoin 12V', 'Pinces crocodiles'],
         etudePrelim: [
-            { q: 'Quel est le principe de fonctionnement d\'un relais automobile ?', r: '' },
-            { q: 'Comment identifier un relais défaillant dans un circuit ?', r: '' },
-            { q: 'Quels sont les différents types de relais (4 ou 5 broches) ?', r: '' },
-            { q: 'Comment lire le brochage d\'un relais (numérotation 30, 85, 86, 87, 87a) ?', r: '' },
-            { q: 'Quelles mesures effectuer pour tester un relais ?', r: '' }
+            { type: 'text', q: 'À l\'aide des numéros de bornes standards (30, 85, 86, 87), décrivez comment fonctionne un relais 4 broches.', r: 'On applique une tension de commande aux bornes 85 et 86 (la bobine), ce qui crée un champ magnétique qui ferme un interrupteur interne, reliant alors la borne de puissance 30 à la borne de sortie 87.' },
+            { type: 'qcm', q: 'Vous entendez un "clic" lorsque vous activez la commande, mais l\'équipement ne fonctionne pas. Que suspectez-vous ?', options: ['La bobine du relais est coupée', 'Le contact de puissance du relais est charbonné/oxydé', 'Le fusible de commande est grillé'], r: 'Le contact de puissance du relais est charbonné/oxydé' },
+            { type: 'text', q: 'Comment tester rapidement un relais si vous disposez d\'un relais identique et fonctionnel ?', r: 'En les échangeant simplement. Si le défaut se résout, le relais d\'origine est bien la cause de la panne.' }
         ],
         activitePratique: [
             etape('Identification et localisation du relais', '20 min', [
@@ -1809,11 +1754,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Effectuer la remise à zéro de l\'indicateur d\'entretien selon la procédure constructeur. (Compétence C1.4)',
         materiel: ['Documentation constructeur', 'Valise de diagnostic (si nécessaire)', 'Montre ou chronomètre'],
         etudePrelim: [
-            { q: 'À quoi sert l\'indicateur d\'entretien sur un véhicule moderne ?', r: '' },
-            { q: 'Quand faut-il remettre à zéro l\'indicateur d\'entretien ?', r: '' },
-            { q: 'Quelles sont les différentes méthodes de remise à zéro ?', r: '' },
-            { q: 'Que se passe-t-il si on oublie de remettre l\'indicateur à zéro ?', r: '' },
-            { q: 'Comment vérifier que la remise à zéro a bien été effectuée ?', r: '' }
+            { type: 'text', q: 'Pourquoi est-il crucial de faire cette remise à zéro après chaque vidange ?', r: 'Pour que le client soit alerté au bon moment pour le prochain entretien et pour maintenir la validité de la garantie constructeur.' },
+            { type: 'qcm', q: 'Sur de nombreux véhicules, la procédure manuelle implique souvent une combinaison d\'actions. Laquelle est la plus courante ?', options: ['Appuyer sur le klaxon 3 fois', 'Maintenir un bouton du tableau de bord enfoncé tout en mettant le contact', 'Faire un appel de phare'], r: 'Maintenir un bouton du tableau de bord enfoncé tout en mettant le contact' },
+            { type: 'text', q: 'Comment s\'assurer que la remise à zéro a bien fonctionné ?', r: 'En coupant puis en remettant le contact. Le message d\'entretien ne doit plus apparaître et l\'ordinateur de bord doit afficher le kilométrage/temps jusqu\'à la prochaine échéance.' }
         ],
         activitePratique: [
             etape('Identification de la procédure', '10 min', [
@@ -1861,11 +1804,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Réparer un faisceau électrique endommagé en respectant les normes de qualité et de sécurité. (Compétence C1.3)',
         materiel: ['Multimètre', 'Fil électrique de section appropriée', 'Cosses et connecteurs', 'Sertisseur de cosses', 'Gaine thermorétractable', 'Ruban isolant'],
         etudePrelim: [
-            { q: 'Comment localiser une coupure dans un faisceau électrique ?', r: '' },
-            { q: 'Quelle section de fil utiliser pour remplacer un conducteur ?', r: '' },
-            { q: 'Comment effectuer une épissure propre et durable ?', r: '' },
-            { q: 'Pourquoi utiliser des gaines thermorétractables ?', r: '' },
-            { q: 'Quelles précautions prendre pour éviter les courts-circuits ?', r: '' }
+            { type: 'text', q: 'Quelle est la méthode la plus sûre et la plus durable pour réparer un fil coupé ?', r: 'Utiliser une cosse à sertir (ou une soudure à l\'étain) puis isoler la réparation avec une gaine thermorétractable.' },
+            { type: 'qcm', q: 'Pourquoi ne doit-on jamais simplement torsader les fils et mettre du ruban adhésif ?', options: ['C\'est trop long à faire', 'Le contact n\'est pas fiable et la réparation n\'est pas étanche', 'Ce n\'est pas esthétique'], r: 'Le contact n\'est pas fiable et la réparation n\'est pas étanche' },
+            { type: 'text', q: 'Comment s\'assurer de choisir un fil de remplacement de la bonne section ?', r: 'En se référant à la documentation technique ou en comparant visuellement avec la section du fil d\'origine. Utiliser un fil trop fin est dangereux (risque de surchauffe).' }
         ],
         activitePratique: [
             etape('Localisation du défaut', '20 min', [
@@ -1915,11 +1856,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Équilibrer une roue pour éliminer les vibrations et assurer un roulage confortable. (Compétence C1.3)',
         materiel: ['Équilibreuse électronique', 'Masses d\'équilibrage adhésives et à clip', 'Nettoyant dégraissant', 'Pince à masses'],
         etudePrelim: [
-            { q: 'Quelles sont les causes du déséquilibre d\'une roue ?', r: '' },
-            { q: 'Quelle différence entre équilibrage statique et dynamique ?', r: '' },
-            { q: 'Comment positionner une roue sur l\'équilibreuse ?', r: '' },
-            { q: 'Où placer les masses d\'équilibrage sur une jante ?', r: '' },
-            { q: 'Quelles tolérances de déséquilibre accepter ?', r: '' }
+            { type: 'text', q: 'Quelle est la différence entre l\'équilibrage statique et l\'équilibrage dynamique ?', r: 'Statique corrige le "sautillement" vertical. Dynamique corrige le "flottement" latéral. Une équilibreuse moderne calcule les deux.' },
+            { type: 'qcm', q: 'Où doit-on coller les masses adhésives sur une jante en aluminium ?', options: ['N\'importe où sur la jante', 'Sur le bord extérieur visible', 'À l\'intérieur de la jante, sur des surfaces planes et propres'], r: 'À l\'intérieur de la jante, sur des surfaces planes et propres' },
+            { type: 'text', q: 'L\'équilibreuse affiche "0 - 0" après correction. Qu\'est-ce que cela signifie ?', r: 'Que la roue est parfaitement équilibrée et qu\'il n\'y a plus de balourd à corriger.' }
         ],
         activitePratique: [
             etape('Préparation de la roue', '15 min', [
@@ -1968,11 +1907,9 @@ export const tpSeconde: Record<number, TP> = {
         objectif: 'Valider l\'acquisition de toutes les compétences du référentiel Seconde par un entretien complet en autonomie. (Toutes compétences C1.1 à C1.4)',
         materiel: ['Tous les outils et équipements d\'atelier', 'Fiche d\'évaluation complète', 'Documentation technique', 'Produits d\'entretien'],
         etudePrelim: [
-            { q: 'Quelles sont les opérations principales d\'un entretien périodique complet ?', r: '' },
-            { q: 'Comment organiser méthodiquement un entretien pour optimiser le temps ?', r: '' },
-            { q: 'Quelles compétences techniques doivent être démontrées ?', r: '' },
-            { q: 'Comment présenter professionnellement le travail réalisé ?', r: '' },
-            { q: 'Quels points de sécurité sont prioritaires lors de l\'évaluation ?', r: '' }
+            { type: 'text', q: 'Avant de commencer un entretien, quelle est votre première action pour connaître les opérations à réaliser ?', r: 'Consulter le carnet d\'entretien du véhicule et la documentation technique du constructeur pour connaître le plan de maintenance spécifique.' },
+            { type: 'qcm', q: 'Lors d\'un contrôle, vous détectez un défaut de sécurité majeur (ex: fuite de liquide de frein). Que faites-vous ?', options: ['Vous ignorez le problème et continuez l\'entretien', 'Vous réparez sans en parler au client', 'Vous arrêtez l\'entretien, informez immédiatement le client et le chef d\'atelier, et préconisez une réparation urgente'], r: 'Vous arrêtez l\'entretien, informez immédiatement le client et le chef d\'atelier, et préconisez une réparation urgente' },
+            { type: 'text', q: 'Citez 3 éléments clés qui doivent figurer sur la fiche d\'intervention que vous remettez au client.', r: '1. Le détail des opérations réalisées. 2. Les références des pièces et fluides utilisés (traçabilité). 3. Les anomalies constatées et les recommandations.' }
         ],
         activitePratique: [
             etape('Réception véhicule et planification', '20 min', [
