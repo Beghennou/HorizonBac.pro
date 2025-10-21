@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Loader2 } from 'lucide-react';
 
 export default function SelectStudentPage() {
   const router = useRouter();
@@ -33,47 +34,57 @@ export default function SelectStudentPage() {
   };
 
   const studentNamesInClass = selectedClass ? classes[selectedClass] || [] : [];
+  const areClassesLoaded = Object.keys(classes).length > 0;
+
 
   return (
-    <div className="flex items-center justify-center py-12 px-4">
+    <div className="flex items-center justify-center min-h-screen py-12 px-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="font-headline text-3xl text-accent">Accès Espace Élève</CardTitle>
           <CardDescription>Sélectionne ta classe puis ton nom pour accéder à tes travaux pratiques.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="class-select">1. Sélectionne ta classe</Label>
-            <Select onValueChange={handleClassChange} value={selectedClass}>
-              <SelectTrigger id="class-select">
-                <SelectValue placeholder="Sélectionne ta classe..." />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.keys(classes).sort().map(className => (
-                  <SelectItem key={className} value={className}>{className}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedClass && (
-            <div className="space-y-2">
-              <Label htmlFor="student-select">2. Sélectionne ton nom</Label>
-              <Select onValueChange={handleStudentChange} value={selectedStudent}>
-                <SelectTrigger id="student-select">
-                  <SelectValue placeholder="Sélectionne ton nom..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {studentNamesInClass.length > 0 ? (
-                    studentNamesInClass.sort().map(studentName => (
-                      <SelectItem key={studentName} value={studentName}>{studentName}</SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="no-student" disabled>Aucun élève dans cette classe</SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+          {!areClassesLoaded ? (
+            <div className="flex items-center justify-center h-24">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="class-select">1. Sélectionne ta classe</Label>
+                <Select onValueChange={handleClassChange} value={selectedClass}>
+                  <SelectTrigger id="class-select">
+                    <SelectValue placeholder="Sélectionne ta classe..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(classes).sort().map(className => (
+                      <SelectItem key={className} value={className}>{className}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedClass && (
+                <div className="space-y-2">
+                  <Label htmlFor="student-select">2. Sélectionne ton nom</Label>
+                  <Select onValueChange={handleStudentChange} value={selectedStudent}>
+                    <SelectTrigger id="student-select">
+                      <SelectValue placeholder="Sélectionne ton nom..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {studentNamesInClass.length > 0 ? (
+                        studentNamesInClass.sort().map(studentName => (
+                          <SelectItem key={studentName} value={studentName}>{studentName}</SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-student" disabled>Aucun élève dans cette classe</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </>
           )}
 
           <Button 
