@@ -1,16 +1,16 @@
+
 'use client';
 import { Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { simulations } from '@/lib/mock-data';
 import { getTpById, TP } from '@/lib/data-manager';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { CheckeredFlag, RacingHelmet } from '@/components/icons';
+import { RacingHelmet } from '@/components/icons';
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { cn } from '@/lib/utils';
 
@@ -115,43 +115,6 @@ function StudentDashboard() {
         </section>
       )}
 
-      <section>
-        <h2 className="font-headline text-4xl tracking-wide flex items-center gap-3 mb-6">
-            <CheckeredFlag className="w-8 h-8 text-accent" />
-            Évaluations & Compétences
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {simulations.map((sim) => {
-             const image = PlaceHolderImages.find(p => p.id === sim.imageId);
-            return (
-               <Card key={sim.id} className="flex flex-col overflow-hidden bg-card border-primary/30 hover:border-accent/50 transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-accent/20">
-                <CardHeader className="p-0">
-                   {image && (
-                     <Image
-                        src={image.imageUrl}
-                        alt={image.description}
-                        width={400}
-                        height={225}
-                        className="w-full h-48 object-cover"
-                        data-ai-hint={image.imageHint}
-                      />
-                   )}
-                </CardHeader>
-                <div className="p-6 flex-grow flex flex-col">
-                    <CardTitle className="font-headline tracking-wider text-2xl text-gray-100">{sim.track}</CardTitle>
-                    <CardDescription className="mt-2 flex-grow">{sim.description}</CardDescription>
-                    {sim.bestLap && <p className="text-sm text-accent mt-4">Votre meilleur score : <span className="font-mono font-bold">{sim.bestLap}</span></p>}
-                </div>
-                <CardFooter>
-                  <Button asChild variant="outline" className="w-full font-bold font-headline uppercase tracking-wider border-accent text-accent hover:bg-accent hover:text-black">
-                    <Link href="#">Voir l'évaluation <ArrowRight className="ml-2"/></Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
     </div>
   );
 }
