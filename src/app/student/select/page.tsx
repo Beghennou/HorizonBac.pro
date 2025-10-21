@@ -4,9 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function SelectStudentPage() {
   const router = useRouter();
@@ -26,11 +27,7 @@ export default function SelectStudentPage() {
 
   const handleClassChange = (className: string) => {
     setSelectedClass(className);
-    setSelectedStudent('');
-  };
-
-  const handleStudentChange = (studentName: string) => {
-    setSelectedStudent(studentName);
+    setSelectedStudent(''); // Reset student selection when class changes
   };
 
   const handleSubmit = () => {
@@ -58,37 +55,37 @@ export default function SelectStudentPage() {
             </div>
           ) : (
             <>
-              <div className="space-y-2">
-                <Label htmlFor="class-select">1. Sélectionne ta classe</Label>
-                <Select onValueChange={handleClassChange} value={selectedClass}>
-                  <SelectTrigger id="class-select">
-                    <SelectValue placeholder="Sélectionne ta classe..." />
-                  </SelectTrigger>
-                  <SelectContent>
+              <div className="space-y-3">
+                <Label className="font-bold text-lg">1. Sélectionne ta classe</Label>
+                <ScrollArea className="h-48 w-full rounded-md border p-4">
+                  <RadioGroup value={selectedClass} onValueChange={handleClassChange}>
                     {Object.keys(classes).sort().map(className => (
-                      <SelectItem key={className} value={className}>{className}</SelectItem>
+                      <div key={className} className="flex items-center space-x-2 py-2">
+                        <RadioGroupItem value={className} id={className} />
+                        <Label htmlFor={className} className="text-base cursor-pointer">{className}</Label>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </RadioGroup>
+                </ScrollArea>
               </div>
 
               {selectedClass && (
-                <div className="space-y-2">
-                  <Label htmlFor="student-select">2. Sélectionne ton nom</Label>
-                  <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={studentNamesInClass.length === 0}>
-                    <SelectTrigger id="student-select">
-                      <SelectValue placeholder="Sélectionne ton nom..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {studentNamesInClass.length > 0 ? (
-                        studentNamesInClass.sort().map(studentName => (
-                          <SelectItem key={studentName} value={studentName}>{studentName}</SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="no-student" disabled>Aucun élève dans cette classe</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
+                <div className="space-y-3">
+                  <Label className="font-bold text-lg">2. Sélectionne ton nom</Label>
+                   <ScrollArea className="h-48 w-full rounded-md border p-4">
+                    {studentNamesInClass.length > 0 ? (
+                      <RadioGroup value={selectedStudent} onValueChange={setSelectedStudent}>
+                        {studentNamesInClass.sort().map(studentName => (
+                          <div key={studentName} className="flex items-center space-x-2 py-2">
+                            <RadioGroupItem value={studentName} id={studentName} />
+                            <Label htmlFor={studentName} className="text-base cursor-pointer">{studentName}</Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    ) : (
+                       <p className="text-muted-foreground text-center py-4">Aucun élève dans cette classe.</p>
+                    )}
+                  </ScrollArea>
                 </div>
               )}
             </>
