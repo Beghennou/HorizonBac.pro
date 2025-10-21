@@ -51,6 +51,7 @@ export default function StudentsPage() {
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
     const tps = getTpsByNiveau(level);
+    const tpsIdsForCurrentLevel = new Set(tps.map(tp => tp.id));
 
     const handleAssignTpToSelected = (tpId: number, tpTitle: string) => {
         if (selectedStudents.length === 0) {
@@ -141,7 +142,7 @@ export default function StudentsPage() {
                     studentsInClass.map((student) => {
                       const studentName = student.name;
                       const isSelected = selectedStudents.includes(studentName);
-                      const studentAssignedTps = assignedTps[studentName] || [];
+                      const studentAssignedTps = (assignedTps[studentName] || []).filter(assignedTp => tpsIdsForCurrentLevel.has(assignedTp.id));
                       
                       return (
                         <Card 
@@ -173,7 +174,7 @@ export default function StudentsPage() {
                                       <p className="text-xs text-muted-foreground text-center mb-2">TP Assignés</p>
                                       <div className="flex flex-wrap gap-2 justify-center">
                                           {studentAssignedTps.map(assignedTp => {
-                                               const tp = getTpsByNiveau(level).find(t => t.id === assignedTp.id);
+                                               const tp = tps.find(t => t.id === assignedTp.id);
                                                if (!tp) return null;
 
                                               return (
