@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/sidebar';
 import { AssignmentsProvider, useAssignments } from '@/contexts/AssignmentsContext';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
+import { Home } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 function DashboardLayoutContent({
   children,
@@ -123,6 +125,12 @@ function DashboardLayoutContent({
                     </button>
                   ))}
                 </div>
+                 <Button variant="ghost" asChild className="text-muted-foreground hover:bg-primary/20 hover:text-accent">
+                    <Link href="/">
+                      <Home className="mr-2"/>
+                      Accueil
+                    </Link>
+                </Button>
                 <LogoutButton />
               </div>
             </div>
