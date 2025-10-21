@@ -32,7 +32,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 301,
     duree: '2h30',
     titre: 'CA 301 • Contrôle des pressions. Recharge d\'une climatisation',
-    situation: 'Contrôle du bon fonctionnement du circuit de climatisation et procédure de recharge selon normes environnementales.',
+    situation: 'Un client se plaint que sa climatisation ne produit plus d\'air froid. Il demande un diagnostic complet et une intervention avant son départ en vacances. Vous devez prendre en charge le diagnostic du circuit de climatisation en respectant les normes environnementales.',
     objectif: 'Mesurer pressions HP/BP, diagnostiquer fuites, effectuer recharge et traçabilité fluide frigorigène. (Compétence C3.1)',
     materiel: ['Station clim agréée', 'Manomètres', 'Détecteur de fuites', 'Fluide R134a/R1234yf', 'EPIs', 'Fiches traçabilité'],
     etudePrelim: [
@@ -64,7 +64,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 302,
     duree: '2h00',
     titre: 'CA 306 • Diagnostic et remplacement airbag',
-    situation: 'Diagnostic et remplacement d’un airbag suite à déclenchement ou défaut.',
+    situation: 'Le témoin d\'airbag d\'un véhicule reste allumé en permanence. Le client s\'inquiète pour sa sécurité. Votre mission est de diagnostiquer le système de retenue programmée et de remplacer le composant défectueux en suivant un protocole de sécurité strict.',
     objectif: 'Appliquer procédures sécurité, déposer/reposer airbag, effacer défauts et valider. (Compétence C3.3)',
     materiel: ['Outil diag', 'Airbag neuf', 'Clé dynamométrique', 'EPIs'],
     etudePrelim: [
@@ -96,7 +96,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 303,
     duree: '2h00',
     titre: 'CA 305 • Essuyage automatique des vitres. Allumage automatique',
-    situation: 'Diagnostic des systèmes essuyage automatique et allumage auto des feux.',
+    situation: 'Un client rapporte que ses essuie-glaces se déclenchent de manière aléatoire et que ses phares ne s\'allument plus automatiquement dans les tunnels. Vous devez diagnostiquer les capteurs de pluie et de luminosité.',
     objectif: 'Tester capteurs pluie/lumière, calibrer et valider. (Compétence C3.1)',
     materiel: ['Valise diag', 'Multimètre', 'Schéma', 'Vaporisateur'],
     etudePrelim: [
@@ -128,7 +128,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 304,
     duree: '1h30',
     titre: 'CA 303 • Reconnaissance des valves de roues',
-    situation: 'Identification et diagnostic des valves TPMS.',
+    situation: 'Malgré une pression des pneus correcte, le témoin TPMS (Tire Pressure Monitoring System) reste allumé. Vous devez diagnostiquer le système, identifier le capteur défaillant et le réappairer au calculateur.',
     objectif: 'Appairer capteurs, remplacer valve défectueuse et valider pressions. (Compétence C3.4)',
     materiel: ['Outil TPMS', 'Valise diag', 'Manomètre', 'Valves neuves'],
     etudePrelim: [
@@ -160,7 +160,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 305,
     duree: '2h00',
     titre: 'CA 311 • Phares au xénon',
-    situation: 'Diagnostic et réglage des phares au xénon.',
+    situation: 'Un client se plaint d\'un éclairage faible sur son véhicule équipé de phares au xénon. De plus, le faisceau semble trop bas. Vous devez diagnostiquer le système haute tension et le correcteur d\'assiette automatique.',
     objectif: 'Contrôler ballasts, ampoules, correcteur auto et réglage faisceau. (Compétence C3.3)',
     materiel: ['Valise diag', 'Régloscope', 'EPIs diélectriques'],
     etudePrelim: [
@@ -192,7 +192,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 306,
     duree: '3h00',
     titre: 'MTE 303 • Remplacement distribution et pompe à eau',
-    situation: 'Remplacement distribution + pompe à eau.',
+    situation: 'Un véhicule entre à l\'atelier pour son entretien majeur, incluant le remplacement préventif de la courroie de distribution et de la pompe à eau. L\'intervention demande une rigueur absolue pour garantir la fiabilité du moteur.',
     objectif: 'Respecter calage/couples et purge circuit. (Compétence C3.3)',
     materiel: ['Kit distri', 'Piges calage', 'Clé dynamométrique', 'LR'],
     etudePrelim: [
@@ -224,7 +224,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 307,
     duree: '1h45',
     titre: 'MA 305 • Relevé de pressions de suralimentation',
-    situation: 'Relevé/analyse pressions de suralimentation.',
+    situation: 'Un client rapporte une perte de puissance significative et un sifflement anormal à l\'accélération sur son moteur turbo. Vous êtes chargé de contrôler le circuit de suralimentation pour identifier la cause du problème.',
     objectif: 'Comparer pressions aux valeurs constructeur, identifier fuites/wastegate/VGT. (Compétence C3.1)',
     materiel: ['Mano turbo', 'Valise diag', 'T de dérivation', 'Fumigène'],
     etudePrelim: [
@@ -257,7 +257,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 308,
     duree: '2h00',
     titre: 'MA 307 • Contrôle du circuit basse pression diesel',
-    situation: 'Contrôle basse pression gasoil jusqu’à pompe HP.',
+    situation: 'Un moteur diesel présente des difficultés de démarrage et des coupures moteur intermittentes. Vous suspectez un problème d\'alimentation et devez contrôler le circuit basse pression pour confirmer votre diagnostic.',
     objectif: 'Mesurer pression/dépression, détecter bulles et colmatage. (Compétence C3.1)',
     materiel: ['Mano BP', 'Tuyau transparent', 'Filtre gasoil', 'Valise diag'],
     etudePrelim: [
@@ -291,7 +291,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 309,
     duree: '2h00',
     titre: 'L 307 • Diagnostic géométrie',
-    situation: 'Diagnostic géométrie trains roulants.',
+    situation: 'Le client se plaint que son véhicule tire à droite et que ses pneus avant s\'usent de manière irrégulière. Un diagnostic complet de la géométrie des trains roulants est nécessaire.',
     objectif: 'Mesurer et interpréter angles, régler parallélisme. (Compétence C3.4)',
     materiel: ['Banc géométrie 3D', 'Clés réglage', 'Fiche constructeur'],
     etudePrelim: [
@@ -328,7 +328,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 310,
     duree: '2h30',
     titre: 'MA 303 • Diagnostic système injection diesel',
-    situation: 'Diagnostic injection diesel common rail.',
+    situation: 'Un véhicule diesel Common Rail présente le voyant moteur allumé, avec des pertes de puissance. Vous êtes chargé de mener un diagnostic avancé du système d\'injection pour identifier la source de la panne.',
     objectif: 'Analyser codes/paramètres, tester actionneurs et conclure. (Compétence C3.2)',
     materiel: ['Valise diag', 'Multimètre', 'Mano rampe', 'Oscilloscope', 'RTA'],
     etudePrelim: [
@@ -366,7 +366,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 311,
     duree: '2h00',
     titre: 'MP 303 • Diagnostic et mesures de paramètres antipollution',
-    situation: 'Diagnostic dispositifs antipollution (lambda, EGR, catalyseur, FAP).',
+    situation: 'Le véhicule a été refusé au contrôle technique pour pollution excessive. Vous devez diagnostiquer les systèmes antipollution (lambda, EGR, FAP) pour trouver la cause et valider la conformité après réparation.',
     objectif: 'Mesurer émissions et vérifier fonctionnement des organes. (Compétence C3.1)',
     materiel: ['Analyseur 4/5 gaz', 'Opacimètre', 'Valise diag', 'Thermo IR'],
     etudePrelim: [
@@ -398,7 +398,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 312,
     duree: '2h00',
     titre: 'UE 304 • Utilisation d\'un oscilloscope',
-    situation: 'Prise en main oscilloscope automobile.',
+    situation: 'Pour diagnostiquer des pannes électroniques complexes, la maîtrise de l\'oscilloscope est indispensable. Cet atelier vise à vous former à la capture et à l\'analyse de signaux électriques automobiles.',
     objectif: 'Paramétrer, capter et interpréter des signaux capteurs/actionneurs. (Compétence C3.3)',
     materiel: ['Oscilloscope', 'Sondes diff', 'Pince ampèremétrique', 'Schémas'],
     etudePrelim: [
@@ -435,7 +435,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 313,
     duree: '2h00',
     titre: 'MA 306 • Contrôle des injecteurs moteur à rampe commune 1',
-    situation: 'Contrôle injecteurs common rail — partie 1 (électrique/retours).',
+    situation: 'Un moteur Common Rail claque et fume. Le chef d\'atelier vous missionne pour la première phase du diagnostic injecteur : les contrôles électriques et l\'analyse des retours de fuite.',
     objectif: 'Mesurer résistances, contrôler retours et étanchéité. (Compétence C3.1)',
     materiel: ['Multimètre', 'Éprouvettes', 'Valise diag', 'Chiffons'],
     etudePrelim: [
@@ -467,7 +467,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 314,
     duree: '2h00',
     titre: 'MA 311 • Contrôle des injecteurs moteur à rampe commune 2',
-    situation: 'Contrôle injecteurs common rail — partie 2 (banc et codage).',
+    situation: 'Suite au diagnostic précédent, un injecteur a été identifié comme défectueux. Vous devez le déposer, le tester sur banc, et coder le nouvel injecteur dans le calculateur moteur.',
     objectif: 'Mesurer débits/étanchéité sur banc et coder corrections (IMA/IQA). (Compétence C3.4)',
     materiel: ['Banc injecteurs', 'Éprouvettes', 'Valise diag', 'RTA'],
     etudePrelim: [
@@ -499,7 +499,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 315,
     duree: '2h30',
     titre: 'F 307 • Diagnostic du système ABS (contrôle des éléments)',
-    situation: 'Diagnostic complet ABS: capteurs, ECU, groupe hydraulique et essais.',
+    situation: 'Le témoin ABS est allumé. Le client signale une sensation étrange à la pédale. Vous devez mener un diagnostic complet pour assurer la sécurité du système de freinage antiblocage.',
     objectif: 'Identifier défauts par codes, mesures et tests actionneurs. (Compétence C3.2)',
     materiel: ['Valise ABS', 'Multimètre', 'Oscillo', 'Banc freinage'],
     etudePrelim: [
@@ -536,7 +536,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 316,
     duree: '2h00',
     titre: 'L 311 • Direction assistée électrique et hydraulique',
-    situation: 'Direction assistée électrique/hydraulique: découverte et diag.',
+    situation: 'Un client se plaint d\'une direction dure par moments et de bruits au braquage. Vous devez identifier le type de direction assistée (hydraulique ou électrique) et mener le diagnostic approprié.',
     objectif: 'Identifier système, lire codes, mesurer pression/params et valider. (Compétence C3.2)',
     materiel: ['Valise DAE', 'Mano 0–150 bar', 'Multimètre', 'Fluide DA'],
     etudePrelim: [
@@ -574,7 +574,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 317,
     duree: '2h00',
     titre: 'L 312 • Diagnostiquer un système de suspension pilotée',
-    situation: 'Suspension pilotée (amortissement variable/pneumatique).',
+    situation: 'Le véhicule, équipé d\'une suspension pilotée, est "bloqué" en position basse ou présente un confort très dégradé. Votre mission est de diagnostiquer le système électronique et pneumatique/hydraulique.',
     objectif: 'Diagnostiquer via codes/paramètres, tester actionneurs, valider comportement dynamique. (Compétence C3.2)',
     materiel: ['Valise suspension', 'Mano pneumatique', 'Multimètre', 'Schéma'],
     etudePrelim: [
@@ -614,7 +614,7 @@ export const tpTerminale: Record<number, TP> = {
     id: 318,
     duree: '2h30',
     titre: 'T 307 • Diagnostic BV robotisée',
-    situation: 'BV robotisée: commande embrayage et sélection pilotée.',
+    situation: 'Les vitesses passent mal sur une boîte robotisée : passages lents, à-coups, ou blocage sur un rapport. Vous devez diagnostiquer le système de commande électro-hydraulique et effectuer les apprentissages nécessaires.',
     objectif: 'Lire paramètres, tester actionneurs, réaliser apprentissages et valider passages. (Compétence C3.4)',
     materiel: ['Valise constructeur', 'Multimètre', 'Schéma BV robotisée', 'EPIs'],
     etudePrelim: [
