@@ -25,7 +25,6 @@ export default function SelectStudentPage() {
 
   const handleSubmit = () => {
     if (selectedStudent) {
-      // Find the class for the selected student
       const className = Object.keys(classes).find(key => classes[key].includes(selectedStudent));
       
       const params = new URLSearchParams({
@@ -40,6 +39,7 @@ export default function SelectStudentPage() {
     return (
         <div className="flex items-center justify-center min-h-screen">
             <Loader2 className="h-16 w-16 animate-spin text-primary" />
+            <p className="ml-4 text-lg">Chargement des données...</p>
         </div>
     );
   }
