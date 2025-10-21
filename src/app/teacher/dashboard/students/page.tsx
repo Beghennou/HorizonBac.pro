@@ -173,31 +173,25 @@ export default function StudentsPage() {
                                   <div>
                                       <p className="text-xs text-muted-foreground text-center mb-2">TP Assignés</p>
                                       <div className="flex flex-wrap gap-2 justify-center">
-                                          {studentAssignedTps.map(assignedTp => {
-                                               const tp = tps.find(t => t.id === assignedTp.id);
-                                               if (!tp) return null;
-
-                                              return (
-                                              <Tooltip key={assignedTp.id}>
-                                                  <TooltipTrigger asChild>
-                                                      <Button 
-                                                        variant="outline"
-                                                        size="icon"
-                                                        className={cn("h-8 w-8 font-bold", statusStyles[assignedTp.status])}
-                                                        asChild
-                                                      >
-                                                        <Link href={`/teacher/dashboard/student/${encodeURIComponent(studentName)}?${new URLSearchParams({...Object.fromEntries(searchParams.entries()), tp: assignedTp.id.toString()})}`} onClick={(e) => e.stopPropagation()}>
-                                                          {tp.id % 100}
-                                                        </Link>
-                                                      </Button>
-                                                  </TooltipTrigger>
-                                                  <TooltipContent>
-                                                      <p className="font-bold">TP {tp.id}: {tp.titre}</p>
-                                                      <p className="text-sm text-muted-foreground">Statut: <span className={cn(assignedTp.status === 'en-cours' && 'text-accent', assignedTp.status === 'terminé' && 'text-green-500')}>{statusLabels[assignedTp.status]}</span></p>
-                                                  </TooltipContent>
-                                              </Tooltip>
-                                              )
-                                          })}
+                                          <Tooltip>
+                                              <TooltipTrigger asChild>
+                                                  <div 
+                                                    className={cn("h-8 w-8 font-bold rounded-full flex items-center justify-center border", statusStyles['non-commencé'])}
+                                                  >
+                                                    {studentAssignedTps.length}
+                                                  </div>
+                                              </TooltipTrigger>
+                                              <TooltipContent>
+                                                  <p className="font-bold">{studentAssignedTps.length} TP assigné(s) pour ce niveau.</p>
+                                                   <ul className="text-sm text-muted-foreground">
+                                                      {studentAssignedTps.map(assignedTp => {
+                                                          const tp = tps.find(t => t.id === assignedTp.id);
+                                                          if (!tp) return null;
+                                                          return <li key={tp.id}>TP {tp.id}: {statusLabels[assignedTp.status]}</li>
+                                                      })}
+                                                  </ul>
+                                              </TooltipContent>
+                                          </Tooltip>
                                       </div>
                                   </div>
                               )}
