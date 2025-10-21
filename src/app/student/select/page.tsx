@@ -44,7 +44,7 @@ export default function SelectStudentPage() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="class-select">1. Sélectionne ta classe</Label>
-            <Select onValueChange={handleClassChange}>
+            <Select onValueChange={handleClassChange} value={selectedClass}>
               <SelectTrigger id="class-select">
                 <SelectValue placeholder="Sélectionne ta classe..." />
               </SelectTrigger>
@@ -56,10 +56,10 @@ export default function SelectStudentPage() {
             </Select>
           </div>
 
-          {selectedClass && (
+          
             <div className="space-y-2">
               <Label htmlFor="student-select">2. Sélectionne ton nom</Label>
-              <Select onValueChange={handleStudentChange} value={selectedStudent}>
+              <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={!selectedClass}>
                 <SelectTrigger id="student-select">
                   <SelectValue placeholder="Sélectionne ton nom..." />
                 </SelectTrigger>
@@ -70,7 +70,7 @@ export default function SelectStudentPage() {
                 </SelectContent>
               </Select>
             </div>
-          )}
+          
 
           <Button 
             onClick={handleSubmit} 
