@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -6,7 +7,7 @@ import { getTpById, TP, Etape, EtudePrelimQCM, EtudePrelimText } from '@/lib/dat
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Send, Loader2, Play, CheckCircle, MessageSquare } from 'lucide-react';
+import { Bot, Send, Loader2, Play, CheckCircle, MessageSquare, Award } from 'lucide-react';
 import { guideStudent, GuideStudentOutput } from '@/ai/flows/tp-assistant';
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Badge } from '@/components/ui/badge';
@@ -168,6 +169,7 @@ export default function TPPage() {
   }
   
   const studentTpAnswers = (studentName && tpId && prelimAnswers[studentName]?.[tpId]) || {};
+  const evaluatedCompetenceIds = tp.objectif.match(/C\d\.\d/g) || [];
 
 
   return (
@@ -177,7 +179,7 @@ export default function TPPage() {
             <div>
               <p className="text-sm uppercase tracking-wider font-semibold text-accent">TP {tp.id}</p>
               <h1 className="font-headline text-4xl tracking-wide">{tp.titre}</h1>
-              <p className="text-muted-foreground mt-1 text-lg">{tp.objectif}</p>
+              <p className="text-muted-foreground mt-1 text-lg">{tp.objectif.split(' (Compétence')[0]}</p>
             </div>
              <div className="flex flex-col items-end gap-2">
                 {assignedTp.status === 'non-commencé' && (
@@ -195,6 +197,21 @@ export default function TPPage() {
                 )}
              </div>
         </div>
+
+        {evaluatedCompetenceIds.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Award />Compétences Ciblées</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+                {evaluatedCompetenceIds.map(id => (
+                    <Badge key={id} variant="outline" className="border-accent text-accent font-semibold text-sm">
+                        {id}
+                    </Badge>
+                ))}
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
@@ -216,7 +233,7 @@ export default function TPPage() {
           </CardContent>
         </Card>
         
-        {tp.etudePrelim && tp.etudePrelim.length > 0 && (
+        {tp.etudePrelim.length > 0 && (
              <Card>
                 <CardHeader>
                     <CardTitle>Étude Préliminaire</CardTitle>
@@ -325,3 +342,5 @@ export default function TPPage() {
     </div>
   );
 }
+
+    

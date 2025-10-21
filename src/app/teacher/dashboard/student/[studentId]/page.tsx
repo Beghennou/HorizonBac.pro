@@ -418,10 +418,10 @@ export default function StudentDetailPage() {
                                 <div>
                                     <CardTitle className="flex items-center gap-2"><CheckSquare />Grille d'évaluation pour le TP {selectedTp.id}: <span className="text-accent">{selectedTp.titre}</span></CardTitle>
                                     {evaluatedCompetenceIds.length > 0 && (
-                                        <CardDescription className="mt-2 flex gap-2 flex-wrap">
+                                        <CardDescription className="mt-2 flex gap-2 flex-wrap items-center">
                                             <span className="font-semibold">Compétences évaluées :</span>
                                             {evaluatedCompetenceIds.map(id => (
-                                                <Badge key={id} variant="outline" className="border-accent text-accent font-semibold">
+                                                <Badge key={id} variant="outline" className="border-accent text-accent font-semibold text-sm">
                                                     {id}
                                                 </Badge>
                                             ))}
@@ -489,5 +489,7 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+
+    
 
     
