@@ -7,7 +7,8 @@
  * - GuideStudentInput - L'input pour la fonction guideStudent.
  *- GuideStudentOutput - L'output pour la fonction guideStudent.
  */
-
+import { config } from 'dotenv';
+config();
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
