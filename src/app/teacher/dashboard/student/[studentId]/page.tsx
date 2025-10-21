@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { getTpById, allBlocs, TP } from '@/lib/data-manager';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { User, CheckSquare, Save, Mail, Bot, Loader2 } from 'lucide-react';
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { analyzeSkillGaps, SkillGapAnalysisOutput } from '@/ai/flows/skill-gap-analysis';
+import { Badge } from '@/components/ui/badge';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 const evaluationLevels: EvaluationStatus[] = ['NA', 'EC', 'A', 'M'];
@@ -210,7 +211,9 @@ export default function StudentDetailPage() {
         else if (tpLevel === 'premiere') currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_2')));
         else if (tpLevel === 'terminale') currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_3')));
     }
-
+    
+    const competenceRegex = /\(Compétence (C\d\.\d)\)/;
+    const evaluatedCompetence = selectedTp?.objectif.match(competenceRegex)?.[1];
 
     if (!studentName || !students.some(s => s.name === studentName)) {
         return (
@@ -260,7 +263,16 @@ export default function StudentDetailPage() {
                 <Card>
                     <CardHeader>
                         <div className="flex justify-between items-center">
-                            <CardTitle className="flex items-center gap-2"><CheckSquare />Grille d'évaluation pour le TP {selectedTp.id}: <span className="text-accent">{selectedTp.titre}</span></CardTitle>
+                            <div>
+                                <CardTitle className="flex items-center gap-2"><CheckSquare />Grille d'évaluation pour le TP {selectedTp.id}: <span className="text-accent">{selectedTp.titre}</span></CardTitle>
+                                {evaluatedCompetence && (
+                                    <CardDescription className="mt-2">
+                                        <Badge variant="outline" className="border-accent text-accent font-semibold">
+                                            Compétence évaluée : {evaluatedCompetence}
+                                        </Badge>
+                                    </CardDescription>
+                                )}
+                            </div>
                             <SendEmailButton tp={selectedTp} studentName={studentName} />
                         </div>
                     </CardHeader>
