@@ -1,6 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+
+const engineSoundUrl = "https://actions.google.com/sounds/v1/transportation/sports_car_revving_and_driving_off.ogg";
 
 const Tachometer = () => {
     return (
@@ -93,12 +95,31 @@ const Tachometer = () => {
 };
 
 export const TachometerAnimation = () => {
+    const audioRef = useRef<HTMLAudioElement>(null);
+
+    useEffect(() => {
+        const playSound = async () => {
+            if (audioRef.current) {
+                try {
+                    await audioRef.current.play();
+                } catch (error) {
+                    console.error("Audio play failed:", error);
+                }
+            }
+        };
+        // Delay sound slightly to sync with animation
+        const timer = setTimeout(playSound, 100); 
+        
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-sm animate-fade-in">
              <div className="w-full max-w-sm">
                 <Tachometer />
             </div>
             <p className="mt-4 font-headline text-2xl tracking-widest text-accent animate-pulse">ACCÈS AUTORISÉ</p>
+            <audio ref={audioRef} src={engineSoundUrl} preload="auto" />
             <style jsx>{`
                 @keyframes fade-in {
                     from { opacity: 0; }
