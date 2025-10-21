@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,28 +6,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Student } from '@/lib/types';
 
 export default function SelectStudentPage() {
   const router = useRouter();
   const { students, classes, isLoaded } = useAssignments();
+  const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
-  const [sortedStudents, setSortedStudents] = useState<Student[]>([]);
+  const [studentsInClass, setStudentsInClass] = useState<Student[]>([]);
 
   useEffect(() => {
-    if (isLoaded) {
-      setSortedStudents([...students].sort((a, b) => a.name.localeCompare(b.name)));
+    if (selectedClass && isLoaded) {
+      const studentNames = classes[selectedClass] || [];
+      const filteredStudents = students
+        .filter(student => studentNames.includes(student.name))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setStudentsInClass(filteredStudents);
+      setSelectedStudent(''); // Reset student selection when class changes
+    } else {
+      setStudentsInClass([]);
     }
-  }, [students, isLoaded]);
+  }, [selectedClass, classes, students, isLoaded]);
 
   const handleSubmit = () => {
     if (selectedStudent) {
-      const className = Object.keys(classes).find(key => classes[key].includes(selectedStudent));
-      
       const params = new URLSearchParams({
-        class: className || '',
+        class: selectedClass || '',
         student: selectedStudent,
       });
       router.push(`/student?${params.toString()}`);
@@ -44,30 +48,46 @@ export default function SelectStudentPage() {
     );
   }
 
+  const sortedClasses = Object.keys(classes).sort();
+
   return (
     <div className="flex items-center justify-center min-h-screen py-12 px-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="font-headline text-3xl text-accent">Accès Espace Élève</CardTitle>
-          <CardDescription>Sélectionne ton nom dans la liste pour accéder à tes travaux pratiques.</CardDescription>
+          <CardDescription>Sélectionne ta classe puis ton nom pour accéder à tes travaux pratiques.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col space-y-6">
           <div className="space-y-3">
-            <Label className="font-bold text-lg">Sélectionne ton nom</Label>
-            <ScrollArea className="h-72 w-full rounded-md border p-4">
-              {sortedStudents.length > 0 ? (
-                <RadioGroup value={selectedStudent} onValueChange={setSelectedStudent}>
-                  {sortedStudents.map(student => (
-                    <div key={student.id} className="flex items-center space-x-2 py-2">
-                      <RadioGroupItem value={student.name} id={student.id} />
-                      <Label htmlFor={student.id} className="text-base cursor-pointer">{student.name}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              ) : (
-                 <p className="text-muted-foreground text-center py-4">Aucun élève n'est enregistré. Veuillez contacter votre enseignant.</p>
-              )}
-            </ScrollArea>
+            <Label htmlFor="class-select" className="font-bold text-lg">1. Sélectionne ta classe</Label>
+            <Select onValueChange={setSelectedClass} value={selectedClass}>
+              <SelectTrigger id="class-select">
+                <SelectValue placeholder="Choisir une classe..." />
+              </SelectTrigger>
+              <SelectContent>
+                {sortedClasses.map(className => (
+                  <SelectItem key={className} value={className}>{className}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-3">
+            <Label htmlFor="student-select" className="font-bold text-lg">2. Sélectionne ton nom</Label>
+            <Select onValueChange={setSelectedStudent} value={selectedStudent} disabled={!selectedClass}>
+              <SelectTrigger id="student-select" disabled={!selectedClass}>
+                <SelectValue placeholder={selectedClass ? "Choisir un élève..." : "Sélectionne d'abord une classe"} />
+              </SelectTrigger>
+              <SelectContent>
+                {studentsInClass.length > 0 ? (
+                  studentsInClass.map(student => (
+                    <SelectItem key={student.id} value={student.name}>{student.name}</SelectItem>
+                  ))
+                ) : (
+                  <div className="p-4 text-sm text-muted-foreground">Aucun élève dans cette classe.</div>
+                )}
+              </SelectContent>
+            </Select>
           </div>
 
           <Button 
