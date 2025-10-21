@@ -1,4 +1,4 @@
-import { Logo } from '@/components/logo';
+import { LyceeLogo } from '@/components/lycee-logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { School, UserCog } from 'lucide-react';
@@ -9,7 +9,7 @@ export default function Home() {
     <div className="relative flex min-h-screen flex-col items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
       <div className="flex items-center justify-center mb-8">
         <div className="flex items-center justify-center w-32 h-32 rounded-lg bg-gradient-to-br from-primary to-racing-orange border-4 border-accent shadow-lg">
-          <Logo className="w-20 h-20 text-white" />
+          <LyceeLogo className="w-24 h-24 text-white" />
         </div>
       </div>
       <h1 className="font-headline text-5xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text mb-2 text-center">

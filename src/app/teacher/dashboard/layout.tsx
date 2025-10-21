@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Logo } from '@/components/logo';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { LogoutButton } from '@/components/logout-button';
 import { DashboardNav } from '@/components/dashboard-nav';
+import { LyceeLogo } from '@/components/lycee-logo';
 import {
   SidebarProvider,
   Sidebar,
@@ -92,7 +92,7 @@ function DashboardLayoutContent({
                 <SidebarTrigger className="md:hidden"/>
                 <Link href="/" className="flex items-center gap-4">
                   <div className="flex items-center justify-center w-12 h-12 rounded-md bg-gradient-to-br from-primary to-racing-orange border-2 border-accent">
-                    <Logo className="w-7 h-7 text-white" />
+                    <LyceeLogo className="w-9 h-9 text-white" />
                   </div>
                   <div>
                     <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
