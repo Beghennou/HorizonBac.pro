@@ -1,7 +1,7 @@
 'use client';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getTpById, TP } from "@/lib/data-manager";
+import { getTpById, TP, EtudePrelimQCM } from "@/lib/data-manager";
 import { useSearchParams } from "next/navigation";
 import { Mail, User, Users, Printer, Bot, Send, Loader2 } from "lucide-react";
 import { useAssignments } from "@/contexts/AssignmentsContext";
@@ -220,13 +220,23 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                 <CardHeader>
                     <CardTitle>Étude Préliminaire</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                     {tp.etudePrelim.map((item, i) => (
                         <div key={i}>
                             <p><strong>Q{i+1}:</strong> {item.q}</p>
-                            <div className="border-l-2 border-dashed border-accent/50 pl-4 ml-4 mt-2">
+                            {item.type === 'qcm' && (
+                                <div className="mt-2 space-y-2">
+                                    {(item as EtudePrelimQCM).options.map((option, optIndex) => (
+                                        <div key={optIndex} className="flex items-center gap-2">
+                                            <div className="w-4 h-4 border border-foreground rounded-sm"></div>
+                                            <label>{option}</label>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <div className="border-l-2 border-dashed border-accent/50 pl-4 ml-2 mt-2">
                                 <p className="text-muted-foreground italic">Votre réponse :</p>
-                                <div className="h-12"></div>
+                                <div className={item.type === 'qcm' ? 'h-4' : 'h-16'}></div>
                             </div>
                         </div>
                     ))}
