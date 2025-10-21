@@ -17,6 +17,7 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import { AssignmentsProvider, useAssignments } from '@/contexts/AssignmentsContext';
+import { TachometerAnimation } from '@/components/TachometerAnimation';
 
 function DashboardLayoutContent({
   children,
@@ -28,9 +29,15 @@ function DashboardLayoutContent({
   const searchParams = useSearchParams();
   const { classes: dynamicClasses } = useAssignments();
 
+  const [isLoading, setIsLoading] = useState(true);
   const [niveau, setNiveau] = useState<Niveau>((searchParams.get('level') as Niveau) ||'seconde');
   const [selectedClass, setSelectedClass] = useState<string>(searchParams.get('class') || Object.keys(dynamicClasses).find(c => c.startsWith('2')) || '2MV1');
   
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const classFromUrl = searchParams.get('class');
     if (classFromUrl && classFromUrl !== selectedClass) {
@@ -81,6 +88,10 @@ function DashboardLayoutContent({
     
     const basePath = pathname.split('/').slice(0, 4).join('/');
     router.push(`${basePath}?${newSearchParams.toString()}`);
+  }
+
+  if (isLoading) {
+    return <TachometerAnimation />;
   }
 
   return (
