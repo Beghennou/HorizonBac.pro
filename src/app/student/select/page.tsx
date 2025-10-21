@@ -9,11 +9,19 @@ import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Student } from '@/lib/types';
 
 export default function SelectStudentPage() {
   const router = useRouter();
   const { students, classes, isLoaded } = useAssignments();
   const [selectedStudent, setSelectedStudent] = useState<string>('');
+  const [sortedStudents, setSortedStudents] = useState<Student[]>([]);
+
+  useEffect(() => {
+    if (isLoaded) {
+      setSortedStudents([...students].sort((a, b) => a.name.localeCompare(b.name)));
+    }
+  }, [students, isLoaded]);
 
   const handleSubmit = () => {
     if (selectedStudent) {
@@ -35,8 +43,6 @@ export default function SelectStudentPage() {
         </div>
     );
   }
-  
-  const sortedStudents = [...students].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="flex items-center justify-center min-h-screen py-12 px-4">
