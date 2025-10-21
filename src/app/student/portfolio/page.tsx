@@ -130,7 +130,7 @@ function StudentPortfolio() {
                                                               </TooltipTrigger>
                                                               <TooltipContent>
                                                                   <p>Niveau de maîtrise : {history.length}/5 évaluations.</p>
-                                                                  <p>Historique : {history.join(', ')}</p>
+                                                                  {Array.isArray(history) && <p>Historique : {history.join(', ')}</p>}
                                                               </TooltipContent>
                                                           </Tooltip>
                                                       </div>
