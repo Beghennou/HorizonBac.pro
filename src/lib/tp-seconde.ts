@@ -259,7 +259,7 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h00',
         titre: 'Contrôle des Niveaux et Appoint des Fluides',
         situation: 'Lors d\'une réception véhicule pour un entretien courant, vous devez effectuer les contrôles systématiques des niveaux des différents fluides du compartiment moteur selon la check-list atelier.',
-        objectif: 'Identifier précisément tous les niveaux et réaliser les ajustements nécessaires pour maintenir le bon fonctionnement des systèmes. (Compétences C1.2, C1.3)',
+        objectif: 'Identifier les anomalies et réaliser les ajustements. (Compétences C1.2, C1.3)',
         materiel: ['Liquide de refroidissement spécifié', 'Produit lave-glace concentré', 'Liquide de frein DOT4 ou 5.1', 'Entonnoirs de différentes tailles', 'Chiffons propres non pelucheux'],
         etudePrelim: [
             { type: 'qcm', q: 'Pourquoi le niveau de liquide de refroidissement doit-il se contrôler moteur FROID ?', options: ['Le liquide chaud est moins visible', 'Pour éviter le risque de brûlure et parce que le niveau est faussé par la dilatation', 'C\'est une préférence de mécanicien'], r: 'Pour éviter le risque de brûlure et parce que le niveau est faussé par la dilatation' },
@@ -309,7 +309,7 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h45',
         titre: 'Contrôle et Remplacement des Ampoules',
         situation: 'Un client a été alerté par les forces de l\'ordre d\'un feu stop défectueux. Il demande un contrôle complet de l\'éclairage et le remplacement de toutes les ampoules nécessaires.',
-        objectif: 'Identifier méthodiquement toutes les ampoules défectueuses et réaliser leur remplacement en respectant les bonnes pratiques. (Compétences C1.2, C1.3)',
+        objectif: 'Identifier et remplacer les ampoules défectueuses. (Compétences C1.2, C1.3)',
         materiel: ['Jeu d\'ampoules de rechange variées', 'Tournevis adaptés', 'Chiffon microfibre propre', 'Gants de protection', 'Assistant pour les tests'],
         etudePrelim: [
             { type: 'text', q: 'Pourquoi ne faut-il jamais toucher le verre d\'une ampoule halogène (H4, H7) avec les doigts ?', r: 'Le gras des doigts crée un point chaud sur le verre qui réduit considérablement la durée de vie de l\'ampoule et peut la faire éclater.' },
@@ -358,5 +358,7 @@ export const tpSeconde: Record<number, TP> = {
         ]
     }
 };
+
+    
 
     
