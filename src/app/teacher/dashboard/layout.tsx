@@ -69,9 +69,7 @@ function DashboardLayoutContent({
     newSearchParams.set('level', newNiveau);
     newSearchParams.set('class', firstClassForLevel);
     
-    const basePath = pathname.split('/').slice(0, 4).join('/');
-    
-    router.push(`${basePath}?${newSearchParams.toString()}`);
+    router.push(`/teacher/dashboard/students?${newSearchParams.toString()}`);
   };
   
   const handleTpSelect = (id: number) => {
