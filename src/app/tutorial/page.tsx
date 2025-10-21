@@ -63,7 +63,7 @@ export default function TutorialPage() {
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-2">
-                                    <AccordionTrigger className="text-xl font-headline">3. Assignation des Travaux Pratiques (TPs)</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">3. Assignation des Travaux Pratiques (TP)</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <strong>Suivi des Classes</strong> :</p>
                                         <ul className="list-disc pl-6 space-y-2">
@@ -107,7 +107,7 @@ export default function TutorialPage() {
                      <Card>
                         <CardHeader>
                             <CardTitle>Guide pour l'Élève</CardTitle>
-                            <CardDescription>Découvrez comment accéder à tes TPs et utiliser les outils à ta disposition.</CardDescription>
+                            <CardDescription>Découvrez comment accéder à tes TP et utiliser les outils à ta disposition.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Accordion type="single" collapsible className="w-full">
@@ -126,7 +126,7 @@ export default function TutorialPage() {
                                 <AccordionItem value="item-2">
                                     <AccordionTrigger className="text-xl font-headline">2. Réaliser un TP</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Ton tableau de bord te montre tous les TPs que ton enseignant t'a assignés.</p>
+                                        <p className="mb-4">Ton tableau de bord te montre tous les TP que ton enseignant t'a assignés.</p>
                                         <ul className="list-disc pl-6 space-y-2">
                                             <li>Chaque TP a un statut : "Non commencé", "En cours" ou "Terminé". Le badge **"Évalué"** apparaîtra une fois que ton professeur aura corrigé ton travail.</li>
                                             <li>Clique sur "Commencer le TP". Le statut passe à "En cours".</li>

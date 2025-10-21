@@ -39,7 +39,7 @@ export default function SelectStudentPage() {
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="font-headline text-3xl text-accent">Accès Espace Élève</CardTitle>
-          <CardDescription>Sélectionne ta classe puis ton nom pour accéder à vos travaux pratiques.</CardDescription>
+          <CardDescription>Sélectionne ta classe puis ton nom pour accéder à tes travaux pratiques.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
