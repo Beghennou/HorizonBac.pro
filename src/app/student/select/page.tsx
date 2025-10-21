@@ -35,13 +35,13 @@ export default function SelectStudentPage() {
   const studentNamesInClass = selectedClass ? classes[selectedClass] || [] : [];
 
   return (
-    <div className="flex items-center justify-center py-12">
+    <div className="flex items-center justify-center py-12 px-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="font-headline text-3xl text-accent">Accès Espace Élève</CardTitle>
           <CardDescription>Sélectionne ta classe puis ton nom pour accéder à tes travaux pratiques.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="flex flex-col space-y-6">
           <div className="space-y-2">
             <Label htmlFor="class-select">1. Sélectionne ta classe</Label>
             <Select onValueChange={handleClassChange} value={selectedClass}>
@@ -56,7 +56,6 @@ export default function SelectStudentPage() {
             </Select>
           </div>
 
-          
           <div className="space-y-2">
             <Label htmlFor="student-select">2. Sélectionne ton nom</Label>
             <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={!selectedClass}>
@@ -70,12 +69,11 @@ export default function SelectStudentPage() {
               </SelectContent>
             </Select>
           </div>
-          
 
           <Button 
             onClick={handleSubmit} 
             disabled={!selectedClass || !selectedStudent}
-            className="w-full font-bold"
+            className="w-full font-bold mt-4"
             size="lg"
           >
             Accéder à mes TP
