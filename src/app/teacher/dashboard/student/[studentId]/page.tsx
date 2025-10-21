@@ -147,19 +147,14 @@ export default function StudentDetailPage() {
     useEffect(() => {
         const tpIdFromUrl = searchParams.get('tp');
         if (tpIdFromUrl) {
-            const tpIdNum = parseInt(tpIdFromUrl);
-            if (selectedTpId !== tpIdNum) {
-                setSelectedTpId(tpIdNum);
-            }
+            setSelectedTpId(parseInt(tpIdFromUrl, 10));
         } else if (studentAssignedTps.length > 0) {
             const firstTpId = studentAssignedTps[0].id;
-             if (selectedTpId !== firstTpId) {
-                setSelectedTpId(firstTpId);
-            }
+             setSelectedTpId(firstTpId);
         } else {
             setSelectedTpId(null);
         }
-    }, [searchParams, studentAssignedTps, selectedTpId]);
+    }, [searchParams, studentName, assignedTps]);
 
     useEffect(() => {
         if (studentName) {
