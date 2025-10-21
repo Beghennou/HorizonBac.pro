@@ -40,7 +40,6 @@ const AssistantTP = ({ tp }: { tp: TP }) => {
                 tpTitle: tp.titre,
                 tpObjective: tp.objectif,
                 studentQuestion: question,
-                // On pourrait ajouter l'étape actuelle pour plus de contexte
             });
             
             const assistantResponse = result.guidanceText;
@@ -55,7 +54,7 @@ const AssistantTP = ({ tp }: { tp: TP }) => {
     };
 
     return (
-        <Card className="bg-card/70 border-accent/30">
+        <Card className="bg-card/70 border-accent/30 sticky top-28">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline text-accent">
                     <Bot /> Assistant Pédagogique IA
@@ -71,6 +70,14 @@ const AssistantTP = ({ tp }: { tp: TP }) => {
                             </div>
                         </div>
                     ))}
+                     {isLoading && (
+                        <div className="flex justify-start">
+                            <div className="p-3 rounded-lg bg-secondary flex items-center gap-2">
+                                <Loader2 className="animate-spin h-4 w-4"/>
+                                <p className="text-sm text-muted-foreground">Réflexion...</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div className="flex gap-2">
                     <Textarea
@@ -84,8 +91,9 @@ const AssistantTP = ({ tp }: { tp: TP }) => {
                                 handleAskAssistant();
                             }
                         }}
+                        disabled={isLoading}
                     />
-                    <Button onClick={handleAskAssistant} disabled={isLoading}>
+                    <Button onClick={handleAskAssistant} disabled={isLoading || !question.trim()}>
                         {isLoading ? <Loader2 className="animate-spin" /> : <Send />}
                     </Button>
                 </div>
@@ -111,7 +119,7 @@ export default function TPPage() {
   }
 
   return (
-    <div className="grid md:grid-cols-3 gap-8">
+    <div className="grid md:grid-cols-3 gap-8 items-start">
       <div className="md:col-span-2 space-y-6">
         <div>
           <p className="text-sm uppercase tracking-wider font-semibold text-accent">TP {tp.id}</p>
