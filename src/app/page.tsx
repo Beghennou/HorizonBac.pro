@@ -13,7 +13,7 @@ export default function Home() {
         </div>
       </div>
       <h1 className="font-headline text-5xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text mb-2 text-center">
-        TP Atelier Pro
+        Horizon Bacpro
       </h1>
       <p className="text-muted-foreground text-xl mb-12 text-center">Plateforme de suivi des compétences pour la maintenance automobile</p>
 

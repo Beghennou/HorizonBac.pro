@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TP Atelier Pro • Racing Performance Mongy 2025",
+  title: "Horizon Bacpro • Suivi des compétences",
   description: "Suivi des compétences pour la maintenance automobile.",
 };
 

@@ -18,7 +18,7 @@ export default function StudentLayout({
               </div>
               <div>
                    <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
-                      Racing Performance
+                      Horizon Bacpro
                    </h1>
                    <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Rénovation 2025 • Espace élève</p>
               </div>
