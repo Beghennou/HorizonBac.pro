@@ -60,10 +60,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         setClasses(savedClasses ? JSON.parse(savedClasses) : initialClasses);
 
         const savedAssignedTps = localStorage.getItem('assignedTps');
-        setAssignedTps(savedAssignedTps ? JSON.parse(savedAssignedTps) : {
-          'BAKHTAR Adam': [{id: 101, status: 'en-cours'}, {id: 102, status: 'non-commencé'}],
-          'BELKAID Rayan': [{id: 101, status: 'terminé'}],
-        });
+        setAssignedTps(savedAssignedTps ? JSON.parse(savedAssignedTps) : {});
 
         const savedEvaluations = localStorage.getItem('evaluations');
         const evaluationsData = savedEvaluations ? JSON.parse(savedEvaluations) : {};
@@ -89,10 +86,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         console.error("Failed to load data from localStorage, using initial data.", error);
         setStudents(initialStudents);
         setClasses(initialClasses);
-        setAssignedTps({
-          'BAKHTAR Adam': [{id: 101, status: 'en-cours'}, {id: 102, status: 'non-commencé'}],
-          'BELKAID Rayan': [{id: 101, status: 'terminé'}],
-        });
+        setAssignedTps({});
         setEvaluations({});
         setTeacherName('M. Dubois');
       }
@@ -187,7 +181,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
     toast({
         title: "Données réinitialisées",
-        description: "Tous les élèves, leurs TP assignés et leurs évaluations ont été effacés.",
+        description: "Tous les élèves, leurs TPs assignés et leurs évaluations ont été effacés.",
     });
   };
 

@@ -14,13 +14,13 @@ export type CompetenceBloc = {
 
 export const competencesParNiveau: Record<Niveau, Record<string, CompetenceBloc>> = {
   seconde: {
-    'BLOC_1': { title: 'BLOC 1 Réaliser l\'entretien périodique des véhicules', colorClass: 'bg-bloc1-color', items: { 'C1.1': 'Organiser un entretien périodique', 'C1.2': 'Identifier les anomalies dans le cadre d\'un entretien périodique', 'C1.3': 'Réaliser les opérations de remplacement, d\'ajustement dans le cadre de l\'entretien périodique', 'C1.4': 'Apporter des conseils techniques à la clientèle sur l\'entretien du véhicule' } }
+    'BLOC_1': { title: 'BLOC 1 : Réaliser l\'entretien périodique des véhicules', colorClass: 'bg-bloc1-color', items: { 'C1.1': 'Organiser un entretien périodique', 'C1.2': 'Identifier les anomalies dans le cadre d\'un entretien périodique', 'C1.3': 'Réaliser les opérations de remplacement, d\'ajustement dans le cadre de l\'entretien périodique', 'C1.4': 'Apporter des conseils techniques à la clientèle sur l\'entretien du véhicule' } }
   },
   premiere: {
-    'BLOC_2': { title: 'BLOC 2 Réaliser la maintenance corrective des véhicules', colorClass: 'bg-bloc2-color', items: { 'C2.1': 'Préparer une intervention corrective', 'C2.2': 'Réaliser le remplacement ou la réparation des composants', 'C2.3': 'Réaliser le réglage ou le paramétrage des systèmes', 'C2.4': 'Réaliser le contrôle qualité d\'une intervention corrective' } }
+    'BLOC_2': { title: 'BLOC 2 : Réaliser la maintenance corrective des véhicules', colorClass: 'bg-bloc2-color', items: { 'C2.1': 'Préparer une intervention corrective', 'C2.2': 'Réaliser le remplacement ou la réparation des composants', 'C2.3': 'Réaliser le réglage ou le paramétrage des systèmes', 'C2.4': 'Réaliser le contrôle qualité d\'une intervention corrective' } }
   },
   terminale: {
-    'BLOC_3': { title: 'BLOC 3 Réaliser le diagnostic des systèmes des véhicules', colorClass: 'bg-bloc3-color', items: { 'C3.1': 'Constater un dysfonctionnement', 'C3.2': 'Hiérarchiser les hypothèses', 'C3.3': 'Mettre en œuvre un protocole d\'intervention existant ou à définir', 'C3.4': 'Identifier les solutions correctives' } }
+    'BLOC_3': { title: 'BLOC 3 : Réaliser le diagnostic des systèmes des véhicules', colorClass: 'bg-bloc3-color', items: { 'C3.1': 'Constater un dysfonctionnement', 'C3.2': 'Hiérarchiser les hypothèses', 'C3.3': 'Mettre en œuvre un protocole d\'intervention existant ou à définir', 'C3.4': 'Identifier les solutions correctives' } }
   }
 };
 
@@ -46,65 +46,23 @@ export const getTpById = (id: number): TP | undefined => {
 };
 
 export const classes = {
-    "2MV1": ["BAKHTAR Adam", "BELKAID Rayan", "BIGO Rayan", "BLONDIAUX Mathéo"],
-    "2MV2": [
-        "ALGOET-VERHAEGHE Tom",
-        "AMOUSSOU Enzo",
-        "ANSART-ROBIC Romain",
-        "ARRAB Yassin",
-        "BENATALLAH Ryan",
-        "BENSAAD Issa",
-        "CLARISSE Noah",
-        "DECOTTIGNIES Louis",
-        "DENDANE Ilyes",
-        "DESPLANCKE Mathis",
-        "DEVAUX Nicolas",
-        "EL AMMARI Naïm",
-        "FERRIER Nolan",
-        "KONIECZNY Léo",
-        "KWASIBA Charlie",
-        "LABZAE Yassin",
-        "LEGROS Jules",
-        "MAHIEUX Kais",
-        "RACOVITA Alexandre",
-        "SERROUX Théo",
-        "THOLAS Ugo",
-        "UCHAN Yanis",
-        "VANWONTERGHEM Théo"
-    ],
-    "2MV3": [
-      "BEATSE Téo",
-      "BELHARIR Elias",
-      "BENHISSEN Adam",
-      "BETROUNI Lyes",
-      "BIPATH Naor",
-      "DAIBOUN-SAID Sami",
-      "DIZLIK Léo",
-      "DJALO Mohamed",
-      "DUJARDIN Titouan",
-      "DURTESTE Oscar",
-      "FROIDURE-HENNEBERT Hugo",
-      "GRESS Jaden",
-      "HAMDANE Remy",
-      "MAZINGUE Mathis",
-      "MEKRANFAR Karim",
-      "MENDES Ilan",
-      "POUILLY Méline",
-      "PRESSE-HIMBERT Paul",
-      "ROMAN Hugo",
-      "SEHIMI Asha",
-      "TABARY Julie",
-      "TONFACK NGUEFACK Chris",
-      "VALENTIN Samuel"
-    ],
-    "2MV4": ["DELATTRE Clément", "DESCAMPS Baptiste", "DUBOIS Océane", "DUPONT Léo"],
-    "2MV5": ["DURAND Clara", "EL FAKIR Ayoub", "FERNANDEZ Hugo", "FOURNIER Tom"],
-    "1VP1": ["Alice Lemoine", "Bob Marley", "Charlie Chaplin", "Diana Ross"],
-    "1VP2": ["David Bowie", "Elon Musk", "Frank Zappa", "Gloria Gaynor"],
-    "1VP3": ["Henri Matisse", "Ingrid Bergman", "John Lennon", "Kate Bush"],
-    "TVP1": ["Grace Hopper", "Heidi Lamar", "Isaac Newton", "Jacque Fresco"],
-    "TVP2": ["Karl Benz", "Leonardo da Vinci", "Marie Curie", "Nikola Tesla"],
-    "TVP3": ["Oprah Winfrey", "Pablo Picasso", "Queen Latifah", "Rosalind Franklin"],
+    "TVP1": [],
+    "TVP2": [],
+    "TVP3": [],
+    "2MV2 - Carol Shelby": [],
+    "2MV3 - Amédée Gordini": [],
+    "2MV4 - Les frères Michelin": [],
+    "2MV5 - Michèle Mouton": [],
+    "2MV6 - Valentino Rossi": [],
+    "TAPP 1": [],
+    "TAPP 2": [],
+    "1APP1": [],
+    "1APP2": [],
+    "1VP1": [],
+    "1VP2": [],
+    "1VP3": [],
+    "2APP-RC/VP - John Coppe": [],
+    "2MV1 - Pierre Latirgue": []
 };
 
 export const allBlocs: Record<string, CompetenceBloc> = {

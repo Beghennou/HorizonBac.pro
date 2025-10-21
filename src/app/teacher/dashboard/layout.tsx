@@ -31,7 +31,7 @@ function DashboardLayoutContent({
 
   const [isLoading, setIsLoading] = useState(true);
   const [niveau, setNiveau] = useState<Niveau>((searchParams.get('level') as Niveau) ||'seconde');
-  const [selectedClass, setSelectedClass] = useState<string>(searchParams.get('class') || Object.keys(dynamicClasses).find(c => c.startsWith('2')) || '2MV1');
+  const [selectedClass, setSelectedClass] = useState<string>(searchParams.get('class') || Object.keys(dynamicClasses).find(c => c.startsWith('2')) || '2MV1 - Pierre Latirgue');
   
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 3000);
@@ -150,6 +150,7 @@ function DashboardLayoutContent({
                                 if (niveau === 'terminale') return c.startsWith('T');
                                 return true;
                               })
+                              .sort()
                               .map(className => (
                                 <SelectItem key={className} value={className}>{className}</SelectItem>
                               ))}
