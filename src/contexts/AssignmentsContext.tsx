@@ -35,7 +35,7 @@ type AssignmentsContextType = {
   classes: Record<string, string[]>;
   setClasses: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
   assignedTps: Record<string, AssignedTp[]>;
-  evaluations: Record<string, Record<string, EvaluationStatus>>;
+  evaluations: Record<string, Record<string, EvaluationStatus[]>>;
   prelimAnswers: Record<string, Record<number, Record<number, PrelimAnswer>>>;
   feedbacks: Record<string, Record<number, Feedback>>;
   assignTp: (studentNames: string[], tpId: number) => void;
@@ -57,7 +57,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Record<string, string[]>>({});
   const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
-  const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus>>>({});
+  const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>({});
   const [prelimAnswers, setPrelimAnswers] = useState<Record<string, Record<number, Record<number, PrelimAnswer>>>>({});
   const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
   const [teacherName, setTeacherName] = useState<string>('');
@@ -90,8 +90,11 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
           const studentEvaluations = evaluationsData[student.name] || {};
           let totalXp = 0;
           for (const competenceId in studentEvaluations) {
-              const level = studentEvaluations[competenceId];
-              totalXp += xpPerLevel[level] || 0;
+              const history = studentEvaluations[competenceId];
+              if (Array.isArray(history) && history.length > 0) {
+                const latestStatus = history[history.length - 1];
+                totalXp += xpPerLevel[latestStatus] || 0;
+              }
           }
           const allCompetencesCount = Object.values(allBlocs).reduce((acc, bloc) => acc + Object.keys(bloc.items).length, 0);
           const maxPossibleXp = allCompetencesCount * xpPerLevel['M'];
@@ -130,6 +133,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       }
       setIsLoaded(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -177,24 +181,33 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
   const saveEvaluation = (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>) => {
     
-    const updatedEvaluationsForStudent = {
-      ...(evaluations[studentName] || {}),
-      ...currentEvals
-    };
-    
-    setEvaluations(prev => ({
-      ...prev,
-      [studentName]: updatedEvaluationsForStudent
-    }));
+    setEvaluations(prev => {
+      const updatedStudentEvals = { ...(prev[studentName] || {}) };
+      
+      for (const competenceId in currentEvals) {
+        const newStatus = currentEvals[competenceId];
+        const history = updatedStudentEvals[competenceId] || [];
+        // Only add if the status has changed from the last one
+        if (history.length === 0 || history[history.length - 1] !== newStatus) {
+          updatedStudentEvals[competenceId] = [...history, newStatus];
+        }
+      }
+
+      return { ...prev, [studentName]: updatedStudentEvals };
+    });
     
     setStudents(prevStudents => {
         const studentToUpdate = prevStudents.find(s => s.name === studentName);
         if (!studentToUpdate) return prevStudents;
-        
+
+        const studentEvaluations = evaluations[studentName] || {};
         let totalXp = 0;
-        for (const competenceId in updatedEvaluationsForStudent) {
-            const level = updatedEvaluationsForStudent[competenceId];
-            totalXp += xpPerLevel[level] || 0;
+        for (const competenceId in studentEvaluations) {
+            const history = studentEvaluations[competenceId];
+            if (Array.isArray(history) && history.length > 0) {
+              const latestStatus = history[history.length - 1];
+              totalXp += xpPerLevel[latestStatus] || 0;
+            }
         }
 
         const allCompetencesCount = Object.values(allBlocs).reduce((acc, bloc) => acc + Object.keys(bloc.items).length, 0);

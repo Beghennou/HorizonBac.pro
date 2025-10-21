@@ -48,7 +48,7 @@ const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: stri
     );
 };
 
-const AiAnalysisHub = ({ studentName, evaluations }: { studentName: string, evaluations: Record<string, EvaluationStatus> }) => {
+const AiAnalysisHub = ({ studentName, evaluations }: { studentName: string, evaluations: Record<string, EvaluationStatus[]> }) => {
     const [analysisResult, setAnalysisResult] = useState<SkillGapAnalysisOutput | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -61,9 +61,17 @@ const AiAnalysisHub = ({ studentName, evaluations }: { studentName: string, eval
                 Object.assign(competenceMap, bloc.items);
             });
 
+            const latestEvaluations: Record<string, EvaluationStatus> = {};
+            for (const competenceId in evaluations) {
+                const history = evaluations[competenceId];
+                if (history && history.length > 0) {
+                    latestEvaluations[competenceId] = history[history.length - 1];
+                }
+            }
+
             const result = await analyzeSkillGaps({
                 studentName,
-                evaluationData: JSON.stringify(evaluations),
+                evaluationData: JSON.stringify(latestEvaluations),
                 competenceMap: JSON.stringify(competenceMap),
             });
             setAnalysisResult(result);
@@ -274,15 +282,23 @@ export default function StudentDetailPage() {
         } else {
             setSelectedTpId(null);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchParams, studentName, studentAssignedTps.length]);
 
     useEffect(() => {
-        if (studentName) {
-            setCurrentEvaluations(savedEvaluations[studentName] || {});
+        if (studentName && savedEvaluations[studentName]) {
+            const latestEvals: Record<string, EvaluationStatus> = {};
+            for (const competenceId in savedEvaluations[studentName]) {
+                const history = savedEvaluations[studentName][competenceId];
+                if (history && history.length > 0) {
+                    latestEvals[competenceId] = history[history.length - 1];
+                }
+            }
+            setCurrentEvaluations(latestEvals);
         } else {
             setCurrentEvaluations({});
         }
-    }, [studentName, savedEvaluations]);
+    }, [studentName, savedEvaluations, selectedTpId]);
 
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
         setCurrentEvaluations(prev => ({
@@ -383,7 +399,7 @@ export default function StudentDetailPage() {
 
             {selectedTp && (
                 <>
-                    {(selectedTp.id >= 1) && prelimAnswers[studentName]?.[selectedTp.id] && (
+                    {((selectedTp.id >= 1 && selectedTp.id < 101) || (selectedTp.id >= 301)) && prelimAnswers[studentName]?.[selectedTp.id] && (
                         <PrelimCorrection 
                             tp={selectedTp} 
                             studentAnswers={prelimAnswers[studentName][selectedTp.id]}
