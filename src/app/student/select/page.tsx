@@ -57,19 +57,19 @@ export default function SelectStudentPage() {
           </div>
 
           
-            <div className="space-y-2">
-              <Label htmlFor="student-select">2. Sélectionne ton nom</Label>
-              <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={!selectedClass}>
-                <SelectTrigger id="student-select">
-                  <SelectValue placeholder="Sélectionne ton nom..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {studentNamesInClass.sort().map(studentName => (
-                    <SelectItem key={studentName} value={studentName}>{studentName}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="student-select">2. Sélectionne ton nom</Label>
+            <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={!selectedClass}>
+              <SelectTrigger id="student-select">
+                <SelectValue placeholder="Sélectionne ton nom..." />
+              </SelectTrigger>
+              <SelectContent>
+                {studentNamesInClass.sort().map(studentName => (
+                  <SelectItem key={studentName} value={studentName}>{studentName}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           
 
           <Button 
