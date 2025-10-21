@@ -147,18 +147,25 @@ export default function StudentDetailPage() {
     useEffect(() => {
         const tpIdFromUrl = searchParams.get('tp');
         if (tpIdFromUrl) {
-            setSelectedTpId(parseInt(tpIdFromUrl));
+            const tpIdNum = parseInt(tpIdFromUrl);
+            if (selectedTpId !== tpIdNum) {
+                setSelectedTpId(tpIdNum);
+            }
         } else if (studentAssignedTps.length > 0) {
-            setSelectedTpId(studentAssignedTps[0].id);
+            const firstTpId = studentAssignedTps[0].id;
+             if (selectedTpId !== firstTpId) {
+                setSelectedTpId(firstTpId);
+            }
+        } else {
+            setSelectedTpId(null);
         }
-    }, [searchParams, studentAssignedTps]);
+    }, [searchParams, studentAssignedTps, selectedTpId]);
 
     useEffect(() => {
         if (studentName) {
             setCurrentEvaluations(savedEvaluations[studentName] || {});
         } else {
             setCurrentEvaluations({});
-            setSelectedTpId(null);
         }
     }, [studentName, savedEvaluations]);
 
@@ -194,11 +201,11 @@ export default function StudentDetailPage() {
     
     let currentBlocs: Record<string, any> = {};
     if (selectedTp) {
-        if (selectedTp.id >= 1000) {
+        if (selectedTp.id >= 1000) { // Terminale
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_3')));
-        } else if (selectedTp.id >= 100) {
+        } else if (selectedTp.id >= 100) { // Seconde
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_1')));
-        } else {
+        } else { // Premiere
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_2')));
         }
     }
