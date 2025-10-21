@@ -13,7 +13,7 @@ export default function TutorialPage() {
                     Tutoriel Racing Performance
                  </h1>
                  <Button asChild>
-                    <Link href="/">Retour à la connexion</Link>
+                    <Link href="/">Retour à l'accueil</Link>
                  </Button>
             </div>
         </header>
@@ -40,7 +40,7 @@ export default function TutorialPage() {
                         <CardTitle className="flex items-center gap-2"><BookCopy className="text-accent"/>Assignation des TP</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p>Assignez des travaux pratiques (TP) à vos élèves en quelques clics. Sélectionnez une ou plusieurs personnes et choisissez un TP dans la liste correspondant à leur niveau.</p>
+                        <p>Assignez des travaux pratiques (TP) à vos élèves en quelques clics. Sélectionnez un ou plusieurs élèves et choisissez un TP dans la liste correspondant à leur niveau.</p>
                     </CardContent>
                 </Card>
                  <Card>
@@ -77,7 +77,7 @@ export default function TutorialPage() {
                     <AccordionItem value="item-2">
                         <AccordionTrigger className="text-xl font-headline">2. Assignation des Travaux Pratiques (TP)</AccordionTrigger>
                         <AccordionContent className="text-base text-muted-foreground p-4">
-                            <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <strong>Élèves</strong> :</p>
+                            <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <strong>Suivi des Classes</strong> :</p>
                             <ul className="list-disc pl-6 space-y-2">
                                 <li>Sélectionnez la bonne classe et le bon niveau (Seconde, Première, Terminale).</li>
                                 <li>Cochez la case sur la carte des élèves concernés.</li>
@@ -90,7 +90,7 @@ export default function TutorialPage() {
                         <AccordionContent className="text-base text-muted-foreground p-4">
                             <p className="mb-4">Le cœur du suivi se fait dans le dossier de l'élève :</p>
                             <ul className="list-disc pl-6 space-y-2">
-                                <li>Depuis la page "Élèves", cliquez sur un élève pour ouvrir son <strong>dossier personnel</strong>.</li>
+                                <li>Depuis la page "Suivi des Classes", cliquez sur un élève pour ouvrir son <strong>dossier personnel</strong>.</li>
                                 <li>Dans son dossier, sélectionnez un TP assigné pour afficher la grille d'évaluation correspondante.</li>
                                 <li>Évaluez chaque compétence (NA, EC, A, M). Les points d'expérience (XP) et la barre de progression se mettront à jour automatiquement.</li>
                                 <li>Sauvegardez l'évaluation pour conserver la progression.</li>
@@ -103,7 +103,7 @@ export default function TutorialPage() {
                         <AccordionContent className="text-base text-muted-foreground p-4">
                            <p className="mb-4">Pour consulter, imprimer ou envoyer une fiche TP vierge :</p>
                             <ul className="list-disc pl-6 space-y-2">
-                                <li>Allez sur la page principale du tableau de bord (<strong>Fiches TP</strong>).</li>
+                                <li>Allez sur la page <strong>Fiches TP</strong>.</li>
                                 <li>Sélectionnez un TP dans la liste de gauche pour l'afficher.</li>
                                 <li>Pour le contextualiser, sélectionnez une classe et un élève via les menus. Le nom de l'élève et de l'enseignant apparaîtront sur la fiche.</li>
                                 <li>Utilisez les boutons pour envoyer la fiche par e-mail ou l'imprimer.</li>
