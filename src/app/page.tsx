@@ -24,7 +24,7 @@ export default function Home() {
             <CardTitle className="font-headline text-3xl font-black uppercase tracking-widest text-accent">
               Espace Enseignant
             </CardTitle>
-            <CardDescription>Gérez les classes, assignez les TPs et suivez la progression de vos élèves.</CardDescription>
+            <CardDescription>Gérez les classes, assignez les TP et suivez la progression de vos élèves.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild size="lg" className="w-full font-headline uppercase tracking-wider text-base border-2 border-accent bg-gradient-to-br from-primary to-racing-orange hover:brightness-110">
