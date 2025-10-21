@@ -13,6 +13,7 @@ export default function SelectStudentPage() {
   const { classes } = useAssignments();
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
+  const areClassesLoaded = Object.keys(classes).length > 0;
 
   const handleClassChange = (className: string) => {
     setSelectedClass(className);
@@ -33,9 +34,7 @@ export default function SelectStudentPage() {
     }
   };
 
-  const studentNamesInClass = selectedClass ? classes[selectedClass] || [] : [];
-  const areClassesLoaded = Object.keys(classes).length > 0;
-
+  const studentNamesInClass = areClassesLoaded && selectedClass ? classes[selectedClass] || [] : [];
 
   return (
     <div className="flex items-center justify-center min-h-screen py-12 px-4">
@@ -46,8 +45,9 @@ export default function SelectStudentPage() {
         </CardHeader>
         <CardContent className="flex flex-col space-y-6">
           {!areClassesLoaded ? (
-            <div className="flex items-center justify-center h-24">
+            <div className="flex items-center justify-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="ml-4 text-muted-foreground">Chargement des classes...</p>
             </div>
           ) : (
             <>
@@ -68,7 +68,7 @@ export default function SelectStudentPage() {
               {selectedClass && (
                 <div className="space-y-2">
                   <Label htmlFor="student-select">2. Sélectionne ton nom</Label>
-                  <Select onValueChange={handleStudentChange} value={selectedStudent}>
+                  <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={studentNamesInClass.length === 0}>
                     <SelectTrigger id="student-select">
                       <SelectValue placeholder="Sélectionne ton nom..." />
                     </SelectTrigger>
