@@ -138,8 +138,8 @@ export default function StudentDetailPage() {
     const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
     const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
-    const studentTpsIds = studentName ? assignedTps[studentName] || [] : [];
-    const studentTps = studentTpsIds.map(id => getTpById(id)).filter((tp): tp is TP => tp !== undefined);
+    const studentAssignedTps = studentName ? assignedTps[studentName] || [] : [];
+    const studentTps = studentAssignedTps.map(assignedTp => getTpById(assignedTp.id)).filter((tp): tp is TP => tp !== undefined);
 
     useEffect(() => {
         const tpIdFromUrl = searchParams.get('tp');
