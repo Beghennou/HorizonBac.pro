@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,11 +13,20 @@ export default function SelectStudentPage() {
   const { classes } = useAssignments();
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
+  const [studentNamesInClass, setStudentNamesInClass] = useState<string[]>([]);
   const areClassesLoaded = Object.keys(classes).length > 0;
+
+  useEffect(() => {
+    if (selectedClass && classes[selectedClass]) {
+      setStudentNamesInClass(classes[selectedClass] || []);
+    } else {
+      setStudentNamesInClass([]);
+    }
+  }, [selectedClass, classes]);
 
   const handleClassChange = (className: string) => {
     setSelectedClass(className);
-    setSelectedStudent(''); // Reset student selection when class changes
+    setSelectedStudent('');
   };
 
   const handleStudentChange = (studentName: string) => {
@@ -33,8 +42,6 @@ export default function SelectStudentPage() {
       router.push(`/student?${params.toString()}`);
     }
   };
-
-  const studentNamesInClass = areClassesLoaded && selectedClass ? classes[selectedClass] || [] : [];
 
   return (
     <div className="flex items-center justify-center min-h-screen py-12 px-4">
