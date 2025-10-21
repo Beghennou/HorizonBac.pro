@@ -216,7 +216,7 @@ export default function TPPage() {
           </CardContent>
         </Card>
         
-        {tp.id >= 301 && (
+        {tp.etudePrelim && tp.etudePrelim.length > 0 && (
              <Card>
                 <CardHeader>
                     <CardTitle>Étude Préliminaire</CardTitle>
