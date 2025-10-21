@@ -132,24 +132,26 @@ export default function StudentDetailPage() {
     const searchParams = useSearchParams();
     const params = useParams();
     const { toast } = useToast();
-    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation, classes } = useAssignments();
+    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation } = useAssignments();
 
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     
     const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
     const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
-    const studentAssignedTps = studentName ? assignedTps[studentName] || [] : [];
-    const studentTps = studentAssignedTps.map(assignedTp => getTpById(assignedTp.id)).filter((tp): tp is TP => tp !== undefined);
+    const studentAssignedTps = (studentName ? assignedTps[studentName] || [] : []).map(assignedTp => {
+        const tp = getTpById(assignedTp.id);
+        return tp ? { ...tp, status: assignedTp.status } : null;
+    }).filter((tp): tp is (TP & { status: string }) => tp !== null);
 
     useEffect(() => {
         const tpIdFromUrl = searchParams.get('tp');
         if (tpIdFromUrl) {
             setSelectedTpId(parseInt(tpIdFromUrl));
-        } else if (studentTps.length > 0) {
-            setSelectedTpId(studentTps[0].id);
+        } else if (studentAssignedTps.length > 0) {
+            setSelectedTpId(studentAssignedTps[0].id);
         }
-    }, [searchParams, studentTps]);
+    }, [searchParams, studentAssignedTps]);
 
     useEffect(() => {
         if (studentName) {
@@ -181,22 +183,7 @@ export default function StudentDetailPage() {
         const tp = getTpById(selectedTpId);
         if (!tp) return;
 
-        let tpCompetencesIds: string[] = [];
-        const tpLevel = tp.id >= 1000 ? 'terminale' : tp.id >= 100 ? 'seconde' : 'premiere';
-        
-        if (tpLevel === 'seconde') {
-             Object.values(allBlocs).filter(b => b.title.includes('Bloc 1')).forEach(bloc => tpCompetencesIds.push(...Object.keys(bloc.items)));
-        } else if (tpLevel === 'premiere') {
-            Object.values(allBlocs).filter(b => b.title.includes('Bloc 2')).forEach(bloc => tpCompetencesIds.push(...Object.keys(bloc.items)));
-        } else if (tpLevel === 'terminale') {
-            Object.values(allBlocs).filter(b => b.title.includes('Bloc 3')).forEach(bloc => tpCompetencesIds.push(...Object.keys(bloc.items)));
-        }
-
-        const evalsToSave = Object.fromEntries(
-            Object.entries(currentEvaluations).filter(([competenceId]) => tpCompetencesIds.includes(competenceId))
-        );
-
-        saveEvaluation(studentName, selectedTpId, evalsToSave);
+        saveEvaluation(studentName, selectedTpId, currentEvaluations);
         toast({
             title: "Évaluation enregistrée",
             description: `Les compétences pour ${studentName} ont été mises à jour.`,
@@ -206,10 +193,13 @@ export default function StudentDetailPage() {
     const selectedTp = selectedTpId ? getTpById(selectedTpId) : null;
     let currentBlocs: Record<string, any> = {};
     if (selectedTp) {
-        const tpLevel = selectedTp.id >= 1000 ? 'terminale' : selectedTp.id >= 100 ? 'seconde' : 'premiere';
-        if (tpLevel === 'seconde') currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_1')));
-        else if (tpLevel === 'premiere') currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_2')));
-        else if (tpLevel === 'terminale') currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_3')));
+        if (selectedTp.id >= 1000) {
+             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_3')));
+        } else if (selectedTp.id >= 100) {
+            currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_1')));
+        } else {
+            currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_2')));
+        }
     }
     
     const competenceRegex = /\(Compétence (C\d\.\d)\)/;
@@ -237,7 +227,7 @@ export default function StudentDetailPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {studentTps.length > 0 ? (
+                    {studentAssignedTps.length > 0 ? (
                         <div className="flex items-center gap-4">
                             <span className="font-semibold">Sélectionner un TP assigné :</span>
                             <Select onValueChange={handleTpSelect} value={selectedTpId?.toString() || ""}>
@@ -245,7 +235,7 @@ export default function StudentDetailPage() {
                                     <SelectValue placeholder="Choisissez un TP..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {studentTps.map(tp => (
+                                    {studentAssignedTps.map(tp => (
                                         <SelectItem key={tp.id} value={tp.id.toString()}>
                                             TP {tp.id} - {tp.titre}
                                         </SelectItem>
