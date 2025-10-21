@@ -5,10 +5,11 @@ import { getTpById, TP, Etape } from '@/lib/data-manager';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Send, Loader2, Play, FlagCheckered, CheckCircle } from 'lucide-react';
+import { Bot, Send, Loader2, Play, CheckCircle } from 'lucide-react';
 import { guideStudent, GuideStudentOutput } from '@/ai/flows/tp-assistant';
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Badge } from '@/components/ui/badge';
+import { CheckeredFlag } from '@/components/icons';
 
 const EtapeCard = ({ etape, index }: { etape: Etape; index: number }) => (
   <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
@@ -164,7 +165,7 @@ export default function TPPage() {
                 )}
                 {assignedTp.status === 'en-cours' && (
                     <Button onClick={handleFinish} variant="outline" size="lg" className="border-accent text-accent hover:bg-accent hover:text-black">
-                        <FlagCheckered className="mr-2"/>Terminer le TP
+                        <CheckeredFlag className="mr-2"/>Terminer le TP
                     </Button>
                 )}
                  {assignedTp.status === 'terminé' && (
