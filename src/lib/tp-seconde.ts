@@ -1,3 +1,4 @@
+
 export type Etape = {
   titre: string;
   duree: string;
@@ -654,7 +655,7 @@ export const tpSeconde: Record<number, TP> = {
             'Toujours couper le contact avant intervention sur circuit électrique',
             'Utiliser des outils isolés pour éviter les courts-circuits',
             'Respecter les calibres de fusibles (ne jamais surdimensionner)',
-            'Vérifier l\'absence d\'échauffement anormal après réparation'
+            'Rechercher la cause en cas de fusion répétée'
         ],
         pointsCles: [
             'Méthode de diagnostic appliquée rigoureusement',
