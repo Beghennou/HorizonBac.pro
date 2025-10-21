@@ -2,11 +2,9 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { students as initialStudents } from '@/lib/mock-data';
-import { classes as initialClasses } from '@/lib/data-manager';
+import { classes as initialClasses, getTpById, allBlocs } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
-import { allBlocs } from '@/lib/data-manager';
 import { useToast } from '@/hooks/use-toast';
-
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
@@ -46,8 +44,8 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window !== 'undefined') {
       try {
         const savedStudents = localStorage.getItem('students');
-        setStudents(savedStudents ? JSON.parse(savedStudents) : initialStudents);
-
+        const studentsData = savedStudents ? JSON.parse(savedStudents) : initialStudents;
+        
         const savedClasses = localStorage.getItem('classes');
         setClasses(savedClasses ? JSON.parse(savedClasses) : initialClasses);
 
@@ -58,8 +56,24 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         });
 
         const savedEvaluations = localStorage.getItem('evaluations');
-        setEvaluations(savedEvaluations ? JSON.parse(savedEvaluations) : {});
+        const evaluationsData = savedEvaluations ? JSON.parse(savedEvaluations) : {};
+        setEvaluations(evaluationsData);
         
+        // Recalculate progress and XP on load
+        const updatedStudents = studentsData.map((student: Student) => {
+          const studentEvaluations = evaluationsData[student.name] || {};
+          let totalXp = 0;
+          for (const competenceId in studentEvaluations) {
+              const level = studentEvaluations[competenceId];
+              totalXp += xpPerLevel[level] || 0;
+          }
+          const allCompetencesCount = Object.values(allBlocs).reduce((acc, bloc) => acc + Object.keys(bloc.items).length, 0);
+          const maxPossibleXp = allCompetencesCount * xpPerLevel['M'];
+          const progressPercentage = maxPossibleXp > 0 ? Math.round((totalXp / maxPossibleXp) * 100) : 0;
+          return { ...student, xp: totalXp, progress: progressPercentage };
+        });
+        setStudents(updatedStudents);
+
         const savedTeacherName = localStorage.getItem('teacherName');
         setTeacherName(savedTeacherName ? JSON.parse(savedTeacherName) : 'M. Dubois');
       } catch (error) {
@@ -101,30 +115,33 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const saveEvaluation = (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>) => {
+    
+    // Update evaluations
+    const updatedEvaluationsForStudent = {
+      ...(evaluations[studentName] || {}),
+      ...currentEvals
+    };
+    
     setEvaluations(prev => ({
       ...prev,
-      [studentName]: {
-        ...(prev[studentName] || {}),
-        ...currentEvals
-      }
+      [studentName]: updatedEvaluationsForStudent
     }));
-
+    
+    // Update student's XP and progress
     setStudents(prevStudents => {
         const studentToUpdate = prevStudents.find(s => s.name === studentName);
         if (!studentToUpdate) return prevStudents;
-
-        const allStudentEvaluations = { ...(evaluations[studentName] || {}), ...currentEvals };
         
         let totalXp = 0;
-        for (const competenceId in allStudentEvaluations) {
-            const level = allStudentEvaluations[competenceId];
+        for (const competenceId in updatedEvaluationsForStudent) {
+            const level = updatedEvaluationsForStudent[competenceId];
             totalXp += xpPerLevel[level] || 0;
         }
 
         const allCompetencesCount = Object.values(allBlocs).reduce((acc, bloc) => acc + Object.keys(bloc.items).length, 0);
         const maxPossibleXp = allCompetencesCount * xpPerLevel['M'];
         const progressPercentage = maxPossibleXp > 0 ? Math.round((totalXp / maxPossibleXp) * 100) : 0;
-
+        
         const updatedStudent: Student = { ...studentToUpdate, xp: totalXp, progress: progressPercentage };
         
         return prevStudents.map(s => s.name === studentName ? updatedStudent : s);
@@ -135,7 +152,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     setStudents([]);
     setAssignedTps({});
     setEvaluations({});
-    // Conserve les noms de classe mais vide les listes d'élèves
     setClasses(prevClasses => {
         const clearedClasses: Record<string, string[]> = {};
         for (const className in prevClasses) {

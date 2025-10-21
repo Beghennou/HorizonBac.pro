@@ -2,36 +2,43 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Book, Cog, Users, CheckSquare, FileText } from 'lucide-react';
+import { Book, Cog, Users, FileText } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 
 export function DashboardNav() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const studentId = searchParams.get('student');
-
+  const studentName = searchParams.get('student');
+  
   const navItems = [
-    { href: `/teacher/dashboard?${searchParams.toString()}`, label: 'Fiches TP', icon: Book, requiredParams: [] },
-    { href: `/teacher/dashboard/students?${searchParams.toString()}`, label: 'Élèves', icon: Users, requiredParams: [] },
-    { href: `/teacher/dashboard/student/${studentId}?${searchParams.toString()}`, label: 'Dossier Élève', icon: FileText, requiredParams: ['student'] },
-    { href: `/teacher/dashboard/settings?${searchParams.toString()}`, label: 'Paramètres', icon: Cog, requiredParams: [] },
+    { href: '/teacher/dashboard/students', label: 'Suivi des Classes', icon: Users, base: '/teacher/dashboard/students' },
+    { href: `/teacher/dashboard/student/${studentName}`, label: 'Dossier Élève', icon: FileText, base: '/teacher/dashboard/student', requiredParam: 'student'},
+    { href: '/teacher/dashboard', label: 'Fiches TP', icon: Book, base: '/teacher/dashboard' },
+    { href: `/teacher/dashboard/settings`, label: 'Paramètres', icon: Cog, base: '/teacher/dashboard/settings' },
   ];
+
+  const createUrl = (base: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (base === '/teacher/dashboard' || base === '/teacher/dashboard/settings') {
+      params.delete('student');
+    }
+    return `${base}?${params.toString()}`;
+  }
 
   return (
     <nav className="flex flex-col gap-2">
       {navItems.map((item) => {
-        // Condition pour afficher l'élément de navigation
-        if (item.requiredParams.length > 0 && !item.requiredParams.every(p => searchParams.has(p))) {
+        if (item.requiredParam && !searchParams.has(item.requiredParam)) {
             return null;
         }
 
         const Icon = item.icon;
-        const baseHref = item.href.split('?')[0];
-        
-        // Gérer la classe active pour les routes dynamiques
-        const isActive = item.label === 'Dossier Élève' ? pathname.startsWith('/teacher/dashboard/student/') : pathname === baseHref;
-        
+        const isActive = pathname.startsWith(item.base);
+        const finalHref = item.requiredParam && studentName 
+            ? `/teacher/dashboard/student/${studentName}?${searchParams.toString()}` 
+            : createUrl(item.base);
+
         return (
           <Button
             key={item.href}
@@ -44,7 +51,7 @@ export function DashboardNav() {
                 : 'hover:bg-primary/10 hover:text-accent'
             )}
           >
-            <Link href={item.href}>
+            <Link href={finalHref}>
               <Icon className="h-5 w-5" />
               <span className="font-headline tracking-wider">{item.label}</span>
             </Link>

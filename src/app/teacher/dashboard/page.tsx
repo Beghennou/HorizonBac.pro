@@ -280,7 +280,9 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col items-center justify-center h-full text-center print-hidden">
       <h1 className="font-headline text-5xl tracking-wide">Bienvenue</h1>
-      <p className="text-muted-foreground text-xl mt-2">Veuillez sélectionner un TP dans la liste de gauche pour afficher ses détails.</p>
+      <p className="text-muted-foreground text-xl mt-2 max-w-lg">
+        Utilisez le menu de gauche pour naviguer. Sélectionnez une classe pour voir vos élèves, ou choisissez un TP pour afficher la fiche de travail.
+      </p>
     </div>
   );
 }

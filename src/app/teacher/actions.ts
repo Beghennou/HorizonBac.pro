@@ -3,22 +3,18 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
-const TEACHER_PASSWORD = 'Mongy';
 const AUTH_COOKIE_NAME = 'teacher-auth';
 
-export async function login(prevState: { error: string | undefined }, formData: FormData) {
-  const password = formData.get('password');
-  if (password === TEACHER_PASSWORD) {
+// This is a simplified auth for demo purposes.
+// In a real app, you'd have a proper login system.
+export async function login() {
     cookies().set(AUTH_COOKIE_NAME, 'true', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 24, // 1 day
       path: '/',
     });
-    return { success: true, error: undefined };
-  } else {
-    return { success: false, error: 'Mot de passe incorrect.' };
-  }
+    redirect('/teacher/dashboard');
 }
 
 export async function logout() {

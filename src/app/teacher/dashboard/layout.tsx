@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { classes, getTpsByNiveau, Niveau } from '@/lib/data-manager';
+import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { LogoutButton } from '@/components/logout-button';
 import { DashboardNav } from '@/components/dashboard-nav';
 import {
@@ -62,21 +62,15 @@ function DashboardLayoutContent({
     newSearchParams.set('level', newNiveau);
     newSearchParams.set('class', firstClassForLevel);
     
-    // Preserve student and TP selection if they exist
-    if (searchParams.has('student')) {
-        newSearchParams.set('student', searchParams.get('student')!);
-    }
-    if (searchParams.has('tp')) {
-        newSearchParams.set('tp', searchParams.get('tp')!);
-    }
-
-    router.push(`${pathname}?${newSearchParams.toString()}`);
+    const basePath = pathname.split('/').slice(0, 4).join('/');
+    
+    router.push(`${basePath}?${newSearchParams.toString()}`);
   };
   
   const handleTpSelect = (id: number) => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('tp', id.toString());
-    router.push(`${pathname}?${newSearchParams.toString()}`);
+    router.push(`/teacher/dashboard?${newSearchParams.toString()}`);
   }
 
   const handleClassChange = (className: string) => {
@@ -85,10 +79,7 @@ function DashboardLayoutContent({
     newSearchParams.set('class', className);
     newSearchParams.delete('student'); // Remove student when class changes
     
-    const basePath = pathname.startsWith('/teacher/dashboard/student') 
-        ? '/teacher/dashboard/students' // Redirect to student list if on a specific student page
-        : pathname;
-
+    const basePath = pathname.split('/').slice(0, 4).join('/');
     router.push(`${basePath}?${newSearchParams.toString()}`);
   }
 
@@ -99,15 +90,15 @@ function DashboardLayoutContent({
             <div className="container flex h-20 items-center justify-between">
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="md:hidden"/>
-                <Link href="/teacher/dashboard" className="flex items-center gap-4">
+                <Link href="/" className="flex items-center gap-4">
                   <div className="flex items-center justify-center w-12 h-12 rounded-md bg-gradient-to-br from-primary to-racing-orange border-2 border-accent">
                     <Logo className="w-7 h-7 text-white" />
                   </div>
                   <div>
                     <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
-                      Racing Performance
+                      TP Atelier Pro
                     </h1>
-                    <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Rénovation 2025 • Lycée des métiers</p>
+                    <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Espace Enseignant • Lycée des métiers</p>
                   </div>
                 </Link>
               </div>
@@ -128,7 +119,7 @@ function DashboardLayoutContent({
             </div>
           </header>
           <SidebarInset>
-              <div className="container flex flex-1">
+              <div className="container flex flex-1 py-8">
                   <Sidebar>
                     <SidebarContent className="flex flex-col gap-4 p-0">
                       <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
@@ -157,10 +148,10 @@ function DashboardLayoutContent({
                         </Select>
                       </div>
                     
-                      <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
+                      <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl flex-1">
                         <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Liste des TP ({niveau})</h3>
-                        <ScrollArea className="h-96">
-                          <div className="space-y-2">
+                        <ScrollArea className="h-[calc(100%-3rem)]">
+                          <div className="space-y-2 pr-4">
                             {tps.map(tp => (
                               <div key={tp.id} 
                                 onClick={() => handleTpSelect(tp.id)}
