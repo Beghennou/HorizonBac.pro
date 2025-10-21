@@ -18,12 +18,12 @@ export default function SelectStudentPage() {
   const areClassesLoaded = Object.keys(classes).length > 0;
 
   useEffect(() => {
-    if (selectedClass && classes[selectedClass]) {
+    if (selectedClass && areClassesLoaded) {
       setStudentNamesInClass(classes[selectedClass] || []);
     } else {
       setStudentNamesInClass([]);
     }
-  }, [selectedClass, classes]);
+  }, [selectedClass, classes, areClassesLoaded]);
 
   const handleClassChange = (className: string) => {
     setSelectedClass(className);
