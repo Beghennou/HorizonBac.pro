@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { LyceeLogo } from '@/components/lycee-logo';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
 import { Home, UserCircle, BookOpen } from 'lucide-react';
 import { Award } from '@/components/icons';
+import { Button } from '@/components/ui/button';
 
 export default function StudentLayoutContent({
   children,
@@ -13,6 +15,7 @@ export default function StudentLayoutContent({
   children: React.ReactNode;
 }) {
   const [isLoading, setIsLoading] = useState(true);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 3000);
@@ -22,6 +25,11 @@ export default function StudentLayoutContent({
   if (isLoading) {
     return <TachometerAnimation />;
   }
+
+  const studentParams = new URLSearchParams(searchParams.toString());
+  const portfolioHref = `/student/portfolio?${studentParams.toString()}`;
+  const mesTpHref = `/student?${studentParams.toString()}`;
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -43,27 +51,24 @@ export default function StudentLayoutContent({
             </Link>
           </div>
           <nav className="flex items-center gap-6 text-sm font-headline uppercase tracking-wider">
-            <Link
-              href="/"
-              className="flex items-center gap-2 transition-colors hover:text-accent text-foreground/80"
-            >
-              <Home />
-              Accueil
-            </Link>
-            <Link
-              href="/student/select"
-              className="flex items-center gap-2 transition-colors hover:text-accent text-foreground/80"
-            >
-              <BookOpen />
-              Mes TP
-            </Link>
-             <Link
-              href="/student/portfolio"
-              className="flex items-center gap-2 transition-colors hover:text-accent text-foreground/80"
-            >
-              <Award className="h-5 w-5"/>
-              Mon Portfolio
-            </Link>
+             <Button variant="ghost" asChild className="text-muted-foreground hover:bg-primary/20 hover:text-accent">
+                <Link href="/">
+                  <Home className="mr-2"/>
+                  Accueil
+                </Link>
+            </Button>
+            <Button variant="ghost" asChild className="text-muted-foreground hover:bg-primary/20 hover:text-accent">
+                <Link href={mesTpHref}>
+                    <BookOpen />
+                    Mes TP
+                </Link>
+            </Button>
+             <Button variant="ghost" asChild className="text-muted-foreground hover:bg-primary/20 hover:text-accent">
+                <Link href={portfolioHref}>
+                    <Award className="h-5 w-5"/>
+                    Mon Portfolio
+                </Link>
+            </Button>
           </nav>
         </div>
       </header>
