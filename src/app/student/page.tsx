@@ -12,6 +12,7 @@ import { CheckeredFlag, RacingHelmet } from '@/components/icons';
 export default function StudentPage() {
   const tpModules = Object.values(tpSeconde).map(tp => ({
     id: `tp-${tp.id}`,
+    tpId: tp.id,
     title: tp.titre,
     description: tp.objectif,
     category: 'Mécanique', // Catégorie générique pour l'instant
@@ -54,7 +55,7 @@ export default function StudentPage() {
                 </div>
                 <CardFooter>
                   <Button asChild className="w-full font-bold font-headline uppercase tracking-wider bg-gradient-to-r from-primary to-racing-orange hover:brightness-110">
-                    <Link href="#">Commencer le TP <ArrowRight className="ml-2"/></Link>
+                    <Link href={`/student/tp/${module.tpId}`}>Commencer le TP <ArrowRight className="ml-2"/></Link>
                   </Button>
                 </CardFooter>
               </Card>
