@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 const evaluationLevels: EvaluationStatus[] = ['NA', 'EC', 'A', 'M'];
@@ -137,6 +138,16 @@ const PrelimCorrection = ({ tp, studentAnswers, studentFeedback, teacherFeedback
     onFeedbackChange: (feedback: string) => void;
 }) => {
     const [correction, setCorrection] = useState<{ score: number, total: number, details: boolean[] } | null>(null);
+    const [manualScore, setManualScore] = useState<string>("");
+
+    useEffect(() => {
+        if(correction) {
+            setManualScore((correction.score / correction.total * 10).toFixed(1));
+        } else {
+            setManualScore("");
+        }
+    }, [correction]);
+
 
     const handleCorrection = () => {
         let score = 0;
@@ -172,8 +183,16 @@ const PrelimCorrection = ({ tp, studentAnswers, studentFeedback, teacherFeedback
                     <CardTitle>Correction - Étude Préliminaire</CardTitle>
                     <div className="flex items-center gap-4">
                         {correction && (
-                            <div className="text-xl font-bold font-headline">
-                                Note: <span className="text-accent">{(correction.score / correction.total * 10).toFixed(1)} / 10</span>
+                             <div className="flex items-center gap-2">
+                                <Label htmlFor="note" className="text-xl font-bold font-headline">Note:</Label>
+                                <Input 
+                                    id="note"
+                                    type="text" 
+                                    value={manualScore} 
+                                    onChange={(e) => setManualScore(e.target.value)}
+                                    className="w-24 text-center text-xl font-bold font-headline text-accent bg-background"
+                                />
+                                <span className="text-xl font-bold font-headline">/ 10</span>
                             </div>
                         )}
                         <Button onClick={handleCorrection}><CheckSquare className="mr-2"/>Auto-correction</Button>
