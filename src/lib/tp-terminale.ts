@@ -33,7 +33,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h30',
     titre: 'CA 301 • Contrôle des pressions. Recharge d\'une climatisation',
     situation: 'Contrôle du bon fonctionnement du circuit de climatisation et procédure de recharge selon normes environnementales.',
-    objectif: 'Mesurer pressions HP/BP, diagnostiquer fuites, effectuer recharge et traçabilité fluide frigorigène.',
+    objectif: 'Mesurer pressions HP/BP, diagnostiquer fuites, effectuer recharge et traçabilité fluide frigorigène. (Compétence C3.1)',
     materiel: ['Station clim agréée', 'Manomètres', 'Détecteur de fuites', 'Fluide R134a/R1234yf', 'EPIs', 'Fiches traçabilité'],
     etudePrelim: [
       { q: 'Différence R134a vs R1234yf (environnement, pression, sécurité) ?', r: '' },
@@ -65,7 +65,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'CA 306 • Diagnostic et remplacement airbag',
     situation: 'Diagnostic et remplacement d’un airbag suite à déclenchement ou défaut.',
-    objectif: 'Appliquer procédures sécurité, déposer/reposer airbag, effacer défauts et valider.',
+    objectif: 'Appliquer procédures sécurité, déposer/reposer airbag, effacer défauts et valider. (Compétence C3.3)',
     materiel: ['Outil diag', 'Airbag neuf', 'Clé dynamométrique', 'EPIs'],
     etudePrelim: [
       { q: 'Pourquoi débrancher batterie et attendre 5 minutes ?', r: '' },
@@ -97,7 +97,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'CA 305 • Essuyage automatique des vitres. Allumage automatique',
     situation: 'Diagnostic des systèmes essuyage automatique et allumage auto des feux.',
-    objectif: 'Tester capteurs pluie/lumière, calibrer et valider.',
+    objectif: 'Tester capteurs pluie/lumière, calibrer et valider. (Compétence C3.1)',
     materiel: ['Valise diag', 'Multimètre', 'Schéma', 'Vaporisateur'],
     etudePrelim: [
       { q: 'Principe capteur de pluie (IR/réflexion) ?', r: '' },
@@ -129,7 +129,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '1h30',
     titre: 'CA 303 • Reconnaissance des valves de roues',
     situation: 'Identification et diagnostic des valves TPMS.',
-    objectif: 'Appairer capteurs, remplacer valve défectueuse et valider pressions.',
+    objectif: 'Appairer capteurs, remplacer valve défectueuse et valider pressions. (Compétence C3.4)',
     materiel: ['Outil TPMS', 'Valise diag', 'Manomètre', 'Valves neuves'],
     etudePrelim: [
       { q: 'TPMS direct vs indirect ?', r: '' },
@@ -161,7 +161,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'CA 311 • Phares au xénon',
     situation: 'Diagnostic et réglage des phares au xénon.',
-    objectif: 'Contrôler ballasts, ampoules, correcteur auto et réglage faisceau.',
+    objectif: 'Contrôler ballasts, ampoules, correcteur auto et réglage faisceau. (Compétence C3.3)',
     materiel: ['Valise diag', 'Régloscope', 'EPIs diélectriques'],
     etudePrelim: [
       { q: 'Tension d’amorçage xénon (~20 kV) ?', r: '' },
@@ -193,7 +193,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '3h00',
     titre: 'MTE 303 • Remplacement distribution et pompe à eau',
     situation: 'Remplacement distribution + pompe à eau.',
-    objectif: 'Respecter calage/couples et purge circuit.',
+    objectif: 'Respecter calage/couples et purge circuit. (Compétence C3.3)',
     materiel: ['Kit distri', 'Piges calage', 'Clé dynamométrique', 'LR'],
     etudePrelim: [
       { q: 'Pourquoi ne pas tourner vilebrequin seul en DOHC ?', r: '' },
@@ -225,7 +225,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '1h45',
     titre: 'MA 305 • Relevé de pressions de suralimentation',
     situation: 'Relevé/analyse pressions de suralimentation.',
-    objectif: 'Comparer pressions aux valeurs constructeur, identifier fuites/wastegate/VGT.',
+    objectif: 'Comparer pressions aux valeurs constructeur, identifier fuites/wastegate/VGT. (Compétence C3.1)',
     materiel: ['Mano turbo', 'Valise diag', 'T de dérivation', 'Fumigène'],
     etudePrelim: [
       { q: 'Pression turbo typique pleine charge ?', r: '' },
@@ -258,7 +258,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'MA 307 • Contrôle du circuit basse pression diesel',
     situation: 'Contrôle basse pression gasoil jusqu’à pompe HP.',
-    objectif: 'Mesurer pression/dépression, détecter bulles et colmatage.',
+    objectif: 'Mesurer pression/dépression, détecter bulles et colmatage. (Compétence C3.1)',
     materiel: ['Mano BP', 'Tuyau transparent', 'Filtre gasoil', 'Valise diag'],
     etudePrelim: [
       { q: 'Pression gavage typique (3–6 bar) ?', r: '' },
@@ -292,7 +292,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'L 307 • Diagnostic géométrie',
     situation: 'Diagnostic géométrie trains roulants.',
-    objectif: 'Mesurer et interpréter angles, régler parallélisme.',
+    objectif: 'Mesurer et interpréter angles, régler parallélisme. (Compétence C3.4)',
     materiel: ['Banc géométrie 3D', 'Clés réglage', 'Fiche constructeur'],
     etudePrelim: [
       { q: 'Définir parallélisme, carrossage, chasse, pivot ?', r: '' },
@@ -329,7 +329,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h30',
     titre: 'MA 303 • Diagnostic système injection diesel',
     situation: 'Diagnostic injection diesel common rail.',
-    objectif: 'Analyser codes/paramètres, tester actionneurs et conclure.',
+    objectif: 'Analyser codes/paramètres, tester actionneurs et conclure. (Compétence C3.2)',
     materiel: ['Valise diag', 'Multimètre', 'Mano rampe', 'Oscilloscope', 'RTA'],
     etudePrelim: [
       { q: 'Pression rampe au ralenti/charge ?', r: '' },
@@ -367,7 +367,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'MP 303 • Diagnostic et mesures de paramètres antipollution',
     situation: 'Diagnostic dispositifs antipollution (lambda, EGR, catalyseur, FAP).',
-    objectif: 'Mesurer émissions et vérifier fonctionnement des organes.',
+    objectif: 'Mesurer émissions et vérifier fonctionnement des organes. (Compétence C3.1)',
     materiel: ['Analyseur 4/5 gaz', 'Opacimètre', 'Valise diag', 'Thermo IR'],
     etudePrelim: [
       { q: 'Limites Euro CO/HC/NOx (essence/diesel) ?', r: '' },
@@ -399,7 +399,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'UE 304 • Utilisation d\'un oscilloscope',
     situation: 'Prise en main oscilloscope automobile.',
-    objectif: 'Paramétrer, capter et interpréter des signaux capteurs/actionneurs.',
+    objectif: 'Paramétrer, capter et interpréter des signaux capteurs/actionneurs. (Compétence C3.3)',
     materiel: ['Oscilloscope', 'Sondes diff', 'Pince ampèremétrique', 'Schémas'],
     etudePrelim: [
       { q: 'Différence multimètre vs oscilloscope ?', r: '' },
@@ -436,7 +436,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'MA 306 • Contrôle des injecteurs moteur à rampe commune 1',
     situation: 'Contrôle injecteurs common rail — partie 1 (électrique/retours).',
-    objectif: 'Mesurer résistances, contrôler retours et étanchéité.',
+    objectif: 'Mesurer résistances, contrôler retours et étanchéité. (Compétence C3.1)',
     materiel: ['Multimètre', 'Éprouvettes', 'Valise diag', 'Chiffons'],
     etudePrelim: [
       { q: 'Résistance bobine piézo/électro (Ω) ?', r: '' },
@@ -468,7 +468,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'MA 311 • Contrôle des injecteurs moteur à rampe commune 2',
     situation: 'Contrôle injecteurs common rail — partie 2 (banc et codage).',
-    objectif: 'Mesurer débits/étanchéité sur banc et coder corrections (IMA/IQA).',
+    objectif: 'Mesurer débits/étanchéité sur banc et coder corrections (IMA/IQA). (Compétence C3.4)',
     materiel: ['Banc injecteurs', 'Éprouvettes', 'Valise diag', 'RTA'],
     etudePrelim: [
       { q: 'Pression/durée test banc ?', r: '' },
@@ -500,7 +500,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h30',
     titre: 'F 307 • Diagnostic du système ABS (contrôle des éléments)',
     situation: 'Diagnostic complet ABS: capteurs, ECU, groupe hydraulique et essais.',
-    objectif: 'Identifier défauts par codes, mesures et tests actionneurs.',
+    objectif: 'Identifier défauts par codes, mesures et tests actionneurs. (Compétence C3.2)',
     materiel: ['Valise ABS', 'Multimètre', 'Oscillo', 'Banc freinage'],
     etudePrelim: [
       { q: 'Rôle ABS/capteurs roue ?', r: '' },
@@ -537,7 +537,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'L 311 • Direction assistée électrique et hydraulique',
     situation: 'Direction assistée électrique/hydraulique: découverte et diag.',
-    objectif: 'Identifier système, lire codes, mesurer pression/params et valider.',
+    objectif: 'Identifier système, lire codes, mesurer pression/params et valider. (Compétence C3.2)',
     materiel: ['Valise DAE', 'Mano 0–150 bar', 'Multimètre', 'Fluide DA'],
     etudePrelim: [
       { q: 'Hydraulique vs électrique ?', r: '' },
@@ -575,7 +575,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h00',
     titre: 'L 312 • Diagnostiquer un système de suspension pilotée',
     situation: 'Suspension pilotée (amortissement variable/pneumatique).',
-    objectif: 'Diagnostiquer via codes/paramètres, tester actionneurs, valider comportement dynamique.',
+    objectif: 'Diagnostiquer via codes/paramètres, tester actionneurs, valider comportement dynamique. (Compétence C3.2)',
     materiel: ['Valise suspension', 'Mano pneumatique', 'Multimètre', 'Schéma'],
     etudePrelim: [
       { q: 'Types de suspension pilotée ?', r: '' },
@@ -615,7 +615,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h30',
     titre: 'T 307 • Diagnostic BV robotisée',
     situation: 'BV robotisée: commande embrayage et sélection pilotée.',
-    objectif: 'Lire paramètres, tester actionneurs, réaliser apprentissages et valider passages.',
+    objectif: 'Lire paramètres, tester actionneurs, réaliser apprentissages et valider passages. (Compétence C3.4)',
     materiel: ['Valise constructeur', 'Multimètre', 'Schéma BV robotisée', 'EPIs'],
     etudePrelim: [
       { q: 'Différence robotisée vs auto classique ?', r: '' },
@@ -649,4 +649,4 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Véhicule calé', 'Procédures constructeur', 'Limiter sollicitations', 'Ranger outils'],
     pointsCles: ['PIDs essentiels', 'Apprentissage obligatoire', 'Actionneurs OK']
   }
-});
+};
