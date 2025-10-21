@@ -102,7 +102,6 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Ne pas heurter airbag', 'Stocker face vers le haut', 'Filière agréée'],
     pointsCles: ['Attente 5 min', 'Couples serrage', 'Effacement défauts']
   },
-  // ... Les autres TPs sont omis pour la concision mais la structure est la même
    303: {
     id: 303,
     duree: '2h00',
@@ -511,7 +510,7 @@ export const tpTerminale: Record<number, TP> = {
     duree: '2h30',
     titre: 'F 307 • Diagnostic du système ABS (contrôle des éléments)',
     situation: 'Le témoin ABS est allumé. Le client signale une sensation étrange à la pédale. Vous devez mener un diagnostic complet pour assurer la sécurité du système de freinage antiblocage.',
-    objectif: 'Identifier défauts par codes, mesures et tests actionneurs. (Compétence C3.2)',
+    objectif: 'Identifier défauts par codes, mesures et tests actionneurs. (Compétences C3.2, C3.3)',
     materiel: ['Valise ABS', 'Multimètre', 'Oscillo', 'Banc freinage'],
     etudePrelim: [
       { q: 'Quel est le rôle des capteurs de roue dans le système ABS ?', r: 'Ils mesurent la vitesse de rotation de chaque roue en temps réel et transmettent cette information au calculateur ABS pour qu\'il détecte tout début de blocage.', type: 'text' },
@@ -661,3 +660,5 @@ export const tpTerminale: Record<number, TP> = {
     pointsCles: ['PIDs essentiels', 'Apprentissage obligatoire', 'Actionneurs OK']
   }
 };
+
+    

@@ -44,13 +44,9 @@ export const tpSeconde: Record<number, TP> = {
         duree: '2h00',
         titre: 'Sécurité et Organisation du Poste de Travail',
         situation: 'Un nouveau mécanicien intègre l\'équipe. Avant sa première intervention, le chef d\'atelier lui demande de préparer son poste et de réviser les règles de sécurité fondamentales.',
-        objectif: 'Organiser son espace de travail de manière sûre et efficace, en identifiant les risques et en utilisant les Équipements de Protection Individuelle (EPI). (Compétence C1.1)',
+        objectif: 'Organiser son espace de travail de manière sûre et efficace, en identifiant les risques et en utilisant les Équipements de Protection Individuelle (EPI). (Compétences C1.1, C1.4)',
         materiel: ['Bleu de travail', 'Chaussures de sécurité', 'Lunettes de protection', 'Gants', 'Chariot à outils', 'Extincteur (localisation)', 'Zone de tri des déchets'],
-        etudePrelim: [
-            { type: 'text', q: 'Citez au moins 3 des 5 types de risques majeurs présents dans un atelier automobile.', r: 'Risques mécaniques (pièces en mouvement), chimiques (fluides, vapeurs), électriques (haute tension), thermiques (pièces chaudes), et risques d\'incendie.' },
-            { type: 'qcm', q: 'Un panneau de sécurité de forme ronde avec un pictogramme barré de rouge indique :', options: ['Une obligation', 'Un danger', 'Une interdiction', 'Une information de sauvetage'], r: 'Une interdiction' },
-            { type: 'text', q: 'Que signifie l\'acronyme TMS et comment peut-on les prévenir dans un atelier ?', r: 'Troubles Musculo-Squelettiques. On les prévient en adoptant de bonnes postures, en utilisant des aides à la manutention et en faisant des pauses.' },
-        ],
+        etudePrelim: [],
         activitePratique: [
             etape('Préparation et organisation de la zone', '30 min', [
                 'Vérifier la propreté et l\'éclairage du poste de travail.',
@@ -100,11 +96,7 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Un client dépose sa berline pour une inspection du soubassement. Vous devez lever le véhicule en utilisant un cric rouleur et des chandelles pour permettre une intervention en toute sécurité.',
         objectif: 'Maîtriser la procédure de levage sécurisé pour permettre une intervention sous le véhicule en respectant les points de levage constructeur. (Compétence C1.1)',
         materiel: ['Cric rouleur hydraulique', 'Paire de chandelles (capacité adaptée)', 'Cales de roues', 'Documentation technique (points de levage)', 'Clé de roue'],
-        etudePrelim: [
-            { type: 'qcm', q: 'Pourquoi est-il absolument interdit de travailler sous un véhicule reposant uniquement sur un cric ?', options: ['Le cric pourrait se dégonfler lentement', 'Un cric n\'est pas un organe de maintien mais de levage', 'Le cric n\'est pas stable latéralement'], r: 'Un cric n\'est pas un organe de maintien mais de levage' },
-            { type: 'text', q: 'Où trouve-t-on l\'information fiable pour localiser les points de levage d\'un véhicule ?', r: 'Dans la documentation technique du constructeur (RTA ou logiciel de données techniques).' },
-            { type: 'qcm', q: 'Une fois le véhicule posé sur les chandelles, quelle est l\'action de sécurité impérative à réaliser avant toute intervention ?', options: ['Retirer le cric pour avoir plus de place', 'Secouer légèrement le véhicule pour tester sa stabilité', 'Lever une autre roue'], r: 'Secouer légèrement le véhicule pour tester sa stabilité' }
-        ],
+        etudePrelim: [],
         activitePratique: [
             etape('Préparation et contrôles préalables', '20 min', [
                 'Consulter la documentation technique pour identifier les points de levage constructeur spécifiques au modèle.',
@@ -155,11 +147,7 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Un SUV est confié à l\'atelier pour le remplacement des plaquettes de frein. L\'intervention nécessite l\'utilisation du pont élévateur à deux colonnes pour un accès optimal.',
         objectif: 'Positionner et lever un véhicule avec un pont 2 colonnes en respectant les règles de centrage et de sécurité. (Compétence C1.1)',
         materiel: ['Pont élévateur 2 colonnes', 'Patins de levage adaptés au véhicule', 'Documentation technique constructeur', 'Télécommande pont'],
-        etudePrelim: [
-            { type: 'text', q: 'Pourquoi le centrage longitudinal (avant/arrière) d\'un véhicule sur un pont 2 colonnes est-il si critique ?', r: 'Pour répartir correctement le poids par rapport au centre de gravité du véhicule et éviter un basculement vers l\'avant ou l\'arrière.' },
-            { type: 'qcm', q: 'Quelle est la première chose à faire juste après avoir levé le véhicule de quelques centimètres ?', options: ['Commencer à travailler', 'Monter le véhicule à hauteur d\'homme', 'Arrêter et vérifier la stabilité et le positionnement des patins'], r: 'Arrêter et vérifier la stabilité et le positionnement des patins' },
-            { type: 'text', q: 'Quel est le rôle des crans de sécurité mécaniques du pont élévateur ?', r: 'Ils servent de sécurité redondante en cas de défaillance hydraulique, en bloquant mécaniquement la descente du pont.' }
-        ],
+        etudePrelim: [],
         activitePratique: [
             etape('Positionnement précis du véhicule', '30 min', [
                 'Avancer le véhicule entre les colonnes en respectant parfaitement le centrage longitudinal.',
@@ -211,13 +199,9 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h00',
         titre: 'Découverte du Poste de Conduite et des Témoins',
         situation: 'Un client vient de récupérer son véhicule après une longue immobilisation et s\'interroge sur la signification des différents témoins lumineux qui apparaissent au tableau de bord.',
-        objectif: 'Identifier toutes les commandes usuelles et interpréter correctement les témoins d\'alerte pour informer et rassurer le client. (Compétence C1.4)',
+        objectif: 'Identifier toutes les commandes usuelles et interpréter correctement les témoins d\'alerte pour informer et rassurer le client. (Compétences C1.1, C1.4)',
         materiel: ['Véhicule en état de fonctionnement', 'Manuel utilisateur du constructeur', 'Fiche de relevé des témoins', 'Stylo'],
-        etudePrelim: [
-            { type: 'qcm', q: 'Un témoin de couleur ORANGE qui reste allumé après démarrage indique :', options: ['Une panne grave nécessitant un arrêt immédiat', 'Une information de fonctionnement (ex: feux allumés)', 'Une anomalie à vérifier prochainement, sans urgence immédiate'], r: 'Une anomalie à vérifier prochainement, sans urgence immédiate' },
-            { type: 'qcm', q: 'Quel témoin impose un arrêt IMMÉDIAT du véhicule ?', options: ['Pression des pneus', 'Niveau de lave-glace', 'Pression d\'huile moteur'], r: 'Pression d\'huile moteur' },
-            { type: 'text', q: 'À quoi sert la phase d\'autotest des témoins lorsque l\'on met le contact ?', r: 'Elle permet de vérifier que toutes les ampoules des témoins fonctionnent correctement avant le démarrage du moteur.' }
-        ],
+        etudePrelim: [],
         activitePratique: [
             etape('Identification systématique des commandes', '20 min', [
                 'Repérer et tester toutes les commandes d\'éclairage (feux de position, croisement, route).',
@@ -259,13 +243,9 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h00',
         titre: 'Contrôle des Niveaux et Appoint des Fluides',
         situation: 'Lors d\'une réception véhicule pour un entretien courant, vous devez effectuer les contrôles systématiques des niveaux des différents fluides du compartiment moteur selon la check-list atelier.',
-        objectif: 'Identifier les anomalies et réaliser les ajustements. (Compétences C1.2, C1.3)',
+        objectif: 'Identifier les anomalies et réaliser les ajustements. (Compétences C1.1, C1.2, C1.3, C1.4)',
         materiel: ['Liquide de refroidissement spécifié', 'Produit lave-glace concentré', 'Liquide de frein DOT4 ou 5.1', 'Entonnoirs de différentes tailles', 'Chiffons propres non pelucheux'],
-        etudePrelim: [
-            { type: 'qcm', q: 'Pourquoi le niveau de liquide de refroidissement doit-il se contrôler moteur FROID ?', options: ['Le liquide chaud est moins visible', 'Pour éviter le risque de brûlure et parce que le niveau est faussé par la dilatation', 'C\'est une préférence de mécanicien'], r: 'Pour éviter le risque de brûlure et parce que le niveau est faussé par la dilatation' },
-            { type: 'text', q: 'Un niveau de liquide de frein qui a beaucoup baissé (mais est encore au-dessus du mini) indique le plus souvent...', r: 'Une usure normale mais avancée des plaquettes de frein (les pistons sont plus sortis).' },
-            { type: 'text', q: 'Peut-on mélanger un liquide de refroidissement de type "organique" (rose/jaune) avec un type "minéral" (bleu/vert) ? Pourquoi ?', r: 'Non, car leurs additifs sont incompatibles et le mélange peut créer des boues qui bouchent le circuit et annulent la protection anti-corrosion.' }
-        ],
+        etudePrelim: [],
         activitePratique: [
             etape('Contrôle du système de refroidissement', '20 min', [
                 'S\'assurer que le moteur est parfaitement froid avant toute manipulation.',
@@ -309,13 +289,9 @@ export const tpSeconde: Record<number, TP> = {
         duree: '1h45',
         titre: 'Contrôle et Remplacement des Ampoules',
         situation: 'Un client a été alerté par les forces de l\'ordre d\'un feu stop défectueux. Il demande un contrôle complet de l\'éclairage et le remplacement de toutes les ampoules nécessaires.',
-        objectif: 'Identifier et remplacer les ampoules défectueuses. (Compétences C1.2, C1.3)',
+        objectif: 'Identifier et remplacer les ampoules défectueuses. (Compétences C1.1, C1.2, C1.3)',
         materiel: ['Jeu d\'ampoules de rechange variées', 'Tournevis adaptés', 'Chiffon microfibre propre', 'Gants de protection', 'Assistant pour les tests'],
-        etudePrelim: [
-            { type: 'text', q: 'Pourquoi ne faut-il jamais toucher le verre d\'une ampoule halogène (H4, H7) avec les doigts ?', r: 'Le gras des doigts crée un point chaud sur le verre qui réduit considérablement la durée de vie de l\'ampoule et peut la faire éclater.' },
-            { type: 'qcm', q: 'Vous remplacez une ampoule de phare avant. Quelle est la meilleure pratique ?', options: ['Remplacer uniquement celle qui est grillée', 'Remplacer les deux ampoules (gauche et droite) en même temps', 'Attendre que l\'autre grille'], r: 'Remplacer les deux ampoules (gauche et droite) en même temps' },
-            { type: 'text', q: 'Comment différenciez-vous une ampoule P21W (un filament) d\'une P21/5W (deux filaments) ?', r: 'L\'ampoule P21/5W a deux filaments visibles à l\'intérieur et deux plots de contact au lieu d\'un seul sur son culot.' }
-        ],
+        etudePrelim: [],
         activitePratique: [
             etape('Contrôle systématique complet de l\'éclairage', '30 min', [
                 'Avec l\'aide d\'une deuxième personne ou d\'un miroir, tester méthodiquement toutes les fonctions d\'éclairage.',
@@ -356,9 +332,158 @@ export const tpSeconde: Record<number, TP> = {
             'Test systématique de chaque fonction après intervention',
             'Documentation complète des ampoules remplacées'
         ]
+    },
+     107: {
+        id: 107,
+        duree: '1h00',
+        titre: 'Contrôle et Remplacement des Balais d\'Essuie-Glace',
+        situation: 'Un client se plaint d\'une mauvaise visibilité sous la pluie, avec des traces laissées par les essuie-glaces. Un remplacement est nécessaire avant un long trajet.',
+        objectif: 'Réaliser le remplacement des balais d\'essuie-glace et conseiller le client. (Compétences C1.1, C1.3)',
+        materiel: ['Jeu de balais neufs', 'Chiffon', 'Produit de nettoyage vitre'],
+        etudePrelim: [],
+        activitePratique: [
+            etape('Contrôle et Diagnostic', '15 min', [
+                'Inspecter visuellement les balais existants (fissures, déformations).',
+                'Tester le fonctionnement et observer les traces sur le pare-brise.',
+                'Nettoyer le pare-brise pour éliminer les impuretés.'
+            ]),
+            etape('Remplacement des Balais', '30 min', [
+                'Positionner les bras d\'essuie-glace en mode "service" si nécessaire.',
+                'Protéger le pare-brise avec un carton pour éviter les impacts.',
+                'Déposer les anciens balais en identifiant le type de fixation (clip, crochet).',
+                'Installer les nouveaux balais en s\'assurant du verrouillage correct.'
+            ]),
+            etape('Validation et Conseil', '15 min', [
+                'Tester le balayage avec du liquide lave-glace.',
+                'Vérifier l\'absence de bruit et de trace.',
+                'Conseiller le client sur l\'entretien (nettoyage régulier des lames).'
+            ])
+        ],
+        securiteRangement: [
+            'Protéger le pare-brise pendant l\'intervention',
+            'S\'assurer du bon clipsage des nouveaux balais',
+            'Jeter les anciens balais dans le bac approprié'
+        ],
+        pointsCles: [
+            'Bonne identification du type de fixation',
+            'Protection du pare-brise',
+            'Test fonctionnel après remplacement'
+        ]
+    },
+    108: {
+        id: 108,
+        duree: '1h30',
+        titre: 'Contrôle de l\'État et de la Pression des Pneus',
+        situation: 'Dans le cadre d\'une révision systématique, vous devez contrôler l\'ensemble des pneumatiques du véhicule, y compris la roue de secours.',
+        objectif: 'Identifier les anomalies d\'usure et de pression et y remédier. (Compétences C1.2, C1.3)',
+        materiel: ['Manomètre de pression', 'Jauge de profondeur', 'Documentation technique (pressions préconisées)'],
+        etudePrelim: [],
+        activitePratique: [
+            etape('Contrôle de la Pression', '20 min', [
+                'Consulter l\'étiquette de pression dans la portière ou la trappe à carburant.',
+                'Mesurer la pression de chaque pneu à froid.',
+                'Ajuster la pression si nécessaire (gonflage ou dégonflage).',
+                'Contrôler la pression de la roue de secours.'
+            ]),
+            etape('Contrôle de l\'Usure', '40 min', [
+                'Mesurer la profondeur des sculptures en 3 points de la bande de roulement.',
+                'Vérifier l\'atteinte du témoin d\'usure légal (1.6 mm).',
+                'Inspecter les flancs pour détecter toute hernie, coupure ou craquelure.',
+                'Analyser le type d\'usure (centre, bords, asymétrique) pour pré-diagnostiquer un problème de géométrie ou de pression.'
+            ]),
+            etape('Rapport et Conseil', '30 min', [
+                'Noter toutes les valeurs relevées sur la fiche d\'intervention.',
+                'Informer le client de toute anomalie (usure irrégulière, pneu à remplacer).',
+                'Expliquer au client l\'importance de maintenir une pression correcte.'
+            ])
+        ],
+        securiteRangement: [
+            'Toujours contrôler la pression à froid',
+            'Respecter les préconisations de pression du constructeur',
+            'Signaler impérativement tout pneu présentant un risque pour la sécurité'
+        ],
+        pointsCles: [
+            'Pression correcte et homogène',
+            'Usure régulière de la bande de roulement',
+            'Absence de dommage sur les flancs'
+        ]
+    },
+    109: {
+        id: 109,
+        duree: '1h30',
+        titre: 'Vidange Huile Moteur et Remplacement du Filtre',
+        situation: 'Un véhicule se présente pour sa vidange annuelle. Vous devez effectuer l\'opération en respectant les procédures, le type d\'huile et le recyclage des déchets.',
+        objectif: 'Réaliser une vidange moteur dans les règles de l\'art. (Compétences C1.2, C1.4)',
+        materiel: ['Huile moteur préconisée', 'Filtre à huile neuf', 'Joint de vidange neuf', 'Clé à filtre', 'Récupérateur d\'huile usagée', 'Clé dynamométrique'],
+        etudePrelim: [],
+        activitePratique: [
+            etape('Préparation et Vidange', '30 min', [
+                'Faire tourner le moteur quelques minutes pour fluidifier l\'huile.',
+                'Placer le récupérateur d\'huile sous le carter.',
+                'Desserrer et retirer le bouchon de vidange.',
+                'Laisser l\'huile s\'écouler complètement.'
+            ]),
+            etape('Remplacement du Filtre et Remplissage', '40 min', [
+                'Pendant que l\'huile s\'écoule, déposer l\'ancien filtre à huile.',
+                'Huiler légèrement le joint du nouveau filtre.',
+                'Visser le nouveau filtre à la main jusqu\'au contact, puis serrer d\'un quart de tour supplémentaire (ou au couple si spécifié).',
+                'Nettoyer la portée du bouchon de vidange, mettre un joint neuf et serrer au couple.',
+                'Remplir avec la quantité d\'huile préconisée.'
+            ]),
+            etape('Contrôle Final', '20 min', [
+                'Démarrer le moteur, laisser tourner 1 minute pour remplir le filtre.',
+                'Couper le moteur, attendre 5 minutes.',
+                'Faire le niveau d\'huile à la jauge et ajuster si nécessaire, sans dépasser le maximum.',
+                'Vérifier l\'absence de fuite au bouchon et au filtre.'
+            ])
+        ],
+        securiteRangement: [
+            'Utiliser un récupérateur d\'huile étanche',
+            'Manipuler l\'huile chaude avec précaution (gants)',
+            'Stocker l\'huile et le filtre usagés dans les bacs de recyclage dédiés'
+        ],
+        pointsCles: [
+            'Utilisation de l\'huile préconisée',
+            'Remplacement systématique du joint de vidange et du filtre',
+            'Serrage au couple du bouchon de vidange'
+        ]
+    },
+    110: {
+        id: 110,
+        duree: '1h00',
+        titre: 'Contrôle et Remplacement du Filtre à Air',
+        situation: 'Lors d\'un entretien, vous devez vérifier l\'état du filtre à air et le remplacer si nécessaire pour garantir une bonne respiration du moteur.',
+        objectif: 'Évaluer l\'état du filtre à air et le remplacer si besoin. (Compétences C1.2, C1.3, C1.4)',
+        materiel: ['Filtre à air neuf', 'Soufflette (optionnel, pour nettoyage boîtier)', 'Tournevis ou clés adaptés'],
+        etudePrelim: [],
+        activitePratique: [
+            etape('Diagnostic', '20 min', [
+                'Localiser le boîtier du filtre à air.',
+                'Ouvrir le boîtier et extraire le filtre.',
+                'Inspecter le filtre à la lumière : vérifier son encrassement et l\'absence de déchirure.'
+            ]),
+            etape('Intervention', '25 min', [
+                'Nettoyer l\'intérieur du boîtier avec un chiffon ou une soufflette (vers l\'extérieur).',
+                'Insérer le nouveau filtre en respectant son sens de montage.',
+                'Refermer et visser correctement le couvercle du boîtier.'
+            ]),
+            etape('Conseil Client', '15 min', [
+                'Montrer l\'ancien filtre au client pour justifier le remplacement.',
+                'Expliquer l\'impact d\'un filtre encrassé sur la consommation et la performance.',
+                'Noter l\'intervention sur la fiche de suivi du véhicule.'
+            ])
+        ],
+        securiteRangement: [
+            'S\'assurer de la parfaite étanchéité du boîtier après intervention',
+            'Ne pas souffler d\'air comprimé à travers le filtre pour le "nettoyer"',
+            'Jeter l\'ancien filtre dans le bac des déchets non recyclables'
+        ],
+        pointsCles: [
+            'Diagnostic visuel fiable de l\'encrassement',
+            'Bon positionnement du filtre neuf',
+            'Justification du remplacement auprès du client'
+        ]
     }
 };
-
-    
 
     
