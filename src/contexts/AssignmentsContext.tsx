@@ -49,6 +49,7 @@ type AssignmentsContextType = {
   deleteStudent: (studentName: string) => void;
   deleteClass: (className: string) => void;
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
+  isLoaded: boolean;
 };
 
 const AssignmentsContext = createContext<AssignmentsContextType | undefined>(undefined);
@@ -393,13 +394,8 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-
-  if (!isLoaded) {
-    return null;
-  }
-
   return (
-    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, prelimAnswers, feedbacks, assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer, saveFeedback, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv }}>
+    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, prelimAnswers, feedbacks, assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer, saveFeedback, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv, isLoaded }}>
       {children}
     </AssignmentsContext.Provider>
   );
@@ -412,3 +408,5 @@ export const useAssignments = () => {
   }
   return context;
 };
+
+    
