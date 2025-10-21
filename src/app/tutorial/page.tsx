@@ -11,7 +11,7 @@ export default function TutorialPage() {
         <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl">
             <div className="container flex h-20 items-center justify-between">
                  <h1 className="font-headline text-3xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
-                    Tutoriel TP Atelier Pro
+                    Tutoriel Horizon Bacpro
                  </h1>
                  <Button asChild>
                     <Link href="/">Retour à l'accueil</Link>
@@ -21,9 +21,9 @@ export default function TutorialPage() {
 
         <main className="container py-12 space-y-12">
             <section className="text-center">
-                <h2 className="font-headline text-5xl tracking-wide text-accent">Bienvenue sur TP Atelier Pro</h2>
-                <p className="text-muted-foreground text-xl mt-2 max-w-3xl mx-auto">
-                    Votre plateforme tout-en-un pour le suivi des compétences en maintenance automobile. Choisissez votre profil pour démarrer.
+                <h2 className="font-headline text-5xl tracking-wide text-accent">Bienvenue sur Horizon Bacpro</h2>
+                <p className="text-muted-foreground text-lg mt-4 max-w-4xl mx-auto">
+                    Conçue par <strong>Hamed BEGHENNOU</strong>, Horizon Bacpro est votre plateforme tout-en-un pour le suivi des compétences en maintenance automobile. Le nom "Horizon Bacpro" a été choisi pour évoquer la progression, l'avenir et le parcours de formation des élèves. Choisissez votre profil pour démarrer.
                 </p>
             </section>
 
