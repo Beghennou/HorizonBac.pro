@@ -14,13 +14,13 @@ export function DashboardNav() {
   const navItems = [
     { href: '/teacher/dashboard/students', label: 'Suivi des Classes', icon: Users, base: '/teacher/dashboard/students' },
     { href: `/teacher/dashboard/student/${studentName}`, label: 'Dossier Élève', icon: FileText, base: '/teacher/dashboard/student', requiredParam: 'student'},
-    { href: '/teacher/dashboard', label: 'Fiches TP', icon: Book, base: '/teacher/dashboard' },
+    { href: '/teacher/dashboard', label: 'Fiches TP', icon: Book, base: '/teacher/dashboard', exact: true },
     { href: `/teacher/dashboard/settings`, label: 'Paramètres', icon: Cog, base: '/teacher/dashboard/settings' },
   ];
 
   const createUrl = (base: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (base === '/teacher/dashboard' || base === '/teacher/dashboard/settings') {
+    if (base === '/teacher/dashboard' || base === '/teacher/dashboard/settings' || base === '/teacher/dashboard/students') {
       params.delete('student');
     }
     return `${base}?${params.toString()}`;
@@ -34,9 +34,9 @@ export function DashboardNav() {
         }
 
         const Icon = item.icon;
-        const isActive = pathname.startsWith(item.base);
+        const isActive = item.exact ? pathname === item.base : pathname.startsWith(item.base);
         const finalHref = item.requiredParam && studentName 
-            ? `/teacher/dashboard/student/${studentName}?${searchParams.toString()}` 
+            ? `/teacher/dashboard/student/${encodeURIComponent(studentName)}?${searchParams.toString()}` 
             : createUrl(item.base);
 
         return (

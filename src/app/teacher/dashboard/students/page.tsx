@@ -22,6 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Link from 'next/link';
 
 export default function StudentsPage() {
     const searchParams = useSearchParams();
@@ -82,8 +83,7 @@ export default function StudentsPage() {
       }
       
       const newSearchParams = new URLSearchParams(searchParams.toString());
-      newSearchParams.set('student', studentName);
-      router.push(`/teacher/dashboard/student/${studentName}?${newSearchParams.toString()}`);
+      router.push(`/teacher/dashboard/student/${encodeURIComponent(studentName)}?${newSearchParams.toString()}`);
     }
 
     const allStudentsSelected = selectedStudents.length > 0 && selectedStudents.length === studentsInClass.length;
@@ -182,7 +182,7 @@ export default function StudentsPage() {
                                                         className={cn("h-8 w-8", hasEvaluationData ? "border-green-500 bg-green-500/10 text-green-400" : "border-primary/50" )}
                                                         asChild
                                                       >
-                                                        <Link href={`/teacher/dashboard/student/${studentName}?${new URLSearchParams({...Object.fromEntries(searchParams.entries()), tp: tpId.toString()})}`} onClick={(e) => e.stopPropagation()}>
+                                                        <Link href={`/teacher/dashboard/student/${encodeURIComponent(studentName)}?${new URLSearchParams({...Object.fromEntries(searchParams.entries()), tp: tpId.toString()})}`} onClick={(e) => e.stopPropagation()}>
                                                           {tp.id % 100}
                                                         </Link>
                                                       </Button>

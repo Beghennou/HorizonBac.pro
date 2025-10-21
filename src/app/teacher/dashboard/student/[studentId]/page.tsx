@@ -145,8 +145,10 @@ export default function StudentDetailPage() {
         const tpIdFromUrl = searchParams.get('tp');
         if (tpIdFromUrl) {
             setSelectedTpId(parseInt(tpIdFromUrl));
+        } else if (studentTps.length > 0) {
+            setSelectedTpId(studentTps[0].id);
         }
-    }, [searchParams]);
+    }, [searchParams, studentTps]);
 
     useEffect(() => {
         if (studentName) {
@@ -156,22 +158,6 @@ export default function StudentDetailPage() {
             setSelectedTpId(null);
         }
     }, [studentName, savedEvaluations]);
-
-    useEffect(() => {
-        if (studentTps.length > 0 && !studentTps.some(tp => tp.id === selectedTpId)) {
-            const newTpId = studentTps[0]?.id || null;
-            setSelectedTpId(newTpId);
-            const newSearchParams = new URLSearchParams(searchParams.toString());
-            if (newTpId) {
-                newSearchParams.set('tp', newTpId.toString());
-            } else {
-                newSearchParams.delete('tp');
-            }
-            router.replace(`${pathname}?${newSearchParams.toString()}`);
-        } else if (studentTps.length === 0) {
-            setSelectedTpId(null);
-        }
-    }, [studentTps, selectedTpId, pathname, router, searchParams]);
 
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
         setCurrentEvaluations(prev => ({
