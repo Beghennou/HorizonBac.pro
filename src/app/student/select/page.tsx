@@ -39,14 +39,14 @@ export default function SelectStudentPage() {
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="font-headline text-3xl text-accent">Accès Espace Élève</CardTitle>
-          <CardDescription>Sélectionnez votre classe puis votre nom pour accéder à vos travaux pratiques.</CardDescription>
+          <CardDescription>Sélectionne ta classe puis ton nom pour accéder à vos travaux pratiques.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="class-select">1. Choisissez votre classe</Label>
+            <Label htmlFor="class-select">1. Sélectionne ta classe</Label>
             <Select onValueChange={handleClassChange}>
               <SelectTrigger id="class-select">
-                <SelectValue placeholder="Sélectionner une classe..." />
+                <SelectValue placeholder="Sélectionne ta classe..." />
               </SelectTrigger>
               <SelectContent>
                 {Object.keys(classes).sort().map(className => (
@@ -58,10 +58,10 @@ export default function SelectStudentPage() {
 
           {selectedClass && (
             <div className="space-y-2">
-              <Label htmlFor="student-select">2. Choisissez votre nom</Label>
+              <Label htmlFor="student-select">2. Sélectionne ton nom</Label>
               <Select onValueChange={handleStudentChange} value={selectedStudent}>
                 <SelectTrigger id="student-select">
-                  <SelectValue placeholder="Sélectionner votre nom..." />
+                  <SelectValue placeholder="Sélectionne ton nom..." />
                 </SelectTrigger>
                 <SelectContent>
                   {studentNamesInClass.sort().map(studentName => (

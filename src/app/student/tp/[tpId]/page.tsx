@@ -206,43 +206,47 @@ export default function TPPage() {
               ))}
           </CardContent>
         </Card>
+        
+        {tp.id >= 301 && (
+             <Card>
+                <CardHeader>
+                    <CardTitle>Étude Préliminaire</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {tp.etudePrelim.map((item, i) => (
+                        <div key={i} className="p-4 border-l-2 border-accent/30 bg-background/50 rounded-r-lg">
+                            <p className="font-bold">Question {i+1}:</p>
+                            <p className="mb-4">{item.q}</p>
+                            
+                            {item.type === 'text' && (
+                                <Textarea 
+                                    placeholder="Votre réponse..." 
+                                    className="bg-card" 
+                                    value={(studentTpAnswers[i] as string) || ''}
+                                    onChange={(e) => handleAnswerChange(i, e.target.value)}
+                                    disabled={assignedTp.status === 'terminé'}
+                                />
+                            )}
 
-        <Card>
-            <CardHeader>
-                <CardTitle>Étude Préliminaire</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                {tp.etudePrelim.map((item, i) => (
-                    <div key={i} className="p-4 border-l-2 border-accent/30 bg-background/50 rounded-r-lg">
-                        <p className="font-bold">Question {i+1}:</p>
-                        <p className="mb-4">{item.q}</p>
-                        
-                        {item.type === 'text' && (
-                            <Textarea 
-                                placeholder="Votre réponse..." 
-                                className="bg-card" 
-                                value={(studentTpAnswers[i] as string) || ''}
-                                onChange={(e) => handleAnswerChange(i, e.target.value)}
-                            />
-                        )}
-
-                        {item.type === 'qcm' && (
-                            <RadioGroup 
-                                value={(studentTpAnswers[i] as string) || ''} 
-                                onValueChange={(value) => handleAnswerChange(i, value)}
-                            >
-                                {(item as EtudePrelimQCM).options.map((option, optIndex) => (
-                                    <div key={optIndex} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
-                                        <RadioGroupItem value={option} id={`q${i}-opt${optIndex}`} />
-                                        <Label htmlFor={`q${i}-opt${optIndex}`} className="flex-1 cursor-pointer">{option}</Label>
-                                    </div>
-                                ))}
-                            </RadioGroup>
-                        )}
-                    </div>
-                ))}
-            </CardContent>
-        </Card>
+                            {item.type === 'qcm' && (
+                                <RadioGroup 
+                                    value={(studentTpAnswers[i] as string) || ''} 
+                                    onValueChange={(value) => handleAnswerChange(i, value)}
+                                    disabled={assignedTp.status === 'terminé'}
+                                >
+                                    {(item as EtudePrelimQCM).options.map((option, optIndex) => (
+                                        <div key={optIndex} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
+                                            <RadioGroupItem value={option} id={`q${i}-opt${optIndex}`} />
+                                            <Label htmlFor={`q${i}-opt${optIndex}`} className="flex-1 cursor-pointer">{option}</Label>
+                                        </div>
+                                    ))}
+                                </RadioGroup>
+                            )}
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+        )}
 
         <Card>
           <CardHeader>
