@@ -14,13 +14,13 @@ export type CompetenceBloc = {
 
 export const competencesParNiveau: Record<Niveau, Record<string, CompetenceBloc>> = {
   seconde: {
-    'BLOC_1': { title: 'Bloc 1 : Réaliser l’entretien périodique', colorClass: 'bg-bloc1-color', items: { 'C1.1': 'Organiser un entretien périodique', 'C1.2': 'Identifier les anomalies', 'C1.3': 'Réaliser les opérations', 'C1.4': 'Apporter des conseils' } }
+    'BLOC_1': { title: 'BLOC 1 Réaliser l\'entretien périodique des véhicules', colorClass: 'bg-bloc1-color', items: { 'C1.1': 'Organiser un entretien périodique', 'C1.2': 'Identifier les anomalies dans le cadre d\'un entretien périodique', 'C1.3': 'Réaliser les opérations de remplacement, d\'ajustement dans le cadre de l\'entretien périodique', 'C1.4': 'Apporter des conseils techniques à la clientèle sur l\'entretien du véhicule' } }
   },
   premiere: {
-    'BLOC_2': { title: 'Bloc 2 : Réaliser la maintenance corrective', colorClass: 'bg-bloc2-color', items: { 'C2.1': 'Préparer une intervention', 'C2.2': 'Remplacer ou réparer', 'C2.3': 'Réaliser le réglage', 'C2.4': 'Contrôle qualité' } }
+    'BLOC_2': { title: 'BLOC 2 Réaliser la maintenance corrective des véhicules', colorClass: 'bg-bloc2-color', items: { 'C2.1': 'Préparer une intervention corrective', 'C2.2': 'Réaliser le remplacement ou la réparation des composants', 'C2.3': 'Réaliser le réglage ou le paramétrage des systèmes', 'C2.4': 'Réaliser le contrôle qualité d\'une intervention corrective' } }
   },
   terminale: {
-    'BLOC_3': { title: 'Bloc 3 : Réaliser le diagnostic', colorClass: 'bg-bloc3-color', items: { 'C3.1': 'Constater un dysfonctionnement', 'C3.2': 'Hiérarchiser les hypothèses', 'C3.3': 'Mettre en œuvre un protocole', 'C3.4': 'Identifier les solutions' } }
+    'BLOC_3': { title: 'BLOC 3 Réaliser le diagnostic des systèmes des véhicules', colorClass: 'bg-bloc3-color', items: { 'C3.1': 'Constater un dysfonctionnement', 'C3.2': 'Hiérarchiser les hypothèses', 'C3.3': 'Mettre en œuvre un protocole d\'intervention existant ou à définir', 'C3.4': 'Identifier les solutions correctives' } }
   }
 };
 

@@ -27,9 +27,9 @@
 
     --racing-orange: 26 100% 50%;
     --xp-color: 187 100% 50%;
-    --bloc1-color: 134 61% 41%;
-    --bloc2-color: 211 100% 50%;
-    --bloc3-color: 30 98% 54%;
+    --bloc1-color: 100 30% 60%;
+    --bloc2-color: 210 50% 70%;
+    --bloc3-color: 45 80% 70%;
   }
 
   .dark {
@@ -110,3 +110,7 @@
       color: #000 !important;
   }
 }
+
+.bg-bloc1-color { @apply bg-[hsl(var(--bloc1-color))] text-black; }
+.bg-bloc2-color { @apply bg-[hsl(var(--bloc2-color))] text-black; }
+.bg-bloc3-color { @apply bg-[hsl(var(--bloc3-color))] text-black; }

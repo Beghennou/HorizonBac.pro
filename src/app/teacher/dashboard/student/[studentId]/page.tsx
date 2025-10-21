@@ -191,10 +191,11 @@ export default function StudentDetailPage() {
     };
     
     const selectedTp = selectedTpId ? getTpById(selectedTpId) : null;
+    
     let currentBlocs: Record<string, any> = {};
     if (selectedTp) {
         if (selectedTp.id >= 1000) {
-             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_3')));
+            currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_3')));
         } else if (selectedTp.id >= 100) {
             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_1')));
         } else {
@@ -267,9 +268,9 @@ export default function StudentDetailPage() {
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        {Object.values(currentBlocs).map((bloc: any) => (
+                        {Object.keys(currentBlocs).length > 0 ? Object.values(currentBlocs).map((bloc: any) => (
                             <div key={bloc.title}>
-                                <h3 className={cn("font-headline text-2xl p-3 rounded-t-md text-white", bloc.colorClass)}>
+                                <h3 className={cn("font-headline text-xl p-3 rounded-t-md", bloc.colorClass)}>
                                     {bloc.title}
                                 </h3>
                                 <div className="border border-t-0 border-primary/30 rounded-b-md p-4 space-y-2 bg-card">
@@ -299,7 +300,7 @@ export default function StudentDetailPage() {
                                     ))}
                                 </div>
                             </div>
-                        ))}
+                        )) : <p className="text-muted-foreground text-center py-8">Aucun bloc de compétences n'est défini pour ce niveau de TP.</p>}
                     </CardContent>
                     <CardFooter>
                         <Button onClick={handleSave} className="ml-auto">
