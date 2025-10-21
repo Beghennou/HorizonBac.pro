@@ -1,12 +1,14 @@
 'use client';
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { getTpById, TP, Etape } from '@/lib/data-manager';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Send, Loader2 } from 'lucide-react';
+import { Bot, Send, Loader2, Play, FlagCheckered, CheckCircle } from 'lucide-react';
 import { guideStudent, GuideStudentOutput } from '@/ai/flows/tp-assistant';
+import { useAssignments } from '@/contexts/AssignmentsContext';
+import { Badge } from '@/components/ui/badge';
 
 const EtapeCard = ({ etape, index }: { etape: Etape; index: number }) => (
   <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
@@ -104,8 +106,14 @@ const AssistantTP = ({ tp }: { tp: TP }) => {
 
 export default function TPPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
+  const studentName = searchParams.get('student');
+  const { assignedTps, updateTpStatus } = useAssignments();
+
   const tpId = typeof params.tpId === 'string' ? parseInt(params.tpId, 10) : null;
   const tp = tpId ? getTpById(tpId) : null;
+
+  const assignedTp = studentName && tpId ? assignedTps[studentName]?.find(t => t.id === tpId) : null;
 
   if (!tp) {
     return (
@@ -117,14 +125,54 @@ export default function TPPage() {
       </div>
     );
   }
+  
+  if (!studentName || !assignedTp) {
+     return (
+      <div className="flex flex-col items-center justify-center h-full text-center">
+        <h1 className="font-headline text-3xl tracking-wide">Accès non autorisé</h1>
+        <p className="text-muted-foreground text-lg mt-2">
+          Vous n'êtes pas identifié ou ce TP ne vous est pas assigné.
+        </p>
+      </div>
+    );
+  }
+
+  const handleStart = () => {
+    if (studentName && tpId) {
+        updateTpStatus(studentName, tpId, 'en-cours');
+    }
+  }
+
+  const handleFinish = () => {
+    if (studentName && tpId) {
+        updateTpStatus(studentName, tpId, 'terminé');
+    }
+  }
 
   return (
     <div className="grid md:grid-cols-3 gap-8 items-start">
       <div className="md:col-span-2 space-y-6">
-        <div>
-          <p className="text-sm uppercase tracking-wider font-semibold text-accent">TP {tp.id}</p>
-          <h1 className="font-headline text-4xl tracking-wide">{tp.titre}</h1>
-          <p className="text-muted-foreground mt-1 text-lg">{tp.objectif}</p>
+        <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm uppercase tracking-wider font-semibold text-accent">TP {tp.id}</p>
+              <h1 className="font-headline text-4xl tracking-wide">{tp.titre}</h1>
+              <p className="text-muted-foreground mt-1 text-lg">{tp.objectif}</p>
+            </div>
+             <div className="flex flex-col items-end gap-2">
+                {assignedTp.status === 'non-commencé' && (
+                    <Button onClick={handleStart} size="lg"><Play className="mr-2"/>Commencer le TP</Button>
+                )}
+                {assignedTp.status === 'en-cours' && (
+                    <Button onClick={handleFinish} variant="outline" size="lg" className="border-accent text-accent hover:bg-accent hover:text-black">
+                        <FlagCheckered className="mr-2"/>Terminer le TP
+                    </Button>
+                )}
+                 {assignedTp.status === 'terminé' && (
+                    <Badge className="bg-green-600 text-white text-base p-3">
+                        <CheckCircle className="mr-2"/>TP Terminé
+                    </Badge>
+                )}
+             </div>
         </div>
 
         <Card>

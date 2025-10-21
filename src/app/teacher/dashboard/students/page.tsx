@@ -15,7 +15,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { useAssignments } from '@/contexts/AssignmentsContext';
+import { useAssignments, TpStatus } from '@/contexts/AssignmentsContext';
 import {
   Tooltip,
   TooltipContent,
@@ -23,6 +23,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Link from 'next/link';
+
+const statusStyles: Record<TpStatus, string> = {
+  'non-commencé': 'border-primary/50 text-foreground/80',
+  'en-cours': 'border-accent bg-accent/10 text-accent',
+  'terminé': 'border-green-500 bg-green-500/10 text-green-400',
+}
+
+const statusLabels: Record<TpStatus, string> = {
+    'non-commencé': 'Non commencé',
+    'en-cours': 'En cours',
+    'terminé': 'Terminé',
+}
 
 export default function StudentsPage() {
     const searchParams = useSearchParams();
@@ -130,7 +142,6 @@ export default function StudentsPage() {
                       const studentName = student.name;
                       const isSelected = selectedStudents.includes(studentName);
                       const studentAssignedTps = assignedTps[studentName] || [];
-                      const studentEvaluations = evaluations[studentName] || {};
                       
                       return (
                         <Card 
@@ -161,35 +172,27 @@ export default function StudentsPage() {
                                   <div>
                                       <p className="text-xs text-muted-foreground text-center mb-2">TP Assignés</p>
                                       <div className="flex flex-wrap gap-2 justify-center">
-                                          {studentAssignedTps.map(tpId => {
-                                               const tp = getTpsByNiveau(level).find(t => t.id === tpId);
+                                          {studentAssignedTps.map(assignedTp => {
+                                               const tp = getTpsByNiveau(level).find(t => t.id === assignedTp.id);
                                                if (!tp) return null;
-                                               
-                                               const isEvaluated = Object.keys(studentEvaluations).some(competenceId => 
-                                                tp && (getTpsByNiveau(level).find(t => t.id === tp.id)?.etudePrelim.some(p => `prelim-${tp.id}-${p.q}` === competenceId) || 
-                                                getTpsByNiveau(level).find(t => t.id === tp.id)?.activitePratique.flatMap(ap => ap.etapes).includes(competenceId))
-                                               );
-
-                                               const hasEvaluationData = tp.id in (evaluations[studentName] || {});
-
 
                                               return (
-                                              <Tooltip key={tpId}>
+                                              <Tooltip key={assignedTp.id}>
                                                   <TooltipTrigger asChild>
                                                       <Button 
                                                         variant="outline"
                                                         size="icon"
-                                                        className={cn("h-8 w-8", hasEvaluationData ? "border-green-500 bg-green-500/10 text-green-400" : "border-primary/50" )}
+                                                        className={cn("h-8 w-8 font-bold", statusStyles[assignedTp.status])}
                                                         asChild
                                                       >
-                                                        <Link href={`/teacher/dashboard/student/${encodeURIComponent(studentName)}?${new URLSearchParams({...Object.fromEntries(searchParams.entries()), tp: tpId.toString()})}`} onClick={(e) => e.stopPropagation()}>
+                                                        <Link href={`/teacher/dashboard/student/${encodeURIComponent(studentName)}?${new URLSearchParams({...Object.fromEntries(searchParams.entries()), tp: assignedTp.id.toString()})}`} onClick={(e) => e.stopPropagation()}>
                                                           {tp.id % 100}
                                                         </Link>
                                                       </Button>
                                                   </TooltipTrigger>
                                                   <TooltipContent>
                                                       <p className="font-bold">TP {tp.id}: {tp.titre}</p>
-                                                      <p className="text-sm text-muted-foreground">{hasEvaluationData ? "Évaluation commencée" : "Non commencé"}</p>
+                                                      <p className="text-sm text-muted-foreground">Statut: <span className={cn(assignedTp.status === 'en-cours' && 'text-accent', assignedTp.status === 'terminé' && 'text-green-500')}>{statusLabels[assignedTp.status]}</span></p>
                                                   </TooltipContent>
                                               </Tooltip>
                                               )

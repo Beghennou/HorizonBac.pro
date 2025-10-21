@@ -8,10 +8,11 @@ import { getTpById, TP } from '@/lib/data-manager';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CheckCircle, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { CheckeredFlag, RacingHelmet } from '@/components/icons';
 import { useAssignments } from '@/contexts/AssignmentsContext';
+import { cn } from '@/lib/utils';
 
 function StudentDashboard() {
   const searchParams = useSearchParams();
@@ -30,8 +31,11 @@ function StudentDashboard() {
     );
   }
 
-  const studentTpsIds = assignedTps[studentName] || [];
-  const tpModules = studentTpsIds.map(id => getTpById(id)).filter((tp): tp is TP => tp !== undefined);
+  const studentTps = assignedTps[studentName] || [];
+  const tpModules = studentTps.map(assignedTp => {
+    const tp = getTpById(assignedTp.id);
+    return tp ? { ...tp, status: assignedTp.status } : null;
+  }).filter((tp): tp is TP & { status: string } => tp !== null);
 
   const getTpCategory = (tpId: number): string => {
     if (tpId >= 1000) return 'Terminale / Diagnostic Avancé';
@@ -39,6 +43,12 @@ function StudentDashboard() {
     if (tpId >= 1) return 'Première / Maintenance Corrective';
     return 'Général';
   };
+
+  const statusInfo = {
+    'non-commencé': { text: 'Non commencé', icon: <ArrowRight className="ml-2"/>, buttonText: 'Commencer le TP', variant: 'default' as const, className: 'bg-gradient-to-r from-primary to-racing-orange hover:brightness-110'},
+    'en-cours': { text: 'En cours', icon: <Clock className="mr-2" />, buttonText: 'Continuer le TP', variant: 'outline' as const, className: 'border-accent text-accent hover:bg-accent hover:text-black'},
+    'terminé': { text: 'Terminé', icon: <CheckCircle className="mr-2" />, buttonText: 'Revoir le TP', variant: 'outline' as const, className: 'border-green-500 text-green-400 hover:bg-green-500 hover:text-black'},
+  }
 
   return (
     <div className="space-y-12">
@@ -56,9 +66,10 @@ function StudentDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tpModules.map((module) => {
               const image = PlaceHolderImages.find(p => p.id === 'tp-engine');
+              const currentStatusInfo = statusInfo[module.status as keyof typeof statusInfo] || statusInfo['non-commencé'];
               return (
                 <Card key={module.id} className="flex flex-col overflow-hidden bg-card border-primary/30 hover:border-accent/50 transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-accent/20">
-                  <CardHeader className="p-0">
+                  <CardHeader className="p-0 relative">
                      {image && (
                        <Image
                           src={image.imageUrl}
@@ -69,6 +80,7 @@ function StudentDashboard() {
                           data-ai-hint={image.imageHint}
                         />
                      )}
+                     <Badge className={cn("absolute top-2 right-2", currentStatusInfo.className)}>{currentStatusInfo.text}</Badge>
                   </CardHeader>
                   <div className="p-6 flex-grow flex flex-col">
                     <Badge variant="outline" className="w-fit mb-2 border-accent text-accent">{getTpCategory(module.id)}</Badge>
@@ -76,8 +88,11 @@ function StudentDashboard() {
                     <CardDescription className="mt-2 flex-grow">{module.objectif}</CardDescription>
                   </div>
                   <CardFooter>
-                    <Button asChild className="w-full font-bold font-headline uppercase tracking-wider bg-gradient-to-r from-primary to-racing-orange hover:brightness-110">
-                      <Link href={`/student/tp/${module.id}`}>Commencer le TP <ArrowRight className="ml-2"/></Link>
+                    <Button asChild className={cn("w-full font-bold font-headline uppercase tracking-wider", currentStatusInfo.className)} variant={currentStatusInfo.variant}>
+                      <Link href={`/student/tp/${module.id}?student=${encodeURIComponent(studentName)}`}>
+                        {currentStatusInfo.buttonText} 
+                        {module.status === 'non-commencé' && currentStatusInfo.icon}
+                      </Link>
                     </Button>
                   </CardFooter>
                 </Card>
