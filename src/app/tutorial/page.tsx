@@ -1,6 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3 } from 'lucide-react';
+import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -98,8 +98,20 @@ export default function TutorialPage() {
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
+                                <AccordionItem value="item-7">
+                                    <AccordionTrigger className="text-xl font-headline">6. Créer ses Propres TP (Concepteur TP)</AccordionTrigger>
+                                    <AccordionContent className="text-base text-muted-foreground p-4">
+                                        <p className="mb-4">L'onglet <DraftingCompass className="inline h-5 w-5 text-accent"/> <strong>Concepteur TP</strong> vous donne une autonomie totale pour créer des travaux pratiques sur mesure.</p>
+                                        <ul className="list-disc pl-6 space-y-2">
+                                            <li><strong>Informations Générales :</strong> Définissez le titre, la durée, le niveau, la situation professionnelle et l'objectif pédagogique.</li>
+                                            <li><strong>Compétences :</strong> Associez votre TP à une ou plusieurs compétences du référentiel en cochant les cases correspondantes.</li>
+                                            <li><strong>Sections dynamiques :</strong> Utilisez les boutons "Ajouter" pour créer autant de champs que nécessaire pour le matériel, l'étude préliminaire (questions texte ou QCM), les étapes pratiques, les points clés et les consignes de sécurité.</li>
+                                            <li><strong>Sauvegarde :</strong> Une fois le formulaire rempli, cliquez sur "Créer le Travail Pratique". Votre nouveau TP sera automatiquement ajouté à la liste des TP disponibles pour le niveau que vous avez sélectionné et pourra être assigné aux élèves.</li>
+                                        </ul>
+                                    </AccordionContent>
+                                </AccordionItem>
                                 <AccordionItem value="item-6">
-                                    <AccordionTrigger className="text-xl font-headline">6. Analyser la Progression</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">7. Analyser la Progression</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                        <p className="mb-4">L'onglet <strong>Analyses</strong> vous offre une vue d'ensemble de la performance de vos classes :</p>
                                         <ul className="list-disc pl-6 space-y-2">
