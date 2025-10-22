@@ -77,15 +77,14 @@ export const classes = {
         "Guerin Hervé", "Muller Christophe",
         "Henry Denis", "Leclercq Bruno",
         "Lecomte Fabrice", "Perez Alain",
-        "Marchand Éric", "Morel Stéphane",
-        "Chevalier Gilles", "Lambert Patrick", "Caron Jean-Michel", "Fontaine Dominique", "VINCENT Christophe", "GAUTIER Guillaume", "MASSON Antoine", "ETIENNE Yann", "TESSIER Sébastien", "MARIE Alexandre"
+        "Marchand Éric", "Morel Stéphane"
     ],
     "TVP1": [],
     "TVP2": [],
     "TVP3": [],
-    "2MV2 - Carol Shelby": [],
-    "2MV3 - Amédée Gordini": [],
-    "2MV4 - Les frères Michelin": [],
+    "2MV2 - Carol Shelby": ["Chevalier Gilles", "Lambert Patrick", "Caron Jean-Michel", "Fontaine Dominique"],
+    "2MV3 - Amédée Gordini": ["VINCENT Christophe", "GAUTIER Guillaume", "MASSON Antoine", "ETIENNE Yann"],
+    "2MV4 - Les frères Michelin": ["TESSIER Sébastien", "MARIE Alexandre"],
     "2MV5 - Michèle Mouton": [],
     "2MV6 - Valentino Rossi": [],
     "TAPP 1": [],
@@ -103,6 +102,7 @@ export const allBlocs: Record<string, CompetenceBloc> = {
     ...competencesParNiveau.premiere,
     ...competencesParNiveau.terminale,
 };
+
 
 
 
