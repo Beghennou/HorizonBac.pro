@@ -5,8 +5,9 @@ import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import { Loader2, UserCheck } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Student } from '@/lib/types';
 
 function StudentSelector() {
@@ -15,6 +16,7 @@ function StudentSelector() {
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
   const [studentsInClass, setStudentsInClass] = useState<Student[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     if (selectedClass) {
@@ -28,6 +30,11 @@ function StudentSelector() {
       setStudentsInClass([]);
     }
   }, [selectedClass, classes, students]);
+
+  const handleStudentSelectInDialog = (studentName: string) => {
+    setSelectedStudent(studentName);
+    setIsDialogOpen(false);
+  }
 
   const handleSubmit = () => {
     if (selectedStudent) {
@@ -63,21 +70,37 @@ function StudentSelector() {
         </div>
 
         <div className="space-y-3">
-          <Label htmlFor="student-select" className="font-bold text-lg">2. Sélectionne ton nom</Label>
-          <Select onValueChange={setSelectedStudent} value={selectedStudent} disabled={!selectedClass}>
-            <SelectTrigger id="student-select" disabled={!selectedClass}>
-              <SelectValue placeholder={selectedClass ? "Choisir un élève..." : "Sélectionne d'abord une classe"} />
-            </SelectTrigger>
-            <SelectContent>
-              {studentsInClass.length > 0 ? (
-                studentsInClass.map(student => (
-                  <SelectItem key={student.id} value={student.name}>{student.name}</SelectItem>
-                ))
-              ) : (
-                <div className="p-4 text-sm text-muted-foreground">Aucun élève dans cette classe.</div>
-              )}
-            </SelectContent>
-          </Select>
+          <Label className="font-bold text-lg">2. Sélectionne ton nom</Label>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full justify-start text-left font-normal" disabled={!selectedClass}>
+                {selectedStudent ? <><UserCheck className="mr-2 h-4 w-4" />{selectedStudent}</> : "Choisir un élève..."}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Sélectionne ton nom dans la classe {selectedClass}</DialogTitle>
+              </DialogHeader>
+              <div className="max-h-[60vh] overflow-y-auto">
+                {studentsInClass.length > 0 ? (
+                  <div className="flex flex-col space-y-2">
+                    {studentsInClass.map(student => (
+                      <Button
+                        key={student.id}
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => handleStudentSelectInDialog(student.name)}
+                      >
+                        {student.name}
+                      </Button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="p-4 text-sm text-muted-foreground">Aucun élève dans cette classe.</p>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Button 
