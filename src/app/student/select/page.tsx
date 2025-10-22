@@ -100,7 +100,7 @@ function StudentSelector() {
 export default function SelectStudentPage() {
   const { isLoaded, classes } = useAssignments();
 
-  if (!isLoaded || !classes) {
+  if (!isLoaded) {
     return (
         <div className="flex items-center justify-center min-h-screen">
             <Loader2 className="h-16 w-16 animate-spin text-primary" />
