@@ -1,6 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare } from 'lucide-react';
+import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -154,6 +154,17 @@ export default function TutorialPage() {
                                         <ul className="list-disc pl-6 space-y-2">
                                             <li>Le badge **"Évalué"** apparaîtra sur la carte du TP.</li>
                                             <li>Retourne sur la page du TP pour lire le **feedback personnalisé** que ton enseignant t'a laissé. C'est un excellent moyen de progresser !</li>
+                                        </ul>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="item-5">
+                                    <AccordionTrigger className="text-xl font-headline">5. Gagner des Badges et des Récompenses</AccordionTrigger>
+                                    <AccordionContent className="text-base text-muted-foreground p-4">
+                                        <p className="mb-4">Ta progression est récompensée ! En terminant des TP et en acquérant des compétences, tu débloqueras des badges pour valoriser tes réussites.</p>
+                                        <ul className="list-disc pl-6 space-y-2">
+                                            <li><strong>Comment ça marche ?</strong> Chaque badge a des critères précis. Par exemple, terminer ton premier TP, maîtriser tous les TP de sécurité, ou devenir un expert du diagnostic.</li>
+                                            <li><strong>Quelques exemples de badges :</strong> "Premier Pas", "Expert Sécurité", "Expert du Diagnostic", "Maître de la Distribution", et bien d'autres.</li>
+                                            <li><strong>Où les voir ?</strong> Tous les badges que tu as gagnés sont affichés dans ton <Link href="/student/portfolio" className="text-accent underline">Portfolio</Link>, dans la section <Award className="inline h-4 w-4"/> "Badges et Récompenses". C'est un excellent moyen de voir tes accomplissements !</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
