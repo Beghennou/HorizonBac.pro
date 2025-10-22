@@ -46,7 +46,10 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Un nouveau mécanicien intègre l\'équipe. Avant sa première intervention, le chef d\'atelier lui demande de préparer son poste et de réviser les règles de sécurité fondamentales.',
         objectif: 'Organiser son espace de travail de manière sûre et efficace, en identifiant les risques et en utilisant les Équipements de Protection Individuelle (EPI). (Compétences C1.1, C1.4)',
         materiel: ['Bleu de travail', 'Chaussures de sécurité', 'Lunettes de protection', 'Gants', 'Chariot à outils', 'Extincteur (localisation)', 'Zone de tri des déchets'],
-        etudePrelim: [],
+        etudePrelim: [
+            { type: 'text', q: 'Quels sont les 3 EPI (Équipements de Protection Individuelle) obligatoires en permanence dans l\'atelier ?', r: 'Chaussures de sécurité, bleu de travail, lunettes de protection.' },
+            { type: 'text', q: 'Décrivez la procédure à suivre en cas de déversement d\'huile sur le sol.', r: 'Signaler la zone, utiliser de l\'absorbant pour contenir et nettoyer, puis jeter l\'absorbant souillé dans le bac dédié.' }
+        ],
         activitePratique: [
             etape('Préparation et organisation de la zone', '30 min', [
                 'Vérifier la propreté et l\'éclairage du poste de travail.',
@@ -96,7 +99,10 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Un client dépose sa berline pour une inspection du soubassement. Vous devez lever le véhicule en utilisant un cric rouleur et des chandelles pour permettre une intervention en toute sécurité.',
         objectif: 'Maîtriser la procédure de levage sécurisé pour permettre une intervention sous le véhicule en respectant les points de levage constructeur. (Compétence C1.1)',
         materiel: ['Cric rouleur hydraulique', 'Paire de chandelles (capacité adaptée)', 'Cales de roues', 'Documentation technique (points de levage)', 'Clé de roue'],
-        etudePrelim: [],
+        etudePrelim: [
+            { type: 'text', q: 'Pourquoi est-il interdit de travailler sous un véhicule qui n\'est supporté que par un cric ?', r: 'Un cric est un appareil de levage, pas de support. Son système hydraulique peut céder, provoquant la chute du véhicule.' },
+            { type: 'qcm', q: 'Quelle est la première action à effectuer avant même de positionner le cric ?', options: ['Desserrer les écrous de roue', 'Caler les roues qui restent au sol et serrer le frein à main', 'Ouvrir le capot'], r: 'Caler les roues qui restent au sol et serrer le frein à main' }
+        ],
         activitePratique: [
             etape('Préparation et contrôles préalables', '20 min', [
                 'Consulter la documentation technique pour identifier les points de levage constructeur spécifiques au modèle.',
@@ -147,7 +153,10 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Un SUV est confié à l\'atelier pour le remplacement des plaquettes de frein. L\'intervention nécessite l\'utilisation du pont élévateur à deux colonnes pour un accès optimal.',
         objectif: 'Positionner et lever un véhicule avec un pont 2 colonnes en respectant les règles de centrage et de sécurité. (Compétence C1.1)',
         materiel: ['Pont élévateur 2 colonnes', 'Patins de levage adaptés au véhicule', 'Documentation technique constructeur', 'Télécommande pont'],
-        etudePrelim: [],
+        etudePrelim: [
+            { type: 'text', q: 'Où se trouve généralement l\'information concernant les points de levage spécifiques d\'un véhicule ?', r: 'Dans la documentation technique du constructeur (RTA) ou parfois indiqué par un symbole sous la caisse.' },
+            { type: 'text', q: 'Quelle est l\'étape la plus critique juste après avoir levé le véhicule de quelques centimètres ?', r: 'Arrêter la montée, et vérifier la stabilité et le bon positionnement des 4 patins avant de continuer à lever.' }
+        ],
         activitePratique: [
             etape('Positionnement précis du véhicule', '30 min', [
                 'Avancer le véhicule entre les colonnes en respectant parfaitement le centrage longitudinal.',
@@ -201,7 +210,10 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Un client vient de récupérer son véhicule après une longue immobilisation et s\'interroge sur la signification des différents témoins lumineux qui apparaissent au tableau de bord.',
         objectif: 'Identifier toutes les commandes usuelles et interpréter correctement les témoins d\'alerte pour informer et rassurer le client. (Compétences C1.1, C1.4)',
         materiel: ['Véhicule en état de fonctionnement', 'Manuel utilisateur du constructeur', 'Fiche de relevé des témoins', 'Stylo'],
-        etudePrelim: [],
+        etudePrelim: [
+            { type: 'qcm', q: 'Un témoin de quelle couleur indique un danger immédiat nécessitant l\'arrêt du véhicule ?', options: ['Vert', 'Orange', 'Rouge'], r: 'Rouge' },
+            { type: 'text', q: 'Citez 3 témoins qui s\'allument en rouge.', r: 'Pression d\'huile, température moteur, charge batterie, frein à main, niveau liquide de frein, etc.' }
+        ],
         activitePratique: [
             etape('Identification systématique des commandes', '20 min', [
                 'Repérer et tester toutes les commandes d\'éclairage (feux de position, croisement, route).',
@@ -245,7 +257,10 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Lors d\'une réception véhicule pour un entretien courant, vous devez effectuer les contrôles systématiques des niveaux des différents fluides du compartiment moteur selon la check-list atelier.',
         objectif: 'Identifier les anomalies et réaliser les ajustements. (Compétences C1.1, C1.2, C1.3, C1.4)',
         materiel: ['Liquide de refroidissement spécifié', 'Produit lave-glace concentré', 'Liquide de frein DOT4 ou 5.1', 'Entonnoirs de différentes tailles', 'Chiffons propres non pelucheux'],
-        etudePrelim: [],
+        etudePrelim: [
+            { type: 'text', q: 'Pourquoi est-il crucial de contrôler les niveaux sur une surface plane ?', r: 'Pour garantir une lecture exacte des niveaux et éviter une fausse interprétation (trop bas ou trop haut).' },
+            { type: 'text', q: 'Un niveau de liquide de frein bas peut indiquer quel problème autre qu\'une fuite ?', r: 'Une usure avancée des plaquettes de frein, car les pistons d\'étrier sortent davantage, ce qui fait baisser le niveau dans le bocal.' }
+        ],
         activitePratique: [
             etape('Contrôle du système de refroidissement', '20 min', [
                 'S\'assurer que le moteur est parfaitement froid avant toute manipulation.',
@@ -291,7 +306,10 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Un client a été alerté par les forces de l\'ordre d\'un feu stop défectueux. Il demande un contrôle complet de l\'éclairage et le remplacement de toutes les ampoules nécessaires.',
         objectif: 'Identifier et remplacer les ampoules défectueuses. (Compétences C1.1, C1.2, C1.3)',
         materiel: ['Jeu d\'ampoules de rechange variées', 'Tournevis adaptés', 'Chiffon microfibre propre', 'Gants de protection', 'Assistant pour les tests'],
-        etudePrelim: [],
+        etudePrelim: [
+            { type: 'text', q: 'Pourquoi ne faut-il jamais toucher le verre d\'une ampoule halogène (H4, H7...) avec les doigts ?', r: 'La graisse des doigts crée un point chaud sur le verre, qui peut faire éclater l\'ampoule lorsqu\'elle chauffe.' },
+            { type: 'text', q: 'Comment identifier le type exact d\'une ampoule défectueuse ?', r: 'En lisant les inscriptions gravées sur son culot (ex: P21W, H7 55W).' }
+        ],
         activitePratique: [
             etape('Contrôle systématique complet de l\'éclairage', '30 min', [
                 'Avec l\'aide d\'une deuxième personne ou d\'un miroir, tester méthodiquement toutes les fonctions d\'éclairage.',
@@ -340,7 +358,10 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Un client se plaint d\'une mauvaise visibilité sous la pluie, avec des traces laissées par les essuie-glaces. Un remplacement est nécessaire avant un long trajet.',
         objectif: 'Réaliser le remplacement des balais d\'essuie-glace et conseiller le client. (Compétences C1.1, C1.3)',
         materiel: ['Jeu de balais neufs', 'Chiffon', 'Produit de nettoyage vitre'],
-        etudePrelim: [],
+        etudePrelim: [
+            { type: 'text', q: 'Quelle précaution simple mais essentielle faut-il prendre pour protéger le pare-brise lors du remplacement des balais ?', r: 'Placer un carton ou un chiffon épais sur le pare-brise pour éviter qu\'il ne soit frappé par le bras métallique si celui-ci se rabat.' },
+            { type: 'text', q: 'Citez deux signes qui indiquent qu\'un balai d\'essuie-glace est usé.', r: 'Il laisse des traces sur le pare-brise, il fait du bruit (saccades), la lame en caoutchouc est craquelée ou déchirée.' }
+        ],
         activitePratique: [
             etape('Contrôle et Diagnostic', '15 min', [
                 'Inspecter visuellement les balais existants (fissures, déformations).',
@@ -377,7 +398,10 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Dans le cadre d\'une révision systématique, vous devez contrôler l\'ensemble des pneumatiques du véhicule, y compris la roue de secours.',
         objectif: 'Identifier les anomalies d\'usure et de pression et y remédier. (Compétences C1.2, C1.3)',
         materiel: ['Manomètre de pression', 'Jauge de profondeur', 'Documentation technique (pressions préconisées)'],
-        etudePrelim: [],
+        etudePrelim: [
+            { type: 'qcm', q: 'Une usure prononcée au centre de la bande de roulement indique :', options: ['Un sous-gonflage chronique', 'Un sur-gonflage chronique', 'Un défaut de parallélisme'], r: 'Un sur-gonflage chronique' },
+            { type: 'text', q: 'Quelle est la profondeur minimale légale des sculptures d\'un pneu en France ?', r: '1.6 mm' }
+        ],
         activitePratique: [
             etape('Contrôle de la Pression', '20 min', [
                 'Consulter l\'étiquette de pression dans la portière ou la trappe à carburant.',
@@ -415,7 +439,10 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Un véhicule se présente pour sa vidange annuelle. Vous devez effectuer l\'opération en respectant les procédures, le type d\'huile et le recyclage des déchets.',
         objectif: 'Réaliser une vidange moteur dans les règles de l\'art. (Compétences C1.2, C1.4)',
         materiel: ['Huile moteur préconisée', 'Filtre à huile neuf', 'Joint de vidange neuf', 'Clé à filtre', 'Récupérateur d\'huile usagée', 'Clé dynamométrique'],
-        etudePrelim: [],
+        etudePrelim: [
+            { type: 'text', q: 'Où se trouvent les informations sur le type d\'huile et la quantité préconisées pour un véhicule ?', r: 'Dans le carnet d\'entretien du véhicule ou dans la documentation technique (RTA).' },
+            { type: 'text', q: 'Pourquoi est-il indispensable de remplacer le joint du bouchon de vidange à chaque fois ?', r: 'Pour garantir une étanchéité parfaite et éviter les fuites. Le joint s\'écrase au serrage et n\'est plus réutilisable.' }
+        ],
         activitePratique: [
             etape('Préparation et Vidange', '30 min', [
                 'Faire tourner le moteur quelques minutes pour fluidifier l\'huile.',
@@ -455,7 +482,10 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Lors d\'un entretien, vous devez vérifier l\'état du filtre à air et le remplacer si nécessaire pour garantir une bonne respiration du moteur.',
         objectif: 'Évaluer l\'état du filtre à air et le remplacer si besoin. (Compétences C1.2, C1.3, C1.4)',
         materiel: ['Filtre à air neuf', 'Soufflette (optionnel, pour nettoyage boîtier)', 'Tournevis ou clés adaptés'],
-        etudePrelim: [],
+        etudePrelim: [
+            { type: 'qcm', q: 'Un filtre à air très encrassé peut provoquer :', options: ['Une surconsommation de carburant', 'Une augmentation de la puissance', 'Un meilleur refroidissement'], r: 'Une surconsommation de carburant' },
+            { type: 'text', q: 'Peut-on nettoyer un filtre à air en papier avec une soufflette ? Pourquoi ?', r: 'Non, car l\'air comprimé endommage la structure du papier, créant des micro-déchirures qui laissent passer les poussières et annulent son pouvoir de filtration.' }
+        ],
         activitePratique: [
             etape('Diagnostic', '20 min', [
                 'Localiser le boîtier du filtre à air.',
