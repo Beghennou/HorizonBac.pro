@@ -311,10 +311,13 @@ export default function StudentDetailPage() {
     const searchParams = useSearchParams();
     const params = useParams();
     const { toast } = useToast();
-    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback, storedEvals } = useAssignments();
+    const { students, classes, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback, storedEvals } = useAssignments();
 
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
+    const className = searchParams.get('class');
     
+    const studentsInClass = (className ? classes[className] || [] : []).sort();
+
     const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
     const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
@@ -365,6 +368,13 @@ export default function StudentDetailPage() {
         newSearchParams.set('tp', newTpId.toString());
         router.push(`${pathname}?${newSearchParams.toString()}`);
     }
+
+    const handleStudentChange = (newStudentName: string) => {
+        if (!newStudentName || newStudentName === studentName) return;
+        const newPath = `/teacher/dashboard/student/${encodeURIComponent(newStudentName)}`;
+        const newSearchParams = new URLSearchParams(searchParams.toString());
+        router.push(`${newPath}?${newSearchParams.toString()}`);
+    };
 
     const handleSave = (prelimNote?: string, tpNote?: string, feedback?: string, isFinal?: boolean) => {
         if (!studentName || !selectedTpId) return;
@@ -428,9 +438,23 @@ export default function StudentDetailPage() {
             <Card>
                 <CardHeader>
                     <div className="flex justify-between items-center">
-                      <CardTitle className="flex items-center gap-3 font-headline">
-                          <User className="w-6 h-6 text-primary" /> Dossier d'évaluation de : <span className="text-accent">{studentName}</span>
-                      </CardTitle>
+                      <div className="flex items-center gap-4">
+                        <CardTitle className="flex items-center gap-3 font-headline">
+                          <User className="w-6 h-6 text-primary" /> Dossier d'évaluation de :
+                        </CardTitle>
+                        {studentsInClass.length > 0 && (
+                          <Select onValueChange={handleStudentChange} value={studentName}>
+                            <SelectTrigger className="w-[300px] bg-card text-accent font-bold text-lg font-headline border-accent">
+                              <SelectValue placeholder="Changer d'élève..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {studentsInClass.map(sName => (
+                                <SelectItem key={sName} value={sName}>{sName}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
                       <AiAnalysisHub studentName={studentName} evaluations={savedEvaluations[studentName] || {}} />
                     </div>
                 </CardHeader>
