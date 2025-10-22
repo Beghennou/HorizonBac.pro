@@ -120,3 +120,33 @@ export function Award(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function Trophy(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+      <path d="M4 22h16" />
+      <path d="M10 14.66V17c0 .55-.47.1-1 1H4" />
+      <path d="M14 14.66V17c0 .55.47.1 1 1h5" />
+      <path d="M9 18h6" />
+      <path d="M12 6V5" />
+      <path d="M6 5H4.5a2.5 2.5 0 0 1 0-5H6" />
+      <path d="M18 5h1.5a2.5 2.5 0 0 0 0-5H18" />
+      <path d="M8 2h8" />
+      <path d="M12 17.5V22" />
+      <path d="M12 6a7 7 0 0 0-7 7c0 3.33 2.67 6.67 7 10 4.33-3.33 7-6.67 7-10a7 7 0 0 0-7-7z" />
+    </svg>
+  );
+}

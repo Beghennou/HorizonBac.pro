@@ -11,10 +11,11 @@ import Link from 'next/link';
 import { Printer, User, CheckCircle, FileText } from 'lucide-react';
 import { LyceeLogo } from '@/components/lycee-logo';
 import { cn } from '@/lib/utils';
-import { Award } from '@/components/icons';
+import { Award, Trophy } from '@/components/icons';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { getBadgesForStudent, allBadges } from '@/lib/badges-data';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
@@ -38,6 +39,8 @@ function StudentPortfolio() {
   const studentEvaluations = evaluations[studentName] || {};
   const studentCompletedTps = (assignedTps[studentName] || []).filter(tp => tp.status === 'terminé');
   const studentStoredEvals = storedEvals[studentName] || {};
+  const earnedBadges = getBadgesForStudent({ completedTps: studentCompletedTps.map(tp => tp.id) });
+
 
   const acquiredSkillsByBloc: Record<string, { title: string, colorClass: string, skills: Record<string, { description: string, history: EvaluationStatus[] }> }> = {};
 
@@ -95,6 +98,36 @@ function StudentPortfolio() {
                       Imprimer ou Enregistrer en PDF
                   </Button>
               </div>
+
+               <section className="break-before-page">
+                  <h2 className="font-headline text-3xl tracking-wide flex items-center gap-3 mb-4">
+                      <Trophy className="w-8 h-8 text-primary"/>
+                      Badges et Récompenses
+                  </h2>
+                  {earnedBadges.length > 0 ? (
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {earnedBadges.map(badge => {
+                              const Icon = badge.icon;
+                              return (
+                                  <Tooltip key={badge.id}>
+                                      <TooltipTrigger asChild>
+                                          <Card className="flex flex-col items-center justify-center p-4 text-center bg-background/50 break-inside-avoid border-accent/30 hover:bg-accent/10 transition-all">
+                                              <Icon className="w-12 h-12 text-accent mb-2"/>
+                                              <CardTitle className="text-sm font-bold">{badge.title}</CardTitle>
+                                          </Card>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                          <p className="font-bold">{badge.title}</p>
+                                          <p>{badge.description}</p>
+                                      </TooltipContent>
+                                  </Tooltip>
+                              )
+                          })}
+                      </div>
+                  ) : (
+                      <p className="text-muted-foreground text-center py-8">Termine des TP pour débloquer tes premiers badges !</p>
+                  )}
+              </section>
               
               <section className="break-before-page">
                   <h2 className="font-headline text-3xl tracking-wide flex items-center gap-3 mb-4">
