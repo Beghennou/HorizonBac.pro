@@ -199,38 +199,6 @@ export const tpTerminale: Record<number, TP> = {
     securiteRangement: ['Jamais manipuler sous tension', 'Élimination spécifique ampoules', 'Tracer réglage'],
     pointsCles: ['HT danger', 'Correcteur OK', 'Réglage anti-éblouissement']
   },
-  306: {
-    id: 306,
-    duree: '3h00',
-    titre: 'MTE 303 • Remplacement distribution et pompe à eau',
-    situation: 'Un véhicule entre à l\'atelier pour son entretien majeur, incluant le remplacement préventif de la courroie de distribution et de la pompe à eau. L\'intervention demande une rigueur absolue pour garantir la fiabilité du moteur.',
-    objectif: 'Respecter calage/couples et purge circuit. (Compétence C3.3)',
-    materiel: ['Kit distri', 'Piges calage', 'Clé dynamométrique', 'LR'],
-    etudePrelim: [
-      { q: 'Sur un moteur DOHC (Double Arbre à Cames en Tête), pourquoi ne faut-il jamais faire tourner le vilebrequin si la courroie est déposée ?', r: 'Car les deux arbres à cames ne seraient plus synchronisés, et l\'un pourrait tourner librement, provoquant une collision entre les soupapes et les pistons.', type: 'text' },
-      { q: 'Quel est le double objectif des deux tours moteur manuels effectués après la pose de la nouvelle courroie ?', r: '1. Vérifier qu\'il n\'y a aucun point dur ou blocage (contact soupape/piston). 2. S\'assurer que les repères de calage reviennent parfaitement à leur position initiale.', type: 'text' },
-      { q: 'Quel est le risque de ne pas remplacer un galet tendeur lors du changement de la courroie ?', r: 'Le roulement du galet, ayant la même usure que la courroie, risque de gripper, de se bloquer ou de casser, provoquant la rupture de la courroie neuve et des dommages moteur graves.', type: 'text' }
-    ],
-    activitePratique: [
-      etape('Calage', '30 min', [
-        'Déposer carters.',
-        'Repérer sens courroie.',
-        'Mettre piges vilo/AAC.'
-      ]),
-      etape('Remplacement', '80 min', [
-        'Changer galets et pompe.',
-        'Poser courroie, tendre au procédé.',
-        '2 tours moteur, recontrôle repères.'
-      ]),
-      etape('Finition', '30 min', [
-        'Remplir/purger LR.',
-        'Contrôler fuites/bruits.',
-        'Tracer intervention.'
-      ])
-    ],
-    securiteRangement: ['Batterie off', 'Couples stricts', 'Plans de joint propres'],
-    pointsCles: ['Calage exact', 'Tension correcte', 'Purge LR']
-  },
   307: {
     id: 307,
     duree: '1h45',
@@ -661,6 +629,8 @@ export const tpTerminale: Record<number, TP> = {
     pointsCles: ['PIDs essentiels', 'Apprentissage obligatoire', 'Actionneurs OK']
   }
 };
+
+    
 
     
 
