@@ -1,4 +1,4 @@
-import { Circuit, Wrench, Settings, Search, ShieldCheck, Trophy, Sparkles, CheckCircle } from 'lucide-react';
+import { CircuitBoard, Wrench, Settings, Search, ShieldCheck, Trophy, Sparkles, CheckCircle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type Badge = {
@@ -14,7 +14,7 @@ export const allBadges: Badge[] = [
     id: 'first_tp',
     title: 'Premier Pas',
     description: 'Terminer son tout premier Travail Pratique.',
-    icon: Circuit,
+    icon: CircuitBoard,
     criteria: (completedTps) => completedTps.length >= 1,
   },
   {
