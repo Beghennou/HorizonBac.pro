@@ -7,8 +7,7 @@
  * - AdaptSimulationDifficultyInput - The input type for the adaptSimulationDifficulty function.
  * - AdaptSimulationDifficultyOutput - The return type for the adaptSimulationDifficulty function.
  */
-import { config } from 'dotenv';
-config();
+
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 

@@ -7,8 +7,7 @@
  * - SkillGapAnalysisInput - The input type for the analyzeSkillGaps function.
  * - SkillGapAnalysisOutput - The return type for the analyzeSkillGaps function.
  */
-import { config } from 'dotenv';
-config();
+
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
@@ -21,6 +20,7 @@ const SkillGapAnalysisInputSchema = z.object({
     ),
   competenceMap: z
     .string()
+
     .describe(
       'JSON string mapping competence IDs to their descriptions.'
     ),
