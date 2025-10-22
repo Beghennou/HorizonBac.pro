@@ -513,6 +513,97 @@ export const tpSeconde: Record<number, TP> = {
             'Bon positionnement du filtre neuf',
             'Justification du remplacement auprès du client'
         ]
+    },
+    111: {
+        id: 111,
+        duree: '1h00',
+        titre: 'Remplacement d\'une Roue',
+        situation: 'Un client a crevé et a utilisé sa roue de secours. Il vient à l\'atelier pour faire réparer son pneu et remonter la roue d\'origine. Vous devez effectuer le changement de roue en toute sécurité en utilisant le cric de bord du véhicule.',
+        objectif: 'Maîtriser la procédure sécurisée de remplacement d\'une roue en utilisant les outils fournis avec le véhicule. (Compétence C1.1)',
+        materiel: ['Cric de bord', 'Clé de roue', 'Cales de roues', 'Roue de secours/réparée', 'Gants de protection', 'Clé dynamométrique'],
+        etudePrelim: [
+            { type: 'qcm', q: 'Avant de soulever le véhicule avec le cric, quelle est l\'action prioritaire à effectuer ?', options: ['Ouvrir le coffre', 'Allumer les feux de détresse', 'Serrer le frein à main et caler les roues'], r: 'Serrer le frein à main et caler les roues' },
+            { type: 'text', q: 'Dans quel ordre faut-il serrer les écrous de roue et pourquoi ?', r: 'En étoile (ou en croix). Pour assurer un placage uniforme de la roue contre le moyeu et éviter de la voiler.' }
+        ],
+        activitePratique: [
+            etape('Préparation du Véhicule', '20 min', [
+                'Stationner le véhicule sur une surface plane et stable.',
+                'Serrer le frein à main et engager une vitesse (ou la position P).',
+                'Placer les cales sur la roue diagonalement opposée à celle à changer.',
+                'Desserrer les écrous de la roue à déposer d\'un quart de tour (roue encore au sol).'
+            ]),
+            etape('Levage et Remplacement', '25 min', [
+                'Positionner le cric de bord sur le point de levage constructeur.',
+                'Lever le véhicule jusqu\'à ce que la roue ne touche plus le sol.',
+                'Déposer complètement les écrous et retirer la roue.',
+                'Positionner la nouvelle roue et visser les écrous à la main sans forcer.'
+            ]),
+            etape('Descente et Serrage Final', '15 min', [
+                'Descendre le véhicule jusqu\'à ce que la roue touche légèrement le sol.',
+                'Effectuer un pré-serrage des écrous en étoile avec la clé de roue.',
+                'Descendre complètement le véhicule et retirer le cric.',
+                'Effectuer le serrage final au couple préconisé avec une clé dynamométrique.'
+            ])
+        ],
+        securiteRangement: [
+            'Ne jamais se positionner sous un véhicule soutenu par un cric de bord.',
+            'Toujours travailler sur une surface stable.',
+            'Respecter l\'ordre de serrage en étoile.',
+            'Vérifier le couple de serrage final avec une clé dynamométrique.'
+        ],
+        pointsCles: [
+            'Serrage au couple en étoile',
+            'Utilisation correcte des points de levage',
+            'Procédure de sécurité (cales, frein à main)',
+            'Contrôle final du serrage'
+        ]
+    },
+    112: {
+        id: 112,
+        duree: '1h15',
+        titre: 'Contrôle et Remplacement d\'une Batterie',
+        situation: 'Un client se plaint de difficultés de démarrage le matin. Vous devez contrôler la batterie et la remplacer si le diagnostic le confirme.',
+        objectif: 'Diagnostiquer l\'état d\'une batterie, la remplacer en toute sécurité et initialiser le nouveau composant si nécessaire. (Compétence C1.2, C1.3)',
+        materiel: ['Multimètre', 'Testeur de batterie', 'Jeu de clés', 'Graisse pour cosses', 'Sauvegarde mémoire (si nécessaire)', 'Batterie neuve'],
+        etudePrelim: [
+            { type: 'qcm', q: 'Dans quel ordre faut-il débrancher les cosses de la batterie pour éviter un court-circuit ?', options: ['D\'abord la cosse Positive (+)', 'D\'abord la cosse Négative (-)', 'Peu importe l\'ordre'], r: 'D\'abord la cosse Négative (-)' },
+            { type: 'text', q: 'Qu\'est-ce que le test "CCA" (Cold Cranking Amps) effectué par un testeur de batterie ?', r: 'C\'est une mesure de la capacité de la batterie à fournir un courant élevé au démarrage, à froid. C\'est un indicateur clé de son état de santé.' },
+            { type: 'text', q: 'Pourquoi peut-il être nécessaire d\'utiliser un appareil de sauvegarde mémoire avant de débrancher la batterie sur un véhicule moderne ?', r: 'Pour éviter de perdre les données des calculateurs (autoradio, horloge, adaptations moteur, initialisation de vitres électriques, etc.).' }
+        ],
+        activitePratique: [
+            etape('Diagnostic de la Batterie', '25 min', [
+                'Inspecter visuellement la batterie (propreté, absence de fuite, date).',
+                'Mesurer la tension à vide avec un multimètre (doit être > 12.4V).',
+                'Effectuer un test complet avec le testeur de batterie (état de santé et état de charge).',
+                'Contrôler la bonne fixation de la batterie et des cosses.'
+            ]),
+            etape('Remplacement de la Batterie', '30 min', [
+                'Brancher une sauvegarde mémoire si nécessaire.',
+                'Débrancher la cosse négative (-), puis la cosse positive (+).',
+                'Déposer le système de fixation et retirer l\'ancienne batterie.',
+                'Nettoyer les cosses et le support de batterie.',
+                'Installer la nouvelle batterie, la fixer correctement.',
+                'Brancher la cosse positive (+), puis la cosse négative (-).',
+                'Graisser les cosses pour les protéger de la corrosion.'
+            ]),
+            etape('Initialisation et Validation', '20 min', [
+                'Débrancher la sauvegarde mémoire.',
+                'Effectuer les réinitialisations nécessaires (horloge, vitres électriques...) selon la procédure constructeur.',
+                'Démarrer le véhicule et contrôler la tension de charge de l\'alternateur (entre 13.5V et 14.8V).'
+            ])
+        ],
+        securiteRangement: [
+            'Porter des gants et des lunettes de protection.',
+            'Respecter l\'ordre de débranchement/rebranchement des cosses.',
+            'Manipuler la batterie avec précaution (lourde et contient de l\'acide).',
+            'Stocker l\'ancienne batterie dans la zone de recyclage dédiée.'
+        ],
+        pointsCles: [
+            'Test de santé avec un testeur dédié',
+            'Ordre de déconnexion : Négatif en premier',
+            'Ordre de connexion : Positif en premier',
+            'Serrage ferme des cosses et de la fixation'
+        ]
     }
 };
 
@@ -520,3 +611,4 @@ export const tpSeconde: Record<number, TP> = {
 
 
     
+
