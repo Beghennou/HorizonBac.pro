@@ -139,12 +139,13 @@ const AiAnalysisHub = ({ studentName, evaluations }: { studentName: string, eval
     );
 };
 
-const PrelimCorrection = ({ tp, studentAnswers, studentFeedback, teacherFeedback, onFeedbackChange }: { 
+const PrelimCorrection = ({ tp, studentAnswers, studentFeedback, teacherFeedback, onFeedbackChange, onSave }: { 
     tp: TP; 
     studentAnswers: Record<number, string | string[]>;
     studentFeedback: string;
     teacherFeedback: string;
     onFeedbackChange: (feedback: string) => void;
+    onSave: (note: string) => void;
 }) => {
     const [correction, setCorrection] = useState<{ score: number, total: number, details: boolean[] } | null>(null);
     const [manualScore, setManualScore] = useState<string>("");
@@ -246,6 +247,12 @@ const PrelimCorrection = ({ tp, studentAnswers, studentFeedback, teacherFeedback
                     />
                 </div>
             </CardContent>
+            <CardFooter>
+                 <Button onClick={() => onSave(manualScore)} className="ml-auto">
+                    <Save className="mr-2 h-4 w-4" />
+                    Enregistrer l'évaluation
+                </Button>
+            </CardFooter>
         </Card>
     );
 };
@@ -312,13 +319,13 @@ export default function StudentDetailPage() {
         router.push(`${pathname}?${newSearchParams.toString()}`);
     }
 
-    const handleSave = () => {
+    const handleSave = (note?: string) => {
         if (!studentName || !selectedTpId) return;
 
         const tp = getTpById(selectedTpId);
         if (!tp) return;
 
-        saveEvaluation(studentName, selectedTpId, currentEvaluations);
+        saveEvaluation(studentName, selectedTpId, currentEvaluations, note);
         toast({
             title: "Évaluation enregistrée",
             description: `Les compétences pour ${studentName} ont été mises à jour.`,
@@ -361,6 +368,7 @@ export default function StudentDetailPage() {
     }
 
     const hasPrelimAnswers = selectedTp && prelimAnswers[studentName]?.[selectedTp.id] && Object.keys(prelimAnswers[studentName][selectedTp.id]).length > 0;
+    const isTpDone = studentAssignedTps.find(tp => tp.id === selectedTpId)?.status === 'terminé';
 
     return (
         <div className="space-y-6">
@@ -398,14 +406,34 @@ export default function StudentDetailPage() {
 
             {selectedTp && (
                 <>
-                    {hasPrelimAnswers && (
+                    {isTpDone && hasPrelimAnswers && (
                         <PrelimCorrection 
                             tp={selectedTp} 
                             studentAnswers={prelimAnswers[studentName][selectedTp.id]}
                             studentFeedback={studentFeedback}
                             teacherFeedback={teacherFeedback}
                             onFeedbackChange={handleTeacherFeedbackChange}
+                            onSave={handleSave}
                         />
+                    )}
+
+                    {isTpDone && !hasPrelimAnswers && (
+                         <Card>
+                             <CardHeader>
+                                <CardTitle>Évaluation</CardTitle>
+                             </CardHeader>
+                             <CardContent>
+                                 <p className="text-muted-foreground mb-4">Ce TP ne contient pas d'étude préliminaire notée. Vous pouvez évaluer les compétences et laisser un feedback.</p>
+                                 <Label htmlFor="teacher-feedback" className="font-bold flex items-center gap-2 mb-2"><MessageSquare className="text-accent"/>Feedback de l'enseignant :</Label>
+                                <Textarea 
+                                    id="teacher-feedback"
+                                    placeholder="Ajoutez votre commentaire pour l'élève ici..."
+                                    value={teacherFeedback}
+                                    onChange={(e) => handleTeacherFeedbackChange(e.target.value)}
+                                    rows={4}
+                                />
+                             </CardContent>
+                         </Card>
                     )}
 
                     <Card>
@@ -474,9 +502,9 @@ export default function StudentDetailPage() {
                             )) : <p className="text-muted-foreground text-center py-8">Aucun bloc de compétences n'est défini pour ce niveau de TP.</p>}
                         </CardContent>
                         <CardFooter>
-                            <Button onClick={handleSave} className="ml-auto">
+                            <Button onClick={() => handleSave()} className="ml-auto" disabled={!isTpDone}>
                                 <Save className="mr-2 h-4 w-4" />
-                                Enregistrer l'évaluation
+                                Enregistrer les compétences
                             </Button>
                         </CardFooter>
                     </Card>

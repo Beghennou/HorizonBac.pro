@@ -29,6 +29,12 @@ type Feedback = {
   teacher?: string;
 }
 
+type StoredEvaluation = {
+  date: string;
+  note?: string;
+  competences: Record<string, EvaluationStatus>;
+}
+
 type AssignmentsContextType = {
   students: Student[];
   setStudents: React.Dispatch<React.SetStateAction<Student[]>>;
@@ -38,8 +44,9 @@ type AssignmentsContextType = {
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
   prelimAnswers: Record<string, Record<number, Record<number, PrelimAnswer>>>;
   feedbacks: Record<string, Record<number, Feedback>>;
+  storedEvals: Record<string, Record<number, StoredEvaluation>>;
   assignTp: (studentNames: string[], tpId: number) => void;
-  saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>) => void;
+  saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, note?: string) => void;
   updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => void;
   savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => void;
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
@@ -61,6 +68,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>({});
   const [prelimAnswers, setPrelimAnswers] = useState<Record<string, Record<number, Record<number, PrelimAnswer>>>>({});
   const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
+  const [storedEvals, setStoredEvals] = useState<Record<string, Record<number, StoredEvaluation>>>({});
   const [teacherName, setTeacherName] = useState<string>('');
   const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
@@ -86,6 +94,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         
         const savedFeedbacks = localStorage.getItem('feedbacks');
         setFeedbacks(savedFeedbacks ? JSON.parse(savedFeedbacks) : {});
+        
+        const savedStoredEvals = localStorage.getItem('storedEvals');
+        setStoredEvals(savedStoredEvals ? JSON.parse(savedStoredEvals) : {});
 
         const updatedStudents = studentsData.map((student: Student) => {
           const studentEvaluations = evaluationsData[student.name] || {};
@@ -103,22 +114,8 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
           return { ...student, xp: totalXp, progress: progressPercentage };
         });
 
-        // Force reset if the classes list doesn't match the new one
-        if(JSON.stringify(Object.keys(classesData).sort()) !== JSON.stringify(Object.keys(initialClasses).sort())){
-            setStudents(initialStudents);
-            setClasses(initialClasses);
-            setAssignedTps({});
-            setEvaluations({});
-            setPrelimAnswers({});
-            setFeedbacks({});
-            toast({
-                title: "Réinitialisation effectuée",
-                description: "Les classes et les élèves ont été mis à jour.",
-            });
-        } else {
-             setStudents(updatedStudents);
-             setClasses(classesData);
-        }
+        setStudents(updatedStudents);
+        setClasses(classesData);
 
         const savedTeacherName = localStorage.getItem('teacherName');
         setTeacherName(savedTeacherName ? JSON.parse(savedTeacherName) : 'M. Dubois');
@@ -130,6 +127,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         setEvaluations({});
         setPrelimAnswers({});
         setFeedbacks({});
+        setStoredEvals({});
         setTeacherName('M. Dubois');
       }
       setIsLoaded(true);
@@ -145,9 +143,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('evaluations', JSON.stringify(evaluations));
       localStorage.setItem('prelimAnswers', JSON.stringify(prelimAnswers));
       localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
+      localStorage.setItem('storedEvals', JSON.stringify(storedEvals));
       localStorage.setItem('teacherName', JSON.stringify(teacherName));
     }
-  }, [students, classes, assignedTps, evaluations, prelimAnswers, feedbacks, teacherName, isLoaded]);
+  }, [students, classes, assignedTps, evaluations, prelimAnswers, feedbacks, storedEvals, teacherName, isLoaded]);
 
   const assignTp = (studentNames: string[], tpId: number) => {
     setAssignedTps(prev => {
@@ -180,7 +179,17 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const saveEvaluation = (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>) => {
+  const saveEvaluation = (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, note?: string) => {
+    
+    setStoredEvals(prev => {
+      const studentEvals = prev[studentName] || {};
+      studentEvals[tpId] = {
+        date: new Date().toLocaleDateString('fr-FR'),
+        note: note,
+        competences: currentEvals,
+      };
+      return { ...prev, [studentName]: studentEvals };
+    });
     
     setEvaluations(prev => {
       const updatedStudentEvals = { ...(prev[studentName] || {}) };
@@ -261,6 +270,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     setEvaluations({});
     setPrelimAnswers({});
     setFeedbacks({});
+    setStoredEvals({});
     setClasses(prevClasses => {
         const clearedClasses: Record<string, string[]> = {};
         for (const className in prevClasses) {
@@ -304,6 +314,11 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       delete newFeedbacks[studentName];
       return newFeedbacks;
     });
+     setStoredEvals(prev => {
+      const newEvals = {...prev};
+      delete newEvals[studentName];
+      return newEvals;
+    });
     toast({
         title: "Élève supprimé",
         description: `${studentName} a été retiré de l'application.`,
@@ -341,6 +356,11 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
           const newFeedbacks = {...prev};
           delete newFeedbacks[studentName];
           return newFeedbacks;
+        });
+        setStoredEvals(prev => {
+          const newEvals = {...prev};
+          delete newEvals[studentName];
+          return newEvals;
         });
     });
 
@@ -395,7 +415,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, prelimAnswers, feedbacks, assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer, saveFeedback, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv, isLoaded }}>
+    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, prelimAnswers, feedbacks, storedEvals, assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer, saveFeedback, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv, isLoaded }}>
       {children}
     </AssignmentsContext.Provider>
   );

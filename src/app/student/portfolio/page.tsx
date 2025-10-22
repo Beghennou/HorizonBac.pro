@@ -1,4 +1,5 @@
 
+
 'use client';
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -7,19 +8,20 @@ import { allBlocs, getTpById } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Printer, User, CheckCircle } from 'lucide-react';
+import { Printer, User, CheckCircle, FileText } from 'lucide-react';
 import { LyceeLogo } from '@/components/lycee-logo';
 import { cn } from '@/lib/utils';
 import { Award } from '@/components/icons';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
 function StudentPortfolio() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { evaluations, assignedTps } = useAssignments();
+  const { evaluations, assignedTps, storedEvals, feedbacks } = useAssignments();
 
   if (!studentName) {
     return (
@@ -35,6 +37,7 @@ function StudentPortfolio() {
 
   const studentEvaluations = evaluations[studentName] || {};
   const studentCompletedTps = (assignedTps[studentName] || []).filter(tp => tp.status === 'terminé');
+  const studentStoredEvals = storedEvals[studentName] || {};
 
   const acquiredSkillsByBloc: Record<string, { title: string, colorClass: string, skills: Record<string, { description: string, history: EvaluationStatus[] }> }> = {};
 
@@ -84,7 +87,7 @@ function StudentPortfolio() {
               </div>
           </header>
 
-          <main className="space-y-8">
+          <main className="space-y-12">
               <div className="flex justify-between items-center print-hidden">
                   <p className="text-muted-foreground">Ce document résume vos compétences acquises et vos travaux pratiques validés.</p>
                   <Button onClick={handlePrint}>
@@ -93,6 +96,45 @@ function StudentPortfolio() {
                   </Button>
               </div>
               
+              <section className="break-before-page">
+                  <h2 className="font-headline text-3xl tracking-wide flex items-center gap-3 mb-4">
+                      <FileText className="w-8 h-8 text-primary"/>
+                      Synthèse des Évaluations
+                  </h2>
+                  {Object.keys(studentStoredEvals).length > 0 ? (
+                      <Card>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-[30%]">TP Évalué</TableHead>
+                              <TableHead className="text-center">Note Étude Préliminaire</TableHead>
+                              <TableHead className="text-center">Date Évaluation</TableHead>
+                              <TableHead>Appréciation de l'enseignant</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {Object.entries(studentStoredEvals).map(([tpId, evalData]) => {
+                                const tp = getTpById(parseInt(tpId));
+                                const teacherFeedback = feedbacks[studentName]?.[parseInt(tpId)]?.teacher;
+                                if (!tp) return null;
+
+                                return (
+                                  <TableRow key={tpId} className="break-inside-avoid">
+                                    <TableCell className="font-medium">{tp.titre}</TableCell>
+                                    <TableCell className="text-center font-bold text-accent">{evalData.note ? `${evalData.note} / 10` : 'N/A'}</TableCell>
+                                    <TableCell className="text-center">{evalData.date}</TableCell>
+                                    <TableCell className="text-muted-foreground italic">{teacherFeedback || "Aucune appréciation."}</TableCell>
+                                  </TableRow>
+                                )
+                            })}
+                          </TableBody>
+                        </Table>
+                      </Card>
+                  ) : (
+                    <p className="text-muted-foreground text-center py-8">Aucun TP n'a encore été évalué par l'enseignant.</p>
+                  )}
+              </section>
+
               <section>
                   <h2 className="font-headline text-3xl tracking-wide flex items-center gap-3 mb-4">
                       <Award className="w-8 h-8 text-accent"/>
