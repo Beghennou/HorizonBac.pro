@@ -100,7 +100,7 @@ const AssistantTP = ({ tp }: { tp: TP }) => {
                         }}
                         disabled={isLoading}
                     />
-                    <Button onClick={handleAskAssistant} disabled={isLoading || !question.trim()}>
+                    <Button onClick={handleAskAssistant} disabled={isLoading || !question.trim()} aria-label="Envoyer la question">
                         {isLoading ? <Loader2 className="animate-spin" /> : <Send />}
                     </Button>
                 </div>
