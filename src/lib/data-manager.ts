@@ -1,3 +1,4 @@
+
 import { tpSeconde, TP as TPSeconde } from './tp-seconde';
 import { tpPremiere, TP as TPPremiere } from './tp-premiere';
 import { tpTerminale, TP as TPTerminale } from './tp-terminale';
@@ -58,23 +59,23 @@ export const getTpById = (id: number): TP | undefined => {
 };
 
 export const classes = {
-    "TVP1": [],
-    "TVP2": [],
-    "TVP3": [],
-    "2MV2 - Carol Shelby": [],
-    "2MV3 - Amédée Gordini": [],
-    "2MV4 - Les frères Michelin": [],
-    "2MV5 - Michèle Mouton": [],
-    "2MV6 - Valentino Rossi": [],
-    "TAPP 1": [],
-    "TAPP 2": [],
-    "1APP1": [],
-    "1APP2": [],
-    "1VP1": [],
-    "1VP2": [],
-    "1VP3": [],
-    "2APP-RC/VP - John Coppe": [],
-    "2MV1 - Pierre Latirgue": []
+    "TVP1": ["Dupont Jean", "Martin Paul"],
+    "TVP2": ["Bernard Luc", "Robert Jacques"],
+    "TVP3": ["Petit Pierre", "Dubois Michel"],
+    "2MV2 - Carol Shelby": ["Durand Alain", "Leroy Philippe"],
+    "2MV3 - Amédée Gordini": ["Moreau Louis", "Simon André"],
+    "2MV4 - Les frères Michelin": ["Laurent Nicolas", "Lefebvre Marc"],
+    "2MV5 - Michèle Mouton": ["Roux Julien", "Fournier David"],
+    "2MV6 - Valentino Rossi": ["Girard Vincent", "Bonnet Christian"],
+    "TAPP 1": ["Lambert Thierry", "Francois Patrick"],
+    "TAPP 2": ["Martinez Serge", "Legrand Daniel"],
+    "1APP1": ["Garnier Jean-Luc", "Faure Pascal"],
+    "1APP2": ["Rousseau Olivier", "Blanc Frédéric"],
+    "1VP1": ["Guerin Hervé", "Muller Christophe"],
+    "1VP2": ["Henry Denis", "Leclercq Bruno"],
+    "1VP3": ["Lecomte Fabrice", "Perez Alain"],
+    "2APP-RC/VP - John Coppe": ["Marchand Éric", "Morel Stéphane"],
+    "2MV1 - Pierre Latirgue": ["Chevalier Gilles", "Lambert Patrick", "Caron Jean-Michel", "Fontaine Dominique", "VINCENT Christophe", "GAUTIER Guillaume", "MASSON Antoine", "ETIENNE Yann", "TESSIER Sébastien", "MARIE Alexandre"]
 };
 
 export const allBlocs: Record<string, CompetenceBloc> = {
@@ -82,3 +83,4 @@ export const allBlocs: Record<string, CompetenceBloc> = {
     ...competencesParNiveau.premiere,
     ...competencesParNiveau.terminale,
 };
+

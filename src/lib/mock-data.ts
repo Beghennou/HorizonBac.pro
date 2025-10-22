@@ -1,4 +1,6 @@
+
 import { Student } from './types';
+import { classes } from './data-manager';
 
 export const tpModules = [
   {
@@ -48,4 +50,18 @@ export const simulations = [
   },
 ]
 
-export const students: Student[] = [];
+const allStudentNames = [...new Set(Object.values(classes).flat())];
+
+export const students: Student[] = allStudentNames.map((name, index) => {
+    const nameParts = name.split(' ');
+    const lastName = nameParts[0] || '';
+    const firstName = nameParts.slice(1).join(' ') || `Prénom${index + 1}`;
+    
+    return {
+        id: `student-${index + 1}`,
+        name: name,
+        email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`,
+        progress: Math.floor(Math.random() * 100),
+        xp: Math.floor(Math.random() * 500)
+    };
+});
