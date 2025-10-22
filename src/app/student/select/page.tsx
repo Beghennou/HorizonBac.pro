@@ -17,16 +17,16 @@ function StudentSelector() {
   const [studentsInClass, setStudentsInClass] = useState<Student[]>([]);
 
   useEffect(() => {
-    if (selectedClass) {
-      const studentNames = classes[selectedClass] || [];
+    if (selectedClass && classes[selectedClass]) {
+      const studentNames = classes[selectedClass];
       const filteredStudents = students
         .filter(student => studentNames.includes(student.name))
         .sort((a, b) => a.name.localeCompare(b.name));
       setStudentsInClass(filteredStudents);
-      setSelectedStudent(''); // Reset student selection when class changes
     } else {
       setStudentsInClass([]);
     }
+    setSelectedStudent(''); // Reset student selection when class changes
   }, [selectedClass, classes, students]);
 
   const handleSubmit = () => {
@@ -39,7 +39,7 @@ function StudentSelector() {
     }
   };
 
-  const sortedClasses = Object.keys(classes).sort();
+  const sortedClasses = Object.keys(classes).filter(c => classes[c].length > 0).sort();
 
   return (
     <Card className="w-full max-w-lg">
