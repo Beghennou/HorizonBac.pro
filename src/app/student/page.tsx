@@ -1,4 +1,5 @@
 
+
 'use client';
 import { Suspense } from 'react';
 import Image from 'next/image';
@@ -17,7 +18,7 @@ import { cn } from '@/lib/utils';
 function StudentDashboard() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { assignedTps, evaluations } = useAssignments();
+  const { assignedTps, storedEvals } = useAssignments();
 
   if (!studentName) {
     return (
@@ -32,18 +33,18 @@ function StudentDashboard() {
   }
 
   const studentTps = assignedTps[studentName] || [];
-  const studentEvaluations = evaluations[studentName] || {};
+  const studentStoredEvals = storedEvals[studentName] || {};
 
   const tpModules = studentTps.map(assignedTp => {
     const tp = getTpById(assignedTp.id);
-    const isEvaluated = studentEvaluations[tp?.id.toString()] !== undefined;
+    const isEvaluated = studentStoredEvals[tp?.id.toString()]?.isFinal;
     return tp ? { ...tp, status: assignedTp.status, isEvaluated } : null;
   }).filter((tp): tp is TP & { status: string; isEvaluated: boolean } => tp !== null);
 
   const getTpCategory = (tpId: number): string => {
     if (tpId >= 301) return 'Terminale / Diagnostic Avancé';
-    if (tpId >= 101) return 'Seconde / Entretien Périodique';
     if (tpId >= 1) return 'Première / Maintenance Corrective';
+    if (tpId >= 101) return 'Seconde / Entretien Périodique';
     return 'Général';
   };
 
@@ -84,7 +85,7 @@ function StudentDashboard() {
                         />
                      )}
                      <div className="absolute top-2 right-2 flex gap-2">
-                        {module.status === 'terminé' && module.isEvaluated && (
+                        {module.isEvaluated && (
                             <Badge className="bg-sky-500 text-white">Évalué</Badge>
                         )}
                         <Badge className={cn(currentStatusInfo.className)}>{currentStatusInfo.text}</Badge>

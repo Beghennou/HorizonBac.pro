@@ -117,7 +117,7 @@ function StudentPortfolio() {
                             {Object.entries(studentStoredEvals).map(([tpId, evalData]) => {
                                 const tp = getTpById(parseInt(tpId));
                                 const teacherFeedback = feedbacks[studentName]?.[parseInt(tpId)]?.teacher;
-                                if (!tp) return null;
+                                if (!tp || !evalData.isFinal) return null;
 
                                 return (
                                   <TableRow key={tpId} className="break-inside-avoid">

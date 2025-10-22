@@ -8,7 +8,7 @@ import { getTpById, allBlocs, TP, EtudePrelimQCM, EtudePrelimText } from '@/lib/
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, CheckSquare, Save, Mail, Bot, Loader2, MessageSquare, Check, X, BookOpen, UserCircle, Award } from 'lucide-react';
+import { User, CheckSquare, Save, Mail, Bot, Loader2, MessageSquare, Check, X, BookOpen, UserCircle, Award, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -139,23 +139,38 @@ const AiAnalysisHub = ({ studentName, evaluations }: { studentName: string, eval
     );
 };
 
-const EvaluationCard = ({ tp, studentAnswers, studentFeedback, teacherFeedback, onFeedbackChange, onSave }: { 
+const EvaluationCard = ({ 
+    tp, 
+    studentAnswers, 
+    studentFeedback, 
+    initialTeacherFeedback,
+    initialPrelimNote,
+    initialTpNote,
+    onSave,
+}: { 
     tp: TP; 
     studentAnswers: Record<number, string | string[]>;
     studentFeedback: string;
-    teacherFeedback: string;
-    onFeedbackChange: (feedback: string) => void;
-    onSave: (prelimNote?: string, tpNote?: string) => void;
+    initialTeacherFeedback: string;
+    initialPrelimNote: string;
+    initialTpNote: string;
+    onSave: (prelimNote?: string, tpNote?: string, feedback?: string, isFinal?: boolean) => void;
 }) => {
     const [correction, setCorrection] = useState<{ score: number, total: number, details: boolean[] } | null>(null);
-    const [prelimNote, setPrelimNote] = useState<string>("");
-    const [tpNote, setTpNote] = useState<string>("");
+    const [prelimNote, setPrelimNote] = useState<string>(initialPrelimNote);
+    const [tpNote, setTpNote] = useState<string>(initialTpNote);
+    const [teacherFeedback, setTeacherFeedback] = useState<string>(initialTeacherFeedback);
+
+    useEffect(() => {
+        setPrelimNote(initialPrelimNote);
+        setTpNote(initialTpNote);
+        setTeacherFeedback(initialTeacherFeedback);
+    }, [initialPrelimNote, initialTpNote, initialTeacherFeedback]);
+
 
     useEffect(() => {
         if (correction) {
             setPrelimNote((correction.score / correction.total * 10).toFixed(1));
-        } else {
-            setPrelimNote("");
         }
     }, [correction]);
 
@@ -269,17 +284,21 @@ const EvaluationCard = ({ tp, studentAnswers, studentFeedback, teacherFeedback, 
                                 id="teacher-feedback"
                                 placeholder="Ajoutez votre commentaire global pour l'élève ici..."
                                 value={teacherFeedback}
-                                onChange={(e) => onFeedbackChange(e.target.value)}
+                                onChange={(e) => setTeacherFeedback(e.target.value)}
                                 rows={3}
                             />
                         </div>
                     </div>
                 </div>
             </CardContent>
-            <CardFooter>
-                 <Button onClick={() => onSave(prelimNote, tpNote)} className="ml-auto">
+            <CardFooter className="gap-2">
+                 <Button onClick={() => onSave(prelimNote, tpNote, teacherFeedback, false)} variant="outline" className="ml-auto">
                     <Save className="mr-2 h-4 w-4" />
-                    Enregistrer l'évaluation
+                    Enregistrer le brouillon
+                </Button>
+                <Button onClick={() => onSave(prelimNote, tpNote, teacherFeedback, true)}>
+                    <Send className="mr-2 h-4 w-4" />
+                    Enregistrer et Rendre à l'élève
                 </Button>
             </CardFooter>
         </Card>
@@ -347,16 +366,20 @@ export default function StudentDetailPage() {
         router.push(`${pathname}?${newSearchParams.toString()}`);
     }
 
-    const handleSave = (prelimNote?: string, tpNote?: string) => {
+    const handleSave = (prelimNote?: string, tpNote?: string, feedback?: string, isFinal?: boolean) => {
         if (!studentName || !selectedTpId) return;
 
-        const tp = getTpById(selectedTpId);
-        if (!tp) return;
+        if (feedback) {
+            saveFeedback(studentName, selectedTpId, feedback, 'teacher');
+        }
+        
+        saveEvaluation(studentName, selectedTpId, currentEvaluations, prelimNote, tpNote, isFinal);
 
-        saveEvaluation(studentName, selectedTpId, currentEvaluations, prelimNote, tpNote);
         toast({
-            title: "Évaluation enregistrée",
-            description: `Les compétences pour ${studentName} ont été mises à jour.`,
+            title: isFinal ? "Évaluation rendue" : "Évaluation enregistrée",
+            description: isFinal 
+                ? `L'évaluation pour ${studentName} a été finalisée et est visible par l'élève.`
+                : `Les compétences pour ${studentName} ont été sauvegardées en brouillon.`,
         });
     };
     
@@ -386,16 +409,19 @@ export default function StudentDetailPage() {
         )
     }
 
+    const assignedTp = studentAssignedTps.find(tp => tp.id === selectedTpId);
     const studentFeedback = (selectedTpId && feedbacks[studentName]?.[selectedTpId]?.student) || '';
-    const teacherFeedback = (selectedTpId && feedbacks[studentName]?.[selectedTpId]?.teacher) || '';
     
-    const handleTeacherFeedbackChange = (feedback: string) => {
-        if (studentName && selectedTpId) {
-            saveFeedback(studentName, selectedTpId, feedback, 'teacher');
-        }
-    }
+    const savedEval = selectedTpId ? storedEvals[studentName]?.[selectedTpId] : undefined;
+    const teacherFeedback = (selectedTpId && feedbacks[studentName]?.[selectedTpId]?.teacher) || '';
 
-    const isTpDone = studentAssignedTps.find(tp => tp.id === selectedTpId)?.status === 'terminé';
+    const statusInfo = {
+      'non-commencé': { text: 'Non commencé', className: 'bg-gray-500'},
+      'en-cours': { text: 'En cours', className: 'bg-yellow-500'},
+      'terminé': { text: 'Terminé (à évaluer)', className: 'bg-blue-500'},
+    };
+    const isEvaluated = !!savedEval?.isFinal;
+    const currentStatus = isEvaluated ? {text: "Évalué et rendu", className: 'bg-green-600'} : statusInfo[assignedTp?.status as keyof typeof statusInfo];
 
     return (
         <div className="space-y-6">
@@ -424,6 +450,9 @@ export default function StudentDetailPage() {
                                     ))}
                                 </SelectContent>
                             </Select>
+                            {currentStatus && (
+                               <Badge className={cn("text-base", currentStatus.className)}>{currentStatus.text}</Badge>
+                            )}
                         </div>
                     ) : (
                         <p className="text-muted-foreground">Aucun TP n'est assigné à cet élève. Veuillez lui en assigner depuis l'onglet "Élèves".</p>
@@ -433,13 +462,14 @@ export default function StudentDetailPage() {
 
             {selectedTp && (
                 <>
-                    {isTpDone && (
+                    {assignedTp?.status === 'terminé' && (
                         <EvaluationCard 
                             tp={selectedTp} 
                             studentAnswers={(prelimAnswers[studentName]?.[selectedTp.id]) || {}}
                             studentFeedback={studentFeedback}
-                            teacherFeedback={teacherFeedback}
-                            onFeedbackChange={handleTeacherFeedbackChange}
+                            initialTeacherFeedback={teacherFeedback}
+                            initialPrelimNote={savedEval?.prelimNote || ""}
+                            initialTpNote={savedEval?.tpNote || ""}
                             onSave={handleSave}
                         />
                     )}
@@ -497,6 +527,7 @@ export default function StudentDetailPage() {
                                                                     currentEvaluations[id] === level && 'bg-accent text-accent-foreground border-accent'
                                                                 )}
                                                                 onClick={() => handleEvaluationChange(id, level)}
+                                                                disabled={assignedTp?.status !== 'terminé'}
                                                             >
                                                                 {level}
                                                             </Button>
@@ -509,12 +540,11 @@ export default function StudentDetailPage() {
                                 </div>
                             )) : <p className="text-muted-foreground text-center py-8">Aucun bloc de compétences n'est défini pour ce niveau de TP.</p>}
                         </CardContent>
-                        <CardFooter>
-                            <Button onClick={() => handleSave()} className="ml-auto" disabled={!isTpDone}>
-                                <Save className="mr-2 h-4 w-4" />
-                                Enregistrer les compétences
-                            </Button>
-                        </CardFooter>
+                         {assignedTp?.status === 'terminé' && (
+                            <CardFooter>
+                                <p className="text-sm text-muted-foreground ml-auto">Utilisez la section "Évaluation du TP" ci-dessus pour enregistrer.</p>
+                            </CardFooter>
+                         )}
                     </Card>
                 </>
             )}

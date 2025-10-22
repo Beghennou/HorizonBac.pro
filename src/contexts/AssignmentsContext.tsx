@@ -34,6 +34,7 @@ type StoredEvaluation = {
   prelimNote?: string;
   tpNote?: string;
   competences: Record<string, EvaluationStatus>;
+  isFinal?: boolean;
 }
 
 type AssignmentsContextType = {
@@ -47,7 +48,7 @@ type AssignmentsContextType = {
   feedbacks: Record<string, Record<number, Feedback>>;
   storedEvals: Record<string, Record<number, StoredEvaluation>>;
   assignTp: (studentNames: string[], tpId: number) => void;
-  saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string) => void;
+  saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => void;
   updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => void;
   savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => void;
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
@@ -180,7 +181,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const saveEvaluation = (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string) => {
+  const saveEvaluation = (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => {
     
     setStoredEvals(prev => {
       const studentEvals = prev[studentName] || {};
@@ -189,47 +190,50 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         prelimNote: prelimNote,
         tpNote: tpNote,
         competences: currentEvals,
+        isFinal: isFinal,
       };
       return { ...prev, [studentName]: studentEvals };
     });
     
-    setEvaluations(prev => {
-      const updatedStudentEvals = { ...(prev[studentName] || {}) };
+    if (isFinal) {
+      setEvaluations(prev => {
+        const updatedStudentEvals = { ...(prev[studentName] || {}) };
+        
+        for (const competenceId in currentEvals) {
+          const newStatus = currentEvals[competenceId];
+          const history = updatedStudentEvals[competenceId] || [];
+          // Only add if the status has changed from the last one
+          if (history.length === 0 || history[history.length - 1] !== newStatus) {
+            updatedStudentEvals[competenceId] = [...history, newStatus];
+          }
+        }
+
+        return { ...prev, [studentName]: updatedStudentEvals };
+      });
       
-      for (const competenceId in currentEvals) {
-        const newStatus = currentEvals[competenceId];
-        const history = updatedStudentEvals[competenceId] || [];
-        // Only add if the status has changed from the last one
-        if (history.length === 0 || history[history.length - 1] !== newStatus) {
-          updatedStudentEvals[competenceId] = [...history, newStatus];
-        }
-      }
+      setStudents(prevStudents => {
+          const studentToUpdate = prevStudents.find(s => s.name === studentName);
+          if (!studentToUpdate) return prevStudents;
 
-      return { ...prev, [studentName]: updatedStudentEvals };
-    });
-    
-    setStudents(prevStudents => {
-        const studentToUpdate = prevStudents.find(s => s.name === studentName);
-        if (!studentToUpdate) return prevStudents;
+          const studentEvaluations = evaluations[studentName] || {};
+          let totalXp = 0;
+          for (const competenceId in studentEvaluations) {
+              const history = studentEvaluations[competenceId];
+              if (Array.isArray(history) && history.length > 0) {
+                const latestStatus = history[history.length - 1];
+                totalXp += xpPerLevel[latestStatus] || 0;
+              }
+          }
 
-        const studentEvaluations = evaluations[studentName] || {};
-        let totalXp = 0;
-        for (const competenceId in studentEvaluations) {
-            const history = studentEvaluations[competenceId];
-            if (Array.isArray(history) && history.length > 0) {
-              const latestStatus = history[history.length - 1];
-              totalXp += xpPerLevel[latestStatus] || 0;
-            }
-        }
-
-        const allCompetencesCount = Object.values(allBlocs).reduce((acc, bloc) => acc + Object.keys(bloc.items).length, 0);
-        const maxPossibleXp = allCompetencesCount * xpPerLevel['M'];
-        const progressPercentage = maxPossibleXp > 0 ? Math.round((totalXp / maxPossibleXp) * 100) : 0;
-        
-        const updatedStudent: Student = { ...studentToUpdate, xp: totalXp, progress: progressPercentage };
-        
-        return prevStudents.map(s => s.name === studentName ? updatedStudent : s);
-    });
+          const allCompetencesCount = Object.values(allBlocs).reduce((acc, bloc) => acc + Object.keys(bloc.items).length, 0);
+          const maxPossibleXp = allCompetencesCount * xpPerLevel['M'];
+          const progressPercentage = maxPossibleXp > 0 ? Math.round((totalXp / maxPossibleXp) * 100) : 0;
+          
+          const updatedStudent: Student = { ...studentToUpdate, xp: totalXp, progress: progressPercentage };
+          
+          return prevStudents.map(s => s.name === studentName ? updatedStudent : s);
+      });
+    }
   };
 
   const savePrelimAnswer = (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
