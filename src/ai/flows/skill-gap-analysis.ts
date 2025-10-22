@@ -84,7 +84,17 @@ const analyzeSkillGapsFlow = ai.defineFlow(
         suggestedLearningPaths: "Pour commencer l'analyse, veuillez d'abord réaliser et enregistrer des évaluations pour cet élève. Une fois les données disponibles, l'IA pourra identifier les points à travailler.",
       };
     }
-    const {output} = await prompt(input);
-    return output!;
+    try {
+      const {output} = await prompt(input);
+      return output!;
+    } catch (e: any) {
+       if (e.message?.includes('403 Forbidden')) {
+        return {
+          identifiedSkillGaps: ["Erreur de configuration de l'API."],
+          suggestedLearningPaths: "L'API Generative Language n'est pas activée sur votre projet. Veuillez l'activer dans la console Google Cloud pour utiliser l'analyse IA.",
+        };
+      }
+      throw e;
+    }
   }
 );

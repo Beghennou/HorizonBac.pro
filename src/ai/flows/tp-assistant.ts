@@ -66,7 +66,17 @@ const tpAssistantFlow = ai.defineFlow(
     outputSchema: GuideStudentOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+      const {output} = await prompt(input);
+      return output!;
+    } catch (e: any) {
+      if (e.message?.includes('403 Forbidden')) {
+        return {
+          guidanceText: "L'API Generative Language n'est pas activée sur votre projet. Veuillez l'activer dans la console Google Cloud pour utiliser l'assistant IA.",
+        };
+      }
+      // Re-throw other errors
+      throw e;
+    }
   }
 );
