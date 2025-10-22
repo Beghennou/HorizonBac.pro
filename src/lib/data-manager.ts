@@ -60,7 +60,7 @@ export const getTpById = (id: number): TP | undefined => {
 };
 
 export const classes = {
-    "2MV1 - Pierre Latirgue": [
+    "2MV1": [
         "LUI Essai",
         "Dupont Jean", "Martin Paul",
         "Bernard Luc", "Robert Jacques",
@@ -82,11 +82,11 @@ export const classes = {
     "TVP1": [],
     "TVP2": [],
     "TVP3": [],
-    "2MV2 - Carol Shelby": ["Chevalier Gilles", "Lambert Patrick", "Caron Jean-Michel", "Fontaine Dominique"],
-    "2MV3 - Amédée Gordini": ["VINCENT Christophe", "GAUTIER Guillaume", "MASSON Antoine", "ETIENNE Yann"],
-    "2MV4 - Les frères Michelin": ["TESSIER Sébastien", "MARIE Alexandre"],
-    "2MV5 - Michèle Mouton": [],
-    "2MV6 - Valentino Rossi": [],
+    "2MV2": ["Chevalier Gilles", "Lambert Patrick", "Caron Jean-Michel", "Fontaine Dominique"],
+    "2MV3": ["VINCENT Christophe", "GAUTIER Guillaume", "MASSON Antoine", "ETIENNE Yann"],
+    "2MV4": ["TESSIER Sébastien", "MARIE Alexandre"],
+    "2MV5": [],
+    "2MV6": [],
     "TAPP 1": [],
     "TAPP 2": [],
     "1APP1": [],
@@ -94,7 +94,7 @@ export const classes = {
     "1VP1": [],
     "1VP2": [],
     "1VP3": [],
-    "2APP-RC/VP - John Coppe": []
+    "2APP-RC/VP": []
 };
 
 export const allBlocs: Record<string, CompetenceBloc> = {
@@ -102,6 +102,7 @@ export const allBlocs: Record<string, CompetenceBloc> = {
     ...competencesParNiveau.premiere,
     ...competencesParNiveau.terminale,
 };
+
 
 
 
