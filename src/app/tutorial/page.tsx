@@ -1,6 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award } from 'lucide-react';
+import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -95,6 +95,17 @@ export default function TutorialPage() {
                                             <li>Sélectionnez un TP dans la liste de gauche pour l'afficher.</li>
                                             <li>Pour le contextualiser, sélectionnez une classe et un élève via les menus. Le nom de l'élève et de l'enseignant apparaîtront sur la fiche.</li>
                                             <li>Utilisez les boutons pour envoyer la fiche par e-mail ou l'imprimer.</li>
+                                        </ul>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="item-6">
+                                    <AccordionTrigger className="text-xl font-headline">6. Analyser la Progression</AccordionTrigger>
+                                    <AccordionContent className="text-base text-muted-foreground p-4">
+                                       <p className="mb-4">L'onglet <strong>Analyses</strong> vous offre une vue d'ensemble de la performance de vos classes :</p>
+                                        <ul className="list-disc pl-6 space-y-2">
+                                            <li><strong>Progression Moyenne :</strong> Visualisez rapidement le niveau d'avancement global de la classe sélectionnée.</li>
+                                            <li><strong>Maîtrise des Compétences :</strong> Identifiez en un coup d'œil les 5 compétences les mieux et les moins bien maîtrisées par le groupe, idéal pour adapter votre pédagogie.</li>
+                                            <li><strong>Comparaison des Classes :</strong> Comparez la progression moyenne entre les différentes classes d'un même niveau (Seconde, Première, etc.).</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
