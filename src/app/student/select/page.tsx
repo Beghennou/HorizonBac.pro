@@ -39,7 +39,7 @@ function StudentSelector() {
     }
   };
 
-  const sortedClasses = Object.keys(classes).filter(c => classes[c].length > 0).sort();
+  const sortedClasses = Object.keys(classes).filter(c => classes[c] && classes[c].length > 0).sort();
 
   return (
     <Card className="w-full max-w-lg">
@@ -98,9 +98,9 @@ function StudentSelector() {
 }
 
 export default function SelectStudentPage() {
-  const { isLoaded } = useAssignments();
+  const { isLoaded, classes } = useAssignments();
 
-  if (!isLoaded) {
+  if (!isLoaded || !classes) {
     return (
         <div className="flex items-center justify-center min-h-screen">
             <Loader2 className="h-16 w-16 animate-spin text-primary" />
