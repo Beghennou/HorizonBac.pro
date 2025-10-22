@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/sidebar';
 import { AssignmentsProvider, useAssignments } from '@/contexts/AssignmentsContext';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
-import { Home } from 'lucide-react';
+import { Home, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 function DashboardLayoutContent({
@@ -90,6 +90,12 @@ function DashboardLayoutContent({
     const basePath = pathname.split('/').slice(0, 4).join('/');
     router.push(`${basePath}?${newSearchParams.toString()}`);
   }
+  
+  const handleEditTp = (tpId: number) => {
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set('editTp', tpId.toString());
+    router.push(`/teacher/dashboard/tp-designer?${newSearchParams.toString()}`);
+  };
 
   if (isLoading) {
     return <TachometerAnimation />;
@@ -170,13 +176,25 @@ function DashboardLayoutContent({
                       <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl flex-1">
                         <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Liste des TP ({niveau})</h3>
                         <ScrollArea className="h-[calc(100%-3rem)]">
-                          <div className="space-y-2 pr-4">
+                           <div className="space-y-2 pr-4">
                             {tps.map(tp => (
                               <div key={tp.id} 
-                                onClick={() => handleTpSelect(tp.id)}
-                                className={`p-3 rounded-md bg-background/50 hover:bg-primary/10 border border-transparent hover:border-primary/50 cursor-pointer transition-all ${selectedTpId === tp.id ? 'bg-primary/20 border-accent' : ''}`}>
-                                <p className="font-bold text-sm text-accent">TP {tp.id}</p>
-                                <p className="text-sm text-foreground/80">{tp.titre}</p>
+                                className={`p-3 rounded-md bg-background/50 hover:bg-primary/10 border border-transparent hover:border-primary/50 transition-all group relative ${selectedTpId === tp.id ? 'bg-primary/20 border-accent' : ''}`}>
+                                <div onClick={() => handleTpSelect(tp.id)} className="cursor-pointer">
+                                  <p className="font-bold text-sm text-accent">TP {tp.id}</p>
+                                  <p className="text-sm text-foreground/80">{tp.titre}</p>
+                                </div>
+                                {tp.id >= 1000 && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => handleEditTp(tp.id)}
+                                    aria-label="Modifier le TP"
+                                  >
+                                    <Pencil className="h-4 w-4 text-accent"/>
+                                  </Button>
+                                )}
                               </div>
                             ))}
                           </div>

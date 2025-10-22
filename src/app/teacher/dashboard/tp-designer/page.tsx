@@ -1,15 +1,17 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { DraftingCompass, PlusCircle, Save, Trash2, X } from "lucide-react";
+import { DraftingCompass, PlusCircle, Save, Trash2, X, FilePenLine } from "lucide-react";
 import { useFieldArray, useForm, Controller } from "react-hook-form";
-import { allBlocs, competencesParNiveau, Niveau } from "@/lib/data-manager";
+import { allBlocs, competencesParNiveau, Niveau, TP } from "@/lib/data-manager";
 import { useAssignments } from "@/contexts/AssignmentsContext";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,8 +51,10 @@ type TpFormValues = z.infer<typeof tpFormSchema>;
 
 export default function TPDesignerPage() {
     const { toast } = useToast();
-    // In a real app, this would be a real function to save to a database.
-    const { addTp } = useAssignments(); 
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const { addTp, teacherName, tps } = useAssignments(); 
+    const [isEditMode, setIsEditMode] = useState(false);
     
     const form = useForm<TpFormValues>({
         resolver: zodResolver(tpFormSchema),
@@ -70,6 +74,24 @@ export default function TPDesignerPage() {
         },
     });
 
+    useEffect(() => {
+        const editTpId = searchParams.get('editTp');
+        if (editTpId && tps) {
+            const tpToEdit = tps[parseInt(editTpId, 10)];
+            if (tpToEdit) {
+                setIsEditMode(true);
+                const competences = tpToEdit.objectif.match(/C\d\.\d/g) || [];
+                const objectifWithoutCompetences = tpToEdit.objectif.split(' (Compétence')[0];
+
+                form.reset({
+                    ...tpToEdit,
+                    objectif: objectifWithoutCompetences,
+                    competences,
+                });
+            }
+        }
+    }, [searchParams, tps, form]);
+
     const { fields: materielFields, append: appendMateriel, remove: removeMateriel } = useFieldArray({ control: form.control, name: "materiel" });
     const { fields: etudePrelimFields, append: appendEtudePrelim, remove: removeEtudePrelim } = useFieldArray({ control: form.control, name: "etudePrelim" });
     const { fields: activitePratiqueFields, append: appendActivitePratique, remove: removeActivitePratique } = useFieldArray({ control: form.control, name: "activitePratique" });
@@ -80,24 +102,35 @@ export default function TPDesignerPage() {
 
     const onSubmit = (data: TpFormValues) => {
         const fullObjectif = `${data.objectif} (Compétences ${data.competences.join(', ')})`;
-        const finalData = {...data, objectif: fullObjectif};
+        const finalData = {
+          ...data,
+          objectif: fullObjectif,
+          author: teacherName,
+          creationDate: new Date().toISOString(),
+        } as TP;
         
-        // This is a placeholder for a real save function
         addTp(finalData);
 
         toast({
-            title: "TP Créé avec succès !",
-            description: `Le TP "${data.titre}" a été ajouté à la liste.`,
+            title: isEditMode ? "TP mis à jour !" : "TP Créé avec succès !",
+            description: `Le TP "${data.titre}" a été sauvegardé.`,
         });
-        form.reset();
+
+        if (!isEditMode) {
+          form.reset();
+        }
+        router.push('/teacher/dashboard/tp-designer');
     };
 
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="font-headline text-5xl tracking-wide">Concepteur de modules TP</h1>
-                <p className="text-muted-foreground">
-                    Créez et partagez des modules TP personnalisés avec des simulations de course intégrées.
+                 <h1 className="font-headline text-5xl tracking-wide flex items-center gap-4">
+                    {isEditMode ? <FilePenLine className="w-12 h-12 text-primary" /> : <DraftingCompass className="w-12 h-12 text-primary" />}
+                    {isEditMode ? 'Éditeur de TP' : 'Concepteur de modules TP'}
+                </h1>
+                <p className="text-muted-foreground mt-2">
+                    {isEditMode ? 'Modifiez les détails de ce travail pratique.' : 'Créez et partagez des modules TP personnalisés avec des simulations de course intégrées.'}
                 </p>
             </div>
             
@@ -115,7 +148,7 @@ export default function TPDesignerPage() {
                            <FormField control={form.control} name="id" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>ID du TP</FormLabel>
-                                    <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
+                                    <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} readOnly={isEditMode} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                            )} />
@@ -138,7 +171,7 @@ export default function TPDesignerPage() {
                            <FormField control={form.control} name="niveau" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Niveau</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl><SelectTrigger><SelectValue placeholder="Sélectionnez un niveau" /></SelectTrigger></FormControl>
                                         <SelectContent>
                                             <SelectItem value="seconde">Seconde</SelectItem>
@@ -257,7 +290,7 @@ export default function TPDesignerPage() {
                                                          }}><Trash2 className="text-destructive"/></Button>
                                                     </div>
                                                 ))}
-                                                <Button type="button" variant="ghost" size="sm" onClick={() => optionsField.onChange([...optionsField.value!, ''])}>Ajouter une option</Button>
+                                                <Button type="button" variant="ghost" size="sm" onClick={() => optionsField.onChange([...(optionsField.value || []), ''])}>Ajouter une option</Button>
                                             </>
                                         )} />
                                      </div>
@@ -377,7 +410,7 @@ export default function TPDesignerPage() {
                 <div className="flex justify-end">
                     <Button type="submit" size="lg">
                         <Save className="mr-2"/>
-                        Créer le Travail Pratique
+                        {isEditMode ? "Mettre à jour le TP" : "Créer le Travail Pratique"}
                     </Button>
                 </div>
             </form>

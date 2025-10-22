@@ -17,6 +17,9 @@ export type EtudePrelim = EtudePrelimSeconde | EtudePrelimPremiere | EtudePrelim
 
 export type TP = Omit<TPSeconde, 'etudePrelim'> & {
     etudePrelim: EtudePrelim[];
+    author?: string;
+    creationDate?: string;
+    niveau?: Niveau;
 };
 
 export type Niveau = 'seconde' | 'premiere' | 'terminale';
@@ -58,6 +61,13 @@ export const getTpsByNiveau = (niveau: Niveau, allTpsFromContext?: Record<number
   return sourceTps.filter(tp => {
     if(!tp) return false;
     const tpId = tp.id;
+    const tpNiveau = tp.niveau;
+
+    if (tpNiveau) {
+        return tpNiveau === niveau;
+    }
+    
+    // Fallback for older TPs without a 'niveau' property
     switch(niveau) {
         case 'seconde': return tpId >= 101 && tpId < 200;
         case 'premiere': return (tpId >= 1 && tpId < 101) || (tpId >= 200 && tpId < 301);
