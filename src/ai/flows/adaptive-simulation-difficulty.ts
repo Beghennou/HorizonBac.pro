@@ -77,17 +77,7 @@ const adaptSimulationDifficultyFlow = ai.defineFlow(
     outputSchema: AdaptSimulationDifficultyOutputSchema,
   },
   async input => {
-    try {
-      const {output} = await prompt(input);
-      return output!;
-    } catch (e: any) {
-       if (e.message?.includes('403 Forbidden')) {
-        return {
-          newDifficultyLevel: "Erreur",
-          suggestedAdjustments: "L'API Generative Language n'est pas activée sur votre projet. Veuillez l'activer dans la console Google Cloud pour utiliser cette fonctionnalité.",
-        };
-      }
-      throw e;
-    }
+    const {output} = await prompt(input);
+    return output!;
   }
 );
