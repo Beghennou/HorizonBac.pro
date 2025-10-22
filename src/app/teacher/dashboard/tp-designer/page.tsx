@@ -1,81 +1,387 @@
+
+'use client';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { DraftingCompass, PlusCircle, Save } from "lucide-react";
+import { DraftingCompass, PlusCircle, Save, Trash2, X } from "lucide-react";
+import { useFieldArray, useForm, Controller } from "react-hook-form";
+import { allBlocs, competencesParNiveau, Niveau } from "@/lib/data-manager";
+import { useAssignments } from "@/contexts/AssignmentsContext";
+import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+
+const etapeSchema = z.object({
+    titre: z.string().min(1, "Le titre est requis."),
+    duree: z.string().min(1, "La durée est requise."),
+    etapes: z.array(z.string().min(1, "La description de la sous-étape est requise.")).min(1, "Au moins une sous-étape est requise."),
+});
+
+const etudePrelimSchema = z.object({
+    type: z.enum(['text', 'qcm']),
+    q: z.string().min(1, "La question est requise."),
+    r: z.string().min(1, "La réponse est requise."),
+    options: z.array(z.string()).optional(),
+});
+
+const tpFormSchema = z.object({
+    id: z.number().int().positive("L'ID doit être un nombre positif."),
+    titre: z.string().min(5, "Le titre doit faire au moins 5 caractères."),
+    duree: z.string().min(3, "La durée est requise."),
+    niveau: z.enum(['seconde', 'premiere', 'terminale']),
+    situation: z.string().min(10, "La situation doit faire au moins 10 caractères."),
+    objectif: z.string().min(10, "L'objectif doit faire au moins 10 caractères."),
+    competences: z.array(z.string()).min(1, "Au moins une compétence doit être sélectionnée."),
+    materiel: z.array(z.string().min(1, "Le nom du matériel est requis.")).min(1, "Au moins un matériel est requis."),
+    etudePrelim: z.array(etudePrelimSchema),
+    activitePratique: z.array(etapeSchema).min(1, "Au moins une étape pratique est requise."),
+    pointsCles: z.array(z.string().min(1, "Le point clé est requis.")).min(1, "Au moins un point clé est requis."),
+    securiteRangement: z.array(z.string().min(1, "La consigne de sécurité est requise.")).min(1, "Au moins une consigne de sécurité est requise."),
+});
+
+type TpFormValues = z.infer<typeof tpFormSchema>;
 
 export default function TPDesignerPage() {
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-headline text-5xl tracking-wide">Concepteur de modules TP</h1>
-        <p className="text-muted-foreground">
-          Créez et partagez des modules TP personnalisés avec des simulations de course intégrées.
-        </p>
-      </div>
+    const { toast } = useToast();
+    // In a real app, this would be a real function to save to a database.
+    const { addTp } = useAssignments(); 
+    
+    const form = useForm<TpFormValues>({
+        resolver: zodResolver(tpFormSchema),
+        defaultValues: {
+            id: Math.floor(1000 + Math.random() * 9000), // Random temporary ID
+            titre: "",
+            duree: "2h00",
+            niveau: "seconde",
+            situation: "",
+            objectif: "",
+            competences: [],
+            materiel: [""],
+            etudePrelim: [],
+            activitePratique: [{ titre: "", duree: "30 min", etapes: [""] }],
+            pointsCles: [""],
+            securiteRangement: [""],
+        },
+    });
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DraftingCompass />
-            Nouveau Module TP
-          </CardTitle>
-          <CardDescription>
-            Remplissez les détails ci-dessous pour créer un nouveau module pratique pour vos élèves.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div className="space-y-2">
-                    <Label htmlFor="title">Titre du module</Label>
-                    <Input id="title" placeholder="ex: Aérodynamique avancée" />
+    const { fields: materielFields, append: appendMateriel, remove: removeMateriel } = useFieldArray({ control: form.control, name: "materiel" });
+    const { fields: etudePrelimFields, append: appendEtudePrelim, remove: removeEtudePrelim } = useFieldArray({ control: form.control, name: "etudePrelim" });
+    const { fields: activitePratiqueFields, append: appendActivitePratique, remove: removeActivitePratique } = useFieldArray({ control: form.control, name: "activitePratique" });
+    const { fields: pointsClesFields, append: appendPointsCles, remove: removePointsCles } = useFieldArray({ control: form.control, name: "pointsCles" });
+    const { fields: securiteRangementFields, append: appendSecuriteRangement, remove: removeSecuriteRangement } = useFieldArray({ control: form.control, name: "securiteRangement" });
+
+    const selectedNiveau = form.watch('niveau');
+
+    const onSubmit = (data: TpFormValues) => {
+        const fullObjectif = `${data.objectif} (Compétences ${data.competences.join(', ')})`;
+        const finalData = {...data, objectif: fullObjectif};
+        
+        // This is a placeholder for a real save function
+        addTp(finalData);
+
+        toast({
+            title: "TP Créé avec succès !",
+            description: `Le TP "${data.titre}" a été ajouté à la liste.`,
+        });
+        form.reset();
+    };
+
+    return (
+        <div className="space-y-8">
+            <div>
+                <h1 className="font-headline text-5xl tracking-wide">Concepteur de modules TP</h1>
+                <p className="text-muted-foreground">
+                    Créez et partagez des modules TP personnalisés avec des simulations de course intégrées.
+                </p>
+            </div>
+            
+            <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <DraftingCompass />
+                            Informations Générales
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                           <FormField control={form.control} name="id" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>ID du TP</FormLabel>
+                                    <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                           )} />
+                           <FormField control={form.control} name="titre" render={({ field }) => (
+                                <FormItem className="md:col-span-2">
+                                    <FormLabel>Titre du TP</FormLabel>
+                                    <FormControl><Input placeholder="ex: Contrôle du circuit de charge" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                           )} />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <FormField control={form.control} name="duree" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Durée estimée</FormLabel>
+                                    <FormControl><Input placeholder="ex: 2h30" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                           )} />
+                           <FormField control={form.control} name="niveau" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Niveau</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Sélectionnez un niveau" /></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="seconde">Seconde</SelectItem>
+                                            <SelectItem value="premiere">Première</SelectItem>
+                                            <SelectItem value="terminale">Terminale</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                           )} />
+                        </div>
+                        <FormField control={form.control} name="situation" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Situation Professionnelle</FormLabel>
+                                <FormControl><Textarea placeholder="Décrivez le scénario de départ..." {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="objectif" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Objectif Pédagogique</FormLabel>
+                                <FormControl><Textarea placeholder="Décrivez ce que l'élève doit être capable de faire à la fin..." {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                         <FormField control={form.control} name="competences" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Compétences Associées</FormLabel>
+                                {Object.entries(competencesParNiveau[selectedNiveau] || {}).map(([blocKey, bloc]) => (
+                                    <div key={blocKey}>
+                                        <h4 className="font-semibold mt-2">{bloc.title}</h4>
+                                        {Object.entries(bloc.items).map(([competenceId, description]) => (
+                                            <FormField key={competenceId} control={form.control} name="competences" render={({ field }) => (
+                                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-2">
+                                                    <FormControl>
+                                                        <Checkbox
+                                                            checked={field.value?.includes(competenceId)}
+                                                            onCheckedChange={(checked) => {
+                                                                return checked
+                                                                    ? field.onChange([...field.value, competenceId])
+                                                                    : field.onChange(field.value?.filter((value) => value !== competenceId))
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal">{competenceId}: {description}</FormLabel>
+                                                </FormItem>
+                                            )} />
+                                        ))}
+                                    </div>
+                                ))}
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                            <span>Matériel Requis</span>
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendMateriel("")}><PlusCircle className="mr-2"/>Ajouter</Button>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                        {materielFields.map((field, index) => (
+                             <FormField key={field.id} control={form.control} name={`materiel.${index}`} render={({ field }) => (
+                                <FormItem>
+                                    <div className="flex items-center gap-2">
+                                        <FormControl><Input {...field} /></FormControl>
+                                        <Button type="button" variant="destructive" size="icon" onClick={() => removeMateriel(index)}><Trash2 /></Button>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                             )} />
+                        ))}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                            <span>Étude Préliminaire</span>
+                            <div className="flex gap-2">
+                                <Button type="button" variant="outline" size="sm" onClick={() => appendEtudePrelim({ type: 'text', q: '', r: ''})}><PlusCircle className="mr-2"/>Question Texte</Button>
+                                <Button type="button" variant="outline" size="sm" onClick={() => appendEtudePrelim({ type: 'qcm', q: '', r: '', options: [''] })}><PlusCircle className="mr-2"/>Question QCM</Button>
+                            </div>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {etudePrelimFields.map((field, index) => (
+                            <div key={field.id} className="p-4 border rounded-lg bg-card/50 relative">
+                                <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive" onClick={() => removeEtudePrelim(index)}><X/></Button>
+                                <FormField control={form.control} name={`etudePrelim.${index}.q`} render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Question {index + 1}</FormLabel>
+                                        <FormControl><Textarea {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                {field.type === 'qcm' && (
+                                     <div className="mt-2 space-y-2">
+                                        <Label>Options de réponse</Label>
+                                        <Controller control={form.control} name={`etudePrelim.${index}.options`} render={({ field: optionsField }) => (
+                                            <>
+                                                {optionsField.value?.map((opt, optIndex) => (
+                                                    <div key={optIndex} className="flex items-center gap-2">
+                                                        <Input defaultValue={opt} onChange={e => {
+                                                            const newOptions = [...optionsField.value!];
+                                                            newOptions[optIndex] = e.target.value;
+                                                            optionsField.onChange(newOptions);
+                                                        }} />
+                                                         <Button type="button" size="icon" variant="ghost" onClick={() => {
+                                                             const newOptions = [...optionsField.value!];
+                                                             newOptions.splice(optIndex, 1);
+                                                             optionsField.onChange(newOptions);
+                                                         }}><Trash2 className="text-destructive"/></Button>
+                                                    </div>
+                                                ))}
+                                                <Button type="button" variant="ghost" size="sm" onClick={() => optionsField.onChange([...optionsField.value!, ''])}>Ajouter une option</Button>
+                                            </>
+                                        )} />
+                                     </div>
+                                )}
+                                <FormField control={form.control} name={`etudePrelim.${index}.r`} render={({ field }) => (
+                                    <FormItem className="mt-2">
+                                        <FormLabel>Réponse Correcte</FormLabel>
+                                        <FormControl><Input {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                            <span>Activité Pratique</span>
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendActivitePratique({ titre: "", duree: "30 min", etapes: [""] })}><PlusCircle className="mr-2"/>Ajouter une étape</Button>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {activitePratiqueFields.map((field, index) => (
+                            <div key={field.id} className="p-4 border rounded-lg bg-card/50 relative">
+                                <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive" onClick={() => removeActivitePratique(index)}><X/></Button>
+                                <h4 className="font-bold mb-2">Étape {index + 1}</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                     <FormField control={form.control} name={`activitePratique.${index}.titre`} render={({ field }) => (
+                                        <FormItem className="md:col-span-2">
+                                            <FormLabel>Titre de l'étape</FormLabel>
+                                            <FormControl><Input {...field} /></FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
+                                     <FormField control={form.control} name={`activitePratique.${index}.duree`} render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Durée</FormLabel>
+                                            <FormControl><Input {...field} /></FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
+                                </div>
+                                <div className="mt-2 space-y-2">
+                                    <Label>Sous-étapes</Label>
+                                    <Controller control={form.control} name={`activitePratique.${index}.etapes`} render={({ field: subStepsField }) => (
+                                        <>
+                                            {subStepsField.value.map((subStep, subIndex) => (
+                                                 <div key={subIndex} className="flex items-center gap-2">
+                                                    <Input defaultValue={subStep} onChange={e => {
+                                                        const newSubSteps = [...subStepsField.value];
+                                                        newSubSteps[subIndex] = e.target.value;
+                                                        subStepsField.onChange(newSubSteps);
+                                                    }} />
+                                                     <Button type="button" size="icon" variant="ghost" onClick={() => {
+                                                        const newSubSteps = [...subStepsField.value];
+                                                        newSubSteps.splice(subIndex, 1);
+                                                        subStepsField.onChange(newSubSteps);
+                                                     }}><Trash2 className="text-destructive"/></Button>
+                                                </div>
+                                            ))}
+                                            <Button type="button" variant="ghost" size="sm" onClick={() => subStepsField.onChange([...subStepsField.value, ''])}>Ajouter une sous-étape</Button>
+                                        </>
+                                    )} />
+                                </div>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center justify-between">
+                                <span>Points Clés</span>
+                                <Button type="button" variant="outline" size="sm" onClick={() => appendPointsCles("")}><PlusCircle className="mr-2"/>Ajouter</Button>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            {pointsClesFields.map((field, index) => (
+                                <FormField key={field.id} control={form.control} name={`pointsCles.${index}`} render={({ field }) => (
+                                    <FormItem>
+                                        <div className="flex items-center gap-2">
+                                            <FormControl><Input {...field} /></FormControl>
+                                            <Button type="button" variant="destructive" size="icon" onClick={() => removePointsCles(index)}><Trash2 /></Button>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            ))}
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center justify-between">
+                                <span>Sécurité & Rangement</span>
+                                <Button type="button" variant="outline" size="sm" onClick={() => appendSecuriteRangement("")}><PlusCircle className="mr-2"/>Ajouter</Button>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            {securiteRangementFields.map((field, index) => (
+                                <FormField key={field.id} control={form.control} name={`securiteRangement.${index}`} render={({ field }) => (
+                                    <FormItem>
+                                        <div className="flex items-center gap-2">
+                                            <FormControl><Input {...field} /></FormControl>
+                                            <Button type="button" variant="destructive" size="icon" onClick={() => removeSecuriteRangement(index)}><Trash2 /></Button>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            ))}
+                        </CardContent>
+                    </Card>
+                 </div>
+
+                <div className="flex justify-end">
+                    <Button type="submit" size="lg">
+                        <Save className="mr-2"/>
+                        Créer le Travail Pratique
+                    </Button>
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="category">Catégorie</Label>
-                    <Select>
-                        <SelectTrigger id="category">
-                            <SelectValue placeholder="Sélectionnez une catégorie" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="aerodynamics">Aérodynamique</SelectItem>
-                            <SelectItem value="powertrain">Groupe motopropulseur</SelectItem>
-                            <SelectItem value="chassis">Châssis</SelectItem>
-                            <SelectItem value="strategy">Stratégie de course</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea id="description" placeholder="Décrivez les objectifs d'apprentissage de ce module." />
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="simulation">Simulation intégrée</Label>
-                 <Select>
-                    <SelectTrigger id="simulation">
-                        <SelectValue placeholder="Lier une simulation (optionnel)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="sim-1">Circuit de Monza</SelectItem>
-                        <SelectItem value="sim-2">Spa-Francorchamps</SelectItem>
-                         <SelectItem value="none">Aucune</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="flex justify-end gap-4">
-                <Button variant="outline">
-                    <Save className="mr-2 h-4 w-4" />
-                    Sauvegarder en brouillon
-                </Button>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Créer le module
-                </Button>
-            </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+            </form>
+            </Form>
+        </div>
+    );
 }

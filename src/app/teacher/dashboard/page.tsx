@@ -1,7 +1,8 @@
+
 'use client';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getTpById, TP, EtudePrelimQCM } from "@/lib/data-manager";
+import { TP, EtudePrelimQCM } from "@/lib/data-manager";
 import { useSearchParams } from "next/navigation";
 import { Mail, User, Users, Printer, Bot } from "lucide-react";
 import { useAssignments } from "@/contexts/AssignmentsContext";
@@ -191,8 +192,9 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
 
 export default function DashboardPage() {
   const searchParams = useSearchParams();
+  const { tps } = useAssignments();
   const tpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
-  const tp = tpId ? getTpById(tpId) : null;
+  const tp = tpId ? tps[tpId] : null;
 
   if (tp) {
     return <TpDetailView tp={tp} />;

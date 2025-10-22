@@ -1,5 +1,6 @@
 
 
+
 import { tpSeconde, TP as TPSeconde } from './tp-seconde';
 import { tpPremiere, TP as TPPremiere } from './tp-premiere';
 import { tpTerminale, TP as TPTerminale } from './tp-terminale';
@@ -51,12 +52,27 @@ const tpsByNiveau: Record<Niveau, TP[]> = {
   terminale: Object.values(tpTerminale) as TP[],
 };
 
-export const getTpsByNiveau = (niveau: Niveau): TP[] => {
-  return tpsByNiveau[niveau] || [];
+export const getTpsByNiveau = (niveau: Niveau, allTpsFromContext?: Record<number, TP>): TP[] => {
+  const sourceTps = allTpsFromContext ? Object.values(allTpsFromContext) : Object.values(allTPs);
+
+  return sourceTps.filter(tp => {
+    if(!tp) return false;
+    const tpId = tp.id;
+    switch(niveau) {
+        case 'seconde': return tpId >= 101 && tpId < 200;
+        case 'premiere': return (tpId >= 1 && tpId < 101) || (tpId >= 200 && tpId < 301);
+        case 'terminale': return tpId >= 301 && tpId < 1000;
+        default: return false;
+    }
+  });
 };
 
-export const getTpById = (id: number): TP | undefined => {
-  return allTPs[id];
+export const getTpById = (id: number, all?: boolean, allTpsFromContext?: Record<number, TP>): TP | Record<number, TP> | undefined => {
+    const sourceTps = allTpsFromContext || allTPs;
+    if (all) {
+        return sourceTps;
+    }
+    return sourceTps[id];
 };
 
 export const classes = {
@@ -102,8 +118,3 @@ export const allBlocs: Record<string, CompetenceBloc> = {
     ...competencesParNiveau.premiere,
     ...competencesParNiveau.terminale,
 };
-
-
-
-
-

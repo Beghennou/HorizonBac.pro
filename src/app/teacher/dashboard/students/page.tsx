@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -39,7 +40,7 @@ const statusLabels: Record<TpStatus, string> = {
 export default function StudentsPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { students, assignTp, classes, assignedTps, evaluations } = useAssignments();
+    const { students, assignTp, classes, assignedTps, evaluations, tps: allTpsFromContext } = useAssignments();
     const { toast } = useToast();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
@@ -50,7 +51,7 @@ export default function StudentsPage() {
     
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
-    const tps = getTpsByNiveau(level);
+    const tps = getTpsByNiveau(level, allTpsFromContext);
     const tpsIdsForCurrentLevel = new Set(tps.map(tp => tp.id));
 
     const handleAssignTpToSelected = (tpId: number, tpTitle: string) => {
@@ -185,7 +186,7 @@ export default function StudentsPage() {
                                                   <p className="font-bold">{studentAssignedTps.length} TP assigné(s) pour ce niveau.</p>
                                                    <ul className="text-sm text-muted-foreground">
                                                       {studentAssignedTps.map(assignedTp => {
-                                                          const tp = tps.find(t => t.id === assignedTp.id);
+                                                          const tp = allTpsFromContext[assignedTp.id];
                                                           if (!tp) return null;
                                                           return <li key={tp.id}>TP {tp.id}: {statusLabels[assignedTp.status]}</li>
                                                       })}

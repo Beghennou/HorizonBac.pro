@@ -1,11 +1,12 @@
 
 
+
 'use client';
 import { Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { getTpById, TP } from '@/lib/data-manager';
+import { TP } from '@/lib/data-manager';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ import { cn } from '@/lib/utils';
 function StudentDashboard() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { assignedTps, storedEvals } = useAssignments();
+  const { assignedTps, storedEvals, tps: allTps } = useAssignments();
 
   if (!studentName) {
     return (
@@ -36,12 +37,13 @@ function StudentDashboard() {
   const studentStoredEvals = storedEvals[studentName] || {};
 
   const tpModules = studentTps.map(assignedTp => {
-    const tp = getTpById(assignedTp.id);
+    const tp = allTps[assignedTp.id];
     const isEvaluated = studentStoredEvals[tp?.id.toString()]?.isFinal;
     return tp ? { ...tp, status: assignedTp.status, isEvaluated } : null;
   }).filter((tp): tp is TP & { status: string; isEvaluated: boolean } => tp !== null);
 
   const getTpCategory = (tpId: number): string => {
+    if (tpId >= 1000) return "TP Personnalisé";
     if (tpId >= 301) return 'Terminale / Diagnostic Avancé';
     if (tpId >= 1) return 'Première / Maintenance Corrective';
     if (tpId >= 101) return 'Seconde / Entretien Périodique';

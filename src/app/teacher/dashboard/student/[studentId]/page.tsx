@@ -1,11 +1,12 @@
 
 
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useAssignments } from '@/contexts/AssignmentsContext';
-import { getTpById, allBlocs, TP, EtudePrelimQCM, EtudePrelimText } from '@/lib/data-manager';
+import { TP, EtudePrelimQCM, EtudePrelimText } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -225,7 +226,7 @@ export default function StudentDetailPage() {
     const searchParams = useSearchParams();
     const params = useParams();
     const { toast } = useToast();
-    const { students, classes, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback, storedEvals } = useAssignments();
+    const { students, classes, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback, storedEvals, tps } = useAssignments();
 
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     const className = searchParams.get('class');
@@ -236,7 +237,7 @@ export default function StudentDetailPage() {
     const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
     const studentAssignedTps = (studentName ? assignedTps[studentName] || [] : []).map(assignedTp => {
-        const tp = getTpById(assignedTp.id);
+        const tp = tps[assignedTp.id];
         return tp ? { ...tp, status: assignedTp.status } : null;
     }).filter((tp): tp is (TP & { status: string }) => tp !== null);
 
@@ -307,18 +308,18 @@ export default function StudentDetailPage() {
         });
     };
     
-    const selectedTp = selectedTpId ? getTpById(selectedTpId) : null;
+    const selectedTp = selectedTpId ? tps[selectedTpId] : null;
     
     let currentBlocs: Record<string, any> = {};
     if (selectedTp) {
-        if (selectedTp.id >= 301) { // Terminale
-            currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_3')));
-        } else if (selectedTp.id >= 1) { // Premiere
-            currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_2')));
-        }
-        if (selectedTp.id >= 101 && selectedTp.id < 301) { // Seconde
-             currentBlocs = Object.fromEntries(Object.entries(allBlocs).filter(([key]) => key.startsWith('BLOC_1')));
-        }
+        const niveau = selectedTp.id >= 1000 ? (selectedTp as any).niveau :
+                       selectedTp.id >= 301 ? 'terminale' :
+                       selectedTp.id >= 1 ? 'premiere' : 'seconde';
+        currentBlocs = {
+            seconde: { ...allBlocs.BLOC_1 },
+            premiere: { ...allBlocs.BLOC_2 },
+            terminale: { ...allBlocs.BLOC_3 },
+        }[niveau] || {};
     }
     
     const evaluatedCompetenceIds = selectedTp?.objectif.match(/C\d\.\d/g) || [];

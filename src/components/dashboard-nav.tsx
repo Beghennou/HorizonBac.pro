@@ -1,8 +1,9 @@
+
 'use client';
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Book, Cog, Users, FileText, BarChart3 } from 'lucide-react';
+import { Book, Cog, Users, FileText, BarChart3, DraftingCompass } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 
@@ -16,12 +17,13 @@ export function DashboardNav() {
     { href: `/teacher/dashboard/student/${studentName}`, label: 'Dossier Élève', icon: FileText, base: '/teacher/dashboard/student', requiredParam: 'student'},
     { href: '/teacher/dashboard/analytics', label: 'Analyses', icon: BarChart3, base: '/teacher/dashboard/analytics' },
     { href: '/teacher/dashboard', label: 'Fiches TP', icon: Book, base: '/teacher/dashboard', exact: true },
+    { href: '/teacher/dashboard/tp-designer', label: 'Concepteur TP', icon: DraftingCompass, base: '/teacher/dashboard/tp-designer' },
     { href: `/teacher/dashboard/settings`, label: 'Paramètres', icon: Cog, base: '/teacher/dashboard/settings' },
   ];
 
   const createUrl = (base: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (['/teacher/dashboard', '/teacher/dashboard/settings', '/teacher/dashboard/students', '/teacher/dashboard/analytics'].includes(base)) {
+    if (['/teacher/dashboard', '/teacher/dashboard/settings', '/teacher/dashboard/students', '/teacher/dashboard/analytics', '/teacher/dashboard/tp-designer'].includes(base)) {
       params.delete('student');
     }
     return `${base}?${params.toString()}`;

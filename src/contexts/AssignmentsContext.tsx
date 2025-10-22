@@ -3,7 +3,7 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { students as initialStudents } from '@/lib/mock-data';
-import { classes as initialClasses, getTpById, allBlocs } from '@/lib/data-manager';
+import { classes as initialClasses, getTpById, allBlocs, TP } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -47,6 +47,7 @@ type AssignmentsContextType = {
   prelimAnswers: Record<string, Record<number, Record<number, PrelimAnswer>>>;
   feedbacks: Record<string, Record<number, Feedback>>;
   storedEvals: Record<string, Record<number, StoredEvaluation>>;
+  tps: Record<number, TP>;
   assignTp: (studentNames: string[], tpId: number) => void;
   saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => void;
   updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => void;
@@ -58,6 +59,7 @@ type AssignmentsContextType = {
   deleteStudent: (studentName: string) => void;
   deleteClass: (className: string) => void;
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
+  addTp: (tp: TP) => void;
   isLoaded: boolean;
 };
 
@@ -72,6 +74,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
   const [storedEvals, setStoredEvals] = useState<Record<string, Record<number, StoredEvaluation>>>({});
   const [teacherName, setTeacherName] = useState<string>('');
+  const [tps, setTps] = useState<Record<number, TP>>({});
   const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
 
@@ -99,6 +102,15 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         
         const savedStoredEvals = localStorage.getItem('storedEvals');
         setStoredEvals(savedStoredEvals ? JSON.parse(savedStoredEvals) : {});
+
+        const savedTps = localStorage.getItem('customTps');
+        const customTps = savedTps ? JSON.parse(savedTps) : {};
+
+        const allTps = { 
+          ...getTpById(-1, true), // get all default TPs
+          ...customTps 
+        };
+        setTps(allTps);
 
         const updatedStudents = studentsData.map((student: Student) => {
           const studentEvaluations = evaluationsData[student.name] || {};
@@ -130,6 +142,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         setPrelimAnswers({});
         setFeedbacks({});
         setStoredEvals({});
+        setTps(getTpById(-1, true) as Record<number, TP>);
         setTeacherName('M. Dubois');
       }
       setIsLoaded(true);
@@ -147,8 +160,17 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
       localStorage.setItem('storedEvals', JSON.stringify(storedEvals));
       localStorage.setItem('teacherName', JSON.stringify(teacherName));
+      
+      const customTps = Object.fromEntries(
+        Object.entries(tps).filter(([id]) => parseInt(id, 10) >= 1000)
+      );
+      localStorage.setItem('customTps', JSON.stringify(customTps));
     }
-  }, [students, classes, assignedTps, evaluations, prelimAnswers, feedbacks, storedEvals, teacherName, isLoaded]);
+  }, [students, classes, assignedTps, evaluations, prelimAnswers, feedbacks, storedEvals, teacherName, tps, isLoaded]);
+
+  const addTp = (tp: TP) => {
+    setTps(prev => ({...prev, [tp.id]: tp }));
+  };
 
   const assignTp = (studentNames: string[], tpId: number) => {
     setAssignedTps(prev => {
@@ -421,7 +443,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, prelimAnswers, feedbacks, storedEvals, assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer, saveFeedback, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv, isLoaded }}>
+    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, prelimAnswers, feedbacks, storedEvals, tps, assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer, saveFeedback, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv, addTp, isLoaded }}>
       {children}
     </AssignmentsContext.Provider>
   );

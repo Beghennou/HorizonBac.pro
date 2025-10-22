@@ -1,10 +1,11 @@
 
 
+
 'use client';
 import { useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { getTpById, TP, Etape, EtudePrelimQCM, EtudePrelimText } from '@/lib/data-manager';
+import { TP, Etape, EtudePrelimQCM, EtudePrelimText } from '@/lib/data-manager';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -49,10 +50,10 @@ export default function TPPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { assignedTps, updateTpStatus, prelimAnswers, savePrelimAnswer, feedbacks, saveFeedback } = useAssignments();
+  const { assignedTps, updateTpStatus, prelimAnswers, savePrelimAnswer, feedbacks, saveFeedback, tps } = useAssignments();
 
   const tpId = typeof params.tpId === 'string' ? parseInt(params.tpId, 10) : null;
-  const tp = tpId ? getTpById(tpId) : null;
+  const tp = tpId ? tps[tpId] : null;
 
   const assignedTp = studentName && tpId ? assignedTps[studentName]?.find(t => t.id === tpId) : null;
   const studentFeedback = (studentName && tpId && feedbacks[studentName]?.[tpId]?.student) || '';

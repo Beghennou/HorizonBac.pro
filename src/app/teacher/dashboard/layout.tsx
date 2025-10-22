@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -29,7 +30,7 @@ function DashboardLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { classes: dynamicClasses } = useAssignments();
+  const { classes: dynamicClasses, tps: allTps } = useAssignments();
 
   const [isLoading, setIsLoading] = useState(true);
   const [niveau, setNiveau] = useState<Niveau>((searchParams.get('level') as Niveau) ||'seconde');
@@ -54,7 +55,7 @@ function DashboardLayoutContent({
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
   const selectedStudent = searchParams.get('student');
   
-  const tps = getTpsByNiveau(niveau);
+  const tps = getTpsByNiveau(niveau, allTps);
 
   const handleNiveauChange = (newNiveau: Niveau) => {
     setNiveau(newNiveau);

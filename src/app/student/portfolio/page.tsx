@@ -1,10 +1,11 @@
 
 
+
 'use client';
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAssignments } from '@/contexts/AssignmentsContext';
-import { allBlocs, getTpById } from '@/lib/data-manager';
+import { allBlocs } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -22,7 +23,7 @@ type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 function StudentPortfolio() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { evaluations, assignedTps, storedEvals, feedbacks } = useAssignments();
+  const { evaluations, assignedTps, storedEvals, feedbacks, tps } = useAssignments();
 
   if (!studentName) {
     return (
@@ -148,7 +149,7 @@ function StudentPortfolio() {
                           </TableHeader>
                           <TableBody>
                             {Object.entries(studentStoredEvals).map(([tpId, evalData]) => {
-                                const tp = getTpById(parseInt(tpId));
+                                const tp = tps[parseInt(tpId, 10)];
                                 const teacherFeedback = feedbacks[studentName]?.[parseInt(tpId)]?.teacher;
                                 if (!tp || !evalData.isFinal) return null;
 
@@ -232,7 +233,7 @@ function StudentPortfolio() {
                   {studentCompletedTps.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {studentCompletedTps.map(assignedTp => {
-                              const tp = getTpById(assignedTp.id);
+                              const tp = tps[assignedTp.id];
                               if (!tp) return null;
                               return (
                                   <Card key={tp.id} className="bg-background/50 break-inside-avoid">
