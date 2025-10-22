@@ -108,6 +108,7 @@ function StudentPortfolio() {
                             <TableRow>
                               <TableHead className="w-[30%]">TP Évalué</TableHead>
                               <TableHead className="text-center">Note Étude Préliminaire</TableHead>
+                              <TableHead className="text-center">Note TP</TableHead>
                               <TableHead className="text-center">Date Évaluation</TableHead>
                               <TableHead>Appréciation de l'enseignant</TableHead>
                             </TableRow>
@@ -121,7 +122,8 @@ function StudentPortfolio() {
                                 return (
                                   <TableRow key={tpId} className="break-inside-avoid">
                                     <TableCell className="font-medium">{tp.titre}</TableCell>
-                                    <TableCell className="text-center font-bold text-accent">{evalData.note ? `${evalData.note} / 10` : 'N/A'}</TableCell>
+                                    <TableCell className="text-center font-bold text-accent">{evalData.prelimNote ? `${evalData.prelimNote} / 10` : 'N/A'}</TableCell>
+                                    <TableCell className="text-center font-bold text-accent">{evalData.tpNote ? `${evalData.tpNote} / 20` : 'N/A'}</TableCell>
                                     <TableCell className="text-center">{evalData.date}</TableCell>
                                     <TableCell className="text-muted-foreground italic">{teacherFeedback || "Aucune appréciation."}</TableCell>
                                   </TableRow>

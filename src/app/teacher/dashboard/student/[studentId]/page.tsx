@@ -8,7 +8,7 @@ import { getTpById, allBlocs, TP, EtudePrelimQCM, EtudePrelimText } from '@/lib/
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, CheckSquare, Save, Mail, Bot, Loader2, MessageSquare, Check, X } from 'lucide-react';
+import { User, CheckSquare, Save, Mail, Bot, Loader2, MessageSquare, Check, X, BookOpen, UserCircle, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -139,25 +139,25 @@ const AiAnalysisHub = ({ studentName, evaluations }: { studentName: string, eval
     );
 };
 
-const PrelimCorrection = ({ tp, studentAnswers, studentFeedback, teacherFeedback, onFeedbackChange, onSave }: { 
+const EvaluationCard = ({ tp, studentAnswers, studentFeedback, teacherFeedback, onFeedbackChange, onSave }: { 
     tp: TP; 
     studentAnswers: Record<number, string | string[]>;
     studentFeedback: string;
     teacherFeedback: string;
     onFeedbackChange: (feedback: string) => void;
-    onSave: (note: string) => void;
+    onSave: (prelimNote?: string, tpNote?: string) => void;
 }) => {
     const [correction, setCorrection] = useState<{ score: number, total: number, details: boolean[] } | null>(null);
-    const [manualScore, setManualScore] = useState<string>("");
+    const [prelimNote, setPrelimNote] = useState<string>("");
+    const [tpNote, setTpNote] = useState<string>("");
 
     useEffect(() => {
-        if(correction) {
-            setManualScore((correction.score / correction.total * 10).toFixed(1));
+        if (correction) {
+            setPrelimNote((correction.score / correction.total * 10).toFixed(1));
         } else {
-            setManualScore("");
+            setPrelimNote("");
         }
     }, [correction]);
-
 
     const handleCorrection = () => {
         let score = 0;
@@ -190,65 +190,94 @@ const PrelimCorrection = ({ tp, studentAnswers, studentFeedback, teacherFeedback
         <Card>
             <CardHeader>
                 <div className="flex justify-between items-center">
-                    <CardTitle>Correction - Étude Préliminaire</CardTitle>
-                    <div className="flex items-center gap-4">
-                        {correction && (
-                             <div className="flex items-center gap-2">
-                                <Label htmlFor="note" className="text-xl font-bold font-headline">Note:</Label>
-                                <Input 
-                                    id="note"
-                                    type="text" 
-                                    value={manualScore} 
-                                    onChange={(e) => setManualScore(e.target.value)}
-                                    className="w-24 text-center text-xl font-bold font-headline text-accent bg-background"
-                                />
-                                <span className="text-xl font-bold font-headline">/ 10</span>
-                            </div>
-                        )}
-                        <Button onClick={handleCorrection}><CheckSquare className="mr-2"/>Auto-correction</Button>
-                    </div>
+                    <CardTitle className="flex items-center gap-2"><Award className="text-accent"/>Évaluation du TP</CardTitle>
                 </div>
             </CardHeader>
             <CardContent className="space-y-6">
-                {studentFeedback && (
-                    <div className="p-4 border-l-2 border-sky-400 bg-background/50 rounded-r-lg">
-                        <h4 className="font-bold flex items-center gap-2"><MessageSquare className="text-sky-400"/> Commentaire de l'élève :</h4>
-                        <p className="mt-2 italic">"{studentFeedback}"</p>
-                    </div>
-                )}
-                {tp.etudePrelim.map((item, i) => {
-                     const studentAnswer = studentAnswers[i] || "Aucune réponse";
-                     const isCorrect = correction?.details[i];
-                     const correctAnswer = item.r;
-                    return (
-                        <div key={i} className={`p-4 border-l-4 bg-background/50 rounded-r-lg ${getBorderColor(isCorrect)}`}>
-                            <p className="font-bold">Question {i+1}: {item.q}</p>
-                            <div className="mt-2 pl-4">
-                                <p className="text-sm text-muted-foreground">Réponse de l'élève :</p>
-                                <p className="font-semibold italic">"{Array.isArray(studentAnswer) ? studentAnswer.join(', ') : studentAnswer}"</p>
-                                {correction && !isCorrect && (
-                                     <div className="mt-2">
-                                        <p className="text-sm text-green-400">Réponse attendue :</p>
-                                        <p className="font-semibold text-green-300 italic">"{correctAnswer}"</p>
+                {tp.etudePrelim.length > 0 && (
+                    <div className="p-4 border rounded-lg">
+                        <div className="flex justify-between items-center mb-4">
+                            <h4 className="font-bold text-lg flex items-center gap-2"><BookOpen/>Correction - Étude Préliminaire</h4>
+                            <div className="flex items-center gap-4">
+                                {correction && (
+                                    <div className="flex items-center gap-2">
+                                        <Label htmlFor="prelim-note" className="text-lg font-bold">Note:</Label>
+                                        <Input 
+                                            id="prelim-note"
+                                            type="text" 
+                                            value={prelimNote} 
+                                            onChange={(e) => setPrelimNote(e.target.value)}
+                                            className="w-20 text-center text-lg font-bold text-accent bg-background"
+                                        />
+                                        <span className="text-lg font-bold">/ 10</span>
                                     </div>
                                 )}
+                                <Button onClick={handleCorrection} variant="outline" size="sm"><CheckSquare className="mr-2"/>Auto-correction</Button>
                             </div>
                         </div>
-                    )
-                })}
-                <div className="p-4 border-t border-primary/20">
-                     <Label htmlFor="teacher-feedback" className="font-bold flex items-center gap-2 mb-2"><MessageSquare className="text-accent"/>Feedback de l'enseignant :</Label>
-                    <Textarea 
-                        id="teacher-feedback"
-                        placeholder="Ajoutez votre commentaire pour l'élève ici..."
-                        value={teacherFeedback}
-                        onChange={(e) => onFeedbackChange(e.target.value)}
-                        rows={4}
-                    />
+                        <div className="space-y-4">
+                            {studentFeedback && (
+                                <div className="p-4 border-l-2 border-sky-400 bg-background/50 rounded-r-lg">
+                                    <h5 className="font-bold flex items-center gap-2"><MessageSquare className="text-sky-400"/> Commentaire de l'élève :</h5>
+                                    <p className="mt-2 italic">"{studentFeedback}"</p>
+                                </div>
+                            )}
+                            {tp.etudePrelim.map((item, i) => {
+                                const studentAnswer = studentAnswers[i] || "Aucune réponse";
+                                const isCorrect = correction?.details[i];
+                                const correctAnswer = item.r;
+                                return (
+                                    <div key={i} className={`p-3 border-l-4 bg-background/50 rounded-r-lg ${getBorderColor(isCorrect)}`}>
+                                        <p className="font-semibold">Question {i+1}: {item.q}</p>
+                                        <div className="mt-1 pl-4">
+                                            <p className="text-sm text-muted-foreground">Réponse de l'élève :</p>
+                                            <p className="italic">"{Array.isArray(studentAnswer) ? studentAnswer.join(', ') : studentAnswer}"</p>
+                                            {correction && !isCorrect && (
+                                                <div className="mt-1">
+                                                    <p className="text-sm text-green-400">Réponse attendue :</p>
+                                                    <p className="font-semibold text-green-300 italic">"{correctAnswer}"</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                )}
+                
+                <div className="p-4 border rounded-lg">
+                    <h4 className="font-bold text-lg flex items-center gap-2 mb-4"><UserCircle/>Notation du Travail Pratique</h4>
+                    <div className="grid grid-cols-2 gap-6">
+                        <div>
+                             <Label htmlFor="tp-note" className="font-bold text-lg flex items-center gap-2 mb-2">Note du TP</Label>
+                             <div className="flex items-center gap-2">
+                                <Input 
+                                    id="tp-note"
+                                    type="text" 
+                                    value={tpNote} 
+                                    onChange={(e) => setTpNote(e.target.value)}
+                                    className="w-24 text-center text-xl font-bold font-headline text-accent bg-background"
+                                    placeholder="??"
+                                />
+                                <span className="text-xl font-bold font-headline">/ 20</span>
+                             </div>
+                        </div>
+                        <div>
+                            <Label htmlFor="teacher-feedback" className="font-bold text-lg flex items-center gap-2 mb-2"><MessageSquare className="text-accent"/>Appréciation de l'enseignant</Label>
+                            <Textarea 
+                                id="teacher-feedback"
+                                placeholder="Ajoutez votre commentaire global pour l'élève ici..."
+                                value={teacherFeedback}
+                                onChange={(e) => onFeedbackChange(e.target.value)}
+                                rows={3}
+                            />
+                        </div>
+                    </div>
                 </div>
             </CardContent>
             <CardFooter>
-                 <Button onClick={() => onSave(manualScore)} className="ml-auto">
+                 <Button onClick={() => onSave(prelimNote, tpNote)} className="ml-auto">
                     <Save className="mr-2 h-4 w-4" />
                     Enregistrer l'évaluation
                 </Button>
@@ -257,14 +286,13 @@ const PrelimCorrection = ({ tp, studentAnswers, studentFeedback, teacherFeedback
     );
 };
 
-
 export default function StudentDetailPage() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const params = useParams();
     const { toast } = useToast();
-    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback } = useAssignments();
+    const { students, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback, storedEvals } = useAssignments();
 
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     
@@ -319,13 +347,13 @@ export default function StudentDetailPage() {
         router.push(`${pathname}?${newSearchParams.toString()}`);
     }
 
-    const handleSave = (note?: string) => {
+    const handleSave = (prelimNote?: string, tpNote?: string) => {
         if (!studentName || !selectedTpId) return;
 
         const tp = getTpById(selectedTpId);
         if (!tp) return;
 
-        saveEvaluation(studentName, selectedTpId, currentEvaluations, note);
+        saveEvaluation(studentName, selectedTpId, currentEvaluations, prelimNote, tpNote);
         toast({
             title: "Évaluation enregistrée",
             description: `Les compétences pour ${studentName} ont été mises à jour.`,
@@ -367,7 +395,6 @@ export default function StudentDetailPage() {
         }
     }
 
-    const hasPrelimAnswers = selectedTp && prelimAnswers[studentName]?.[selectedTp.id] && Object.keys(prelimAnswers[studentName][selectedTp.id]).length > 0;
     const isTpDone = studentAssignedTps.find(tp => tp.id === selectedTpId)?.status === 'terminé';
 
     return (
@@ -406,34 +433,15 @@ export default function StudentDetailPage() {
 
             {selectedTp && (
                 <>
-                    {isTpDone && hasPrelimAnswers && (
-                        <PrelimCorrection 
+                    {isTpDone && (
+                        <EvaluationCard 
                             tp={selectedTp} 
-                            studentAnswers={prelimAnswers[studentName][selectedTp.id]}
+                            studentAnswers={(prelimAnswers[studentName]?.[selectedTp.id]) || {}}
                             studentFeedback={studentFeedback}
                             teacherFeedback={teacherFeedback}
                             onFeedbackChange={handleTeacherFeedbackChange}
                             onSave={handleSave}
                         />
-                    )}
-
-                    {isTpDone && !hasPrelimAnswers && (
-                         <Card>
-                             <CardHeader>
-                                <CardTitle>Évaluation</CardTitle>
-                             </CardHeader>
-                             <CardContent>
-                                 <p className="text-muted-foreground mb-4">Ce TP ne contient pas d'étude préliminaire notée. Vous pouvez évaluer les compétences et laisser un feedback.</p>
-                                 <Label htmlFor="teacher-feedback" className="font-bold flex items-center gap-2 mb-2"><MessageSquare className="text-accent"/>Feedback de l'enseignant :</Label>
-                                <Textarea 
-                                    id="teacher-feedback"
-                                    placeholder="Ajoutez votre commentaire pour l'élève ici..."
-                                    value={teacherFeedback}
-                                    onChange={(e) => handleTeacherFeedbackChange(e.target.value)}
-                                    rows={4}
-                                />
-                             </CardContent>
-                         </Card>
                     )}
 
                     <Card>
@@ -513,7 +521,3 @@ export default function StudentDetailPage() {
         </div>
     );
 }
-
-    
-
-    

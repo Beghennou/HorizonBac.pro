@@ -31,7 +31,8 @@ type Feedback = {
 
 type StoredEvaluation = {
   date: string;
-  note?: string;
+  prelimNote?: string;
+  tpNote?: string;
   competences: Record<string, EvaluationStatus>;
 }
 
@@ -46,7 +47,7 @@ type AssignmentsContextType = {
   feedbacks: Record<string, Record<number, Feedback>>;
   storedEvals: Record<string, Record<number, StoredEvaluation>>;
   assignTp: (studentNames: string[], tpId: number) => void;
-  saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, note?: string) => void;
+  saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string) => void;
   updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => void;
   savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => void;
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
@@ -179,13 +180,14 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const saveEvaluation = (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, note?: string) => {
+  const saveEvaluation = (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string) => {
     
     setStoredEvals(prev => {
       const studentEvals = prev[studentName] || {};
       studentEvals[tpId] = {
         date: new Date().toLocaleDateString('fr-FR'),
-        note: note,
+        prelimNote: prelimNote,
+        tpNote: tpNote,
         competences: currentEvals,
       };
       return { ...prev, [studentName]: studentEvals };
