@@ -77,7 +77,22 @@ const adaptSimulationDifficultyFlow = ai.defineFlow(
     outputSchema: AdaptSimulationDifficultyOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+      const {output} = await prompt(input);
+      return output!;
+    } catch (e: any) {
+      console.error(e);
+      const errorMessage = e.message || 'An unexpected error occurred.';
+      if (errorMessage.includes('403 Forbidden')) {
+        return {
+          newDifficultyLevel: 'Erreur API',
+          suggestedAdjustments: "L'accès à l'API d'IA est actuellement bloqué. Veuillez vérifier la configuration de votre projet Google Cloud.",
+        };
+      }
+      return {
+        newDifficultyLevel: 'Erreur',
+        suggestedAdjustments: "Une erreur inattendue est survenue avec l'assistant IA.",
+      };
+    }
   }
 );

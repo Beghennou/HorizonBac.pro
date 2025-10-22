@@ -66,7 +66,20 @@ const tpAssistantFlow = ai.defineFlow(
     outputSchema: GuideStudentOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+      const {output} = await prompt(input);
+      return output!;
+    } catch (e: any) {
+      console.error(e);
+      const errorMessage = e.message || 'An unexpected error occurred.';
+      if (errorMessage.includes('403 Forbidden')) {
+        return {
+          guidanceText: "L'accès à l'API d'IA est actuellement bloqué. Veuillez vérifier que l'API Generative Language est activée dans votre projet Google Cloud et qu'aucune restriction n'empêche son utilisation.",
+        }
+      }
+      return {
+        guidanceText: "Une erreur inattendue est survenue avec l'assistant IA. Veuillez réessayer plus tard.",
+      };
+    }
   }
 );

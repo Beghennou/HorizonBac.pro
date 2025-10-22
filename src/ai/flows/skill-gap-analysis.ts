@@ -84,7 +84,22 @@ const analyzeSkillGapsFlow = ai.defineFlow(
         suggestedLearningPaths: "Pour commencer l'analyse, veuillez d'abord réaliser et enregistrer des évaluations pour cet élève. Une fois les données disponibles, l'IA pourra identifier les points à travailler.",
       };
     }
-    const {output} = await prompt(input);
-    return output!;
+    try {
+      const {output} = await prompt(input);
+      return output!;
+    } catch (e: any) {
+      console.error(e);
+      const errorMessage = e.message || 'An unexpected error occurred.';
+      if (errorMessage.includes('403 Forbidden')) {
+        return {
+          identifiedSkillGaps: ["Accès à l'API bloqué"],
+          suggestedLearningPaths: "L'accès à l'API d'IA est actuellement bloqué. Veuillez vérifier que l'API Generative Language est activée dans votre projet Google Cloud et qu'aucune restriction n'empêche son utilisation.",
+        };
+      }
+      return {
+        identifiedSkillGaps: ["Erreur inattendue"],
+        suggestedLearningPaths: "Une erreur inattendue est survenue avec l'assistant IA. Veuillez réessayer plus tard.",
+      };
+    }
   }
 );
