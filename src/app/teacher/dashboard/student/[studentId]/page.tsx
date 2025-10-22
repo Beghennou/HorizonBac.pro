@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const AiAnalysisHub = dynamic(() => import('@/components/ai-analysis-hub').then(mod => mod.AiAnalysisHub), {
     ssr: false,
@@ -100,7 +101,7 @@ const EvaluationCard = ({
             } else if (question.type === 'qcm') {
                 const isCorrect = studentAnswer === question.r;
                 if(isCorrect) score++;
-                return is-correct;
+                return isCorrect;
             }
             return false;
         });
@@ -488,5 +489,3 @@ export default function StudentDetailPage() {
         </div>
     );
 }
-
-    
