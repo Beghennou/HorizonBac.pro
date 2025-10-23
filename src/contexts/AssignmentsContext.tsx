@@ -94,7 +94,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
     
     // Also clear other collections to ensure a fresh start
-    const collectionsToClear = ['assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
+    const collectionsToClear = ['assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'tps'];
     for (const coll of collectionsToClear) {
         try {
             const snapshot = await getDocs(collection(db, coll));
