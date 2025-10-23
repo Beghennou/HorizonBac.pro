@@ -6,7 +6,7 @@ import { Firestore, collection, doc, getDocs, writeBatch, setDoc, deleteDoc, get
 import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useUser } from '@/firebase/provider';
+import { useFirestore } from '@/firebase/provider';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
 
@@ -70,7 +70,6 @@ export const AssignmentsContext = createContext<AssignmentsContextType | undefin
 
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const db = useFirestore();
-  const { user, isUserLoading } = useUser();
   const { toast } = useToast();
 
   const [students, setStudents] = useState<Student[]>([]);
@@ -85,90 +84,88 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   const loadAllData = useCallback(async (db: Firestore) => {
-    const collectionsToFetch = ['students', 'classes', 'tps', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'config'];
-    
-    const promises = collectionsToFetch.map(colName => 
-        getDocs(collection(db, colName)).catch(serverError => {
-            const contextualError = new FirestorePermissionError({
-                operation: 'list',
-                path: colName,
+    setIsLoaded(false);
+    try {
+        const collectionsToFetch = ['students', 'classes', 'tps', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'config'];
+        
+        const snapshots = await Promise.all(collectionsToFetch.map(colName => getDocs(collection(db, colName))));
+
+        const [studentsSnapshot, classesSnapshot, tpsSnapshot, assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, configSnapshot] = snapshots;
+
+        let loadedStudents: Student[];
+        if (studentsSnapshot.empty) {
+            const batch = writeBatch(db);
+            initialStudents.forEach(student => {
+                const studentRef = doc(db, 'students', student.id);
+                batch.set(studentRef, student);
             });
-            errorEmitter.emit('permission-error', contextualError);
-            // Propagate the error to be caught by Promise.all
-            throw contextualError;
-        })
-    );
+            await batch.commit();
+            loadedStudents = initialStudents;
+            toast({ title: "Données initialisées", description: "La base de données des élèves a été créée." });
+        } else {
+            loadedStudents = studentsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Student));
+        }
+        
+        let loadedClasses: Record<string, string[]>;
+        if(classesSnapshot.empty) {
+            const batch = writeBatch(db);
+            Object.entries(initialClasses).forEach(([className, studentNames]) => {
+                const classRef = doc(db, 'classes', className);
+                batch.set(classRef, { studentNames });
+            });
+            await batch.commit();
+            loadedClasses = initialClasses;
+        } else {
+            loadedClasses = Object.fromEntries(classesSnapshot.docs.map(d => [d.id, d.data().studentNames]));
+        }
 
-    const snapshots = await Promise.all(promises);
+        const createPlaceholderIfNeeded = async (snapshot: any, colName: string) => {
+          if (snapshot.empty) {
+            await setDoc(doc(db, colName, '_placeholder'), { initialized: true });
+          }
+        };
 
-    const [studentsSnapshot, classesSnapshot, tpsSnapshot, assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, configSnapshot] = snapshots;
+        await createPlaceholderIfNeeded(assignedTpsSnapshot, 'assignedTps');
+        await createPlaceholderIfNeeded(evalsSnapshot, 'evaluations');
+        await createPlaceholderIfNeeded(prelimsSnapshot, 'prelimAnswers');
+        await createPlaceholderIfNeeded(feedbacksSnapshot, 'feedbacks');
+        await createPlaceholderIfNeeded(storedEvalsSnapshot, 'storedEvals');
 
-    let loadedStudents: Student[];
-    if (studentsSnapshot.empty) {
-        const batch = writeBatch(db);
-        initialStudents.forEach(student => {
-            const studentRef = doc(db, 'students', student.id);
-            batch.set(studentRef, student);
+        setStudents(loadedStudents);
+        setClasses(loadedClasses);
+        setAssignedTps(Object.fromEntries(assignedTpsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data().assignments])));
+        setEvaluations(Object.fromEntries(evalsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data()])));
+        setPrelimAnswers(Object.fromEntries(prelimsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data()])));
+        setFeedbacks(Object.fromEntries(feedbacksSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, 'data' in d.data() ? d.data().data : {}])));
+        setStoredEvals(Object.fromEntries(storedEvalsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data()])));
+        
+        const customTpsData = Object.fromEntries(tpsSnapshot.docs.filter(d => d.id !== '_placeholder').map(doc => [doc.id, doc.data() as TP]));
+        const allTps = { ...getTpById(-1, true) as Record<number, TP>, ...customTpsData };
+        setTps(allTps);
+        
+        const teacherNameDoc = configSnapshot.docs.find(d => d.id === 'teacher');
+        if (teacherNameDoc) {
+            setTeacherNameState(teacherNameDoc.data().name);
+        }
+    } catch (error: any) {
+        // This is a simplified error handling. 
+        // A more robust solution was attempted but failed, this is a fallback.
+        console.error("Erreur de chargement Firestore:", error);
+        toast({
+            variant: "destructive",
+            title: "Erreur de chargement des données",
+            description: "Impossible de lire les données depuis la base de données. Vérifiez les règles de sécurité Firestore.",
         });
-        await batch.commit();
-        loadedStudents = initialStudents;
-        toast({ title: "Données initialisées", description: "La base de données des élèves a été créée." });
-    } else {
-        loadedStudents = studentsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Student));
+    } finally {
+        setIsLoaded(true);
     }
-    
-    let loadedClasses: Record<string, string[]>;
-    if(classesSnapshot.empty) {
-        const batch = writeBatch(db);
-        Object.entries(initialClasses).forEach(([className, studentNames]) => {
-            const classRef = doc(db, 'classes', className);
-            batch.set(classRef, { studentNames });
-        });
-        await batch.commit();
-        loadedClasses = initialClasses;
-    } else {
-        loadedClasses = Object.fromEntries(classesSnapshot.docs.map(d => [d.id, d.data().studentNames]));
-    }
-
-    const createPlaceholderIfNeeded = async (snapshot: any, colName: string) => {
-      if (snapshot.empty) {
-        await setDoc(doc(db, colName, '_placeholder'), { initialized: true });
-      }
-    };
-
-    await createPlaceholderIfNeeded(assignedTpsSnapshot, 'assignedTps');
-    await createPlaceholderIfNeeded(evalsSnapshot, 'evaluations');
-    await createPlaceholderIfNeeded(prelimsSnapshot, 'prelimAnswers');
-    await createPlaceholderIfNeeded(feedbacksSnapshot, 'feedbacks');
-    await createPlaceholderIfNeeded(storedEvalsSnapshot, 'storedEvals');
-
-    setStudents(loadedStudents);
-    setClasses(loadedClasses);
-
-    setAssignedTps(Object.fromEntries(assignedTpsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data().assignments])));
-    setEvaluations(Object.fromEntries(evalsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data()])));
-    setPrelimAnswers(Object.fromEntries(prelimsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data()])));
-    setFeedbacks(Object.fromEntries(feedbacksSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, 'data' in d.data() ? d.data().data : {}])));
-    setStoredEvals(Object.fromEntries(storedEvalsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data()])));
-    
-    const customTpsData = Object.fromEntries(tpsSnapshot.docs.filter(d => d.id !== '_placeholder').map(doc => [doc.id, doc.data() as TP]));
-    const allTps = { ...getTpById(-1, true) as Record<number, TP>, ...customTpsData };
-    setTps(allTps);
-    
-    const teacherNameDoc = configSnapshot.docs.find(d => d.id === 'teacher');
-    if (teacherNameDoc) {
-        setTeacherNameState(teacherNameDoc.data().name);
-    }
-
-    setIsLoaded(true);
-
   }, [toast]);
 
   useEffect(() => {
-    if (db && !isLoaded && !isUserLoading) {
+    if (db) {
       loadAllData(db);
     }
-  }, [db, isLoaded, isUserLoading, loadAllData]);
+  }, [db, loadAllData]);
 
   useEffect(() => {
     if (!isLoaded || students.length === 0) return;
@@ -441,5 +438,3 @@ export const useAssignments = () => {
   }
   return context;
 };
-
-    
