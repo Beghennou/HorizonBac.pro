@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,46 +32,7 @@ function DashboardLayoutContent({
   const searchParams = useSearchParams();
   const { classes: dynamicClasses, tps: allTps, isLoaded } = useAssignments();
 
-  const [niveau, setNiveau] = useState<Niveau>((searchParams.get('level') as Niveau) || 'seconde');
-  const [selectedClass, setSelectedClass] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isLoaded && Object.keys(dynamicClasses).length > 0) {
-      const currentLevel = (searchParams.get('level') as Niveau) || 'seconde';
-      const currentClass = searchParams.get('class');
-
-      const sortedClasses = Object.keys(dynamicClasses).sort();
-      const classesForLevel = sortedClasses.filter(c => {
-        if (currentLevel === 'seconde') return c.startsWith('2');
-        if (currentLevel === 'premiere') return c.startsWith('1');
-        if (currentLevel === 'terminale') return c.startsWith('T');
-        return false;
-      });
-
-      let targetClass = currentClass && dynamicClasses[currentClass] ? currentClass : null;
-
-      if (!targetClass) {
-        targetClass = classesForLevel[0] || sortedClasses[0] || null;
-      }
-      
-      setSelectedClass(targetClass);
-      
-      const newSearchParams = new URLSearchParams(searchParams.toString());
-      if (targetClass && (!currentClass || currentClass !== targetClass)) {
-        newSearchParams.set('class', targetClass);
-        router.replace(`${pathname}?${newSearchParams.toString()}`);
-      }
-    }
-  }, [isLoaded, searchParams, pathname, dynamicClasses, router]);
-
-
-  const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
-  const selectedStudent = searchParams.get('student');
-  
-  const tps = getTpsByNiveau(niveau, allTps);
-
   const handleNiveauChange = (newNiveau: Niveau) => {
-    setNiveau(newNiveau);
     const firstClassForLevel = Object.keys(dynamicClasses).find(c => {
         if (newNiveau === 'seconde') return c.startsWith('2');
         if (newNiveau === 'premiere') return c.startsWith('1');
@@ -79,30 +40,29 @@ function DashboardLayoutContent({
         return false;
     }) || Object.keys(dynamicClasses)[0];
     
-    setSelectedClass(firstClassForLevel);
-
     const newSearchParams = new URLSearchParams();
     newSearchParams.set('level', newNiveau);
-    newSearchParams.set('class', firstClassForLevel);
+    if (firstClassForLevel) {
+      newSearchParams.set('class', firstClassForLevel);
+    }
     
     router.push(`/teacher/dashboard/students?${newSearchParams.toString()}`);
   };
-  
-  const handleTpSelect = (id: number) => {
-    const newSearchParams = new URLSearchParams(searchParams.toString());
-    newSearchParams.set('tp', id.toString());
-    router.push(`/teacher/dashboard?${newSearchParams.toString()}`);
-  }
 
   const handleClassChange = (className: string) => {
-    setSelectedClass(className);
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('class', className);
     newSearchParams.delete('student'); // Remove student when class changes
     
     const basePath = pathname.split('/').slice(0, 4).join('/');
     router.push(`${basePath}?${newSearchParams.toString()}`);
-  }
+  };
+  
+  const handleTpSelect = (id: number) => {
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set('tp', id.toString());
+    router.push(`/teacher/dashboard?${newSearchParams.toString()}`);
+  };
   
   const handleEditTp = (tpId: number) => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
@@ -110,9 +70,27 @@ function DashboardLayoutContent({
     router.push(`/teacher/dashboard/tp-designer?${newSearchParams.toString()}`);
   };
 
+  const niveau = (searchParams.get('level') as Niveau) || 'seconde';
+  const currentClassFromUrl = searchParams.get('class');
+
+  const classesForLevel = useMemo(() => Object.keys(dynamicClasses).filter(c => {
+    if (niveau === 'seconde') return c.startsWith('2');
+    if (niveau === 'premiere') return c.startsWith('1');
+    if (niveau === 'terminale') return c.startsWith('T');
+    return false;
+  }).sort(), [dynamicClasses, niveau]);
+
+  const selectedClass = currentClassFromUrl && dynamicClasses[currentClassFromUrl] 
+    ? currentClassFromUrl 
+    : classesForLevel[0] || null;
+
   if (!isLoaded || !selectedClass) {
     return <TachometerAnimation />;
   }
+
+  const tps = getTpsByNiveau(niveau, allTps);
+  const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
+  const selectedStudent = searchParams.get('student');
 
   return (
       <SidebarProvider>
@@ -171,15 +149,7 @@ function DashboardLayoutContent({
                             <SelectValue placeholder="Choisir une classe..." />
                           </SelectTrigger>
                           <SelectContent>
-                            {Object.keys(dynamicClasses)
-                              .filter(c => {
-                                if (niveau === 'seconde') return c.startsWith('2');
-                                if (niveau === 'premiere') return c.startsWith('1');
-                                if (niveau === 'terminale') return c.startsWith('T');
-                                return true;
-                              })
-                              .sort()
-                              .map(className => (
+                            {classesForLevel.map(className => (
                                 <SelectItem key={className} value={className}>{className}</SelectItem>
                               ))}
                           </SelectContent>
