@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
-import { ChevronDown, Users, BookOpen } from 'lucide-react';
+import { ChevronDown, Users } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,12 +25,6 @@ import {
 } from "@/components/ui/tooltip";
 import Link from 'next/link';
 
-const statusStyles: Record<TpStatus, string> = {
-  'non-commencé': 'border-primary/50 text-foreground/80',
-  'en-cours': 'border-accent bg-accent/10 text-accent',
-  'terminé': 'border-green-500 bg-green-500/10 text-green-400',
-}
-
 const statusLabels: Record<TpStatus, string> = {
     'non-commencé': 'Non commencé',
     'en-cours': 'En cours',
@@ -40,28 +34,13 @@ const statusLabels: Record<TpStatus, string> = {
 export default function StudentsPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { students, assignTp, classes, assignedTps, evaluations, tps: allTpsFromContext } = useAssignments();
+    const { students, assignTp, classes, assignedTps, tps: allTpsFromContext } = useAssignments();
     const { toast } = useToast();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
-    const getInitialClass = () => {
-        const classFromUrl = searchParams.get('class');
-        if (classFromUrl && classes[classFromUrl]) return classFromUrl;
-        
-        const sortedClasses = Object.keys(classes).sort();
-        const firstClassForLevel = sortedClasses.find(c => {
-            if (level === 'seconde') return c.startsWith('2');
-            if (level === 'premiere') return c.startsWith('1');
-            if (level === 'terminale') return c.startsWith('T');
-            return false;
-        });
-
-        return firstClassForLevel || sortedClasses[0] || '';
-    };
-
-    const className = getInitialClass();
+    const className = searchParams.get('class') || '';
     
-    const studentNamesInClass = classes[className as keyof typeof classes] || [];
+    const studentNamesInClass = classes[className] || [];
     const studentsInClass = students.filter(student => studentNamesInClass.includes(student.name));
     
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
@@ -193,7 +172,7 @@ export default function StudentsPage() {
                                           <Tooltip>
                                               <TooltipTrigger asChild>
                                                   <div 
-                                                    className={cn("h-8 w-8 font-bold rounded-full flex items-center justify-center border", statusStyles['non-commencé'])}
+                                                    className="h-8 w-8 font-bold rounded-full flex items-center justify-center border border-primary/50 text-foreground/80"
                                                   >
                                                     {studentAssignedTps.length}
                                                   </div>

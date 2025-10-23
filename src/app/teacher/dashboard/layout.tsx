@@ -32,41 +32,38 @@ function DashboardLayoutContent({
   const searchParams = useSearchParams();
   const { classes: dynamicClasses, tps: allTps, isLoaded } = useAssignments();
 
-  const [niveau, setNiveau] = useState<Niveau>((searchParams.get('level') as Niveau) ||'seconde');
-  
-  const getInitialClass = () => {
-    const classFromUrl = searchParams.get('class');
-    if (classFromUrl) return classFromUrl;
-    
-    const firstClassForLevel = Object.keys(dynamicClasses).find(c => {
-        if (niveau === 'seconde') return c.startsWith('2');
-        if (niveau === 'premiere') return c.startsWith('1');
-        if (niveau === 'terminale') return c.startsWith('T');
+  const [niveau, setNiveau] = useState<Niveau>((searchParams.get('level') as Niveau) || 'seconde');
+  const [selectedClass, setSelectedClass] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isLoaded && Object.keys(dynamicClasses).length > 0) {
+      const currentLevel = (searchParams.get('level') as Niveau) || 'seconde';
+      const currentClass = searchParams.get('class');
+
+      const sortedClasses = Object.keys(dynamicClasses).sort();
+      const classesForLevel = sortedClasses.filter(c => {
+        if (currentLevel === 'seconde') return c.startsWith('2');
+        if (currentLevel === 'premiere') return c.startsWith('1');
+        if (currentLevel === 'terminale') return c.startsWith('T');
         return false;
-    });
-    return firstClassForLevel || Object.keys(dynamicClasses)[0];
-  }
-  
-  const [selectedClass, setSelectedClass] = useState<string>(getInitialClass());
-  
-  useEffect(() => {
-    if (isLoaded) {
-      setSelectedClass(getInitialClass());
+      });
+
+      let targetClass = currentClass && dynamicClasses[currentClass] ? currentClass : null;
+
+      if (!targetClass) {
+        targetClass = classesForLevel[0] || sortedClasses[0] || null;
+      }
+      
+      setSelectedClass(targetClass);
+      
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      if (targetClass && (!currentClass || currentClass !== targetClass)) {
+        newSearchParams.set('class', targetClass);
+        router.replace(`${pathname}?${newSearchParams.toString()}`);
+      }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, niveau, dynamicClasses]);
-  
-  useEffect(() => {
-    const classFromUrl = searchParams.get('class');
-    if (classFromUrl && classFromUrl !== selectedClass) {
-      setSelectedClass(classFromUrl);
-    }
-    const levelFromUrl = searchParams.get('level') as Niveau;
-     if (levelFromUrl && levelFromUrl !== niveau) {
-      setNiveau(levelFromUrl);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [isLoaded, searchParams, pathname, dynamicClasses, router]);
+
 
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
   const selectedStudent = searchParams.get('student');
@@ -113,7 +110,7 @@ function DashboardLayoutContent({
     router.push(`/teacher/dashboard/tp-designer?${newSearchParams.toString()}`);
   };
 
-  if (!isLoaded) {
+  if (!isLoaded || !selectedClass) {
     return <TachometerAnimation />;
   }
 
@@ -239,5 +236,3 @@ export default function TeacherDashboardLayout({
     </AssignmentsProvider>
   );
 }
-
-    
