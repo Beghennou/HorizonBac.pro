@@ -3,14 +3,12 @@
 
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore, collection, getDocs, QuerySnapshot, DocumentData } from 'firebase/firestore';
+import { Firestore, collection, doc, setDoc, getDocs, writeBatch, deleteDoc } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
-import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
+import { TP, initialStudents, initialClasses, getTpById, getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
-import { FirestorePermissionError } from '@/firebase/errors';
-import { errorEmitter } from '@/firebase/error-emitter';
 
 // Types definition
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
@@ -114,17 +112,19 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: null,
   });
 
-  // App Data State
-  const [students, setStudents] = useState<Student[]>([]);
-  const [classes, setClasses] = useState<Record<string, string[]>>({});
+  // App Data State - We keep local state for rapid UI updates
+  const [students, setStudents] = useState<Student[]>(initialStudents);
+  const [classes, setClasses] = useState<Record<string, string[]>>(initialClasses);
   const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
   const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>({});
   const [prelimAnswers, setPrelimAnswers] = useState<Record<string, Record<number, Record<number, PrelimAnswer>>>>({});
   const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
   const [storedEvals, setStoredEvals] = useState<Record<string, Record<number, StoredEvaluation>>>({});
-  const [tps, setTps] = useState<Record<number, TP>>({});
+  const [tps, setTps] = useState<Record<number, TP>>(getTpById(-1, true) as Record<number, TP>);
   const [teacherName, setTeacherNameState] = useState<string>('M. Dubois');
-  const [isLoaded, setIsLoaded] = useState(false);
+
+  // isLoaded now only depends on auth state.
+  const isLoaded = !userAuthState.isUserLoading;
 
   // Auth state listener
   useEffect(() => {
@@ -151,104 +151,164 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     return () => unsubscribe();
   }, [auth]);
 
-  // Data loading logic
-  const loadAllData = useCallback(async (db: Firestore) => {
-    if (!db) return;
-    setIsLoaded(false);
-    try {
-        const collectionsToFetch = ['students', 'classes', 'tps', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'config'];
-        
-        const snapshots = await Promise.all(collectionsToFetch.map(colName => 
-            getDocs(collection(db, colName)).catch(serverError => {
-                const contextualError = new FirestorePermissionError({
-                    operation: 'list',
-                    path: colName,
-                });
-                errorEmitter.emit('permission-error', contextualError);
-                throw contextualError;
-            })
-        ));
-
-        const [studentsSnapshot, classesSnapshot, tpsSnapshot, assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, configSnapshot] = snapshots;
-
-        let loadedStudents: Student[];
-        if (studentsSnapshot.empty) {
-            // This part for initial setup is commented out as it requires write permissions
-            // which might not be available initially. Data should be pre-seeded.
-            loadedStudents = initialStudents;
-        } else {
-            loadedStudents = studentsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Student));
-        }
-        
-        let loadedClasses: Record<string, string[]>;
-        if(classesSnapshot.empty) {
-            loadedClasses = initialClasses;
-        } else {
-            loadedClasses = Object.fromEntries(classesSnapshot.docs.map(d => [d.id, d.data().studentNames]));
-        }
-
-        const dataReducer = (snapshot: QuerySnapshot<DocumentData>) => Object.fromEntries(snapshot.docs.map(d => [d.id, d.data()]));
-        
-        setStudents(loadedStudents);
-        setClasses(loadedClasses);
-        setAssignedTps(dataReducer(assignedTpsSnapshot));
-        setEvaluations(dataReducer(evalsSnapshot));
-        setPrelimAnswers(dataReducer(prelimsSnapshot));
-        setFeedbacks(dataReducer(feedbacksSnapshot));
-        setStoredEvals(dataReducer(storedEvalsSnapshot));
-        
-        const customTpsData = dataReducer(tpsSnapshot);
-        const allTps = { ...getTpById(-1, true) as Record<number, TP>, ...customTpsData };
-        setTps(allTps);
-        
-        const teacherNameDoc = configSnapshot.docs.find(d => d.id === 'teacher');
-        if (teacherNameDoc) {
-            setTeacherNameState(teacherNameDoc.data().name);
-        }
-
-    } catch (error: any) {
-        toast({
-            variant: "destructive",
-            title: "Erreur de chargement des données",
-            description: error.message || "Impossible de lire les données depuis la base de données.",
+  const assignTp = useCallback(async (studentNames: string[], tpId: number) => {
+    setAssignedTps(prev => {
+        const newState = { ...prev };
+        studentNames.forEach(name => {
+            if (!newState[name]) newState[name] = [];
+            if (!newState[name].some(tp => tp.id === tpId)) {
+                newState[name].push({ id: tpId, status: 'non-commencé' });
+            }
         });
-    } finally {
-        setIsLoaded(true);
-    }
+        return newState;
+    });
+  }, []);
+
+  const saveEvaluation = useCallback(async (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => {
+      if (!studentName || !tpId) return;
+
+      const evalDate = new Date().toLocaleDateString('fr-FR');
+      
+      // Update local state for immediate UI feedback
+      setStoredEvals(prev => ({
+          ...prev,
+          [studentName]: {
+              ...prev[studentName],
+              [tpId]: {
+                  date: evalDate,
+                  prelimNote,
+                  tpNote,
+                  competences: currentEvals,
+                  isFinal
+              }
+          }
+      }));
+
+      setEvaluations(prev => {
+        const newEvals = { ...prev };
+        if (!newEvals[studentName]) newEvals[studentName] = {};
+
+        Object.entries(currentEvals).forEach(([competenceId, status]) => {
+            if (!newEvals[studentName][competenceId]) newEvals[studentName][competenceId] = [];
+            newEvals[studentName][competenceId].push(status);
+        });
+        return newEvals;
+      });
+
+      toast({
+          title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
+          description: `L'évaluation pour le TP ${tpId} a été enregistrée.`,
+      });
   }, [toast]);
 
-  // Effect to trigger data loading
-  useEffect(() => {
-    // Only load data if we have a firestore instance and auth check is complete.
-    if (firestore && !userAuthState.isUserLoading) {
-      loadAllData(firestore);
-    }
-  }, [firestore, userAuthState.isUserLoading, loadAllData]);
 
+  const updateTpStatus = useCallback(async (studentName: string, tpId: number, status: TpStatus) => {
+    setAssignedTps(prev => {
+        const studentTps = prev[studentName]?.map(tp => 
+            tp.id === tpId ? { ...tp, status } : tp
+        );
+        return { ...prev, [studentName]: studentTps };
+    });
+  }, []);
 
-  // Placeholder functions for data modification
-  const assignTp = useCallback(async (studentNames: string[], tpId: number) => { console.log('assignTp not implemented'); }, []);
-  const saveEvaluation = useCallback(async (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => { console.log('saveEvaluation not implemented'); }, []);
-  const updateTpStatus = useCallback(async (studentName: string, tpId: number, status: TpStatus) => { console.log('updateTpStatus not implemented'); }, []);
-  const savePrelimAnswer = useCallback(async (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => { console.log('savePrelimAnswer not implemented'); }, []);
-  const saveFeedback = useCallback(async (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => { console.log('saveFeedback not implemented'); }, []);
-  const setTeacherName = useCallback(async (name: string) => { setTeacherNameState(name); }, []);
-  const deleteStudent = useCallback(async (studentName: string) => { console.log('deleteStudent not implemented'); }, []);
-  const deleteClass = useCallback(async (className: string) => { console.log('deleteClass not implemented'); }, []);
-  const updateClassWithCsv = useCallback(async (className: string, studentNames: string[]) => { console.log('updateClassWithCsv not implemented'); }, []);
-  const addTp = useCallback(async (tp: TP) => { console.log('addTp not implemented'); }, []);
+  const savePrelimAnswer = useCallback((studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
+    setPrelimAnswers(prev => ({
+        ...prev,
+        [studentName]: {
+            ...prev[studentName],
+            [tpId]: {
+                ...prev[studentName]?.[tpId],
+                [questionIndex]: answer
+            }
+        }
+    }));
+  }, []);
 
+  const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
+      setFeedbacks(prev => ({
+          ...prev,
+          [studentName]: {
+              ...prev[studentName],
+              [tpId]: {
+                  ...prev[studentName]?.[tpId],
+                  [author]: feedback
+              }
+          }
+      }));
+  }, []);
+  
+  const setTeacherName = useCallback((name: string) => {
+      setTeacherNameState(name);
+  }, []);
+
+  const deleteStudent = useCallback((studentNameToDelete: string) => {
+      setStudents(prev => prev.filter(s => s.name !== studentNameToDelete));
+      setClasses(prev => {
+          const newClasses = { ...prev };
+          for (const key in newClasses) {
+              newClasses[key] = newClasses[key].filter(s => s !== studentNameToDelete);
+          }
+          return newClasses;
+      });
+      // Also clean up other states
+      setAssignedTps(prev => { const s = {...prev}; delete s[studentNameToDelete]; return s; });
+      setEvaluations(prev => { const s = {...prev}; delete s[studentNameToDelete]; return s; });
+      setPrelimAnswers(prev => { const s = {...prev}; delete s[studentNameToDelete]; return s; });
+      setFeedbacks(prev => { const s = {...prev}; delete s[studentNameToDelete]; return s; });
+      setStoredEvals(prev => { const s = {...prev}; delete s[studentNameToDelete]; return s; });
+      toast({ title: "Élève supprimé", description: `${studentNameToDelete} a été supprimé.` });
+  }, [toast]);
+
+  const deleteClass = useCallback((classNameToDelete: string) => {
+      const studentsInClass = classes[classNameToDelete] || [];
+      studentsInClass.forEach(studentName => deleteStudent(studentName));
+      setClasses(prev => {
+          const newClasses = { ...prev };
+          delete newClasses[classNameToDelete];
+          return newClasses;
+      });
+      toast({ title: "Classe supprimée", description: `La classe ${classNameToDelete} et ses élèves ont été supprimés.` });
+  }, [classes, deleteStudent, toast]);
+
+  const updateClassWithCsv = useCallback((className: string, studentNames: string[]) => {
+      const newStudents: Student[] = [];
+      const existingStudents = new Set(students.map(s => s.name));
+
+      studentNames.forEach(name => {
+          if (!existingStudents.has(name)) {
+              newStudents.push({
+                  id: `student-${Date.now()}-${Math.random()}`,
+                  name: name,
+                  email: `${name.toLowerCase().replace(/\s/g, '.')}@school.com`,
+                  progress: 0,
+                  xp: 0
+              });
+          }
+      });
+
+      if (newStudents.length > 0) {
+          setStudents(prev => [...prev, ...newStudents]);
+      }
+
+      setClasses(prev => ({ ...prev, [className]: studentNames }));
+
+      toast({
+          title: "Classe mise à jour",
+          description: `${studentNames.length} élèves assignés à la classe ${className}. ${newStudents.length} nouveaux élèves créés.`
+      });
+  }, [students, toast]);
+
+  const addTp = useCallback((newTp: TP) => {
+      setTps(prev => ({ ...prev, [newTp.id]: newTp }));
+  }, []);
 
   const contextValue = useMemo((): FirebaseContextState => ({
-    // Services
     firebaseApp,
     firestore,
     auth,
-    // Auth State
     user: userAuthState.user,
     isUserLoading: userAuthState.isUserLoading,
     userError: userAuthState.userError,
-    // App Data
     students,
     setStudents,
     classes,
@@ -261,7 +321,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     tps,
     isLoaded,
     teacherName,
-    // Functions
     assignTp,
     saveEvaluation,
     updateTpStatus,
@@ -297,24 +356,18 @@ export const useFirebase = (): FirebaseContextState => {
   return context;
 };
 
-// Re-exporting useAssignments for backward compatibility during refactor
-export const useAssignments = useFirebase;
-
-/** Hook to access Firebase Auth instance. */
 export const useAuth = (): Auth => {
   const { auth } = useFirebase();
   if (!auth) throw new Error("Auth service not available");
   return auth;
 };
 
-/** Hook to access Firestore instance. */
 export const useFirestore = (): Firestore => {
   const { firestore } = useFirebase();
   if (!firestore) throw new Error("Firestore service not available");
   return firestore;
 };
 
-/** Hook to access Firebase App instance. */
 export const useFirebaseApp = (): FirebaseApp => {
   const { firebaseApp } = useFirebase();
   if (!firebaseApp) throw new Error("Firebase App not available");
