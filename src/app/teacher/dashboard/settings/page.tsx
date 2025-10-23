@@ -98,7 +98,7 @@ export default function SettingsPage() {
             
             if (studentNames.length > 0) {
                 updateClassWithCsv(targetClassName, studentNames);
-                setClassList(prev => ({...prev, [targetClassName]: studentNames}));
+                setClassList(prev => ({...prev, [targetClassName]: studentNames.sort((a,b) => a.localeCompare(b))}));
                 toast({
                     title: "Importation réussie",
                     description: `${studentNames.length} élèves importés dans la classe ${targetClassName}.`
@@ -145,14 +145,15 @@ export default function SettingsPage() {
         return;
     }
 
-    updateClassWithCsv(finalClassName, [...existingStudents, studentName]);
+    const updatedStudentList = [...existingStudents, studentName].sort((a, b) => a.localeCompare(b));
+    updateClassWithCsv(finalClassName, updatedStudentList);
 
     toast({
       title: "Élève ajouté",
       description: `${studentName} a été ajouté à la classe ${finalClassName}.`,
     });
     
-    setClassList(prev => ({...prev, [finalClassName]: [...(prev[finalClassName] || []), studentName]}));
+    setClassList(prev => ({...prev, [finalClassName]: updatedStudentList}));
 
     setFirstName('');
     setLastName('');
@@ -217,7 +218,12 @@ export default function SettingsPage() {
       if (!classToDelete || !firestore) return;
       deleteClass(classToDelete);
       setClassToDelete('');
-      setClassList(prev => ({...prev, [classToDelete]: []}));
+      setClassList(prev => {
+          const newList = {...prev};
+          delete newList[classToDelete];
+          return newList;
+      });
+      toast({ title: "Classe vidée", description: `Les élèves de la classe ${classToDelete} ont été retirés.` });
   }
 
   const handleLegacyCsvImport = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -483,7 +489,7 @@ export default function SettingsPage() {
                               <AlertDialogDescription>
                                   Cette action est irréversible. Toutes les listes d'élèves seront vidées. Pour confirmer, veuillez taper <strong>reset</strong> dans le champ ci-dessous.
                               </AlertDialogDescription>
-                          </Header>
+                          </AlertDialogHeader>
                           <div className="space-y-2">
                             <Label htmlFor="reset-lists-password">Mot de passe de confirmation</Label>
                             <Input 
@@ -522,7 +528,7 @@ export default function SettingsPage() {
                               <AlertDialogDescription>
                                   Cette action est irréversible. Toutes les données des élèves (progrès, évaluations) seront supprimées. Pour confirmer, veuillez taper <strong>Mongy</strong> dans le champ ci-dessous.
                               </AlertDialogDescription>
-                          </Header>
+                          </AlertDialogHeader>
                           <div className="space-y-2">
                             <Label htmlFor="reset-data-password">Mot de passe de confirmation</Label>
                             <Input 
@@ -551,3 +557,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
