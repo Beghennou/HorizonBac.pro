@@ -514,7 +514,7 @@ export default function SettingsPage() {
               <CardDescription>Cette action est irréversible. Soyez certain avant de continuer.</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-between items-center">
-              <p>Réinitialiser toutes les données des élèves (évaluations, TPs assignés, etc.) mais conserver les classes vides.</p>
+              <p>Réinitialiser toutes les données des élèves (évaluations, TPs assignés, etc.) mais conserver les classes et les élèves.</p>
                <AlertDialog>
                   <AlertDialogTrigger asChild>
                       <Button variant="destructive">

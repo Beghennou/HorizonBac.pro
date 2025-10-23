@@ -94,7 +94,7 @@ export const initialClasses: Record<string, string[]> = {
     "2MV4": [],
     "2MV5": [],
     "2MV6": [],
-    "2APP-RC/VP": [],
+    "2APP-RCVP": ["John Coppe"],
 };
 
 export const allBlocs: Record<string, CompetenceBloc> = {
@@ -103,18 +103,12 @@ export const allBlocs: Record<string, CompetenceBloc> = {
     ...competencesParNiveau.terminale,
 };
 
-const allStudentNames = [...new Set(Object.values(initialClasses).flat())];
-
-export const initialStudents: Student[] = allStudentNames.map((name, index) => {
-    const nameParts = name.split(' ');
-    const lastName = nameParts[0] || '';
-    const firstName = nameParts.slice(1).join(' ') || `Prénom${index + 1}`;
-    
-    return {
-        id: `student-${lastName.toLowerCase()}-${firstName.toLowerCase()}`.replace(' ','-'),
-        name: name,
-        email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`,
-        progress: 0,
-        xp: 0
-    };
-});
+export const initialStudents: Student[] = [
+    { id: 'student-dupont-jean', name: 'DUPONT Jean', email: 'jean.dupont@school.com', progress: 0, xp: 0 },
+    { id: 'student-martin-lea', name: 'MARTIN Léa', email: 'lea.martin@school.com', progress: 0, xp: 0 },
+    { id: 'student-bernard-hugo', name: 'BERNARD Hugo', email: 'hugo.bernard@school.com', progress: 0, xp: 0 },
+    { id: 'student-robert-alice', name: 'ROBERT Alice', email: 'alice.robert@school.com', progress: 0, xp: 0 },
+    { id: 'student-petit-louis', name: 'PETIT Louis', email: 'louis.petit@school.com', progress: 0, xp: 0 },
+    { id: 'student-durand-clara', name: 'DURAND Clara', email: 'clara.durand@school.com', progress: 0, xp: 0 },
+    { id: 'student-coppe-john', name: 'John Coppe', email: 'john.coppe@school.com', progress: 0, xp: 0 },
+];
