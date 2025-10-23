@@ -79,18 +79,18 @@ export const getTpById = (id: number, all?: boolean, allTpsFromContext?: Record<
     return sourceTps[id];
 };
 
-export const classes = {
-    "TVP1": [],
+export const classes: Record<string, string[]> = {
+    "TVP1": ["DUPONT Jean", "MARTIN Léa"],
     "TVP2": [],
     "TVP3": [],
     "TAPP 1": [],
     "TAPP 2": [],
     "1APP1": [],
     "1APP2": [],
-    "1VP1": [],
+    "1VP1": ["BERNARD Hugo", "ROBERT Alice"],
     "1VP2": [],
     "1VP3": [],
-    "2MV1 - Pierre Latirgue": [],
+    "2MV1 - Pierre Latirgue": ["PETIT Louis", "DURAND Clara"],
     "2MV2 - Carol Shelby": [],
     "2MV3 - Amédée Gordini": [],
     "2MV4 - Les frères Michelin": [],

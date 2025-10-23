@@ -121,7 +121,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
         if (studentsSnapshot.empty) {
             await resetStudentData(true);
-            // Re-fetch after reset
             studentsSnapshot = await getDocs(collection(db, 'students'));
         }
 
@@ -136,7 +135,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
             getDoc(doc(db, 'settings', 'teacher')),
         ]);
 
-        setStudents(studentsSnapshot.docs.map(doc => doc.data() as Student));
+        const studentsData = studentsSnapshot.docs.map(doc => doc.data() as Student);
+        setStudents(studentsData);
+        
         const classesData: Record<string, string[]> = {};
         classesSnapshot.forEach(doc => classesData[doc.id] = doc.data().studentNames);
         setClasses(classesData);
@@ -177,8 +178,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
             title: "Erreur de connexion à Firestore",
             description: "Impossible de lire les données. Vérifiez votre configuration Firebase et vos règles de sécurité.",
         });
-        setStudents(initialStudentsData);
-        setClasses(initialClasses);
     } finally {
         setIsLoaded(true);
     }
