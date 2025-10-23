@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
-import { db } from '@/lib/firebase';
+import { db } from '@/firebase';
 import { collection, doc, getDoc, getDocs, setDoc, writeBatch, deleteDoc } from 'firebase/firestore';
 import { getTpById, TP, initialStudents, initialClasses } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
@@ -82,11 +82,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const resetStudentData = useCallback(async () => {
     const batch = writeBatch(db);
     
-    // This list now includes ALL collections the app depends on.
-    const collectionsToDelete = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'tps', 'settings'];
+    const collectionsToReset = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'tps', 'settings'];
 
-    // Delete existing documents to ensure a clean slate
-    for (const coll of collectionsToDelete) {
+    for (const coll of collectionsToReset) {
         try {
             const snapshot = await getDocs(collection(db, coll));
             if (!snapshot.empty) {
@@ -104,7 +102,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         console.error("Error committing deletions", e);
     }
 
-    // Now, repopulate with initial data
     const writeBatch2 = writeBatch(db);
     initialStudents.forEach(student => {
         const studentRef = doc(db, 'students', student.id);
@@ -124,7 +121,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     
     writeBatch2.set(doc(db, 'settings', 'teacher'), { name: 'M. Dubois' });
     
-    // Explicitly create a placeholder for other collections to ensure they exist
     const placeholderCollections = ['assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
     for(const coll of placeholderCollections) {
         writeBatch2.set(doc(db, coll, '_placeholder'), { initialized: true });
@@ -153,12 +149,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         const studentsSnapshot = await getDocs(collection(db, 'students'));
         const classesSnapshot = await getDocs(collection(db, 'classes'));
 
-        // If core data is missing, force a full reset.
         if (studentsSnapshot.empty || classesSnapshot.empty) {
             console.log("Core collections (students or classes) are empty. Forcing a full data reset.");
             await resetStudentData();
-            // Re-fetch data after reset
-            await loadData();
+            await loadData(); // Re-run loadData after resetting
             return;
         }
 
