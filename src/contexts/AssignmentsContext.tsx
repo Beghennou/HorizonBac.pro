@@ -113,18 +113,22 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         description: "La base de données a été réinitialisée avec les données initiales.",
     });
 
-    await loadData();
   }, [toast]);
   
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (forceReset = false) => {
     setIsLoaded(false);
     try {
+        if (forceReset) {
+            await resetStudentData();
+        }
+
         let studentsSnapshot = await getDocs(collection(db, 'students'));
         let classesSnapshot = await getDocs(collection(db, 'classes'));
 
         if (studentsSnapshot.empty || classesSnapshot.empty) {
             await resetStudentData();
-            return;
+            studentsSnapshot = await getDocs(collection(db, 'students'));
+            classesSnapshot = await getDocs(collection(db, 'classes'));
         }
 
         const [tpsSnapshot, assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, teacherSnapshot] = await Promise.all([
@@ -188,6 +192,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 

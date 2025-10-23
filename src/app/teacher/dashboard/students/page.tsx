@@ -1,6 +1,6 @@
 
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -44,6 +44,11 @@ export default function StudentsPage() {
     const studentsInClass = students.filter(student => studentNamesInClass.includes(student.name));
     
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+
+    useEffect(() => {
+        // Reset selection when class changes
+        setSelectedStudents([]);
+    }, [className]);
 
     const tps = getTpsByNiveau(level, allTpsFromContext);
     const tpsIdsForCurrentLevel = new Set(tps.map(tp => tp.id));
