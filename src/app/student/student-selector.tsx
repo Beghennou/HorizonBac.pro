@@ -7,29 +7,28 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { collection } from 'firebase/firestore';
-import { toutesLesClassesStatiques } from '@/lib/data-manager';
 
 export default function StudentSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { firestore, isLoaded } = useFirebase();
+  const { firestore, isLoaded, classes } = useFirebase();
 
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
 
-  const { data: classData, isLoading: isLoadingClass } = useCollection(
-      useMemoFirebase(() => firestore && selectedClass ? collection(firestore, 'classes') : null, [firestore, selectedClass])
-  );
+  const classNames = useMemo(() => {
+    return (classes || []).map(c => c.id).sort();
+  }, [classes]);
 
   const studentsInClass = useMemo(() => {
-    if (selectedClass && classData) {
-        const currentClassDoc = classData.find(c => c.id === selectedClass);
+    if (selectedClass && classes) {
+        const currentClassDoc = classes.find(c => c.id === selectedClass);
         if (currentClassDoc && currentClassDoc.studentNames) {
             return (currentClassDoc.studentNames as string[]).sort((a, b) => a.localeCompare(b));
         }
     }
     return [];
-  }, [selectedClass, classData]);
+  }, [selectedClass, classes]);
 
 
   useEffect(() => {
@@ -73,7 +72,7 @@ export default function StudentSelector() {
               <SelectValue placeholder="Choisir une classe..." />
             </SelectTrigger>
             <SelectContent>
-              {toutesLesClassesStatiques.map(className => (
+              {classNames.map(className => (
                 <SelectItem key={className} value={className}>{className}</SelectItem>
               ))}
             </SelectContent>
@@ -82,7 +81,7 @@ export default function StudentSelector() {
 
         <div className="space-y-2">
           <Label htmlFor="student-select" className="font-bold">Élève</Label>
-          <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={!selectedClass || isLoadingClass}>
+          <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={!selectedClass}>
             <SelectTrigger id="student-select">
               <SelectValue placeholder={!selectedClass ? "Choisis d'abord une classe" : "Choisir ton nom..."} />
             </SelectTrigger>

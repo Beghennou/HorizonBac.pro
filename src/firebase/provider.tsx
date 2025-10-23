@@ -85,6 +85,7 @@ export interface FirebaseContextState {
   signInWithGoogle: () => Promise<void>;
   isLoaded: boolean;
   
+  classes: DocumentData[];
   tps: Record<number, TP>;
   assignedTps: Record<string, AssignedTp[]>;
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
@@ -109,14 +110,15 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: null,
   });
 
-  // Data is no longer loaded globally here to avoid permission issues.
-  // Components will be responsible for fetching their own data.
   const [tps, setTps] = useState<Record<number, TP>>(initialTps);
   const [teacherName, setTeacherNameState] = useState<string>('');
 
   const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
+  const { data: classesData, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   
+  const classes = useMemo(() => classesData || [], [classesData]);
+
   useEffect(() => {
     if (dynamicTps) {
         const tpsData = Object.fromEntries(dynamicTps.map(tp => [tp.id, tp]));
@@ -131,10 +133,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     }
   }, [configData]);
 
-  // The main loaded state now depends on auth and essential configs.
-  const isLoaded = !userAuthState.isUserLoading && !isTpsLoading && !isConfigLoading;
+  const isLoaded = !userAuthState.isUserLoading && !isTpsLoading && !isConfigLoading && !isClassesLoading;
 
-  // Auth state listener remains the same
   useEffect(() => {
     if (!auth) {
       setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Firebase Auth service not provided.") });
@@ -387,21 +387,22 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: userAuthState.userError,
     isLoaded,
     teacherName,
+    classes,
     tps,
-    // These are now empty by default and fetched by components
-    assignedTps: {},
-    evaluations: {},
+    assignedTps,
+    evaluations,
     assignTp: (studentNames: string[], tpId: number) => {
-        // This function will need to be adapted in the component to pass the currently fetched assignedTps
-        console.warn("assignTp called from provider context. This is deprecated.");
+        assignTp(studentNames, tpId, assignedTps);
     },
     saveEvaluation,
     updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => {
-         console.warn("updateTpStatus called from provider context. This is deprecated.");
+         updateTpStatus(studentName, tpId, status);
     },
     savePrelimAnswer,
     saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
-         console.warn("saveFeedback called from provider context. This is deprecated.");
+        const feedbacksForStudent = feedbacksForStudent[studentName] || {};
+        const feedbacksForTp = feedbacksForStudent[tpId] || {};
+        saveFeedback(studentName, tpId, feedback, author, feedbacksForTp);
     },
     setTeacherName,
     deleteStudent,
