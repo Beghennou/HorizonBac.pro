@@ -1,11 +1,10 @@
-
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { getTpsByNiveau, Niveau, getTpById } from '@/lib/data-manager';
+import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { ChevronDown, Users } from 'lucide-react';
 import {
   DropdownMenu,
@@ -55,10 +54,7 @@ export default function StudentsPage() {
     const { data: assignedTpsData, isLoading: isLoadingAssignedTps } = useCollection(
         useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore])
     );
-    const { data: allTpsData, isLoading: isLoadingTps } = useCollection(
-        useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore])
-    );
-
+    
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
     
     const studentsInClass = students || [];
@@ -67,16 +63,6 @@ export default function StudentsPage() {
         // Reset selection when class changes
         setSelectedStudents([]);
     }, [className]);
-    
-    const allTps = useMemo(() => {
-        const tps = getTpById(-1, true) as Record<number, any>;
-        if (allTpsData) {
-            allTpsData.forEach(tp => {
-                tps[tp.id] = tp;
-            });
-        }
-        return tps;
-    }, [allTpsData]);
     
     const assignedTps = useMemo(() => {
         const tpsMap: Record<string, any> = {};
@@ -89,7 +75,7 @@ export default function StudentsPage() {
     }, [assignedTpsData]);
 
 
-    const tpsForLevel = getTpsByNiveau(level, allTps);
+    const tpsForLevel = getTpsByNiveau(level, allTpsFromContext);
     const tpsIdsForCurrentLevel = new Set(tpsForLevel.map(tp => tp.id));
 
     const handleAssignTpToSelected = (tpId: number, tpTitle: string) => {
@@ -227,7 +213,7 @@ export default function StudentsPage() {
                                                   <p className="font-bold">{studentAssignedTps.length} TP assigné(s) pour ce niveau.</p>
                                                    <ul className="text-sm text-muted-foreground">
                                                       {studentAssignedTps.map((assignedTp: any) => {
-                                                          const tp = allTps[assignedTp.id];
+                                                          const tp = allTpsFromContext[assignedTp.id];
                                                           if (!tp) return null;
                                                           return <li key={tp.id}>TP {tp.id}: {statusLabels[assignedTp.status]}</li>
                                                       })}
