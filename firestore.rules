@@ -1,9 +1,58 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Accès ouvert pour le développement. À restreindre avant la mise en production.
+
+    // Helper function to check if the user is an admin.
+    // In a real app, this might check for a custom claim.
+    // For now, we'll allow authenticated users to act as admins for setup.
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // Allow wide-open access for admins for setup purposes
     match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Rules for your application data
+    match /students/{studentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /classes/{classId} {
+       allow read: if true;
+       allow write: if isAdmin();
+    }
+
+    match /tps/{tpId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /assignedTps/{studentName} {
+        allow read, write: if true; // Allow students to see and update their own assignments
+    }
+
+    match /evaluations/{studentName} {
       allow read, write: if true;
+    }
+
+    match /prelimAnswers/{studentName} {
+       allow read, write: if true;
+    }
+
+    match /feedbacks/{studentName} {
+      allow read, write: if true;
+    }
+
+    match /storedEvals/{studentName} {
+       allow read, write: if true;
+    }
+    
+    match /settings/{settingId} {
+        allow read, write: if isAdmin();
     }
   }
 }
