@@ -25,9 +25,22 @@ export type TP = Omit<TPSeconde, 'etudePrelim'> & {
 export type Niveau = 'seconde' | 'premiere' | 'terminale';
 
 export const classNames: string[] = [
-    '2MV', '2VP',
-    '1MV', '1VP', '1APP',
-    'TMV', 'TVP', 'TAPP'
+    '2MV1',
+    '2MV2',
+    '2MV3',
+    '2MV4',
+    '2MV5',
+    '1VP1',
+    '1VP2',
+    '1VP3',
+    '2APP', 
+    'TVP1', 
+    'TVP2', 
+    'TVP3', 
+    '1APP1', 
+    '1APP2', 
+    'TAPP1', 
+    'TAPP2'
 ];
 
 export type CompetenceBloc = {

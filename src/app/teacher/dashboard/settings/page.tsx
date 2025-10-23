@@ -48,9 +48,9 @@ export default function SettingsPage() {
   const [studentToDelete, setStudentToDelete] = useState('');
   const [classToDelete, setClassToDelete] = useState('');
 
-  const [newSecondeClassName, setNewSecondeClassName] = useState('2MV');
-  const [newPremiereClassName, setNewPremiereClassName] = useState('1VP');
-  const [newTerminaleClassName, setNewTerminaleClassName] = useState('TVP');
+  const [newSecondeClassName, setNewSecondeClassName] = useState('2MV1');
+  const [newPremiereClassName, setNewPremiereClassName] = useState('1VP1');
+  const [newTerminaleClassName, setNewTerminaleClassName] = useState('TVP1');
 
   useEffect(() => {
     setLocalTeacherName(teacherName);
@@ -557,5 +557,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-    
