@@ -306,7 +306,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
     toast({
         title: "Classe supprimée de la session",
-        description: `La classe ${className} et tous ses élèves ont été supprimés.`,
+        description: `La classe ${className} a été retirée. Le changement sera perdu au rechargement.`,
     });
   };
   
