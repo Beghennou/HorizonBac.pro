@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau } from "@/lib/data-manager";
 import { useSearchParams, useRouter } from "next/navigation";
 import { User, Users, Printer, Bot } from "lucide-react";
-import { useAssignments } from "@/contexts/AssignmentsContext";
+import { useFirebase } from '@/firebase/provider';
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,7 +24,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
     const searchParams = useSearchParams();
     const studentName = searchParams.get('student');
     const className = searchParams.get('class');
-    const { teacherName } = useAssignments();
+    const { teacherName } = useFirebase();
 
     return (
         <div className="space-y-6" id="printable-tp">
@@ -140,7 +140,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
 function TpListPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { tps, classes } = useAssignments();
+  const { tps, classes } = useFirebase();
 
   const className = searchParams.get('class');
   

@@ -3,7 +3,7 @@
 'use client';
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useAssignments } from '@/contexts/AssignmentsContext';
+import { useFirebase } from '@/firebase/provider';
 import { allBlocs } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 function StudentPortfolio() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { evaluations, assignedTps, storedEvals, feedbacks, tps } = useAssignments();
+  const { evaluations, assignedTps, storedEvals, feedbacks, tps } = useFirebase();
 
   if (!studentName) {
     return (

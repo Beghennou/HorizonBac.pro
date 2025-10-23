@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DraftingCompass, PlusCircle, Save, Trash2, X, FilePenLine } from "lucide-react";
 import { useFieldArray, useForm, Controller } from "react-hook-form";
 import { allBlocs, competencesParNiveau, Niveau, TP } from "@/lib/data-manager";
-import { useAssignments } from "@/contexts/AssignmentsContext";
+import { useFirebase } from '@/firebase/provider';
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -53,7 +53,7 @@ export default function TPDesignerPage() {
     const { toast } = useToast();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { addTp, teacherName, tps } = useAssignments(); 
+    const { addTp, teacherName, tps } = useFirebase(); 
     const [isEditMode, setIsEditMode] = useState(false);
     
     const form = useForm<TpFormValues>({

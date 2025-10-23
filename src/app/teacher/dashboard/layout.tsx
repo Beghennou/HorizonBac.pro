@@ -16,7 +16,7 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { AssignmentsProvider, useAssignments } from '@/contexts/AssignmentsContext';
+import { useFirebase } from '@/firebase/provider';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
 import { Home, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,7 @@ function DashboardLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { classes: dynamicClasses, tps: allTps, isLoaded } = useAssignments();
+  const { classes: dynamicClasses, tps: allTps, isLoaded } = useFirebase();
 
   const [niveau, setNiveau] = useState<Niveau>('seconde');
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
@@ -61,14 +61,14 @@ function DashboardLayoutContent({
 
     setSelectedClass(initialClass);
     
-    if (initialClass && (!classFromUrl || !levelFromUrl)) {
+    if (isLoaded && initialClass && (!classFromUrl || !levelFromUrl)) {
         const newSearchParams = new URLSearchParams(searchParams.toString());
         newSearchParams.set('level', initialNiveau);
         newSearchParams.set('class', initialClass);
         router.replace(`${pathname}?${newSearchParams.toString()}`);
     }
 
-  }, [searchParams, dynamicClasses, router, pathname]);
+  }, [searchParams, dynamicClasses, router, pathname, isLoaded]);
 
   if (!isLoaded || !selectedClass) {
     return <TachometerAnimation />;
@@ -224,8 +224,6 @@ export default function TeacherDashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AssignmentsProvider>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
-    </AssignmentsProvider>
+    <DashboardLayoutContent>{children}</DashboardLayoutContent>
   );
 }

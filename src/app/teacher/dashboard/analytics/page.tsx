@@ -1,7 +1,7 @@
 
 'use client';
 import { useSearchParams } from 'next/navigation';
-import { useAssignments } from '@/contexts/AssignmentsContext';
+import { useFirebase } from '@/firebase/provider';
 import { allBlocs, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -20,7 +20,7 @@ const MAX_SCORE = 3;
 
 export default function AnalyticsPage() {
     const searchParams = useSearchParams();
-    const { students, classes, evaluations } = useAssignments();
+    const { students, classes, evaluations } = useFirebase();
     
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const currentClassName = searchParams.get('class') || Object.keys(classes).find(c => c.startsWith('2')) || '2MV1';

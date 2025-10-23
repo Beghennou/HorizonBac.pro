@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Bot, Send, Loader2, Play, CheckCircle, MessageSquare, Award } from 'lucide-react';
-import { useAssignments } from '@/contexts/AssignmentsContext';
+import { useFirebase } from '@/firebase/provider';
 import { Badge } from '@/components/ui/badge';
 import { CheckeredFlag } from '@/components/icons';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -49,7 +49,7 @@ export default function TPPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { assignedTps, updateTpStatus, prelimAnswers, savePrelimAnswer, feedbacks, saveFeedback, tps } = useAssignments();
+  const { assignedTps, updateTpStatus, prelimAnswers, savePrelimAnswer, feedbacks, saveFeedback, tps } = useFirebase();
 
   const tpId = typeof params.tpId === 'string' ? parseInt(params.tpId, 10) : null;
   const tp = tpId ? tps[tpId] : null;

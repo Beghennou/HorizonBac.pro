@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { useAssignments } from '@/contexts/AssignmentsContext';
+import { useFirebase } from '@/firebase/provider';
 import { TP, EtudePrelimQCM, EtudePrelimText, allBlocs } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 const evaluationLevels: EvaluationStatus[] = ['NA', 'EC', 'A', 'M'];
 
 const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: string | null }) => {
-    const { students } = useAssignments();
+    const { students } = useFirebase();
     
     if (!tp || !studentName) return null;
 
@@ -226,7 +226,7 @@ export default function StudentDetailPage() {
     const searchParams = useSearchParams();
     const params = useParams();
     const { toast } = useToast();
-    const { students, classes, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback, storedEvals, tps } = useAssignments();
+    const { students, classes, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback, storedEvals, tps } = useFirebase();
 
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     const className = searchParams.get('class');
@@ -482,6 +482,3 @@ export default function StudentDetailPage() {
         </div>
     );
 }
-
-
-

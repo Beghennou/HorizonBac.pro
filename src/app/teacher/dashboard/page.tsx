@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { TP, EtudePrelimQCM } from "@/lib/data-manager";
 import { useSearchParams } from "next/navigation";
 import { Mail, User, Users, Printer, Bot } from "lucide-react";
-import { useAssignments } from "@/contexts/AssignmentsContext";
+import { useFirebase } from '@/firebase/provider';
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 
@@ -28,7 +28,7 @@ const PrintButton = () => {
 }
 
 const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: string | null }) => {
-    const { students } = useAssignments();
+    const { students } = useFirebase();
     
     if (!tp || !studentName) {
         return (
@@ -74,7 +74,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
     const searchParams = useSearchParams();
     const studentName = searchParams.get('student');
     const className = searchParams.get('class');
-    const { teacherName } = useAssignments();
+    const { teacherName } = useFirebase();
 
     return (
         <div className="space-y-6" id="printable-tp">
@@ -192,7 +192,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
 
 export default function DashboardPage() {
   const searchParams = useSearchParams();
-  const { tps } = useAssignments();
+  const { tps } = useFirebase();
   const tpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
   const tp = tpId ? tps[tpId] : null;
 

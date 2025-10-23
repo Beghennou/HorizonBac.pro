@@ -16,7 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { useAssignments, TpStatus } from '@/contexts/AssignmentsContext';
+import { useFirebase, TpStatus } from '@/firebase/provider';
 import {
   Tooltip,
   TooltipContent,
@@ -34,7 +34,7 @@ const statusLabels: Record<TpStatus, string> = {
 export default function StudentsPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { students, assignTp, classes, assignedTps, tps: allTpsFromContext } = useAssignments();
+    const { students, assignTp, classes, assignedTps, tps: allTpsFromContext } = useFirebase();
     const { toast } = useToast();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';

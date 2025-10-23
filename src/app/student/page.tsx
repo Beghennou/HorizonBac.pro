@@ -1,5 +1,4 @@
 
-
 'use client';
 import { Suspense } from 'react';
 import Image from 'next/image';
@@ -12,13 +11,13 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { RacingHelmet } from '@/components/icons';
-import { useAssignments } from '@/contexts/AssignmentsContext';
+import { useFirebase } from '@/firebase/provider';
 import { cn } from '@/lib/utils';
 
 function StudentDashboard() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { assignedTps, storedEvals, tps: allTps } = useAssignments();
+  const { assignedTps, storedEvals, tps: allTps } = useFirebase();
 
   if (!studentName) {
     return (

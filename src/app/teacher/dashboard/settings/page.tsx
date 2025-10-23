@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight } from "lucide-react";
-import { useAssignments } from '@/contexts/AssignmentsContext';
+import { useFirebase } from '@/firebase/provider';
 import { Student } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -75,7 +75,7 @@ const CsvImportSection = ({ title, onImport }: { title: string, onImport: (stude
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { students, classes, setStudents, setClasses, teacherName, setTeacherName, deleteStudent, deleteClass, updateClassWithCsv } = useAssignments();
+  const { students, classes, setStudents, setClasses, teacherName, setTeacherName, deleteStudent, deleteClass, updateClassWithCsv } = useFirebase();
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
