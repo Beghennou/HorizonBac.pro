@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,8 +31,8 @@ function DashboardLayoutContent({
   const searchParams = useSearchParams();
   const { classes: dynamicClasses, tps: allTps, isLoaded } = useAssignments();
 
-  const niveau = (searchParams.get('level') as Niveau) || 'seconde';
-  const currentClassFromUrl = searchParams.get('class');
+  const [niveau, setNiveau] = useState<Niveau>('seconde');
+  const [selectedClass, setSelectedClass] = useState<string | null>(null);
 
   const classesForLevel = useMemo(() => Object.keys(dynamicClasses).filter(c => {
     if (niveau === 'seconde') return c.startsWith('2');
@@ -42,11 +41,36 @@ function DashboardLayoutContent({
     return false;
   }).sort(), [dynamicClasses, niveau]);
 
-  const selectedClass = currentClassFromUrl && classesForLevel.includes(currentClassFromUrl) 
-    ? currentClassFromUrl 
-    : classesForLevel[0] || null;
+  useEffect(() => {
+    const levelFromUrl = searchParams.get('level') as Niveau | null;
+    const classFromUrl = searchParams.get('class');
 
-  if (!isLoaded) {
+    const initialNiveau = levelFromUrl || 'seconde';
+    setNiveau(initialNiveau);
+
+    const classesForInitialNiveau = Object.keys(dynamicClasses).filter(c => {
+        if (initialNiveau === 'seconde') return c.startsWith('2');
+        if (initialNiveau === 'premiere') return c.startsWith('1');
+        if (initialNiveau === 'terminale') return c.startsWith('T');
+        return false;
+      }).sort();
+
+    const initialClass = classFromUrl && classesForInitialNiveau.includes(classFromUrl) 
+        ? classFromUrl 
+        : classesForInitialNiveau[0] || null;
+
+    setSelectedClass(initialClass);
+    
+    if (initialClass && (!classFromUrl || !levelFromUrl)) {
+        const newSearchParams = new URLSearchParams(searchParams.toString());
+        newSearchParams.set('level', initialNiveau);
+        newSearchParams.set('class', initialClass);
+        router.replace(`${pathname}?${newSearchParams.toString()}`);
+    }
+
+  }, [searchParams, dynamicClasses, router, pathname]);
+
+  if (!isLoaded || !selectedClass) {
     return <TachometerAnimation />;
   }
 
@@ -56,7 +80,7 @@ function DashboardLayoutContent({
         if (newNiveau === 'premiere') return c.startsWith('1');
         if (newNiveau === 'terminale') return c.startsWith('T');
         return false;
-    }) || Object.keys(dynamicClasses)[0];
+    }) || null;
     
     const newSearchParams = new URLSearchParams();
     newSearchParams.set('level', newNiveau);
@@ -90,17 +114,6 @@ function DashboardLayoutContent({
 
   const tps = getTpsByNiveau(niveau, allTps);
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
-
-  if (!selectedClass && pathname !== '/teacher/dashboard/settings') {
-     const firstClass = Object.keys(dynamicClasses)[0];
-     if(firstClass) {
-        const newSearchParams = new URLSearchParams(searchParams.toString());
-        newSearchParams.set('class', firstClass);
-        router.replace(`${pathname}?${newSearchParams.toString()}`);
-        return <TachometerAnimation />;
-     }
-  }
-
 
   return (
       <SidebarProvider>

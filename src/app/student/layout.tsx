@@ -4,7 +4,6 @@ import { Suspense } from 'react';
 import { AssignmentsProvider } from '@/contexts/AssignmentsContext';
 import StudentLayoutContent from './student-layout-content';
 import { useAssignments } from '@/contexts/AssignmentsContext';
-import { Loader2 } from 'lucide-react';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -31,5 +30,3 @@ export default function StudentLayout({
     </AssignmentsProvider>
   );
 }
-
-    

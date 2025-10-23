@@ -1,13 +1,14 @@
 
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
-import { Firestore, collection, doc, getDoc, getDocs, setDoc, writeBatch, deleteDoc } from 'firebase/firestore';
-import { getTpById, TP, initialStudents, initialClasses } from '@/lib/data-manager';
+import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback, useMemo } from 'react';
+import { useAuth, useFirestore } from '@/firebase/provider';
+import { collection, doc, getDocs, writeBatch, query, where, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore } from '@/firebase';
 
+// Types definition
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 export type TpStatus = 'non-commencé' | 'en-cours' | 'terminé';
 
@@ -65,8 +66,13 @@ type AssignmentsContextType = {
 
 const AssignmentsContext = createContext<AssignmentsContextType | undefined>(undefined);
 
+const collectionsToManage = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'tps', 'config'];
+
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const db = useFirestore();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Record<string, string[]>>({});
   const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
@@ -74,218 +80,183 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [prelimAnswers, setPrelimAnswers] = useState<Record<string, Record<number, Record<number, PrelimAnswer>>>>({});
   const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
   const [storedEvals, setStoredEvals] = useState<Record<string, Record<number, StoredEvaluation>>>({});
+  const [tps, setTps] = useState<Record<number, TP>>(() => getTpById(-1, true) as Record<number, TP>);
   const [teacherName, setTeacherName] = useState<string>('M. Dubois');
-  const [tps, setTps] = useState<Record<number, TP>>({});
   const [isLoaded, setIsLoaded] = useState(false);
-  const { toast } = useToast();
 
-  const resetStudentData = useCallback(async (db: Firestore) => {
-    const batch = writeBatch(db);
-    
-    const collectionsToReset = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'tps', 'settings'];
+  const resetAndSeedDatabase = useCallback(async () => {
+    if (!db) return;
+    toast({ title: "Initialisation de la base de données...", description: "Veuillez patienter." });
 
-    for (const coll of collectionsToReset) {
-        try {
-            const snapshot = await getDocs(collection(db, coll));
-            if (!snapshot.empty) {
-              snapshot.forEach(doc => batch.delete(doc.ref));
-            }
-        } catch (error) {
-            console.error(`Could not query collection ${coll} for deletion`, error);
-        }
-    }
-    
     try {
-        await batch.commit();
-        console.log("All collections cleared for reset.");
-    } catch(e) {
-        console.error("Error committing deletions", e);
-    }
+      const batch = writeBatch(db);
 
-    const writeBatch2 = writeBatch(db);
-    initialStudents.forEach(student => {
+      // Seed students
+      initialStudents.forEach(student => {
         const studentRef = doc(db, 'students', student.id);
-        writeBatch2.set(studentRef, student);
-    });
-    
-    Object.entries(initialClasses).forEach(([className, studentNames]) => {
+        batch.set(studentRef, student);
+      });
+
+      // Seed classes
+      Object.entries(initialClasses).forEach(([className, studentNames]) => {
         const classRef = doc(db, 'classes', className);
-        writeBatch2.set(classRef, { studentNames });
-    });
-    
-    const localTps = getTpById(-1, true) as Record<number, TP>;
-    Object.values(localTps).forEach(tp => {
-        const tpRef = doc(db, 'tps', tp.id.toString());
-        writeBatch2.set(tpRef, tp);
-    });
-    
-    writeBatch2.set(doc(db, 'settings', 'teacher'), { name: 'M. Dubois' });
-    
-    const placeholderCollections = ['assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
-    for(const coll of placeholderCollections) {
-        writeBatch2.set(doc(db, coll, '_placeholder'), { initialized: true });
-    }
+        batch.set(classRef, { studentNames });
+      });
 
-    try {
-        await writeBatch2.commit();
-        toast({
-            title: "Données réinitialisées et synchronisées",
-            description: "La base de données a été peuplée avec les données initiales.",
-        });
-    } catch(e) {
-        console.error("Error committing initial data", e);
-        toast({
-            variant: "destructive",
-            title: "Erreur de synchronisation",
-            description: "Impossible d'écrire les données initiales dans Firestore.",
-        });
-    }
+      // Ensure other collections exist by adding a placeholder doc
+      for (const collName of collectionsToManage) {
+        if (!['students', 'classes'].includes(collName)) {
+           const placeholderRef = doc(db, collName, '_placeholder');
+           batch.set(placeholderRef, { initialized: true });
+        }
+      }
+      
+      const configRef = doc(db, 'config', 'teacher');
+      batch.set(configRef, { name: 'M. Dubois' });
 
-  }, [toast]);
-  
-  const loadData = useCallback(async (db: Firestore) => {
+
+      await batch.commit();
+      toast({ title: "Base de données initialisée avec succès !" });
+      return true;
+    } catch (error: any) {
+      console.error("Error seeding database: ", error);
+      toast({ variant: 'destructive', title: "Erreur d'initialisation", description: error.message });
+      return false;
+    }
+  }, [db, toast]);
+
+  const loadAllData = useCallback(async () => {
     if (!db) return;
     setIsLoaded(false);
+
     try {
-        const studentsSnapshot = await getDocs(collection(db, 'students'));
-        const classesSnapshot = await getDocs(collection(db, 'classes'));
-
-        if (studentsSnapshot.empty || classesSnapshot.empty) {
-            console.log("Core collections (students or classes) are empty. Forcing a full data reset.");
-            await resetStudentData(db);
-            await loadData(db); // Re-run loadData after resetting
-            return;
+      const studentsSnapshot = await getDocs(collection(db, 'students'));
+      if (studentsSnapshot.empty) {
+        const success = await resetAndSeedDatabase();
+        if (success) {
+           // Reload data after seeding
+           loadAllData();
+        } else {
+            setIsLoaded(true);
         }
+        return;
+      }
+      
+      const studentsData = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
+      setStudents(studentsData);
 
-        const [tpsSnapshot, assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, teacherSnapshot] = await Promise.all([
-            getDocs(collection(db, 'tps')),
-            getDocs(collection(db, 'assignedTps')),
-            getDocs(collection(db, 'evaluations')),
-            getDocs(collection(db, 'prelimAnswers')),
-            getDocs(collection(db, 'feedbacks')),
-            getDocs(collection(db, 'storedEvals')),
-            getDoc(doc(db, 'settings', 'teacher')),
-        ]);
+      const classesSnapshot = await getDocs(collection(db, 'classes'));
+      const classesData = Object.fromEntries(classesSnapshot.docs.map(doc => [doc.id, doc.data().studentNames]));
+      setClasses(classesData);
+      
+      const collectionsPromises = [
+        getDocs(collection(db, 'assignedTps')),
+        getDocs(collection(db, 'evaluations')),
+        getDocs(collection(db, 'prelimAnswers')),
+        getDocs(collection(db, 'feedbacks')),
+        getDocs(collection(db, 'storedEvals')),
+        getDocs(collection(db, 'tps')),
+      ];
 
-        const studentsData = studentsSnapshot.docs.map(doc => doc.data() as Student);
-        setStudents(studentsData);
-        
-        const classesData: Record<string, string[]> = {};
-        classesSnapshot.forEach(doc => classesData[doc.id] = doc.data().studentNames);
-        setClasses(classesData);
+      const [assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, tpsSnapshot] = await Promise.all(collectionsPromises);
+      
+      setAssignedTps(Object.fromEntries(assignedTpsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data().assigned])));
+      setEvaluations(Object.fromEntries(evalsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data()])));
+      setPrelimAnswers(Object.fromEntries(prelimsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data()])));
+      setFeedbacks(Object.fromEntries(feedbacksSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, 'data' in d.data() ? d.data().data : {}])));
+      setStoredEvals(Object.fromEntries(storedEvalsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data()])));
+      
+      const customTpsData = Object.fromEntries(tpsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(doc => [doc.id, doc.data() as TP]));
+      setTps(prev => ({...prev, ...customTpsData}));
+      
+      const teacherConfigDoc = await getDoc(doc(db, 'config', 'teacher'));
+      if(teacherConfigDoc.exists()) setTeacherName(teacherConfigDoc.data().name);
 
-        const localTps = getTpById(-1, true) as Record<number, TP>;
-        const tpsData: Record<number, TP> = { ...localTps };
-        tpsSnapshot.forEach(doc => tpsData[doc.data().id] = doc.data() as TP);
-        setTps(tpsData);
-        
-        const assignedTpsData: Record<string, AssignedTp[]> = {};
-        assignedTpsSnapshot.docs.filter(doc => doc.id !== '_placeholder').forEach(doc => assignedTpsData[doc.id] = doc.data().tps);
-        setAssignedTps(assignedTpsData);
-        
-        const evalsData: Record<string, Record<string, EvaluationStatus[]>> = {};
-        evalsSnapshot.docs.filter(doc => doc.id !== '_placeholder').forEach(doc => evalsData[doc.id] = doc.data());
-        setEvaluations(evalsData);
 
-        const prelimsData: Record<string, Record<number, Record<number, PrelimAnswer>>> = {};
-        prelimsSnapshot.docs.filter(doc => doc.id !== '_placeholder').forEach(doc => prelimsData[doc.id] = JSON.parse(doc.data().answers));
-        setPrelimAnswers(prelimsData);
-
-        const feedbacksData: Record<string, Record<number, Feedback>> = {};
-        feedbacksSnapshot.docs.filter(doc => doc.id !== '_placeholder').forEach(doc => feedbacksData[doc.id] = JSON.parse(doc.data().feedbacks));
-        setFeedbacks(feedbacksData);
-
-        const storedEvalsData: Record<string, Record<number, StoredEvaluation>> = {};
-        storedEvalsSnapshot.docs.filter(doc => doc.id !== '_placeholder').forEach(doc => storedEvalsData[doc.id] = JSON.parse(doc.data().evals));
-        setStoredEvals(storedEvalsData);
-
-        if (teacherSnapshot.exists()) {
-            setTeacherName(teacherSnapshot.data().name);
-        }
-        
-        toast({ title: "Connecté à Firestore", description: "Les données sont lues depuis la base de données." });
-    } catch (error) {
-        console.error("Error loading data from Firestore:", error);
-        toast({
-            variant: "destructive",
-            title: "Erreur de connexion à Firestore",
-            description: `Impossible de lire les données. Erreur: ${(error as Error).message}`,
-        });
+    } catch (error: any) {
+      console.error("Failed to load data from Firestore", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur de chargement des données",
+        description: error.message,
+      });
     } finally {
-        setIsLoaded(true);
+      setIsLoaded(true);
     }
-  }, [toast, resetStudentData]);
+  }, [db, toast, resetAndSeedDatabase]);
 
   useEffect(() => {
-    if (db) {
-        loadData(db);
+    if (user && db) {
+      loadAllData();
+    } else if (!user) {
+      // Handle logout, clear data
+      setIsLoaded(true); // Or set to false until user logs in
     }
-  }, [db, loadData]);
-
+  }, [user, db, loadAllData]);
 
   const addTp = async (tp: TP) => {
-    try {
-        const tpRef = doc(db, 'tps', tp.id.toString());
-        await setDoc(tpRef, tp);
-        setTps(prev => ({ ...prev, [tp.id]: tp }));
-    } catch(e) { console.error(e) }
+    if(!db) return;
+    const tpRef = doc(db, 'tps', tp.id.toString());
+    await setDoc(tpRef, tp);
+    setTps(prev => ({ ...prev, [tp.id]: tp }));
+    toast({ title: "TP ajouté", description: `Le TP ${tp.titre} a été sauvegardé.` });
   };
-
+  
   const assignTp = async (studentNames: string[], tpId: number) => {
-    const batch = writeBatch(db);
-    const newAssignedTps = { ...assignedTps };
+     if(!db) return;
+     const batch = writeBatch(db);
+     const newAssignedTps = { ...assignedTps };
 
-    studentNames.forEach(studentName => {
+     studentNames.forEach(studentName => {
         const studentTps = newAssignedTps[studentName] || [];
         if (!studentTps.some(tp => tp.id === tpId)) {
-            newAssignedTps[studentName] = [...studentTps, { id: tpId, status: 'non-commencé' }].sort((a,b) => a.id - b.id);
+            studentTps.push({ id: tpId, status: 'non-commencé' });
+            newAssignedTps[studentName] = studentTps.sort((a,b) => a.id - b.id);
             const studentRef = doc(db, 'assignedTps', studentName);
-            batch.set(studentRef, { tps: newAssignedTps[studentName] });
+            batch.set(studentRef, { assigned: newAssignedTps[studentName] });
         }
     });
-
     await batch.commit();
     setAssignedTps(newAssignedTps);
   };
-
-   const updateTpStatus = async (studentName: string, tpId: number, status: TpStatus) => {
+  
+  const updateTpStatus = async (studentName: string, tpId: number, status: TpStatus) => {
+    if(!db) return;
     const studentTps = assignedTps[studentName] || [];
     const tpIndex = studentTps.findIndex(tp => tp.id === tpId);
 
     if (tpIndex !== -1) {
         const updatedTps = [...studentTps];
         updatedTps[tpIndex].status = status;
-        const studentRef = doc(db, 'assignedTps', studentName);
-        await setDoc(studentRef, { tps: updatedTps });
-        setAssignedTps(prev => ({ ...prev, [studentName]: updatedTps }));
+        const newAssignedTps = { ...assignedTps, [studentName]: updatedTps };
+        await setDoc(doc(db, 'assignedTps', studentName), { assigned: updatedTps });
+        setAssignedTps(newAssignedTps);
+        toast({ title: "Statut du TP mis à jour" });
     }
-     toast({
-      title: "Statut du TP mis à jour",
-      description: `Le TP ${tpId} est maintenant "${status}".`,
-    });
   };
-
+  
   const saveEvaluation = async (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => {
-    
-    const newStoredEvals = { ...storedEvals };
-    const studentStoredEvals = newStoredEvals[studentName] || {};
-    studentStoredEvals[tpId] = {
+     if(!db) return;
+     
+     const evalData : StoredEvaluation = {
         date: new Date().toLocaleDateString('fr-FR'),
-        prelimNote: prelimNote,
-        tpNote: tpNote,
+        prelimNote,
+        tpNote,
         competences: currentEvals,
-        isFinal: isFinal,
-    };
-    newStoredEvals[studentName] = studentStoredEvals;
-    
-    const storedEvalRef = doc(db, 'storedEvals', studentName);
-    await setDoc(storedEvalRef, { evals: JSON.stringify(newStoredEvals[studentName]) });
-    setStoredEvals(newStoredEvals);
-    
+        isFinal,
+     };
+     
+     const storedEvalRef = doc(db, 'storedEvals', `${studentName}_${tpId}`);
+     await setDoc(storedEvalRef, evalData);
+     
+     const newStoredEvals = {...storedEvals};
+     if(!newStoredEvals[studentName]) newStoredEvals[studentName] = {};
+     newStoredEvals[studentName][tpId] = evalData;
+     setStoredEvals(newStoredEvals);
+     
     if (isFinal) {
         const newEvaluations = { ...evaluations };
         const updatedStudentEvals = { ...(newEvaluations[studentName] || {}) };
-        
         for (const competenceId in currentEvals) {
           const newStatus = currentEvals[competenceId];
           const history = updatedStudentEvals[competenceId] || [];
@@ -294,189 +265,159 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
           }
         }
         newEvaluations[studentName] = updatedStudentEvals;
-        const evalRef = doc(db, 'evaluations', studentName);
-        await setDoc(evalRef, newEvaluations[studentName]);
+        await setDoc(doc(db, 'evaluations', studentName), updatedStudentEvals);
         setEvaluations(newEvaluations);
     }
-    toast({
-        title: isFinal ? "Évaluation rendue" : "Évaluation enregistrée",
-        description: isFinal 
-            ? `L'évaluation pour ${studentName} a été finalisée et est visible par l'élève.`
-            : `Les compétences pour ${studentName} ont été sauvegardées en brouillon.`,
-    });
+    toast({ title: isFinal ? "Évaluation finale enregistrée" : "Brouillon sauvegardé" });
   };
   
-   useEffect(() => {
-    if (!isLoaded || !db) return;
-    const { allBlocs } = require('@/lib/data-manager');
-    const calculateProgress = async () => {
-        const batch = writeBatch(db);
-        const updatedStudents = students.map(student => {
-            const studentEvaluations = evaluations[student.name] || {};
-            let totalXp = 0;
-            for (const competenceId in studentEvaluations) {
-                const history = studentEvaluations[competenceId];
-                if (Array.isArray(history) && history.length > 0) {
-                    const latestStatus = history[history.length - 1];
-                    totalXp += xpPerLevel[latestStatus] || 0;
-                }
-            }
-
-            const allCompetencesCount = Object.values(allBlocs).reduce((acc, bloc: any) => acc + Object.keys(bloc.items).length, 0);
-            const maxPossibleXp = allCompetencesCount * xpPerLevel['M'];
-            const progressPercentage = maxPossibleXp > 0 ? Math.round((totalXp / maxPossibleXp) * 100) : 0;
-            
-            if (student.xp !== totalXp || student.progress !== progressPercentage) {
-                const updatedStudent = { ...student, xp: totalXp, progress: progressPercentage };
-                const studentRef = doc(db, "students", student.id);
-                batch.set(studentRef, updatedStudent);
-                return updatedStudent;
-            }
-            return student;
-        });
-        if(updatedStudents.some(s => s.xp !== students.find(os => os.id === s.id)?.xp)) {
-            await batch.commit();
-            setStudents(updatedStudents);
-        }
-    };
-
-    calculateProgress();
-  }, [db, evaluations, isLoaded, students]);
-
   const savePrelimAnswer = async (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
-    const newPrelimAnswers = { ...prelimAnswers };
-    const studentAnswers = newPrelimAnswers[studentName] || {};
-    const tpAnswers = studentAnswers[tpId] || {};
-    tpAnswers[questionIndex] = answer;
-    studentAnswers[tpId] = tpAnswers;
-    newPrelimAnswers[studentName] = studentAnswers;
-    
-    const prelimRef = doc(db, 'prelimAnswers', studentName);
-    await setDoc(prelimRef, { answers: JSON.stringify(newPrelimAnswers[studentName]) });
-    setPrelimAnswers(newPrelimAnswers);
+     if(!db) return;
+     const newPrelimAnswers = { ...prelimAnswers };
+     if (!newPrelimAnswers[studentName]) newPrelimAnswers[studentName] = {};
+     if (!newPrelimAnswers[studentName][tpId]) newPrelimAnswers[studentName][tpId] = {};
+     newPrelimAnswers[studentName][tpId][questionIndex] = answer;
+     
+     const docRef = doc(db, 'prelimAnswers', `${studentName}_${tpId}`);
+     await setDoc(docRef, newPrelimAnswers[studentName][tpId]);
+     
+     setPrelimAnswers(newPrelimAnswers);
   };
 
   const saveFeedback = async (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
-    const newFeedbacks = { ...feedbacks };
-    const studentFeedbacks = newFeedbacks[studentName] || {};
-    const tpFeedback = studentFeedbacks[tpId] || {};
-    tpFeedback[author] = feedback;
-    studentFeedbacks[tpId] = tpFeedback;
-    newFeedbacks[studentName] = studentFeedbacks;
-    
-    const feedbackRef = doc(db, 'feedbacks', studentName);
-    await setDoc(feedbackRef, { feedbacks: JSON.stringify(newFeedbacks[studentName]) });
-    setFeedbacks(newFeedbacks);
+      if(!db) return;
+      const newFeedbacks = { ...feedbacks };
+      if(!newFeedbacks[studentName]) newFeedbacks[studentName] = {};
+      if(!newFeedbacks[studentName][tpId]) newFeedbacks[studentName][tpId] = {};
+      newFeedbacks[studentName][tpId][author] = feedback;
+      
+      const docRef = doc(db, 'feedbacks', `${studentName}_${tpId}`);
+      await setDoc(docRef, { data: newFeedbacks[studentName][tpId] });
+      setFeedbacks(newFeedbacks);
   };
-
+  
   const deleteStudent = async (studentName: string) => {
-      const studentToDelete = students.find(s => s.name === studentName);
-      if (!studentToDelete) return;
+    if(!db) return;
+    const studentToDelete = students.find(s => s.name === studentName);
+    if (!studentToDelete) return;
 
-      const batch = writeBatch(db);
+    await deleteDoc(doc(db, 'students', studentToDelete.id));
+    setStudents(prev => prev.filter(s => s.name !== studentName));
 
-      batch.delete(doc(db, 'students', studentToDelete.id));
-      batch.delete(doc(db, 'assignedTps', studentName));
-      batch.delete(doc(db, 'evaluations', studentName));
-      batch.delete(doc(db, 'prelimAnswers', studentName));
-      batch.delete(doc(db, 'feedbacks', studentName));
-      batch.delete(doc(db, 'storedEvals', studentName));
-      
-      const updatedClasses = { ...classes };
-      for (const className in updatedClasses) {
-        if (updatedClasses[className].includes(studentName)) {
-            updatedClasses[className] = updatedClasses[className].filter(name => name !== studentName);
-            batch.set(doc(db, 'classes', className), { studentNames: updatedClasses[className] });
-        }
+    const newClasses = { ...classes };
+    for (const cName in newClasses) {
+      const index = newClasses[cName].indexOf(studentName);
+      if (index > -1) {
+        newClasses[cName].splice(index, 1);
+        await setDoc(doc(db, 'classes', cName), { studentNames: newClasses[cName] });
       }
-
-      await batch.commit();
-      
-      setStudents(prev => prev.filter(s => s.name !== studentName));
-      setClasses(updatedClasses);
-      if (db) await loadData(db);
-
-      toast({
-          title: "Élève supprimé",
-          description: `${studentName} et toutes ses données ont été supprimés de Firestore.`,
-      });
+    }
+    setClasses(newClasses);
+    toast({ title: "Élève supprimé" });
   };
-
+  
   const deleteClass = async (className: string) => {
-    const studentsInClass = classes[className] || [];
+    if(!db) return;
+    const studentsToDelete = classes[className] || [];
     const batch = writeBatch(db);
 
-    studentsInClass.forEach(studentName => {
-        const studentToDelete = students.find(s => s.name === studentName);
-        if (studentToDelete) {
-          batch.delete(doc(db, 'students', studentToDelete.id));
-          batch.delete(doc(db, 'assignedTps', studentName));
-          batch.delete(doc(db, 'evaluations', studentName));
-          batch.delete(doc(db, 'prelimAnswers', studentName));
-          batch.delete(doc(db, 'feedbacks', studentName));
-          batch.delete(doc(db, 'storedEvals', studentName));
+    studentsToDelete.forEach(studentName => {
+        const studentDoc = students.find(s => s.name === studentName);
+        if(studentDoc) {
+            batch.delete(doc(db, 'students', studentDoc.id));
         }
     });
-
     batch.delete(doc(db, 'classes', className));
-    await batch.commit();
-    if (db) await loadData(db);
 
-    toast({
-        title: "Classe supprimée",
-        description: `La classe ${className} et ses élèves ont été supprimés de Firestore.`,
-    });
+    await batch.commit();
+
+    setStudents(prev => prev.filter(s => !studentsToDelete.includes(s.name)));
+    const newClasses = { ...classes };
+    delete newClasses[className];
+    setClasses(newClasses);
+
+    toast({ title: "Classe supprimée" });
   };
   
   const updateClassWithCsv = async (className: string, studentNames: string[]) => {
-    const batch = writeBatch(db);
-
-    const updatedClasses = { ...classes };
-    Object.keys(updatedClasses).forEach(key => {
-        updatedClasses[key] = updatedClasses[key].filter(name => !studentNames.includes(name));
+     if(!db) return;
+     const batch = writeBatch(db);
+     
+     // Remove students from their old classes
+     const newClasses = { ...classes };
+     Object.keys(newClasses).forEach(key => {
+        newClasses[key] = newClasses[key].filter(name => !studentNames.includes(name));
+        batch.set(doc(db, 'classes', key), { studentNames: newClasses[key]});
     });
-    updatedClasses[className] = studentNames;
-    
-    Object.entries(updatedClasses).forEach(([name, names]) => {
-      batch.set(doc(db, 'classes', name), { studentNames: names });
-    });
-
-    const existingStudents = [...students];
-    const existingStudentNames = new Set(existingStudents.map(s => s.name));
-    
-    studentNames.forEach(name => {
+     
+     // Add to new class
+     newClasses[className] = [...(newClasses[className] || []), ...studentNames]
+        .filter((v,i,a) => a.indexOf(v) === i) // unique
+        .sort();
+     batch.set(doc(db, 'classes', className), { studentNames: newClasses[className] });
+     
+     const existingStudents = [...students];
+     const existingStudentNames = new Set(existingStudents.map(s => s.name));
+     
+     studentNames.forEach(name => {
       if (!existingStudentNames.has(name)) {
         const nameParts = name.split(' ');
         const lastName = nameParts[0] || '';
         const firstName = nameParts.slice(1).join(' ') || 'Prénom';
-
+        
         const newStudent: Student = {
-          id: `student-${lastName.toLowerCase()}-${firstName.toLowerCase()}`.replace(' ','-'),
+          id: `student-${lastName.toLowerCase()}-${firstName.toLowerCase()}`.replace(' ','-') + Date.now(),
           name: name,
           email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`,
           progress: 0,
           xp: 0,
         };
         existingStudents.push(newStudent);
-        batch.set(doc(db, 'students', newStudent.id), newStudent);
+        const studentRef = doc(db, 'students', newStudent.id);
+        batch.set(studentRef, newStudent);
       }
     });
 
     await batch.commit();
-    setClasses(updatedClasses);
+    setClasses(newClasses);
     setStudents(existingStudents);
-    
-    toast({
-      title: "Classe mise à jour",
-      description: `La classe ${className} a été mise à jour avec les nouveaux élèves sur Firestore.`,
-    });
+    toast({ title: "Classe mise à jour" });
   };
-
+  
   const updateTeacherName = async (name: string) => {
+    if(!db) return;
+    await setDoc(doc(db, 'config', 'teacher'), { name });
     setTeacherName(name);
-    await setDoc(doc(db, 'settings', 'teacher'), { name });
   };
+  
+  useEffect(() => {
+    // This effect calculates student progress based on evaluations
+    if (!isLoaded || students.length === 0) return;
 
+    const { allBlocs } = require('@/lib/data-manager');
+    const allCompetencesCount = Object.values(allBlocs).reduce((acc: number, bloc: any) => acc + Object.keys(bloc.items).length, 0);
+    const maxPossibleXp = allCompetencesCount * xpPerLevel['M'];
+
+    const updatedStudents = students.map(student => {
+        const studentEvaluations = evaluations[student.name] || {};
+        let totalXp = 0;
+        for (const competenceId in studentEvaluations) {
+            const history = studentEvaluations[competenceId];
+            if (Array.isArray(history) && history.length > 0) {
+                const latestStatus = history[history.length - 1];
+                totalXp += xpPerLevel[latestStatus] || 0;
+            }
+        }
+        const progressPercentage = maxPossibleXp > 0 ? Math.round((totalXp / maxPossibleXp) * 100) : 0;
+        
+        return { ...student, xp: totalXp, progress: progressPercentage };
+    });
+    
+    // Only update if there's a change to avoid loops
+    if (JSON.stringify(students) !== JSON.stringify(updatedStudents)) {
+        setStudents(updatedStudents);
+    }
+}, [evaluations, students, isLoaded]);
 
   return (
     <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, prelimAnswers, feedbacks, storedEvals, tps, assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer, saveFeedback, teacherName, setTeacherName: updateTeacherName, deleteStudent, deleteClass, updateClassWithCsv, addTp, isLoaded }}>
@@ -492,3 +433,19 @@ export const useAssignments = () => {
   }
   return context;
 };
+
+// Helper function to create an object from entries, because Object.fromEntries is not available in all environments
+function fromEntries<T>(entries: [string, T][]): Record<string, T> {
+  return entries.reduce((acc, [key, value]) => {
+    acc[key] = value;
+    return acc;
+  }, {} as Record<string, T>);
+}
+
+function ObjectfromEntries<T>(docs: { id: string; data: () => T; }[]): Record<string, T> {
+    const obj: Record<string, T> = {};
+    docs.forEach(doc => {
+        obj[doc.id] = doc.data();
+    });
+    return obj;
+}
