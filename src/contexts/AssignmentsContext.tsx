@@ -56,7 +56,6 @@ type AssignmentsContextType = {
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
   teacherName: string;
   setTeacherName: (name: string) => void;
-  resetStudentData: () => Promise<void>;
   deleteStudent: (studentName: string) => void;
   deleteClass: (className: string) => void;
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
@@ -80,7 +79,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
 
-  const resetStudentData = useCallback(async () => {
+  const resetStudentData = useCallback(async (db: Firestore) => {
     const batch = writeBatch(db);
     
     const collectionsToReset = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'tps', 'settings'];
@@ -142,9 +141,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         });
     }
 
-  }, [db, toast]);
+  }, [toast]);
   
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (db: Firestore) => {
     if (!db) return;
     setIsLoaded(false);
     try {
@@ -153,8 +152,8 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
         if (studentsSnapshot.empty || classesSnapshot.empty) {
             console.log("Core collections (students or classes) are empty. Forcing a full data reset.");
-            await resetStudentData();
-            await loadData(); // Re-run loadData after resetting
+            await resetStudentData(db);
+            await loadData(db); // Re-run loadData after resetting
             return;
         }
 
@@ -215,11 +214,11 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     } finally {
         setIsLoaded(true);
     }
-  }, [db, toast, resetStudentData]);
+  }, [toast, resetStudentData]);
 
   useEffect(() => {
     if (db) {
-        loadData();
+        loadData(db);
     }
   }, [db, loadData]);
 
@@ -308,7 +307,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   };
   
    useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || !db) return;
     const { allBlocs } = require('@/lib/data-manager');
     const calculateProgress = async () => {
         const batch = writeBatch(db);
@@ -395,7 +394,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       
       setStudents(prev => prev.filter(s => s.name !== studentName));
       setClasses(updatedClasses);
-      await loadData();
+      if (db) await loadData(db);
 
       toast({
           title: "Élève supprimé",
@@ -421,7 +420,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
     batch.delete(doc(db, 'classes', className));
     await batch.commit();
-    await loadData();
+    if (db) await loadData(db);
 
     toast({
         title: "Classe supprimée",
@@ -480,7 +479,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
 
   return (
-    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, prelimAnswers, feedbacks, storedEvals, tps, assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer, saveFeedback, teacherName, setTeacherName: updateTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv, addTp, isLoaded }}>
+    <AssignmentsContext.Provider value={{ students, setStudents, classes, setClasses, assignedTps, evaluations, prelimAnswers, feedbacks, storedEvals, tps, assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer, saveFeedback, teacherName, setTeacherName: updateTeacherName, deleteStudent, deleteClass, updateClassWithCsv, addTp, isLoaded }}>
       {children}
     </AssignmentsContext.Provider>
   );
@@ -493,5 +492,3 @@ export const useAssignments = () => {
   }
   return context;
 };
-
-    

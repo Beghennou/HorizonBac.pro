@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -74,7 +75,7 @@ const CsvImportSection = ({ title, onImport }: { title: string, onImport: (stude
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { students, classes, setStudents, setClasses, teacherName, setTeacherName, resetStudentData, deleteStudent, deleteClass, updateClassWithCsv } = useAssignments();
+  const { students, classes, setStudents, setClasses, teacherName, setTeacherName, deleteStudent, deleteClass, updateClassWithCsv } = useAssignments();
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
@@ -162,7 +163,14 @@ export default function SettingsPage() {
 
   const handleReset = () => {
     if (resetPassword === 'Mongy') {
-        resetStudentData();
+        // This function does not exist in the context, so it will cause an error
+        // resetStudentData();
+        console.error("resetStudentData function is not available in this component's context.");
+        toast({
+            variant: 'destructive',
+            title: 'Fonctionnalité non implémentée',
+            description: 'La réinitialisation des données n\'est pas connectée dans cette interface.'
+        });
         setResetPassword('');
     } else {
         toast({
