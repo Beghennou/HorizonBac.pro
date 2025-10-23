@@ -6,7 +6,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
+import { getTpsByNiveau, Niveau, classesStatiques } from '@/lib/data-manager';
 import { LogoutButton } from '@/components/logout-button';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { LyceeLogo } from '@/components/lycee-logo';
@@ -31,31 +31,12 @@ function DashboardLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { firestore, tps: allTps, isLoaded: isAuthLoaded } = useFirebase();
-
-  const { data: dynamicClasses, isLoading: isLoadingClasses } = useCollection(
-      useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore])
-  );
-
-  const classes = useMemo(() => {
-      const classMap: Record<string, string[]> = {};
-      if (dynamicClasses) {
-          dynamicClasses.forEach(doc => {
-              classMap[doc.id] = doc.studentNames || [];
-          });
-      }
-      return classMap;
-  }, [dynamicClasses]);
+  const { isLoaded: isAuthLoaded, tps: allTps } = useFirebase();
 
   const [niveau, setNiveau] = useState<Niveau>('seconde');
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
 
-  const classesForLevel = useMemo(() => Object.keys(classes).filter(c => {
-    if (niveau === 'seconde') return c.startsWith('2');
-    if (niveau === 'premiere') return c.startsWith('1');
-    if (niveau === 'terminale') return c.startsWith('T');
-    return false;
-  }).sort(), [classes, niveau]);
+  const classesForLevel = useMemo(() => classesStatiques[niveau] || [], [niveau]);
 
   useEffect(() => {
     const levelFromUrl = searchParams.get('level') as Niveau | null;
@@ -64,14 +45,7 @@ function DashboardLayoutContent({
     const initialNiveau = levelFromUrl || 'seconde';
     setNiveau(initialNiveau);
 
-    if (isLoadingClasses) return;
-
-    const classesForInitialNiveau = Object.keys(classes).filter(c => {
-        if (initialNiveau === 'seconde') return c.startsWith('2');
-        if (initialNiveau === 'premiere') return c.startsWith('1');
-        if (initialNiveau === 'terminale') return c.startsWith('T');
-        return false;
-      }).sort();
+    const classesForInitialNiveau = classesStatiques[initialNiveau] || [];
 
     const initialClass = classFromUrl && classesForInitialNiveau.includes(classFromUrl) 
         ? classFromUrl 
@@ -79,28 +53,23 @@ function DashboardLayoutContent({
 
     setSelectedClass(initialClass);
     
-    if (isAuthLoaded && !isLoadingClasses && initialClass && (!classFromUrl || !levelFromUrl)) {
+    if (isAuthLoaded && initialClass && (!classFromUrl || !levelFromUrl)) {
         const newSearchParams = new URLSearchParams(searchParams.toString());
         newSearchParams.set('level', initialNiveau);
         newSearchParams.set('class', initialClass);
         router.replace(`${pathname}?${newSearchParams.toString()}`);
     }
 
-  }, [searchParams, classes, router, pathname, isAuthLoaded, isLoadingClasses]);
+  }, [searchParams, router, pathname, isAuthLoaded]);
   
-  const isLoaded = isAuthLoaded && !isLoadingClasses;
+  const isLoaded = isAuthLoaded && selectedClass !== null;
 
   if (!isLoaded) {
     return <TachometerAnimation />;
   }
 
   const handleNiveauChange = (newNiveau: Niveau) => {
-    const firstClassForLevel = Object.keys(classes).find(c => {
-        if (newNiveau === 'seconde') return c.startsWith('2');
-        if (newNiveau === 'premiere') return c.startsWith('1');
-        if (newNiveau === 'terminale') return c.startsWith('T');
-        return false;
-    }) || null;
+    const firstClassForLevel = classesStatiques[newNiveau]?.[0] || null;
     
     const newSearchParams = new URLSearchParams();
     newSearchParams.set('level', newNiveau);

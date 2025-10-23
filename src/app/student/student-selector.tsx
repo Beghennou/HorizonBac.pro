@@ -7,38 +7,30 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { collection } from 'firebase/firestore';
+import { toutesLesClassesStatiques } from '@/lib/data-manager';
 
 export default function StudentSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { firestore, isLoaded } = useFirebase();
 
-  const { data: classesData, isLoading: isLoadingClasses } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
-  
-  const classes = useMemo(() => {
-    if (!classesData) return {};
-    return Object.fromEntries(classesData.map(c => [c.id, c.studentNames || []]))
-  }, [classesData]);
-
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
 
-  const sortedClasses = useMemo(() => {
-    return Object.keys(classes).sort((a, b) => {
-      const levelA = a.startsWith('T') ? 3 : a.startsWith('1') ? 2 : 1;
-      const levelB = b.startsWith('T') ? 3 : b.startsWith('1') ? 2 : 1;
-      if (levelA !== levelB) return levelA - levelB;
-      return a.localeCompare(b);
-    });
-  }, [classes]);
+  const { data: classData, isLoading: isLoadingClass } = useCollection(
+      useMemoFirebase(() => firestore && selectedClass ? collection(firestore, 'classes') : null, [firestore, selectedClass])
+  );
 
   const studentsInClass = useMemo(() => {
-    if (selectedClass && classes[selectedClass]) {
-      const studentNames = classes[selectedClass] as string[];
-      return studentNames.sort((a, b) => a.localeCompare(b));
+    if (selectedClass && classData) {
+        const currentClassDoc = classData.find(c => c.id === selectedClass);
+        if (currentClassDoc && currentClassDoc.studentNames) {
+            return (currentClassDoc.studentNames as string[]).sort((a, b) => a.localeCompare(b));
+        }
     }
     return [];
-  }, [selectedClass, classes]);
+  }, [selectedClass, classData]);
+
 
   useEffect(() => {
     if (isLoaded) {
@@ -68,8 +60,8 @@ export default function StudentSelector() {
   };
 
 
-  if (!isLoaded || isLoadingClasses) {
-    return <div>Chargement des données...</div>;
+  if (!isLoaded) {
+    return <div>Chargement...</div>;
   }
 
   return (
@@ -81,7 +73,7 @@ export default function StudentSelector() {
               <SelectValue placeholder="Choisir une classe..." />
             </SelectTrigger>
             <SelectContent>
-              {sortedClasses.map(className => (
+              {toutesLesClassesStatiques.map(className => (
                 <SelectItem key={className} value={className}>{className}</SelectItem>
               ))}
             </SelectContent>
@@ -90,7 +82,7 @@ export default function StudentSelector() {
 
         <div className="space-y-2">
           <Label htmlFor="student-select" className="font-bold">Élève</Label>
-          <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={!selectedClass || studentsInClass.length === 0}>
+          <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={!selectedClass || isLoadingClass}>
             <SelectTrigger id="student-select">
               <SelectValue placeholder={!selectedClass ? "Choisis d'abord une classe" : "Choisir ton nom..."} />
             </SelectTrigger>

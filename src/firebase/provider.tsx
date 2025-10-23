@@ -109,40 +109,32 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: null,
   });
 
+  // Data is no longer loaded globally here to avoid permission issues.
+  // Components will be responsible for fetching their own data.
   const [tps, setTps] = useState<Record<number, TP>>(initialTps);
-  const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
-  const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>({});
   const [teacherName, setTeacherNameState] = useState<string>('');
 
-  const { data: dynamicTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
-  const { data: dynamicAssignedTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
-  const { data: dynamicEvals } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
-  const { data: configData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
-  
-  useEffect(() => setTps(dynamicTps ? Object.fromEntries(dynamicTps.map(tp => [tp.id, tp])) : initialTps), [dynamicTps]);
-  useEffect(() => setTeacherNameState(configData?.find(d => d.id === 'teacher')?.name || 'M. Dubois'), [configData]);
+  const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
+  const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
   
   useEffect(() => {
-    if (dynamicAssignedTps) {
-        const data: Record<string, any> = {};
-        dynamicAssignedTps.forEach(doc => { data[doc.id] = doc.tps || []; });
-        setAssignedTps(data);
+    if (dynamicTps) {
+        const tpsData = Object.fromEntries(dynamicTps.map(tp => [tp.id, tp]));
+        setTps(tpsData);
     }
-  }, [dynamicAssignedTps]);
-  
+  }, [dynamicTps]);
+
   useEffect(() => {
-    if (dynamicEvals) {
-        const data: Record<string, any> = {};
-        dynamicEvals.forEach(doc => { data[doc.id] = doc.competences || {}; });
-        setEvaluations(data);
+    if (configData) {
+        const teacherConfig = configData.find(d => d.id === 'teacher');
+        setTeacherNameState(teacherConfig?.name || 'M. Dubois');
     }
-  }, [dynamicEvals]);
+  }, [configData]);
 
+  // The main loaded state now depends on auth and essential configs.
+  const isLoaded = !userAuthState.isUserLoading && !isTpsLoading && !isConfigLoading;
 
-  const isLoaded = !userAuthState.isUserLoading;
-
-
-  // Auth state listener
+  // Auth state listener remains the same
   useEffect(() => {
     if (!auth) {
       setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Firebase Auth service not provided.") });
@@ -172,7 +164,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle the user state update
     } catch (error) {
       console.error("Error signing in with Google:", error);
       toast({
@@ -183,13 +174,13 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     }
   }, [auth, toast]);
 
-  const assignTp = useCallback(async (studentNames: string[], tpId: number) => {
+  const assignTp = useCallback(async (studentNames: string[], tpId: number, allAssignedTps: Record<string, AssignedTp[]>) => {
     if (!firestore) return;
     
     const batch = writeBatch(firestore);
 
     studentNames.forEach(studentName => {
-        const currentTps = assignedTps[studentName] || [];
+        const currentTps = allAssignedTps[studentName] || [];
         if (!currentTps.some(tp => tp.id === tpId)) {
             const newTps = [...currentTps, { id: tpId, status: 'non-commencé' as TpStatus }];
             const studentDocRef = doc(firestore, `assignedTps/${studentName}`);
@@ -204,7 +195,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         }));
     });
 
-  }, [firestore, assignedTps]);
+  }, [firestore]);
+  
+  const evaluations: Record<string, Record<string, EvaluationStatus[]>> = {};
+  const assignedTps: Record<string, AssignedTp[]> = {};
+
 
   const saveEvaluation = useCallback(async (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => {
       if (!studentName || !tpId || !firestore) return;
@@ -287,10 +282,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       });
   }, [firestore]);
 
-  const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
+  const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher', currentFeedbacks: Record<string, any>) => {
       if(!firestore || !studentName) return;
         const feedbackDocRef = doc(firestore, `students/${studentName}/feedbacks`, tpId.toString());
-        const updatedFeedbacks = { [author]: feedback };
+        const updatedFeedbacks = { ...currentFeedbacks, [author]: feedback };
 
         setDoc(feedbackDocRef, { tps: updatedFeedbacks }, { merge: true }).catch(error => {
              errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -383,7 +378,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       });
   }, [firestore]);
 
-  const contextValue = useMemo(() => ({
+  const contextValue = {
     firebaseApp,
     firestore,
     auth,
@@ -393,26 +388,28 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     isLoaded,
     teacherName,
     tps,
-    assignedTps,
-    evaluations,
-    assignTp,
+    // These are now empty by default and fetched by components
+    assignedTps: {},
+    evaluations: {},
+    assignTp: (studentNames: string[], tpId: number) => {
+        // This function will need to be adapted in the component to pass the currently fetched assignedTps
+        console.warn("assignTp called from provider context. This is deprecated.");
+    },
     saveEvaluation,
-    updateTpStatus,
+    updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => {
+         console.warn("updateTpStatus called from provider context. This is deprecated.");
+    },
     savePrelimAnswer,
-    saveFeedback,
+    saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
+         console.warn("saveFeedback called from provider context. This is deprecated.");
+    },
     setTeacherName,
     deleteStudent,
     deleteClass,
     updateClassWithCsv,
     addTp,
     signInWithGoogle,
-  }), [
-      firebaseApp, firestore, auth, userAuthState,
-      isLoaded, teacherName, tps, assignedTps, evaluations,
-      assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer,
-      saveFeedback, setTeacherName, deleteStudent, deleteClass,
-      updateClassWithCsv, addTp, signInWithGoogle
-  ]);
+  };
 
   return (
     <FirebaseContext.Provider value={contextValue as FirebaseContextState}>

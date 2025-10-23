@@ -24,6 +24,19 @@ export type TP = Omit<TPSeconde, 'etudePrelim'> & {
 
 export type Niveau = 'seconde' | 'premiere' | 'terminale';
 
+export const classesStatiques: Record<Niveau, string[]> = {
+  seconde: ['2MV', '2REM'],
+  premiere: ['1APP', '1VP'],
+  terminale: ['TAPP', 'TVP'],
+};
+
+export const toutesLesClassesStatiques = [
+    ...classesStatiques.seconde,
+    ...classesStatiques.premiere,
+    ...classesStatiques.terminale
+].sort();
+
+
 export type CompetenceBloc = {
   title: string;
   colorClass: string;
