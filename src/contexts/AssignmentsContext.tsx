@@ -1,7 +1,8 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
-import { Firestore, collection, doc, getDocs, writeBatch, setDoc, deleteDoc } from 'firebase/firestore';
+import { Firestore, collection, doc, getDocs, writeBatch, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -71,7 +72,7 @@ const collectionsToManage = ['students', 'classes', 'assignedTps', 'evaluations'
 
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const db = useFirestore();
-  const { user } = useAuth();
+  const { user, isUserLoading } = useAuth();
   const { toast } = useToast();
 
   const [students, setStudents] = useState<Student[]>([]);
@@ -122,6 +123,11 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       console.error("Error seeding database: ", error);
       toast({ variant: 'destructive', title: "Erreur d'initialisation", description: error.message });
+      const contextualError = new FirestorePermissionError({
+          operation: 'write',
+          path: 'multiple collections'
+      });
+      errorEmitter.emit('permission-error', contextualError);
       return false;
     }
   }, [toast]);
@@ -156,15 +162,15 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         getDocs(collection(db, 'feedbacks')),
         getDocs(collection(db, 'storedEvals')),
         getDocs(collection(db, 'tps')),
-        doc(db, 'config', 'teacher')
+        getDoc(doc(db, 'config', 'teacher'))
       ];
 
-      const [assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, tpsSnapshot, teacherConfigDoc] = await Promise.all(collectionsPromises.map(p => p instanceof Promise ? p : getDoc(p)));
+      const [assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, tpsSnapshot, teacherConfigDoc] = await Promise.all(collectionsPromises);
       
       setAssignedTps(Object.fromEntries(assignedTpsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data().assigned])));
       setEvaluations(Object.fromEntries(evalsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data()])));
       setPrelimAnswers(Object.fromEntries(prelimsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data()])));
-      setFeedbacks(Object.fromEntries(feedbacksSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data().data || {}])));
+      setFeedbacks(Object.fromEntries(feedbacksSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, 'data' in d.data() ? d.data().data : {}])));
       setStoredEvals(Object.fromEntries(storedEvalsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data()])));
       
       const customTpsData = Object.fromEntries(tpsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(doc => [doc.id, doc.data() as TP]));
@@ -185,15 +191,17 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }, [toast, resetAndSeedDatabase]);
 
   useEffect(() => {
-    if (db) {
+    if (db && !isUserLoading) {
       loadAllData(db);
     }
-  }, [db, loadAllData]);
+  }, [db, isUserLoading, loadAllData]);
 
   const addTp = async (tp: TP) => {
     if(!db) return;
     const tpRef = doc(db, 'tps', tp.id.toString());
-    await setDoc(tpRef, tp);
+    await setDoc(tpRef, tp).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'write', path: tpRef.path, requestResourceData: tp }));
+    });
     setTps(prev => ({ ...prev, [tp.id]: tp }));
     toast({ title: "TP ajouté", description: `Le TP ${tp.titre} a été sauvegardé.` });
   };
@@ -212,7 +220,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
             batch.set(studentRef, { assigned: newAssignedTps[studentName] });
         }
     });
-    await batch.commit();
+    await batch.commit().catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'write', path: 'assignedTps' }));
+    });
     setAssignedTps(newAssignedTps);
   };
   
@@ -225,7 +235,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         const updatedTps = [...studentTps];
         updatedTps[tpIndex].status = status;
         const newAssignedTps = { ...assignedTps, [studentName]: updatedTps };
-        await setDoc(doc(db, 'assignedTps', studentName), { assigned: updatedTps });
+        const docRef = doc(db, 'assignedTps', studentName);
+        await setDoc(docRef, { assigned: updatedTps }).catch(error => {
+            errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'write', path: docRef.path, requestResourceData: { assigned: updatedTps } }));
+        });
         setAssignedTps(newAssignedTps);
         toast({ title: "Statut du TP mis à jour" });
     }
@@ -243,7 +256,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
      };
      
      const storedEvalRef = doc(db, 'storedEvals', `${studentName}_${tpId}`);
-     await setDoc(storedEvalRef, evalData);
+     await setDoc(storedEvalRef, evalData).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'write', path: storedEvalRef.path, requestResourceData: evalData }));
+     });
      
      const newStoredEvals = {...storedEvals};
      if(!newStoredEvals[studentName]) newStoredEvals[studentName] = {};
@@ -261,7 +276,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
           }
         }
         newEvaluations[studentName] = updatedStudentEvals;
-        await setDoc(doc(db, 'evaluations', studentName), updatedStudentEvals);
+        const evalRef = doc(db, 'evaluations', studentName);
+        await setDoc(evalRef, updatedStudentEvals).catch(error => {
+            errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'write', path: evalRef.path, requestResourceData: updatedStudentEvals }));
+        });
         setEvaluations(newEvaluations);
     }
     toast({ title: isFinal ? "Évaluation finale enregistrée" : "Brouillon sauvegardé" });
@@ -275,7 +293,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
      newPrelimAnswers[studentName][tpId][questionIndex] = answer;
      
      const docRef = doc(db, 'prelimAnswers', `${studentName}_${tpId}`);
-     await setDoc(docRef, newPrelimAnswers[studentName][tpId]);
+     await setDoc(docRef, newPrelimAnswers[studentName][tpId]).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'write', path: docRef.path, requestResourceData: newPrelimAnswers[studentName][tpId] }));
+     });
      
      setPrelimAnswers(newPrelimAnswers);
   };
@@ -288,7 +308,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       newFeedbacks[studentName][tpId][author] = feedback;
       
       const docRef = doc(db, 'feedbacks', `${studentName}_${tpId}`);
-      await setDoc(docRef, { data: newFeedbacks[studentName][tpId] });
+      await setDoc(docRef, { data: newFeedbacks[studentName][tpId] }).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'write', path: docRef.path, requestResourceData: { data: newFeedbacks[studentName][tpId] } }));
+      });
       setFeedbacks(newFeedbacks);
   };
   
@@ -297,7 +319,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     const studentToDelete = students.find(s => s.name === studentName);
     if (!studentToDelete) return;
 
-    await deleteDoc(doc(db, 'students', studentToDelete.id));
+    await deleteDoc(doc(db, 'students', studentToDelete.id)).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'delete', path: doc(db, 'students', studentToDelete.id).path }));
+    });
     setStudents(prev => prev.filter(s => s.name !== studentName));
 
     const newClasses = { ...classes };
@@ -305,7 +329,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       const index = newClasses[cName].indexOf(studentName);
       if (index > -1) {
         newClasses[cName].splice(index, 1);
-        await setDoc(doc(db, 'classes', cName), { studentNames: newClasses[cName] });
+        await setDoc(doc(db, 'classes', cName), { studentNames: newClasses[cName] }).catch(error => {
+            errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'write', path: doc(db, 'classes', cName).path, requestResourceData: { studentNames: newClasses[cName] } }));
+        });
       }
     }
     setClasses(newClasses);
@@ -325,7 +351,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
     batch.delete(doc(db, 'classes', className));
 
-    await batch.commit();
+    await batch.commit().catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'write', path: 'classes ou students' }));
+    });
 
     setStudents(prev => prev.filter(s => !studentsToDelete.includes(s.name)));
     const newClasses = { ...classes };
@@ -374,7 +402,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    await batch.commit();
+    await batch.commit().catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'write', path: 'classes ou students' }));
+    });
     setClasses(newClasses);
     setStudents(existingStudents);
     toast({ title: "Classe mise à jour" });
@@ -382,7 +412,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   
   const updateTeacherName = async (name: string) => {
     if(!db) return;
-    await setDoc(doc(db, 'config', 'teacher'), { name });
+    const docRef = doc(db, 'config', 'teacher');
+    await setDoc(docRef, { name }).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'write', path: docRef.path, requestResourceData: { name } }));
+    });
     setTeacherName(name);
   };
   
@@ -429,5 +462,3 @@ export const useAssignments = () => {
   }
   return context;
 };
-
-    
