@@ -78,23 +78,23 @@ export const getTpById = (id: number, all?: boolean, allTpsFromContext?: Record<
 };
 
 export const initialClasses: Record<string, string[]> = {
-    "TVP1": ["DUPONT Jean", "MARTIN Léa"],
+    "TVP1": [],
     "TVP2": [],
     "TVP3": [],
     "TAPP 1": [],
     "TAPP 2": [],
     "1APP1": [],
     "1APP2": [],
-    "1VP1": ["BERNARD Hugo", "ROBERT Alice"],
+    "1VP1": [],
     "1VP2": [],
     "1VP3": [],
-    "2MV1": ["PETIT Louis", "DURAND Clara"],
+    "2MV1": [],
     "2MV2": [],
     "2MV3": [],
     "2MV4": [],
     "2MV5": [],
     "2MV6": [],
-    "2APP-RCVP": ["John Coppe"],
+    "2APP-RCVP": [],
 };
 
 export const allBlocs: Record<string, CompetenceBloc> = {
@@ -104,11 +104,5 @@ export const allBlocs: Record<string, CompetenceBloc> = {
 };
 
 export const initialStudents: Student[] = [
-    { id: 'student-dupont-jean', name: 'DUPONT Jean', email: 'jean.dupont@school.com', progress: 0, xp: 0 },
-    { id: 'student-martin-lea', name: 'MARTIN Léa', email: 'lea.martin@school.com', progress: 0, xp: 0 },
-    { id: 'student-bernard-hugo', name: 'BERNARD Hugo', email: 'hugo.bernard@school.com', progress: 0, xp: 0 },
-    { id: 'student-robert-alice', name: 'ROBERT Alice', email: 'alice.robert@school.com', progress: 0, xp: 0 },
-    { id: 'student-petit-louis', name: 'PETIT Louis', email: 'louis.petit@school.com', progress: 0, xp: 0 },
-    { id: 'student-durand-clara', name: 'DURAND Clara', email: 'clara.durand@school.com', progress: 0, xp: 0 },
-    { id: 'student-coppe-john', name: 'John Coppe', email: 'john.coppe@school.com', progress: 0, xp: 0 },
+    // La liste est vide pour permettre la mise à jour par CSV
 ];
