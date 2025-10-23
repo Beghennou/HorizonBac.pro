@@ -46,7 +46,7 @@ function DashboardLayoutContent({
     ? currentClassFromUrl 
     : classesForLevel[0] || null;
 
-  if (!isLoaded || !selectedClass) {
+  if (!isLoaded) {
     return <TachometerAnimation />;
   }
 
@@ -90,6 +90,17 @@ function DashboardLayoutContent({
 
   const tps = getTpsByNiveau(niveau, allTps);
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
+
+  if (!selectedClass && pathname !== '/teacher/dashboard/settings') {
+     const firstClass = Object.keys(dynamicClasses)[0];
+     if(firstClass) {
+        const newSearchParams = new URLSearchParams(searchParams.toString());
+        newSearchParams.set('class', firstClass);
+        router.replace(`${pathname}?${newSearchParams.toString()}`);
+        return <TachometerAnimation />;
+     }
+  }
+
 
   return (
       <SidebarProvider>
@@ -143,7 +154,7 @@ function DashboardLayoutContent({
 
                       <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
                         <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Sélection de la classe</h3>
-                        <Select value={selectedClass} onValueChange={handleClassChange}>
+                        <Select value={selectedClass || ''} onValueChange={handleClassChange}>
                           <SelectTrigger>
                             <SelectValue placeholder="Choisir une classe..." />
                           </SelectTrigger>
