@@ -94,8 +94,12 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
     const collectionsToClear = ['assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
     for (const coll of collectionsToClear) {
-        const snapshot = await getDocs(collection(db, coll));
-        snapshot.forEach(doc => batch.delete(doc.ref));
+        try {
+            const snapshot = await getDocs(collection(db, coll));
+            snapshot.forEach(doc => batch.delete(doc.ref));
+        } catch (error) {
+            console.error(`Could not clear collection ${coll}`, error);
+        }
     }
 
     await batch.commit();
@@ -105,9 +109,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
           title: "Données réinitialisées sur Firestore",
           description: "La base de données a été réinitialisée avec les données initiales.",
       });
-      loadData();
+      await loadData();
     }
-  }, [toast]);
+  }, [toast, loadData]);
 
 
   const loadData = useCallback(async () => {
@@ -117,6 +121,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
         if (studentsSnapshot.empty) {
             await resetStudentData(true);
+            // Re-fetch after reset
             studentsSnapshot = await getDocs(collection(db, 'students'));
         }
 
@@ -177,7 +182,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     } finally {
         setIsLoaded(true);
     }
-  }, [toast, resetStudentData]);
+  }, [toast, resetStudentData, tps]);
 
   useEffect(() => {
     loadData();
