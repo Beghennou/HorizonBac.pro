@@ -90,8 +90,6 @@ export interface FirebaseContextState {
   classes: Record<string, string[]>;
   assignedTps: Record<string, AssignedTp[]>;
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
-  prelimAnswers: Record<string, Record<number, Record<number, PrelimAnswer>>>;
-  feedbacks: Record<string, Record<number, Feedback>>;
 }
 
 // React Context
@@ -113,28 +111,23 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: null,
   });
 
+  // --- DATA IS NOW LOADED IN COMPONENTS THAT NEED IT, NOT GLOBALLY ---
   const { data: tpsData, isLoading: isLoadingTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
   const { data: studentsData, isLoading: isLoadingStudents } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
   const { data: classesData, isLoading: isLoadingClasses } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: assignedTpsData, isLoading: isLoadingAssignedTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
   const { data: teacherNameData, isLoading: isLoadingConfig } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
-  
   const { data: evalsData, isLoading: isLoadingEvals } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
-  const { data: prelimAnswersData, isLoading: isLoadingPrelimAnswers } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'prelimAnswers') : null, [firestore]));
-  const { data: feedbacksData, isLoading: isLoadingFeedbacks } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'feedbacks') : null, [firestore]));
-
-
+  
   // --- STATE MANAGEMENT ---
-  const [tps, setTps] = useState<Record<number, TP>>({});
+  const [tps, setTps] = useState<Record<number, TP>>(initialTps);
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Record<string, string[]>>({});
   const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
   const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>({});
-  const [prelimAnswers, setPrelimAnswers] = useState<Record<string, Record<number, Record<number, PrelimAnswer>>>>({});
-  const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
   const [teacherName, setTeacherNameState] = useState<string>('');
 
-  const isDataLoading = isLoadingTps || isLoadingStudents || isLoadingClasses || isLoadingAssignedTps || isLoadingConfig || isLoadingEvals || isLoadingPrelimAnswers || isLoadingFeedbacks;
+  const isDataLoading = isLoadingTps || isLoadingStudents || isLoadingClasses || isLoadingAssignedTps || isLoadingConfig || isLoadingEvals;
   const isLoaded = !userAuthState.isUserLoading && !isDataLoading;
 
 
@@ -158,25 +151,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         setEvaluations(data);
     }
   }, [evalsData]);
-
-
-  useEffect(() => {
-    if (prelimAnswersData) {
-        const data: Record<string, any> = {};
-        prelimAnswersData.forEach(doc => { data[doc.id] = doc.answers || {}; });
-        setPrelimAnswers(data);
-    }
-  }, [prelimAnswersData]);
-  
-  useEffect(() => {
-    if (feedbacksData) {
-        const data: Record<string, any> = {};
-        feedbacksData.forEach(doc => { data[doc.id] = doc.tps || {}; });
-        setFeedbacks(data);
-    }
-  }, [feedbacksData]);
-
-
 
   // Auth state listener
   useEffect(() => {
@@ -311,21 +285,22 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const savePrelimAnswer = useCallback((studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
       if(!firestore || !studentName) return;
       const prelimDocRef = doc(firestore, `students/${studentName}/prelimAnswers`, tpId.toString());
-      const updatedAnswers = { ...(prelimAnswers[studentName]?.[tpId] || {}), [questionIndex]: answer };
+      
+      const newAnswers = { [questionIndex]: answer };
 
-      setDoc(prelimDocRef, { answers: updatedAnswers }, { merge: true }).catch(error => {
+      setDoc(prelimDocRef, { answers: newAnswers }, { merge: true }).catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
               path: prelimDocRef.path,
               operation: 'update',
-              requestResourceData: { answers: updatedAnswers },
+              requestResourceData: { answers: newAnswers },
           }));
       });
-  }, [firestore, prelimAnswers]);
+  }, [firestore]);
 
   const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
       if(!firestore || !studentName) return;
         const feedbackDocRef = doc(firestore, `students/${studentName}/feedbacks`, tpId.toString());
-        const updatedFeedbacks = { ...(feedbacks[studentName]?.[tpId] || {}), [author]: feedback };
+        const updatedFeedbacks = { [author]: feedback };
 
         setDoc(feedbackDocRef, { tps: updatedFeedbacks }, { merge: true }).catch(error => {
              errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -334,7 +309,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
                 requestResourceData: { tps: updatedFeedbacks },
             }));
         });
-  }, [firestore, feedbacks]);
+  }, [firestore]);
   
   const setTeacherName = useCallback((name: string) => {
       if(!firestore) return;
@@ -446,7 +421,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       });
   }, [firestore]);
 
-  const contextValue = useMemo((): Omit<FirebaseContextState, 'storedEvals'> => ({
+  const contextValue = useMemo(() => ({
     firebaseApp,
     firestore,
     auth,
@@ -460,8 +435,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     classes,
     assignedTps,
     evaluations,
-    prelimAnswers,
-    feedbacks,
     assignTp,
     saveEvaluation,
     updateTpStatus,
@@ -475,7 +448,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     signInWithGoogle,
   }), [
       firebaseApp, firestore, auth, userAuthState,
-      isLoaded, teacherName, tps, students, classes, assignedTps, evaluations, prelimAnswers, feedbacks,
+      isLoaded, teacherName, tps, students, classes, assignedTps, evaluations,
       assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer,
       saveFeedback, setTeacherName, deleteStudent, deleteClass,
       updateClassWithCsv, addTp, signInWithGoogle
