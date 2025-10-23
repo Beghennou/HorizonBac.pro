@@ -186,13 +186,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }, [toast, resetAndSeedDatabase]);
 
   useEffect(() => {
-    if (user && db) {
+    if (db) {
       loadAllData(db);
-    } else if (!user) {
-      // Handle logout, clear data
-      setIsLoaded(true); // Or set to false until user logs in
     }
-  }, [user, db, loadAllData]);
+  }, [db, loadAllData]);
 
   const addTp = async (tp: TP) => {
     if(!db) return;
@@ -433,5 +430,3 @@ export const useAssignments = () => {
   }
   return context;
 };
-
-    
