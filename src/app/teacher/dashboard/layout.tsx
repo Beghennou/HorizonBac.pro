@@ -68,17 +68,26 @@ function DashboardLayoutContent({
 
       setSelectedClass(initialClass);
       
-      if (initialClass && (!classFromUrl || !levelFromUrl)) {
-          const newSearchParams = new URLSearchParams(searchParams.toString());
-          newSearchParams.set('level', initialNiveau);
-          newSearchParams.set('class', initialClass);
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      let needsRedirect = false;
+      
+      if (!levelFromUrl) {
+        newSearchParams.set('level', initialNiveau);
+        needsRedirect = true;
+      }
+      if (!classFromUrl && initialClass) {
+        newSearchParams.set('class', initialClass);
+        needsRedirect = true;
+      }
+
+      if (needsRedirect) {
           router.replace(`${pathname}?${newSearchParams.toString()}`);
       }
     }
 
   }, [searchParams, router, pathname, isFirebaseLoaded, classes]);
   
-  const isLoaded = isFirebaseLoaded && selectedClass !== null;
+  const isLoaded = isFirebaseLoaded;
 
   if (!isLoaded) {
     return <TachometerAnimation />;
