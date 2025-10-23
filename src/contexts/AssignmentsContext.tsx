@@ -82,18 +82,24 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const resetStudentData = useCallback(async () => {
     const batch = writeBatch(db);
 
-    // Delete existing data
     const collectionsToDelete = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
     for (const coll of collectionsToDelete) {
         try {
             const snapshot = await getDocs(collection(db, coll));
-            snapshot.forEach(doc => batch.delete(doc.ref));
+            if (!snapshot.empty) {
+              snapshot.forEach(doc => batch.delete(doc.ref));
+            }
         } catch (error) {
-            console.error(`Could not clear collection ${coll}`, error);
+            console.error(`Could not query collection ${coll} for deletion`, error);
         }
     }
-    // We commit the delete batch first
-    await batch.commit();
+    
+    // Commit deletions first
+    try {
+        await batch.commit();
+    } catch(e) {
+        console.error("Error committing deletions", e);
+    }
 
     // Re-create initial data in a new batch
     const writeBatch2 = writeBatch(db);
@@ -107,12 +113,20 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         writeBatch2.set(classRef, { studentNames });
     });
 
-    await writeBatch2.commit();
-    
-    toast({
-        title: "Données réinitialisées",
-        description: "La base de données a été synchronisée avec les données initiales de l'application.",
-    });
+    try {
+        await writeBatch2.commit();
+        toast({
+            title: "Données réinitialisées et synchronisées",
+            description: "La base de données a été peuplée avec les données initiales.",
+        });
+    } catch(e) {
+        console.error("Error committing initial data", e);
+        toast({
+            variant: "destructive",
+            title: "Erreur de synchronisation",
+            description: "Impossible d'écrire les données initiales dans Firestore.",
+        });
+    }
 
   }, [toast]);
   
@@ -189,7 +203,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }, [toast, resetStudentData]);
 
   useEffect(() => {
-    // We force a check on initial load. If DB is empty, it will reset.
+    // Force a check on initial load. If DB is empty, it will reset.
     loadData(true); 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
