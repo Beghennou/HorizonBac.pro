@@ -44,15 +44,9 @@ export const competencesParNiveau: Record<Niveau, Record<string, CompetenceBloc>
 
 
 const allTPs: Record<number, TP> = {
-  ...(tpSeconde as Record<number, TP>),
-  ...(tpPremiere as Record<number, TP>),
-  ...(tpTerminale as Record<number, TP>),
-};
-
-const tpsByNiveau: Record<Niveau, TP[]> = {
-  seconde: Object.values(tpSeconde) as TP[],
-  premiere: Object.values(tpPremiere) as TP[],
-  terminale: Object.values(tpTerminale) as TP[],
+  ...tpSeconde,
+  ...tpPremiere,
+  ...tpTerminale,
 };
 
 export const getTpsByNiveau = (niveau: Niveau, allTpsFromContext?: Record<number, TP>): TP[] => {
@@ -61,16 +55,16 @@ export const getTpsByNiveau = (niveau: Niveau, allTpsFromContext?: Record<number
   return sourceTps.filter(tp => {
     if(!tp) return false;
     const tpId = tp.id;
-    const tpNiveau = tp.niveau;
-
-    if (tpNiveau) {
-        return tpNiveau === niveau;
+    
+    // Prioritize the 'niveau' property if it exists (for custom TPs)
+    if (tp.niveau) {
+        return tp.niveau === niveau;
     }
     
-    // Fallback for older TPs without a 'niveau' property
+    // Fallback for older TPs without a 'niveau' property based on ID ranges
     switch(niveau) {
         case 'seconde': return tpId >= 101 && tpId < 200;
-        case 'premiere': return (tpId >= 1 && tpId < 101) || (tpId >= 200 && tpId < 301);
+        case 'premiere': return tpId >= 1 && tpId < 101;
         case 'terminale': return tpId >= 301 && tpId < 1000;
         default: return false;
     }
@@ -122,7 +116,7 @@ export const students: Student[] = allStudentNames.map((name, index) => {
         id: `student-${index + 1}`,
         name: name,
         email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`,
-        progress: Math.floor(Math.random() * 100),
-        xp: Math.floor(Math.random() * 500)
+        progress: 0,
+        xp: 0
     };
 });
