@@ -81,8 +81,11 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
   const resetStudentData = useCallback(async () => {
     const batch = writeBatch(db);
-
+    
+    // This list now includes ALL collections the app depends on.
     const collectionsToDelete = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'tps', 'settings'];
+
+    // Delete existing documents to ensure a clean slate
     for (const coll of collectionsToDelete) {
         try {
             const snapshot = await getDocs(collection(db, coll));
@@ -96,10 +99,12 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     
     try {
         await batch.commit();
+        console.log("All collections cleared for reset.");
     } catch(e) {
         console.error("Error committing deletions", e);
     }
 
+    // Now, repopulate with initial data
     const writeBatch2 = writeBatch(db);
     initialStudents.forEach(student => {
         const studentRef = doc(db, 'students', student.id);
@@ -118,7 +123,12 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
     
     writeBatch2.set(doc(db, 'settings', 'teacher'), { name: 'M. Dubois' });
-
+    
+    // Explicitly create a placeholder for other collections to ensure they exist
+    const placeholderCollections = ['assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
+    for(const coll of placeholderCollections) {
+        writeBatch2.set(doc(db, coll, '_placeholder'), { initialized: true });
+    }
 
     try {
         await writeBatch2.commit();
@@ -137,17 +147,19 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
   }, [toast]);
   
-  const loadData = useCallback(async (forceReset = false) => {
+  const loadData = useCallback(async () => {
     setIsLoaded(false);
     try {
-        let studentsSnapshot = await getDocs(collection(db, 'students'));
-        let classesSnapshot = await getDocs(collection(db, 'classes'));
+        const studentsSnapshot = await getDocs(collection(db, 'students'));
+        const classesSnapshot = await getDocs(collection(db, 'classes'));
 
-        if (forceReset || studentsSnapshot.empty || classesSnapshot.empty) {
+        // If core data is missing, force a full reset.
+        if (studentsSnapshot.empty || classesSnapshot.empty) {
+            console.log("Core collections (students or classes) are empty. Forcing a full data reset.");
             await resetStudentData();
-            // We need to re-fetch after reset
-            studentsSnapshot = await getDocs(collection(db, 'students'));
-            classesSnapshot = await getDocs(collection(db, 'classes'));
+            // Re-fetch data after reset
+            await loadData();
+            return;
         }
 
         const [tpsSnapshot, assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, teacherSnapshot] = await Promise.all([
@@ -173,23 +185,23 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         setTps(tpsData);
         
         const assignedTpsData: Record<string, AssignedTp[]> = {};
-        assignedTpsSnapshot.forEach(doc => assignedTpsData[doc.id] = doc.data().tps);
+        assignedTpsSnapshot.docs.filter(doc => doc.id !== '_placeholder').forEach(doc => assignedTpsData[doc.id] = doc.data().tps);
         setAssignedTps(assignedTpsData);
         
         const evalsData: Record<string, Record<string, EvaluationStatus[]>> = {};
-        evalsSnapshot.forEach(doc => evalsData[doc.id] = doc.data());
+        evalsSnapshot.docs.filter(doc => doc.id !== '_placeholder').forEach(doc => evalsData[doc.id] = doc.data());
         setEvaluations(evalsData);
 
         const prelimsData: Record<string, Record<number, Record<number, PrelimAnswer>>> = {};
-        prelimsSnapshot.forEach(doc => prelimsData[doc.id] = JSON.parse(doc.data().answers));
+        prelimsSnapshot.docs.filter(doc => doc.id !== '_placeholder').forEach(doc => prelimsData[doc.id] = JSON.parse(doc.data().answers));
         setPrelimAnswers(prelimsData);
 
         const feedbacksData: Record<string, Record<number, Feedback>> = {};
-        feedbacksSnapshot.forEach(doc => feedbacksData[doc.id] = JSON.parse(doc.data().feedbacks));
+        feedbacksSnapshot.docs.filter(doc => doc.id !== '_placeholder').forEach(doc => feedbacksData[doc.id] = JSON.parse(doc.data().feedbacks));
         setFeedbacks(feedbacksData);
 
         const storedEvalsData: Record<string, Record<number, StoredEvaluation>> = {};
-        storedEvalsSnapshot.forEach(doc => storedEvalsData[doc.id] = JSON.parse(doc.data().evals));
+        storedEvalsSnapshot.docs.filter(doc => doc.id !== '_placeholder').forEach(doc => storedEvalsData[doc.id] = JSON.parse(doc.data().evals));
         setStoredEvals(storedEvalsData);
 
         if (teacherSnapshot.exists()) {
@@ -210,7 +222,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }, [toast, resetStudentData]);
 
   useEffect(() => {
-    loadData(true); 
+    loadData(); 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -326,8 +338,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
             }
             return student;
         });
-        await batch.commit();
-        setStudents(updatedStudents);
+        if(updatedStudents.some(s => s.xp !== students.find(os => os.id === s.id)?.xp)) {
+            await batch.commit();
+            setStudents(updatedStudents);
+        }
     };
 
     calculateProgress();
