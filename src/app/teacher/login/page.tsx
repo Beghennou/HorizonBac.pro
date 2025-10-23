@@ -1,32 +1,12 @@
 'use client';
 
-import { useTransition } from 'react';
 import { login } from '@/app/teacher/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LyceeLogo } from '@/components/lycee-logo';
 import { LogIn } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
-  const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
-
-  const handleLogin = () => {
-    startTransition(async () => {
-      try {
-        await login();
-      } catch (error) {
-        console.error(error);
-        toast({
-          variant: 'destructive',
-          title: 'Erreur de connexion',
-          description: 'Une erreur est survenue lors de la tentative de connexion.',
-        });
-      }
-    });
-  };
-
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
       <Card className="w-full max-w-md bg-gradient-to-br from-card to-background border-2 border-primary shadow-2xl">
@@ -44,15 +24,16 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button
-            onClick={handleLogin}
-            size="lg"
-            className="w-full font-headline uppercase tracking-wider text-base border-2 border-accent bg-gradient-to-br from-primary to-racing-orange hover:brightness-110"
-            disabled={isPending}
-          >
-            <LogIn className="mr-2" />
-            {isPending ? 'Connexion...' : 'Se connecter (Mode Démo)'}
-          </Button>
+          <form action={login}>
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full font-headline uppercase tracking-wider text-base border-2 border-accent bg-gradient-to-br from-primary to-racing-orange hover:brightness-110"
+            >
+              <LogIn className="mr-2" />
+              Se connecter (Mode Démo)
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>
