@@ -17,7 +17,7 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, useMemoFirebase } from '@/firebase';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
 import { Home, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ function DashboardLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { isLoaded: isAuthLoaded, tps: allTps, classes } = useFirebase();
+  const { isLoaded: isFirebaseLoaded, tps: allTps, classes } = useFirebase();
 
   const [niveau, setNiveau] = useState<Niveau>('seconde');
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
@@ -53,30 +53,32 @@ function DashboardLayoutContent({
     const initialNiveau = levelFromUrl || 'seconde';
     setNiveau(initialNiveau);
 
-    const classesForInitialNiveau = (classes || []).filter(c => {
-        const id = c.id.toLowerCase();
-        if (initialNiveau === 'seconde') return id.startsWith('2');
-        if (initialNiveau === 'premiere') return id.startsWith('1');
-        if (initialNiveau === 'terminale') return id.startsWith('t');
-        return false;
-    }).map(c => c.id).sort();
+    if (isFirebaseLoaded) {
+      const classesForInitialNiveau = (classes || []).filter(c => {
+          const id = c.id.toLowerCase();
+          if (initialNiveau === 'seconde') return id.startsWith('2');
+          if (initialNiveau === 'premiere') return id.startsWith('1');
+          if (initialNiveau === 'terminale') return id.startsWith('t');
+          return false;
+      }).map(c => c.id).sort();
+      
+      const initialClass = classFromUrl && classesForInitialNiveau.includes(classFromUrl) 
+          ? classFromUrl 
+          : classesForInitialNiveau[0] || null;
 
-    const initialClass = classFromUrl && classesForInitialNiveau.includes(classFromUrl) 
-        ? classFromUrl 
-        : classesForInitialNiveau[0] || null;
-
-    setSelectedClass(initialClass);
-    
-    if (isAuthLoaded && initialClass && (!classFromUrl || !levelFromUrl)) {
-        const newSearchParams = new URLSearchParams(searchParams.toString());
-        newSearchParams.set('level', initialNiveau);
-        newSearchParams.set('class', initialClass);
-        router.replace(`${pathname}?${newSearchParams.toString()}`);
+      setSelectedClass(initialClass);
+      
+      if (initialClass && (!classFromUrl || !levelFromUrl)) {
+          const newSearchParams = new URLSearchParams(searchParams.toString());
+          newSearchParams.set('level', initialNiveau);
+          newSearchParams.set('class', initialClass);
+          router.replace(`${pathname}?${newSearchParams.toString()}`);
+      }
     }
 
-  }, [searchParams, router, pathname, isAuthLoaded, classes]);
+  }, [searchParams, router, pathname, isFirebaseLoaded, classes]);
   
-  const isLoaded = isAuthLoaded && selectedClass !== null;
+  const isLoaded = isFirebaseLoaded && selectedClass !== null;
 
   if (!isLoaded) {
     return <TachometerAnimation />;

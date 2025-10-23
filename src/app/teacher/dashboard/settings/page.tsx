@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight } from "lucide-react";
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight, Eraser } from "lucide-react";
+import { useFirebase } from '@/firebase';
 import { Student } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -76,14 +76,12 @@ const CsvImportSection = ({ title, onImport }: { title: string, onImport: (stude
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { firestore, teacherName, setTeacherName, updateClassWithCsv, deleteClass } = useFirebase();
+  const { firestore, teacherName, setTeacherName, updateClassWithCsv, deleteClass, classes, resetAllStudentLists } = useFirebase();
 
-  const { data: classesData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
-
-  const classes = useMemo(() => {
-    if (!classesData) return {};
-    return Object.fromEntries(classesData.map(c => [c.id, c.studentNames || []]))
-  }, [classesData]);
+  const classList = useMemo(() => {
+    if (!classes) return {};
+    return Object.fromEntries(classes.map(c => [c.id, c.studentNames || []]))
+  }, [classes]);
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
@@ -92,7 +90,8 @@ export default function SettingsPage() {
   const [lastName, setLastName] = useState('');
   const [newClassName, setNewClassName] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
-  const [resetPassword, setResetPassword] = useState('');
+  const [resetDataPassword, setResetDataPassword] = useState('');
+  const [resetListsPassword, setResetListsPassword] = useState('');
   
   const [importClassName, setImportClassName] = useState('');
   const [newImportClassName, setNewImportClassName] = useState('');
@@ -122,7 +121,7 @@ export default function SettingsPage() {
     const finalClassName = newClassName || selectedClass;
     const studentName = `${lastName.toUpperCase()} ${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}`;
     
-    const existingStudents = classes[finalClassName] || [];
+    const existingStudents = classList[finalClassName] || [];
     if (existingStudents.includes(studentName)) {
         toast({
             variant: 'destructive',
@@ -153,15 +152,15 @@ export default function SettingsPage() {
     });
   };
 
-  const handleReset = () => {
-    if (resetPassword === 'Mongy') {
+  const handleResetData = () => {
+    if (resetDataPassword === 'Mongy') {
         console.error("resetStudentData function is not available in this component's context.");
         toast({
             variant: 'destructive',
             title: 'Fonctionnalité non implémentée',
             description: 'La réinitialisation des données n\'est pas connectée dans cette interface.'
         });
-        setResetPassword('');
+        setResetDataPassword('');
     } else {
         toast({
             variant: 'destructive',
@@ -170,18 +169,27 @@ export default function SettingsPage() {
         });
     }
   };
+
+  const handleResetLists = () => {
+    if (resetListsPassword === 'reset') {
+        resetAllStudentLists();
+        setResetListsPassword('');
+    } else {
+        toast({
+            variant: 'destructive',
+            title: "Mot de passe incorrect",
+            description: "La réinitialisation a été annulée.",
+        });
+    }
+  }
   
   const handleDeleteStudent = async () => {
       if (!studentToDelete || !deleteStudentClass || !firestore) return;
       
-      const currentStudents = classes[deleteStudentClass] || [];
+      const currentStudents = classList[deleteStudentClass] || [];
       const updatedStudents = currentStudents.filter((s: string) => s !== studentToDelete);
 
       updateClassWithCsv(deleteStudentClass, updatedStudents);
-
-      // Note: This only removes the student from the class list.
-      // It does not delete their associated data (evals, progress etc.)
-      // to prevent accidental data loss. This could be extended later.
 
       setStudentToDelete('');
       setDeleteStudentClass('');
@@ -297,7 +305,7 @@ export default function SettingsPage() {
                             <SelectValue placeholder="Choisir une classe..." />
                         </SelectTrigger>
                         <SelectContent>
-                            {Object.keys(classes).sort().map(c => (
+                            {Object.keys(classList).sort().map(c => (
                                 <SelectItem key={c} value={c}>{c}</SelectItem>
                             ))}
                         </SelectContent>
@@ -333,7 +341,7 @@ export default function SettingsPage() {
                               <SelectValue placeholder="Choisir une classe..." />
                           </SelectTrigger>
                           <SelectContent>
-                              {Object.keys(classes).sort().map(c => (
+                              {Object.keys(classList).sort().map(c => (
                                   <SelectItem key={c} value={c}>{c}</SelectItem>
                               ))}
                           </SelectContent>
@@ -397,7 +405,7 @@ export default function SettingsPage() {
                             <SelectValue placeholder="Choisir une classe..."/>
                         </SelectTrigger>
                         <SelectContent>
-                            {Object.keys(classes).sort().map(c => (
+                            {Object.keys(classList).sort().map(c => (
                                 <SelectItem key={c} value={c}>{c}</SelectItem>
                             ))}
                         </SelectContent>
@@ -410,7 +418,7 @@ export default function SettingsPage() {
                             <SelectValue placeholder="Choisir un élève..."/>
                         </SelectTrigger>
                         <SelectContent>
-                            {(classes[deleteStudentClass] || []).sort().map((s: string) => (
+                            {(classList[deleteStudentClass] || []).sort().map((s: string) => (
                                 <SelectItem key={s} value={s}>{s}</SelectItem>
                             ))}
                         </SelectContent>
@@ -442,7 +450,7 @@ export default function SettingsPage() {
                             <SelectValue placeholder="Choisir une classe..."/>
                         </SelectTrigger>
                         <SelectContent>
-                            {Object.keys(classes).sort().map(c => (
+                            {Object.keys(classList).sort().map(c => (
                                 <SelectItem key={c} value={c}>{c}</SelectItem>
                             ))}
                         </SelectContent>
@@ -472,46 +480,87 @@ export default function SettingsPage() {
       <Card className="border-destructive">
           <CardHeader>
               <CardTitle className="flex items-center gap-2 text-destructive"><AlertTriangle/> Zone de danger</CardTitle>
-              <CardDescription>Cette action est irréversible. Soyez certain avant de continuer.</CardDescription>
+              <CardDescription>Ces actions sont irréversibles. Soyez certain avant de continuer.</CardDescription>
           </CardHeader>
-          <CardContent className="flex justify-between items-center">
-              <p>Réinitialiser toutes les données des élèves (évaluations, TPs assignés, etc.) mais conserver les classes et les élèves.</p>
-               <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                      <Button variant="destructive">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Réinitialiser les données
-                      </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                      <AlertDialogHeader>
-                          <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                              Cette action est irréversible. Toutes les données des élèves seront supprimées. Pour confirmer, veuillez taper <strong>Mongy</strong> dans le champ ci-dessous.
-                          </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <div className="space-y-2">
-                        <Label htmlFor="reset-password">Mot de passe de confirmation</Label>
-                        <Input 
-                            id="reset-password" 
-                            type="password"
-                            value={resetPassword}
-                            onChange={(e) => setResetPassword(e.target.value)}
-                            placeholder="Entrez le mot de passe..."
-                        />
-                      </div>
-                      <AlertDialogFooter>
-                          <AlertDialogCancel onClick={() => setResetPassword('')}>Annuler</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={handleReset} 
-                            disabled={resetPassword !== 'Mongy'}
-                            className="bg-destructive hover:bg-destructive/90"
-                          >
-                            Confirmer la réinitialisation
-                          </AlertDialogAction>
-                      </AlertDialogFooter>
-                  </AlertDialogContent>
-              </AlertDialog>
+          <CardContent className="space-y-4">
+               <div className="flex justify-between items-center p-4 border border-destructive/50 rounded-lg">
+                  <p>Vider les listes d'élèves de **toutes** les classes. Utile pour une réinitialisation avant une nouvelle année scolaire.</p>
+                   <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                          <Button variant="destructive" outline>
+                              <Eraser className="mr-2 h-4 w-4" />
+                              Vider toutes les listes
+                          </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                          <AlertDialogHeader>
+                              <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                  Cette action est irréversible. Toutes les listes d'élèves seront vidées. Pour confirmer, veuillez taper <strong>reset</strong> dans le champ ci-dessous.
+                              </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <div className="space-y-2">
+                            <Label htmlFor="reset-lists-password">Mot de passe de confirmation</Label>
+                            <Input 
+                                id="reset-lists-password" 
+                                type="password"
+                                value={resetListsPassword}
+                                onChange={(e) => setResetListsPassword(e.target.value)}
+                                placeholder="Entrez le mot de passe..."
+                            />
+                          </div>
+                          <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => setResetListsPassword('')}>Annuler</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={handleResetLists} 
+                                disabled={resetListsPassword !== 'reset'}
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                Confirmer la réinitialisation
+                              </AlertDialogAction>
+                          </AlertDialogFooter>
+                      </AlertDialogContent>
+                  </AlertDialog>
+              </div>
+              <div className="flex justify-between items-center p-4 border border-destructive/50 rounded-lg">
+                  <p>Réinitialiser toutes les données des élèves (évaluations, TPs assignés, etc.) mais conserver les classes et les élèves.</p>
+                   <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                          <Button variant="destructive">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Réinitialiser les données
+                          </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                          <AlertDialogHeader>
+                              <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                  Cette action est irréversible. Toutes les données des élèves (progrès, évaluations) seront supprimées. Pour confirmer, veuillez taper <strong>Mongy</strong> dans le champ ci-dessous.
+                              </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <div className="space-y-2">
+                            <Label htmlFor="reset-data-password">Mot de passe de confirmation</Label>
+                            <Input 
+                                id="reset-data-password" 
+                                type="password"
+                                value={resetDataPassword}
+                                onChange={(e) => setResetDataPassword(e.target.value)}
+                                placeholder="Entrez le mot de passe..."
+                            />
+                          </div>
+                          <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => setResetDataPassword('')}>Annuler</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={handleResetData} 
+                                disabled={resetDataPassword !== 'Mongy'}
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                Confirmer la réinitialisation
+                              </AlertDialogAction>
+                          </AlertDialogFooter>
+                      </AlertDialogContent>
+                  </AlertDialog>
+              </div>
           </CardContent>
       </Card>
 

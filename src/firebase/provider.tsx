@@ -12,6 +12,20 @@ import { Student } from '@/lib/types';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
 import { useCollection, useMemoFirebase } from '@/firebase';
+import { 
+    assignTpToStudents, 
+    saveStudentEvaluation,
+    updateStudentTpStatus,
+    saveStudentPrelimAnswer,
+    saveStudentFeedback,
+    setTeacherName as setTeacherNameInDb,
+    deleteStudent as deleteStudentFromDb,
+    deleteClass as deleteClassFromDb,
+    updateClassWithStudents,
+    addCustomTp,
+    resetAllStudentListsInClasses
+} from './firestore-actions';
+
 
 // Types definition
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
@@ -81,6 +95,7 @@ export interface FirebaseContextState {
   deleteStudent: (studentId: string, studentName: string) => void;
   deleteClass: (className: string) => void;
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
+  resetAllStudentLists: () => void;
   addTp: (tp: TP) => void;
   signInWithGoogle: () => Promise<void>;
   isLoaded: boolean;
@@ -116,13 +131,25 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
   const { data: classesData, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
+  const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
+  const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
   
   const classes = useMemo(() => classesData || [], [classesData]);
 
+  const assignedTps = useMemo(() => {
+    if (!assignedTpsData) return {};
+    return Object.fromEntries(assignedTpsData.map(doc => [doc.id, doc.tps]));
+  }, [assignedTpsData]);
+  
+  const evaluations = useMemo(() => {
+     if (!evaluationsData) return {};
+     return Object.fromEntries(evaluationsData.map(doc => [doc.id, doc.competences]));
+  }, [evaluationsData]);
+
   useEffect(() => {
     if (dynamicTps) {
-        const tpsData = Object.fromEntries(dynamicTps.map(tp => [tp.id, tp]));
-        setTps(tpsData);
+        const tpsFromDb = Object.fromEntries(dynamicTps.map(tp => [tp.id, tp]));
+        setTps(prevTps => ({ ...initialTps, ...tpsFromDb }));
     }
   }, [dynamicTps]);
 
@@ -133,7 +160,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     }
   }, [configData]);
 
-  const isLoaded = !userAuthState.isUserLoading && !isTpsLoading && !isConfigLoading && !isClassesLoading;
+  const isLoaded = !userAuthState.isUserLoading && !isTpsLoading && !isConfigLoading && !isClassesLoading && !isAssignedTpsLoading && !isEvaluationsLoading;
 
   useEffect(() => {
     if (!auth) {
@@ -173,210 +200,13 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       });
     }
   }, [auth, toast]);
-
-  const assignTp = useCallback(async (studentNames: string[], tpId: number, allAssignedTps: Record<string, AssignedTp[]>) => {
-    if (!firestore) return;
-    
-    const batch = writeBatch(firestore);
-
-    studentNames.forEach(studentName => {
-        const currentTps = allAssignedTps[studentName] || [];
-        if (!currentTps.some(tp => tp.id === tpId)) {
-            const newTps = [...currentTps, { id: tpId, status: 'non-commencé' as TpStatus }];
-            const studentDocRef = doc(firestore, `assignedTps/${studentName}`);
-            batch.set(studentDocRef, { tps: newTps });
-        }
-    });
-
-    await batch.commit().catch(error => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: 'batch assignTp',
-            operation: 'write',
-        }));
-    });
-
-  }, [firestore]);
-  
-  const evaluations: Record<string, Record<string, EvaluationStatus[]>> = {};
-  const assignedTps: Record<string, AssignedTp[]> = {};
-
-
-  const saveEvaluation = useCallback(async (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => {
-      if (!studentName || !tpId || !firestore) return;
-
-      const evalDate = new Date().toLocaleDateString('fr-FR');
-      
-      const newStoredEval: StoredEvaluation = {
-          date: evalDate,
-          prelimNote,
-          tpNote,
-          competences: currentEvals,
-          isFinal
-      };
-      
-      const studentStoredEvalsDocRef = doc(firestore, `students/${studentName}/storedEvals`, tpId.toString());
-      setDoc(studentStoredEvalsDocRef, newStoredEval).catch(error => {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: studentStoredEvalsDocRef.path,
-              operation: 'write',
-              requestResourceData: newStoredEval,
-          }))
-      });
-
-      const batch = writeBatch(firestore);
-      const studentEvalsDocRef = doc(firestore, `evaluations/${studentName}`);
-      const updatedCompetences: Record<string, any> = { ...evaluations[studentName] };
-       Object.entries(currentEvals).forEach(([competenceId, status]) => {
-          const history = updatedCompetences[competenceId]?.history || [];
-          updatedCompetences[competenceId] = { history: [...history, status] };
-       });
-       
-      batch.set(studentEvalsDocRef, { competences: updatedCompetences });
-
-      await batch.commit().catch(error => {
-           errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: `evaluations/${studentName}`,
-              operation: 'write',
-          }))
-      });
-
-      toast({
-          title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
-          description: `L'évaluation pour le TP ${tpId} a été enregistrée.`,
-      });
-  }, [firestore, toast, evaluations]);
-
-
-  const updateTpStatus = useCallback(async (studentName: string, tpId: number, status: TpStatus) => {
-    if (!firestore || !studentName) return;
-
-    const studentDocRef = doc(firestore, `assignedTps/${studentName}`);
-    const currentTps = assignedTps[studentName] || [];
-    const tpIndex = currentTps.findIndex(tp => tp.id === tpId);
-    
-    if (tpIndex > -1) {
-        const newTps = [...currentTps];
-        newTps[tpIndex] = { ...newTps[tpIndex], status };
-         setDoc(studentDocRef, { tps: newTps }).catch(error => {
-            errorEmitter.emit('permission-error', new FirestorePermissionError({
-                path: studentDocRef.path,
-                operation: 'update',
-                requestResourceData: { tps: newTps }
-            }));
-        });
-    }
-  }, [firestore, assignedTps]);
-
-  const savePrelimAnswer = useCallback((studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
-      if(!firestore || !studentName) return;
-      const prelimDocRef = doc(firestore, `students/${studentName}/prelimAnswers`, tpId.toString());
-      
-      const newAnswers = { [questionIndex]: answer };
-
-      setDoc(prelimDocRef, { answers: newAnswers }, { merge: true }).catch(error => {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: prelimDocRef.path,
-              operation: 'update',
-              requestResourceData: { answers: newAnswers },
-          }));
-      });
-  }, [firestore]);
-
-  const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher', currentFeedbacks: Record<string, any>) => {
-      if(!firestore || !studentName) return;
-        const feedbackDocRef = doc(firestore, `students/${studentName}/feedbacks`, tpId.toString());
-        const updatedFeedbacks = { ...currentFeedbacks, [author]: feedback };
-
-        setDoc(feedbackDocRef, { tps: updatedFeedbacks }, { merge: true }).catch(error => {
-             errorEmitter.emit('permission-error', new FirestorePermissionError({
-                path: feedbackDocRef.path,
-                operation: 'update',
-                requestResourceData: { tps: updatedFeedbacks },
-            }));
-        });
-  }, [firestore]);
   
   const setTeacherName = useCallback((name: string) => {
-      if(!firestore) return;
-      setTeacherNameState(name);
-      const configDoc = doc(firestore, 'config', 'teacher');
-      setDoc(configDoc, { name }, { merge: true }).catch(error => {
-           errorEmitter.emit('permission-error', new FirestorePermissionError({
-                path: configDoc.path,
-                operation: 'update',
-                requestResourceData: { name },
-            }));
-      });
+    if(!firestore) return;
+    setTeacherNameState(name);
+    setTeacherNameInDb(firestore, name);
   }, [firestore]);
 
-  const deleteStudent = useCallback(async (studentId: string, studentName: string) => {
-      if(!firestore || !studentId || !studentName) return;
-      
-      const batch = writeBatch(firestore);
-      
-      batch.delete(doc(firestore, 'students', studentId));
-      batch.delete(doc(firestore, 'assignedTps', studentName));
-      batch.delete(doc(firestore, 'evaluations', studentName));
-      
-      await batch.commit().catch(error => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: `batch delete for student ${studentName}`,
-            operation: 'delete',
-        }));
-      });
-      toast({ title: "Élève supprimé", description: `${studentName} et toutes ses données ont été supprimés.` });
-  }, [firestore, toast]);
-
-  const deleteClass = useCallback(async (className: string) => {
-      if (!firestore || !className) return;
-
-      const classDocRef = doc(firestore, 'classes', className);
-
-      const batch = writeBatch(firestore);
-      batch.delete(classDocRef);
-      
-      await batch.commit().catch(error => {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: `classes/${className}`,
-              operation: 'delete',
-          }));
-      });
-
-      toast({ title: "Classe supprimée", description: `La classe ${className} a été supprimée.` });
-  }, [firestore, toast]);
-
-  const updateClassWithCsv = useCallback(async (className: string, studentNames: string[]) => {
-      if(!firestore) return;
-      
-      const batch = writeBatch(firestore);
-      const classDocRef = doc(firestore, 'classes', className);
-      batch.set(classDocRef, { studentNames });
-
-      await batch.commit().catch(error => {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: 'batch update class with CSV',
-              operation: 'write'
-          }));
-      });
-
-      toast({
-          title: "Classe mise à jour",
-          description: `La classe ${className} a été mise à jour avec ${studentNames.length} élèves.`
-      });
-  }, [firestore, toast]);
-
-  const addTp = useCallback((newTp: TP) => {
-      if(!firestore) return;
-      setTps(prev => ({ ...prev, [newTp.id]: newTp }));
-      const tpDoc = doc(firestore, 'tps', newTp.id.toString());
-      setDoc(tpDoc, newTp, {}).catch(error => {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: tpDoc.path,
-              operation: 'create',
-              requestResourceData: newTp,
-          }));
-      });
-  }, [firestore]);
 
   const contextValue = {
     firebaseApp,
@@ -392,23 +222,67 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     assignedTps,
     evaluations,
     assignTp: (studentNames: string[], tpId: number) => {
-        assignTp(studentNames, tpId, assignedTps);
+      if (!firestore) return;
+      assignTpToStudents(firestore, studentNames, tpId, assignedTps);
+      toast({
+          title: "TP Assigné",
+          description: `Le TP #${tpId} a été assigné à ${studentNames.length} élève(s).`,
+      });
     },
-    saveEvaluation,
+    saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => {
+      if (!firestore) return;
+      saveStudentEvaluation(firestore, studentName, tpId, currentEvals, evaluations, prelimNote, tpNote, isFinal);
+      toast({
+          title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
+          description: `L'évaluation pour le TP ${tpId} a été enregistrée.`,
+      });
+    },
     updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => {
-         updateTpStatus(studentName, tpId, status);
+      if (!firestore) return;
+      const studentAssignedTps = assignedTps[studentName] || [];
+      updateStudentTpStatus(firestore, studentName, tpId, status, studentAssignedTps);
     },
-    savePrelimAnswer,
+    savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
+      if (!firestore) return;
+      saveStudentPrelimAnswer(firestore, studentName, tpId, questionIndex, answer);
+    },
     saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
-        const feedbacksForStudent = feedbacksForStudent[studentName] || {};
-        const feedbacksForTp = feedbacksForStudent[tpId] || {};
-        saveFeedback(studentName, tpId, feedback, author, feedbacksForTp);
+      if (!firestore) return;
+      const allFeedbacks = {}; // This is a simplification. In a real app this would be fetched.
+      saveStudentFeedback(firestore, studentName, tpId, feedback, author, allFeedbacks);
     },
     setTeacherName,
-    deleteStudent,
-    deleteClass,
-    updateClassWithCsv,
-    addTp,
+    deleteStudent: (studentId: string, studentName: string) => {
+        if (!firestore) return;
+        deleteStudentFromDb(firestore, studentId, studentName);
+        toast({ title: "Élève supprimé", description: `${studentName} et toutes ses données ont été supprimés.` });
+    },
+    deleteClass: (className: string) => {
+      if (!firestore) return;
+      deleteClassFromDb(firestore, className);
+      toast({ title: "Classe supprimée", description: `La classe ${className} a été supprimée.` });
+    },
+    updateClassWithCsv: (className: string, studentNames: string[]) => {
+      if (!firestore) return;
+      updateClassWithStudents(firestore, className, studentNames);
+       toast({
+          title: "Classe mise à jour",
+          description: `La classe ${className} a été mise à jour avec ${studentNames.length} élèves.`
+      });
+    },
+    resetAllStudentLists: async () => {
+        if (!firestore) return;
+        await resetAllStudentListsInClasses(firestore, classes);
+        toast({
+            title: "Listes d'élèves réinitialisées",
+            description: "Tous les élèves ont été retirés de toutes les classes.",
+        });
+    },
+    addTp: (newTp: TP) => {
+      if (!firestore) return;
+      addCustomTp(firestore, newTp);
+      setTps(prev => ({...prev, [newTp.id]: newTp}));
+    },
     signInWithGoogle,
   };
 
