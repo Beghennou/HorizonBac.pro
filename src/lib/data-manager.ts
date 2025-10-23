@@ -86,17 +86,23 @@ export const getTpById = (id: number, all?: boolean, allTpsFromContext?: Record<
 };
 
 export const classes = {
-    "2MV1": ["Dupont Jean", "Martin Paul"],
-    "2MV2": ["Bernard Luc", "Robert Jacques"],
-    "2MV3": ["Petit Pierre", "Dubois Michel"],
-    "2MV4": ["Durand Alain", "Leroy Philippe"],
-    "2MV5": ["Michel Mouton", "Agha Azzouz"],
-    "1VP1": ["Simon André", "Laurent Nicolas"],
-    "1VP2": ["Lefebvre Marc", "Roux Julien"],
-    "1VP3": ["Fournier David", "Girard Vincent"],
-    "TVP1": ["Bonnet Christian", "Lambert Thierry"],
-    "TVP2": ["Francois Patrick", "Martinez Serge"],
-    "TVP3": ["Legrand Daniel", "Garnier Jean-Luc"]
+    "TVP1": [],
+    "TVP2": [],
+    "TVP3": [],
+    "2MV2 - Carol Shelby": [],
+    "2MV3 - Amédée Gordini": [],
+    "2MV4 - Les frères Michelin": [],
+    "2MV5 - Michèle Mouton": [],
+    "2MV6 - Valentino Rossi": [],
+    "TAPP 1": [],
+    "TAPP 2": [],
+    "1APP1": [],
+    "1APP2": [],
+    "1VP1": [],
+    "1VP2": [],
+    "1VP3": [],
+    "2APP-RC/VP - John Coppe": [],
+    "2MV1 - Pierre Latirgue": []
 };
 
 export const allBlocs: Record<string, CompetenceBloc> = {
