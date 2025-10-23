@@ -9,7 +9,7 @@ import { TP, EtudePrelimQCM, EtudePrelimText, allBlocs } from '@/lib/data-manage
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, CheckSquare, Save, Mail, Bot, Loader2, MessageSquare, Check, X, BookOpen, UserCircle, Award, Send } from 'lucide-react';
+import { User, CheckSquare, Save, Mail, Bot, Loader2, MessageSquare, Check, X, BookOpen, UserCircle, Award, Send, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -226,10 +226,15 @@ export default function StudentDetailPage() {
     const searchParams = useSearchParams();
     const params = useParams();
     const { toast } = useToast();
-    const { students, classes, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback, storedEvals, tps } = useFirebase();
+    const { students, classes, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback, storedEvals, tps, teacherName } = useFirebase();
 
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     const className = searchParams.get('class');
+    
+    // --- Vérification de cohérence ---
+    const isStudentInClass = className && classes[className]?.includes(studentName);
+    const teacherIdFromStudent = students.find(s => s.name === studentName)?.teacherId;
+    const isTeacherOwner = teacherIdFromStudent === teacherName; // Simple check, in real app would be UID
     
     const studentsInClass = (className ? classes[className] || [] : []).sort();
 
@@ -315,6 +320,37 @@ export default function StudentDetailPage() {
     }
     
     const evaluatedCompetenceIds = selectedTp?.objectif.match(/C\d\.\d/g) || [];
+
+    if (!isStudentInClass) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64 text-center">
+                <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
+                <h1 className="font-headline text-3xl tracking-wide text-destructive">Accès non autorisé</h1>
+                <p className="text-muted-foreground text-lg mt-2 max-w-md">
+                    L'élève <strong>{studentName}</strong> ne fait pas partie de la classe <strong>{className}</strong> sélectionnée. Veuillez sélectionner un élève dans la liste déroulante ou retourner au suivi des classes.
+                </p>
+                 <div className="flex items-center gap-4 mt-8">
+                      <div className="flex items-center gap-4">
+                        <CardTitle className="flex items-center gap-3 font-headline">
+                          <User className="w-6 h-6 text-primary" /> Changer d'élève :
+                        </CardTitle>
+                        {studentsInClass.length > 0 && (
+                          <Select onValueChange={handleStudentChange} value={studentName}>
+                            <SelectTrigger className="w-[300px] bg-card text-accent font-bold text-lg font-headline border-accent">
+                              <SelectValue placeholder="Changer d'élève..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {studentsInClass.map(sName => (
+                                <SelectItem key={sName} value={sName}>{sName}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+                </div>
+            </div>
+        )
+    }
 
     if (!studentName || !students.some(s => s.name === studentName)) {
         return (
