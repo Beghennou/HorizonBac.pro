@@ -3,8 +3,8 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, doc, getDoc, getDocs, setDoc, writeBatch } from 'firebase/firestore';
-import { getTpById, TP } from '@/lib/data-manager';
+import { collection, doc, getDoc, getDocs, setDoc, writeBatch, deleteDoc } from 'firebase/firestore';
+import { getTpById, TP, initialStudents, initialClasses } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -75,27 +75,16 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
   const [storedEvals, setStoredEvals] = useState<Record<string, Record<number, StoredEvaluation>>>({});
   const [teacherName, setTeacherName] = useState<string>('M. Dubois');
-  const [tps, setTps] = useState<Record<number, TP>>(getTpById(-1, true) as Record<number, TP>);
+  const [tps, setTps] = useState<Record<number, TP>>({});
   const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
 
   const resetStudentData = useCallback(async () => {
-    const { students: initialStudentsData, classes: initialClassesData } = await import('@/lib/data-manager');
     const batch = writeBatch(db);
 
-    initialStudentsData.forEach(student => {
-        const studentRef = doc(db, 'students', student.id);
-        batch.set(studentRef, student);
-    });
-    
-    Object.entries(initialClassesData).forEach(([className, studentNames]) => {
-        const classRef = doc(db, 'classes', className);
-        batch.set(classRef, { studentNames });
-    });
-    
-    // Also clear other collections to ensure a fresh start
-    const collectionsToClear = ['assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'tps'];
-    for (const coll of collectionsToClear) {
+    // Delete existing data
+    const collectionsToDelete = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
+    for (const coll of collectionsToDelete) {
         try {
             const snapshot = await getDocs(collection(db, coll));
             snapshot.forEach(doc => batch.delete(doc.ref));
@@ -103,13 +92,28 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
             console.error(`Could not clear collection ${coll}`, error);
         }
     }
-
     await batch.commit();
 
-    toast({
-        title: "Données initiales chargées",
-        description: "La base de données a été initialisée avec succès.",
+    // Re-create initial data
+    const writeBatch2 = writeBatch(db);
+    initialStudents.forEach(student => {
+        const studentRef = doc(db, 'students', student.id);
+        writeBatch2.set(studentRef, student);
     });
+    
+    Object.entries(initialClasses).forEach(([className, studentNames]) => {
+        const classRef = doc(db, 'classes', className);
+        writeBatch2.set(classRef, { studentNames });
+    });
+
+    await writeBatch2.commit();
+    
+    toast({
+        title: "Données réinitialisées",
+        description: "La base de données a été réinitialisée avec les données initiales.",
+    });
+
+    await loadData();
   }, [toast]);
   
   const loadData = useCallback(async () => {
@@ -120,9 +124,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
         if (studentsSnapshot.empty || classesSnapshot.empty) {
             await resetStudentData();
-            // Re-fetch after resetting data
-            studentsSnapshot = await getDocs(collection(db, 'students'));
-            classesSnapshot = await getDocs(collection(db, 'classes'));
+            return;
         }
 
         const [tpsSnapshot, assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, teacherSnapshot] = await Promise.all([
@@ -142,7 +144,8 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         classesSnapshot.forEach(doc => classesData[doc.id] = doc.data().studentNames);
         setClasses(classesData);
 
-        const tpsData: Record<number, TP> = { ...(getTpById(-1, true) as Record<number, TP>) };
+        const localTps = getTpById(-1, true) as Record<number, TP>;
+        const tpsData: Record<number, TP> = { ...localTps };
         tpsSnapshot.forEach(doc => tpsData[doc.data().id] = doc.data() as TP);
         setTps(tpsData);
         
@@ -185,7 +188,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, []);
 
 
   const addTp = async (tp: TP) => {
@@ -357,7 +360,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       
       setStudents(prev => prev.filter(s => s.name !== studentName));
       setClasses(updatedClasses);
-      loadData();
+      await loadData();
 
       toast({
           title: "Élève supprimé",
@@ -383,7 +386,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
     batch.delete(doc(db, 'classes', className));
     await batch.commit();
-    loadData();
+    await loadData();
 
     toast({
         title: "Classe supprimée",
@@ -414,7 +417,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         const firstName = nameParts.slice(1).join(' ') || 'Prénom';
 
         const newStudent: Student = {
-          id: `student-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: `student-${lastName.toLowerCase()}-${firstName.toLowerCase()}`.replace(' ','-'),
           name: name,
           email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`,
           progress: 0,

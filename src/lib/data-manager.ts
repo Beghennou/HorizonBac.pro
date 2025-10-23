@@ -1,6 +1,3 @@
-
-
-
 import { tpSeconde, TP as TPSeconde } from './tp-seconde';
 import { tpPremiere, TP as TPPremiere } from './tp-premiere';
 import { tpTerminale, TP as TPTerminale } from './tp-terminale';
@@ -80,7 +77,7 @@ export const getTpById = (id: number, all?: boolean, allTpsFromContext?: Record<
     return sourceTps[id];
 };
 
-export const classes: Record<string, string[]> = {
+export const initialClasses: Record<string, string[]> = {
     "TVP1": ["DUPONT Jean", "MARTIN Léa"],
     "TVP2": [],
     "TVP3": [],
@@ -91,13 +88,13 @@ export const classes: Record<string, string[]> = {
     "1VP1": ["BERNARD Hugo", "ROBERT Alice"],
     "1VP2": [],
     "1VP3": [],
-    "2MV1 - Pierre Latirgue": ["PETIT Louis", "DURAND Clara"],
-    "2MV2 - Carol Shelby": [],
-    "2MV3 - Amédée Gordini": [],
-    "2MV4 - Les frères Michelin": [],
-    "2MV5 - Michèle Mouton": [],
-    "2MV6 - Valentino Rossi": [],
-    "2APP-RC/VP - John Coppe": [],
+    "2MV1": ["PETIT Louis", "DURAND Clara"],
+    "2MV2": [],
+    "2MV3": [],
+    "2MV4": [],
+    "2MV5": [],
+    "2MV6": [],
+    "2APP-RC/VP": [],
 };
 
 export const allBlocs: Record<string, CompetenceBloc> = {
@@ -106,15 +103,15 @@ export const allBlocs: Record<string, CompetenceBloc> = {
     ...competencesParNiveau.terminale,
 };
 
-const allStudentNames = [...new Set(Object.values(classes).flat())];
+const allStudentNames = [...new Set(Object.values(initialClasses).flat())];
 
-export const students: Student[] = allStudentNames.map((name, index) => {
+export const initialStudents: Student[] = allStudentNames.map((name, index) => {
     const nameParts = name.split(' ');
     const lastName = nameParts[0] || '';
     const firstName = nameParts.slice(1).join(' ') || `Prénom${index + 1}`;
     
     return {
-        id: `student-${index + 1}`,
+        id: `student-${lastName.toLowerCase()}-${firstName.toLowerCase()}`.replace(' ','-'),
         name: name,
         email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`,
         progress: 0,
