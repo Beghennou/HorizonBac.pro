@@ -7,8 +7,6 @@ import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manag
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase/provider';
-import { FirestorePermissionError } from '@/firebase/errors';
-import { errorEmitter } from '@/firebase/error-emitter';
 
 // Types definition
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
@@ -438,3 +436,4 @@ export const useAssignments = () => {
   }
   return context;
 };
+
