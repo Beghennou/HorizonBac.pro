@@ -118,14 +118,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const loadData = useCallback(async (forceReset = false) => {
     setIsLoaded(false);
     try {
-        if (forceReset) {
-            await resetStudentData();
-        }
-
         let studentsSnapshot = await getDocs(collection(db, 'students'));
         let classesSnapshot = await getDocs(collection(db, 'classes'));
 
-        if (studentsSnapshot.empty || classesSnapshot.empty) {
+        if (forceReset || studentsSnapshot.empty || classesSnapshot.empty) {
             await resetStudentData();
             studentsSnapshot = await getDocs(collection(db, 'students'));
             classesSnapshot = await getDocs(collection(db, 'classes'));
@@ -191,7 +187,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }, [toast, resetStudentData]);
 
   useEffect(() => {
-    loadData();
+    loadData(true); // Force reset on initial load
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
