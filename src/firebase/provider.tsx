@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore, collection, doc, setDoc, getDocs, writeBatch, deleteDoc } from 'firebase/firestore';
+import { Firestore, collection, doc, setDoc, writeBatch, getDocs, deleteDoc } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
@@ -125,62 +125,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const [storedEvals, setStoredEvals] = useState<Record<string, Record<number, StoredEvaluation>>>({});
   const [tps, setTps] = useState<Record<number, TP>>(getTpById(-1, true) as Record<number, TP>);
   const [teacherName, setTeacherNameState] = useState<string>('M. Dubois');
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  const isLoaded = !userAuthState.isUserLoading && isDataLoaded;
-
-  const loadAllData = useCallback(async (db: Firestore) => {
-    const collectionsToFetch = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'tps', 'config'];
-    try {
-        const snapshots = await Promise.all(collectionsToFetch.map(colName => 
-            getDocs(collection(db, colName)).catch(serverError => {
-                const contextualError = new FirestorePermissionError({
-                    operation: 'list',
-                    path: colName,
-                });
-                errorEmitter.emit('permission-error', contextualError);
-                throw contextualError; // Re-throw to stop Promise.all
-            })
-        ));
-
-        const data: Record<string, any> = {};
-        snapshots.forEach((snapshot, index) => {
-            const colName = collectionsToFetch[index];
-            if (['students', 'tps'].includes(colName)) {
-                data[colName] = snapshot.docs.map(d => ({...d.data(), id: d.id }));
-            } else {
-                const colData: Record<string, any> = {};
-                snapshot.docs.forEach(doc => {
-                    colData[doc.id] = doc.data();
-                });
-                data[colName] = colData;
-            }
-        });
-        
-        if (data.students && data.students.length > 0) setStudents(data.students.sort((a: Student,b: Student) => a.name.localeCompare(b.name)));
-        if (data.classes && Object.keys(data.classes).length > 0) setClasses(data.classes);
-        if (data.assignedTps && Object.keys(data.assignedTps).length > 0) setAssignedTps(data.assignedTps);
-        if (data.evaluations && Object.keys(data.evaluations).length > 0) setEvaluations(data.evaluations);
-        if (data.prelimAnswers && Object.keys(data.prelimAnswers).length > 0) setPrelimAnswers(data.prelimAnswers);
-        if (data.feedbacks && Object.keys(data.feedbacks).length > 0) setFeedbacks(data.feedbacks);
-        if (data.storedEvals && Object.keys(data.storedEvals).length > 0) setStoredEvals(data.storedEvals);
-
-        const allTps = getTpById(-1, true) as Record<number, TP>;
-        if (data.tps && data.tps.length > 0) {
-            data.tps.forEach((tp: TP) => {
-                allTps[tp.id] = tp;
-            });
-        }
-        setTps(allTps);
-        
-        if (data.config && data.config.teacher) setTeacherNameState(data.config.teacher.name);
-
-        setIsDataLoaded(true);
-
-    } catch (error: any) {
-        console.error("Error loading initial data:", error);
-    }
-  }, []);
+  const isLoaded = !userAuthState.isUserLoading;
 
   // Auth state listener & data loader
   useEffect(() => {
@@ -192,11 +138,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       auth,
       async (firebaseUser) => {
         setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
-        if (firebaseUser) {
-          if (!isDataLoaded) {
-            await loadAllData(firestore);
-          }
-        } else {
+        if (!firebaseUser) {
             try {
                 await signInAnonymously(auth);
             } catch (error) {
@@ -211,7 +153,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       }
     );
     return () => unsubscribe();
-  }, [auth, firestore, isDataLoaded, loadAllData]);
+  }, [auth, firestore]);
 
   const assignTp = useCallback(async (studentNames: string[], tpId: number) => {
     if (!firestore || !userAuthState.user) return;

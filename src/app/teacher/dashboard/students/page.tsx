@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -16,7 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { useFirebase, TpStatus } from '@/firebase/provider';
+import { useFirebase, TpStatus, useCollection, useMemoFirebase } from '@/firebase';
 import {
   Tooltip,
   TooltipContent,
@@ -24,6 +24,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Link from 'next/link';
+import { collection, query, where } from 'firebase/firestore';
+import { Student } from '@/lib/types';
+
 
 const statusLabels: Record<TpStatus, string> = {
     'non-commencé': 'Non commencé',
@@ -34,24 +37,60 @@ const statusLabels: Record<TpStatus, string> = {
 export default function StudentsPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { students, assignTp, classes, assignedTps, tps: allTpsFromContext } = useFirebase();
+    const { firestore, assignTp, classes, assignedTps: localAssignedTps, tps: allTpsFromContext } = useFirebase();
     const { toast } = useToast();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const className = searchParams.get('class') || '';
+
+    const studentsQuery = useMemoFirebase(() => {
+        if (!firestore || !className || !classes[className]) return null;
+        const studentNamesInClass = classes[className] || [];
+        if (studentNamesInClass.length === 0) return null;
+        return query(collection(firestore, 'students'), where('name', 'in', studentNamesInClass));
+    }, [firestore, className, classes]);
     
-    const studentNamesInClass = classes[className] || [];
-    const studentsInClass = students.filter(student => studentNamesInClass.includes(student.name));
+    const { data: students, isLoading: isLoadingStudents } = useCollection<Student>(studentsQuery);
     
+    const { data: assignedTpsData, isLoading: isLoadingAssignedTps } = useCollection(
+        useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore])
+    );
+    const { data: allTpsData, isLoading: isLoadingTps } = useCollection(
+        useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore])
+    );
+
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+    
+    const studentsInClass = students || [];
 
     useEffect(() => {
         // Reset selection when class changes
         setSelectedStudents([]);
     }, [className]);
+    
+    const allTps = useMemo(() => {
+        const tps = getTpById(-1, true) as Record<number, any>;
+        if (allTpsData) {
+            allTpsData.forEach(tp => {
+                tps[tp.id] = tp;
+            });
+        }
+        return tps;
+    }, [allTpsData]);
+    
+    const assignedTps = useMemo(() => {
+        const tpsMap: Record<string, any> = {};
+        if (assignedTpsData) {
+            assignedTpsData.forEach(doc => {
+                tpsMap[doc.id] = doc.tps;
+            });
+        }
+        return tpsMap;
+    }, [assignedTpsData]);
 
-    const tps = getTpsByNiveau(level, allTpsFromContext);
-    const tpsIdsForCurrentLevel = new Set(tps.map(tp => tp.id));
+
+    const tpsForLevel = getTpsByNiveau(level, allTps);
+    const tpsIdsForCurrentLevel = new Set(tpsForLevel.map(tp => tp.id));
 
     const handleAssignTpToSelected = (tpId: number, tpTitle: string) => {
         if (selectedStudents.length === 0) {
@@ -127,7 +166,7 @@ export default function StudentsPage() {
                               </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto">
-                              {tps.map(tp => (
+                              {tpsForLevel.map(tp => (
                                   <DropdownMenuItem key={tp.id} onSelect={() => handleAssignTpToSelected(tp.id, tp.titre)}>
                                       <span className="font-bold mr-2">TP {tp.id}</span>
                                       <span>{tp.titre}</span>
@@ -139,11 +178,13 @@ export default function StudentsPage() {
                   </div>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {studentsInClass.length > 0 ? (
+                  {isLoadingStudents || isLoadingAssignedTps ? (
+                    <p>Chargement des élèves...</p>
+                  ) : studentsInClass.length > 0 ? (
                     studentsInClass.map((student) => {
                       const studentName = student.name;
                       const isSelected = selectedStudents.includes(studentName);
-                      const studentAssignedTps = (assignedTps[studentName] || []).filter(assignedTp => tpsIdsForCurrentLevel.has(assignedTp.id));
+                      const studentAssignedTps = (assignedTps[studentName] || []).filter((assignedTp: any) => tpsIdsForCurrentLevel.has(assignedTp.id));
                       
                       return (
                         <Card 
@@ -185,8 +226,8 @@ export default function StudentsPage() {
                                               <TooltipContent>
                                                   <p className="font-bold">{studentAssignedTps.length} TP assigné(s) pour ce niveau.</p>
                                                    <ul className="text-sm text-muted-foreground">
-                                                      {studentAssignedTps.map(assignedTp => {
-                                                          const tp = allTpsFromContext[assignedTp.id];
+                                                      {studentAssignedTps.map((assignedTp: any) => {
+                                                          const tp = allTps[assignedTp.id];
                                                           if (!tp) return null;
                                                           return <li key={tp.id}>TP {tp.id}: {statusLabels[assignedTp.status]}</li>
                                                       })}
