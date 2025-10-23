@@ -4,7 +4,7 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, doc, getDoc, getDocs, setDoc, writeBatch } from 'firebase/firestore';
-import { getTpById, allBlocs, TP } from '@/lib/data-manager';
+import { getTpById, TP } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -80,7 +80,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   const resetStudentData = useCallback(async () => {
-    const { students: initialStudentsData, classes: initialClasses } = await import('@/lib/data-manager');
+    const { students: initialStudentsData, classes: initialClassesData } = await import('@/lib/data-manager');
     const batch = writeBatch(db);
 
     initialStudentsData.forEach(student => {
@@ -88,11 +88,12 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         batch.set(studentRef, student);
     });
     
-    Object.entries(initialClasses).forEach(([className, studentNames]) => {
+    Object.entries(initialClassesData).forEach(([className, studentNames]) => {
         const classRef = doc(db, 'classes', className);
         batch.set(classRef, { studentNames });
     });
-
+    
+    // Also clear other collections to ensure a fresh start
     const collectionsToClear = ['assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
     for (const coll of collectionsToClear) {
         try {
@@ -106,11 +107,11 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     await batch.commit();
 
     toast({
-        title: "Données réinitialisées sur Firestore",
-        description: "La base de données a été réinitialisée avec les données initiales.",
+        title: "Données initiales chargées",
+        description: "La base de données a été initialisée avec succès.",
     });
   }, [toast]);
-
+  
   const loadData = useCallback(async () => {
     setIsLoaded(false);
     try {
@@ -119,6 +120,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
         if (studentsSnapshot.empty || classesSnapshot.empty) {
             await resetStudentData();
+            // Re-fetch after resetting data
             studentsSnapshot = await getDocs(collection(db, 'students'));
             classesSnapshot = await getDocs(collection(db, 'classes'));
         }
@@ -140,7 +142,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         classesSnapshot.forEach(doc => classesData[doc.id] = doc.data().studentNames);
         setClasses(classesData);
 
-        const tpsData: Record<number, TP> = { ...tps };
+        const tpsData: Record<number, TP> = { ...(getTpById(-1, true) as Record<number, TP>) };
         tpsSnapshot.forEach(doc => tpsData[doc.data().id] = doc.data() as TP);
         setTps(tpsData);
         
@@ -174,12 +176,12 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         toast({
             variant: "destructive",
             title: "Erreur de connexion à Firestore",
-            description: "Impossible de lire les données. Vérifiez votre configuration Firebase et vos règles de sécurité.",
+            description: `Impossible de lire les données. Erreur: ${(error as Error).message}`,
         });
     } finally {
         setIsLoaded(true);
     }
-  }, [toast, tps, resetStudentData]);
+  }, [toast, resetStudentData]);
 
   useEffect(() => {
     loadData();
@@ -270,6 +272,8 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   };
   
    useEffect(() => {
+    if (!isLoaded) return;
+    const { allBlocs } = require('@/lib/data-manager');
     const calculateProgress = async () => {
         const batch = writeBatch(db);
         const updatedStudents = students.map(student => {
@@ -283,7 +287,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
                 }
             }
 
-            const allCompetencesCount = Object.values(allBlocs).reduce((acc, bloc) => acc + Object.keys(bloc.items).length, 0);
+            const allCompetencesCount = Object.values(allBlocs).reduce((acc, bloc: any) => acc + Object.keys(bloc.items).length, 0);
             const maxPossibleXp = allCompetencesCount * xpPerLevel['M'];
             const progressPercentage = maxPossibleXp > 0 ? Math.round((totalXp / maxPossibleXp) * 100) : 0;
             
@@ -299,9 +303,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         setStudents(updatedStudents);
     };
 
-    if (isLoaded) {
-        calculateProgress();
-    }
+    calculateProgress();
   }, [evaluations, isLoaded, students]);
 
   const savePrelimAnswer = async (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
@@ -453,5 +455,3 @@ export const useAssignments = () => {
   }
   return context;
 };
-
-    

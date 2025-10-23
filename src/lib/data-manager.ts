@@ -1,5 +1,6 @@
 
 
+
 import { tpSeconde, TP as TPSeconde } from './tp-seconde';
 import { tpPremiere, TP as TPPremiere } from './tp-premiere';
 import { tpTerminale, TP as TPTerminale } from './tp-terminale';
