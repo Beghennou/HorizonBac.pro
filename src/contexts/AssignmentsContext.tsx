@@ -64,66 +64,24 @@ type AssignmentsContextType = {
 
 const AssignmentsContext = createContext<AssignmentsContextType | undefined>(undefined);
 
-// Helper function to safely parse JSON from localStorage
-const getInitialState = <T>(key: string, defaultValue: T): T => {
-    if (typeof window === 'undefined') {
-        return defaultValue;
-    }
-    try {
-        const item = window.localStorage.getItem(key);
-        return item ? JSON.parse(item) : defaultValue;
-    } catch (error) {
-        console.warn(`Error reading localStorage key "${key}":`, error);
-        return defaultValue;
-    }
-};
-
-
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
-  const [students, setStudents] = useState<Student[]>(() => getInitialState('students', initialStudentsData));
-  const [classes, setClasses] = useState<Record<string, string[]>>(() => getInitialState('classes', initialClasses));
-  const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>(() => getInitialState('assignedTps', {}));
-  const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>(() => getInitialState('evaluations', {}));
-  const [prelimAnswers, setPrelimAnswers] = useState<Record<string, Record<number, Record<number, PrelimAnswer>>>>(() => getInitialState('prelimAnswers', {}));
-  const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>(() => getInitialState('feedbacks', {}));
-  const [storedEvals, setStoredEvals] = useState<Record<string, Record<number, StoredEvaluation>>>(() => getInitialState('storedEvals', {}));
-  const [teacherName, setTeacherName] = useState<string>(() => getInitialState('teacherName', 'M. Dubois'));
-  const [tps, setTps] = useState<Record<number, TP>>(() => getInitialState('tps', getTpById(-1, true) as Record<number, TP>));
+  const [students, setStudents] = useState<Student[]>(initialStudentsData);
+  const [classes, setClasses] = useState<Record<string, string[]>>(initialClasses);
+  const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
+  const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>({});
+  const [prelimAnswers, setPrelimAnswers] = useState<Record<string, Record<number, Record<number, PrelimAnswer>>>>({});
+  const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
+  const [storedEvals, setStoredEvals] = useState<Record<string, Record<number, StoredEvaluation>>>({});
+  const [teacherName, setTeacherName] = useState<string>('M. Dubois');
+  const [tps, setTps] = useState<Record<number, TP>>(getTpById(-1, true) as Record<number, TP>);
   const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    // This effect now only marks the context as loaded.
+    // Data will be fetched from Firestore in subsequent steps.
     setIsLoaded(true);
   }, []);
-
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem('students', JSON.stringify(students));
-  }, [students, isLoaded]);
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem('classes', JSON.stringify(classes));
-  }, [classes, isLoaded]);
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem('assignedTps', JSON.stringify(assignedTps));
-  }, [assignedTps, isLoaded]);
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem('evaluations', JSON.stringify(evaluations));
-  }, [evaluations, isLoaded]);
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem('prelimAnswers', JSON.stringify(prelimAnswers));
-  }, [prelimAnswers, isLoaded]);
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
-  }, [feedbacks, isLoaded]);
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem('storedEvals', JSON.stringify(storedEvals));
-  }, [storedEvals, isLoaded]);
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem('teacherName', JSON.stringify(teacherName));
-  }, [teacherName, isLoaded]);
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem('tps', JSON.stringify(tps));
-  }, [tps, isLoaded]);
-
 
   const addTp = (tp: TP) => {
     setTps(prev => ({...prev, [tp.id]: tp }));
@@ -257,10 +215,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     setFeedbacks({});
     setStoredEvals({});
     setTps(getTpById(-1, true) as Record<number, TP>);
-    localStorage.clear();
     toast({
         title: "Données réinitialisées",
-        description: "Toutes les données locales ont été effacées.",
+        description: "Toutes les données ont été réinitialisées à leur état initial.",
     });
   };
 
