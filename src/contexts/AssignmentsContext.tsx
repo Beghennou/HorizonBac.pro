@@ -268,7 +268,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     if (isLoaded) {
         calculateProgress();
     }
-  }, [evaluations, isLoaded]);
+  }, [evaluations, isLoaded, students]);
 
   const savePrelimAnswer = async (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
     const newPrelimAnswers = { ...prelimAnswers };
