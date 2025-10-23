@@ -3,9 +3,13 @@
 
 import React, { DependencyList, createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore } from 'firebase/firestore';
+import { Firestore, collection, getDocs } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged, signInAnonymously } from 'firebase/auth';
-import { FirebaseErrorListener } from '@/components/FirebaseErrorListener'
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
+import { AssignmentsContext, AssignmentsContextType } from '@/contexts/AssignmentsContext';
+import { TachometerAnimation } from '@/components/TachometerAnimation';
+import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
+import { Student } from '@/lib/types';
 
 interface FirebaseProviderProps {
   children: ReactNode;
@@ -67,35 +71,85 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     isUserLoading: true, // Start loading until first auth event
     userError: null,
   });
+  
+  const [appData, setAppData] = useState<Omit<AssignmentsContextType, 'children' | 'setStudents' | 'setClasses' | 'addTp' | 'assignTp' | 'deleteClass'| 'updateClassWithCsv'|'saveEvaluation'|'updateTpStatus'|'savePrelimAnswer'|'saveFeedback'|'deleteStudent'| 'setTeacherName' > | null>(null);
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   // Effect to subscribe to Firebase auth state changes
   useEffect(() => {
-    if (!auth) { // If no Auth service instance, cannot determine user state
+    if (!auth) {
       setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Auth service not provided.") });
       return;
     }
     
-    // Ensure anonymous sign-in
     signInAnonymously(auth).catch((error) => {
         console.error("Anonymous sign-in failed:", error);
     });
 
-    setUserAuthState({ user: null, isUserLoading: true, userError: null }); // Reset on auth instance change
-
     const unsubscribe = onAuthStateChanged(
       auth,
-      (firebaseUser) => { // Auth state determined
+      (firebaseUser) => {
         setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
       },
-      (error) => { // Auth listener error
+      (error) => {
         console.error("FirebaseProvider: onAuthStateChanged error:", error);
         setUserAuthState({ user: null, isUserLoading: false, userError: error });
       }
     );
-    return () => unsubscribe(); // Cleanup
-  }, [auth]); // Depends on the auth instance
+    return () => unsubscribe();
+  }, [auth]);
 
-  // Memoize the context value
+  useEffect(() => {
+    async function loadInitialData() {
+        if (!firestore || userAuthState.isUserLoading) return;
+
+        setIsDataLoading(true);
+        try {
+            const studentsSnapshot = await getDocs(collection(firestore, 'students'));
+            let studentsData: Student[];
+
+            if (studentsSnapshot.empty) {
+                studentsData = initialStudents;
+            } else {
+                studentsData = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
+            }
+            
+            const classesSnapshot = await getDocs(collection(firestore, 'classes'));
+            let classesData: Record<string, string[]>;
+            if(classesSnapshot.empty){
+                classesData = initialClasses;
+            } else {
+                classesData = Object.fromEntries(classesSnapshot.docs.map(doc => [doc.id, doc.data().studentNames]));
+            }
+
+            const customTpsSnapshot = await getDocs(collection(firestore, 'tps'));
+            const customTpsData = Object.fromEntries(customTpsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(doc => [doc.id, doc.data() as TP]));
+            const allTps = { ...getTpById(-1, true) as Record<number, TP>, ...customTpsData };
+            
+            const contextData = {
+                students: studentsData,
+                classes: classesData,
+                assignedTps: {},
+                evaluations: {},
+                prelimAnswers: {},
+                feedbacks: {},
+                storedEvals: {},
+                tps: allTps,
+                teacherName: 'M. Dubois',
+                isLoaded: true,
+            };
+
+            setAppData(contextData);
+        } catch (error) {
+            console.error("Failed to load initial data:", error);
+        } finally {
+            setIsDataLoading(false);
+        }
+    }
+    loadInitialData();
+  }, [firestore, userAuthState.isUserLoading]);
+
+
   const contextValue = useMemo((): FirebaseContextState => {
     const servicesAvailable = !!(firebaseApp && firestore && auth);
     return {
@@ -109,10 +163,16 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     };
   }, [firebaseApp, firestore, auth, userAuthState]);
 
+  if (isDataLoading || userAuthState.isUserLoading || !appData) {
+    return <TachometerAnimation />;
+  }
+
   return (
     <FirebaseContext.Provider value={contextValue}>
-      <FirebaseErrorListener />
-      {children}
+      <AssignmentsContext.Provider value={{...appData, setStudents: ()=>{}, setClasses: ()=>{}, addTp: ()=>{}, assignTp: ()=>{}, deleteClass: ()=>{}, updateClassWithCsv: ()=>{}, saveEvaluation: ()=>{}, updateTpStatus: ()=>{}, savePrelimAnswer: ()=>{}, saveFeedback: ()=>{}, deleteStudent: ()=>{}, setTeacherName: ()=>{} }}>
+        <FirebaseErrorListener />
+        {children}
+      </AssignmentsContext.Provider>
     </FirebaseContext.Provider>
   );
 };
