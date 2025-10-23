@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { getTpsByNiveau, Niveau, getTpById } from '@/lib/data-manager';
+import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { ChevronDown, Users } from 'lucide-react';
 import {
   DropdownMenu,
@@ -53,7 +53,11 @@ export default function StudentsPage() {
     const { data: students, isLoading: isLoadingStudents } = useCollection<Student>(studentsQuery);
     
     const { data: assignedTpsData, isLoading: isLoadingAssignedTps } = useCollection(
-        useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore])
+        useMemoFirebase(() => {
+          if (!firestore || !students || students.length === 0) return null;
+          const studentNames = students.map(s => s.name);
+          return query(collection(firestore, 'assignedTps'), where('__name__', 'in', studentNames));
+        }, [firestore, students])
     );
     
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
