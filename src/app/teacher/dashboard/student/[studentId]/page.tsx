@@ -1,12 +1,11 @@
 
 
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useAssignments } from '@/contexts/AssignmentsContext';
-import { TP, EtudePrelimQCM, EtudePrelimText } from '@/lib/data-manager';
+import { TP, EtudePrelimQCM, EtudePrelimText, allBlocs } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -490,3 +489,4 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+
