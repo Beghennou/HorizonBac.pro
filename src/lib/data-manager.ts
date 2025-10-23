@@ -89,11 +89,6 @@ export const classes = {
     "TVP1": [],
     "TVP2": [],
     "TVP3": [],
-    "2MV2 - Carol Shelby": [],
-    "2MV3 - Amédée Gordini": [],
-    "2MV4 - Les frères Michelin": [],
-    "2MV5 - Michèle Mouton": [],
-    "2MV6 - Valentino Rossi": [],
     "TAPP 1": [],
     "TAPP 2": [],
     "1APP1": [],
@@ -101,8 +96,13 @@ export const classes = {
     "1VP1": [],
     "1VP2": [],
     "1VP3": [],
+    "2MV1 - Pierre Latirgue": [],
+    "2MV2 - Carol Shelby": [],
+    "2MV3 - Amédée Gordini": [],
+    "2MV4 - Les frères Michelin": [],
+    "2MV5 - Michèle Mouton": [],
+    "2MV6 - Valentino Rossi": [],
     "2APP-RC/VP - John Coppe": [],
-    "2MV1 - Pierre Latirgue": []
 };
 
 export const allBlocs: Record<string, CompetenceBloc> = {
