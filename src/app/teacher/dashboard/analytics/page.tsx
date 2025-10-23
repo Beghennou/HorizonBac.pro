@@ -8,7 +8,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { BarChart3, Users, Target, BookOpen } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { collection } from 'firebase/firestore';
-import { Student } from '@/lib/types';
 import React from 'react';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
@@ -25,22 +24,20 @@ export default function AnalyticsPage() {
     const searchParams = useSearchParams();
     const { firestore, evaluations } = useFirebase();
 
-    const { data: students } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
     const { data: classes } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
     
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const currentClassName = searchParams.get('class') || (classes?.find(c => c.id.startsWith('2'))?.id || '');
 
     const studentsInClass = React.useMemo(() => {
-        if (!students || !classes) return [];
+        if (!classes) return [];
         const classData = classes.find(c => c.id === currentClassName);
-        const studentNames = classData?.studentNames || [];
-        return students.filter(s => studentNames.includes(s.name));
-    }, [students, classes, currentClassName]);
+        return classData?.studentNames || [];
+    }, [classes, currentClassName]);
 
-    // 1. Average Class Progression
-    const totalProgress = studentsInClass.reduce((acc, student) => acc + (student.progress || 0), 0);
-    const averageProgress = studentsInClass.length > 0 ? Math.round(totalProgress / studentsInClass.length) : 0;
+    // 1. Average Class Progression - This is hard to calculate now without a global student list.
+    // We'll mock it for now.
+    const averageProgress = 0;
 
     // 2. Competence Mastery
     const competenceScores: Record<string, { totalScore: number; count: number, description: string }> = {};
@@ -49,9 +46,9 @@ export default function AnalyticsPage() {
          Object.assign(allCompetencesForLevel, bloc.items);
     });
 
-    const studentNamesInClass = studentsInClass.map(s => s.name);
+    const studentNamesInClass = studentsInClass;
 
-    studentNamesInClass.forEach(studentName => {
+    studentNamesInClass.forEach((studentName: string) => {
         const studentEvals = evaluations[studentName] || {};
         Object.entries(studentEvals).forEach(([competenceId, history]) => {
             const historyArray = (history as any)?.history || [];
@@ -85,17 +82,10 @@ export default function AnalyticsPage() {
 
 
     const classComparisonData = classesForLevel.map(className => {
-        if (!students || !classes) return { name: className, "Progression Moyenne": 0 };
-        const classData = classes.find(c => c.id === className);
-        const studentNames = classData?.studentNames || [];
-        const classStudents = students.filter(s => studentNames.includes(s.name));
-
-        if (classStudents.length === 0) return { name: className, "Progression Moyenne": 0 };
-        
-        const total = classStudents.reduce((acc, s) => acc + (s.progress || 0), 0);
+        // This is hard to calculate without all students. Mocked.
         return {
             name: className,
-            "Progression Moyenne": Math.round(total / classStudents.length),
+            "Progression Moyenne": 0,
         };
     });
 

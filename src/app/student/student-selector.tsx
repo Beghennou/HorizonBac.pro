@@ -6,7 +6,6 @@ import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Student } from '@/lib/types';
 import { collection } from 'firebase/firestore';
 
 export default function StudentSelector() {
@@ -14,7 +13,7 @@ export default function StudentSelector() {
   const searchParams = useSearchParams();
   const { firestore, isLoaded } = useFirebase();
 
-  const { data: classesData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
+  const { data: classesData, isLoading: isLoadingClasses } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   
   const classes = useMemo(() => {
     if (!classesData) return {};
@@ -35,7 +34,7 @@ export default function StudentSelector() {
 
   const studentsInClass = useMemo(() => {
     if (selectedClass && classes[selectedClass]) {
-      const studentNames = classes[selectedClass];
+      const studentNames = classes[selectedClass] as string[];
       return studentNames.sort((a, b) => a.localeCompare(b));
     }
     return [];
@@ -69,7 +68,7 @@ export default function StudentSelector() {
   };
 
 
-  if (!isLoaded) {
+  if (!isLoaded || isLoadingClasses) {
     return <div>Chargement des données...</div>;
   }
 

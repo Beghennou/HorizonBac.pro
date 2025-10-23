@@ -84,10 +84,8 @@ export interface FirebaseContextState {
   addTp: (tp: TP) => void;
   signInWithGoogle: () => Promise<void>;
   isLoaded: boolean;
-  // This data is now loaded in specific components, but we keep the state here for mutation functions
+  
   tps: Record<number, TP>;
-  // students: Student[];
-  // classes: Record<string, string[]>;
   assignedTps: Record<string, AssignedTp[]>;
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
 }
@@ -111,15 +109,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: null,
   });
 
-  // --- DATA FETCHING HAS BEEN MOVED TO INDIVIDUAL COMPONENTS ---
-  // The global data loading has been removed to prevent permission errors at startup.
-  // We keep the state management here so mutation functions can update the local cache if needed.
   const [tps, setTps] = useState<Record<number, TP>>(initialTps);
   const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
   const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>({});
   const [teacherName, setTeacherNameState] = useState<string>('');
 
-  // --- We now use live collections in components that need them ---
   const { data: dynamicTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
   const { data: dynamicAssignedTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
   const { data: dynamicEvals } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
@@ -341,24 +335,19 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const deleteClass = useCallback(async (className: string) => {
       if (!firestore || !className) return;
 
-      const classDoc = await doc(firestore, 'classes', className);
-      // const studentNames = (await getDoc(classDoc)).data()?.studentNames || [];
-      const studentNames: string[] = []; // This part is complex now, needs component-level data.
+      const classDocRef = doc(firestore, 'classes', className);
 
       const batch = writeBatch(firestore);
-      batch.delete(classDoc);
-
-      // This logic will fail now, as the provider no longer has the student list.
-      // The component calling this function will need to provide student IDs.
+      batch.delete(classDocRef);
       
       await batch.commit().catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: 'batch delete class',
+              path: `classes/${className}`,
               operation: 'delete',
           }));
       });
 
-      toast({ title: "Classe supprimée", description: `La classe ${className} et ses élèves ont été supprimés.` });
+      toast({ title: "Classe supprimée", description: `La classe ${className} a été supprimée.` });
   }, [firestore, toast]);
 
   const updateClassWithCsv = useCallback(async (className: string, studentNames: string[]) => {
@@ -367,9 +356,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       const batch = writeBatch(firestore);
       const classDocRef = doc(firestore, 'classes', className);
       batch.set(classDocRef, { studentNames });
-      
-      // This part is also problematic without a global student list.
-      // It should be handled by checking existence within the batch or pre-fetching.
 
       await batch.commit().catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({

@@ -44,7 +44,6 @@ export default function StudentsPage() {
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const className = searchParams.get('class') || '';
 
-    const { data: students } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
     const { data: classes } = useCollection(useMemoFirebase(() => firestore && className ? query(collection(firestore, 'classes'), where('__name__', '==', className)) : null, [firestore, className]));
 
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
@@ -55,13 +54,11 @@ export default function StudentsPage() {
     }, [className, level]);
     
     const studentsInClass = useMemo(() => {
-        if (!students || !classes || classes.length === 0) return [];
+        if (!classes || classes.length === 0) return [];
         const classData = classes.find(c => c.id === className);
         const studentNames = classData?.studentNames || [];
-        return students
-            .filter(student => studentNames.includes(student.name))
-            .sort((a, b) => a.name.localeCompare(b.name));
-    }, [students, classes, className]);
+        return studentNames.sort((a: string, b: string) => a.localeCompare(b));
+    }, [classes, className]);
 
 
     const tpsForLevel = getTpsByNiveau(level, allTpsFromContext);
@@ -98,7 +95,7 @@ export default function StudentsPage() {
     
     const handleSelectAll = (isSelected: boolean) => {
         if (isSelected) {
-            setSelectedStudents(studentsInClass.map(s => s.name));
+            setSelectedStudents(studentsInClass);
         } else {
             setSelectedStudents([]);
         }
@@ -154,10 +151,13 @@ export default function StudentsPage() {
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {studentsInClass.length > 0 ? (
-                    studentsInClass.map((student) => {
-                      const studentName = student.name;
+                    studentsInClass.map((studentName: string) => {
                       const isSelected = selectedStudents.includes(studentName);
                       const studentAssignedTps = (assignedTps[studentName] || []).filter((assignedTp: any) => tpsIdsForCurrentLevel.has(assignedTp.id));
+                      
+                      // This part is problematic as student details are not fetched.
+                      // We will display the name and that's it for now.
+                      // The progress and XP will be missing.
                       
                       return (
                         <Card 
@@ -181,8 +181,8 @@ export default function StudentsPage() {
                           <div className="space-y-2 flex-grow">
                               <div className="w-full">
                                 <p className="text-xs text-muted-foreground text-center mb-1">Progression Globale</p>
-                                <Progress value={student.progress} className="h-2 bg-muted/30" indicatorClassName="bg-gradient-to-r from-xp-color to-green-400" />
-                                <p className="text-xs text-muted-foreground mt-1 font-mono text-center">{student.xp || 0} XP</p>
+                                <Progress value={0} className="h-2 bg-muted/30" indicatorClassName="bg-gradient-to-r from-xp-color to-green-400" />
+                                <p className="text-xs text-muted-foreground mt-1 font-mono text-center">{0} XP</p>
                               </div>
                               {studentAssignedTps.length > 0 && (
                                   <div>

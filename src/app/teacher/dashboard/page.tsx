@@ -9,7 +9,6 @@ import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { collection } from 'firebase/firestore';
-import { Student } from '@/lib/types';
 
 const TpAssistantDialog = dynamic(() => import('@/components/tp-assistant-dialog').then(mod => mod.TpAssistantDialog), {
     ssr: false,
@@ -30,8 +29,6 @@ const PrintButton = () => {
 }
 
 const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: string | null }) => {
-    const { firestore } = useFirebase();
-    const { data: students } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
     
     if (!tp || !studentName) {
         return (
@@ -42,22 +39,12 @@ const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: stri
         )
     };
 
-    const student = students?.find(s => s.name === studentName);
-
     const handleSendEmail = () => {
-        if (!student || !student.email) {
-            alert("Impossible de trouver l'e-mail de l'élève.");
-            return;
-        }
-
-        const subject = `Votre Fiche TP: ${tp.titre}`;
-        const body = `Bonjour ${student.name},\n\nVeuillez trouver ci-joint un lien vers votre fiche de travail pratique (TP) pour la session "${tp.titre}".\n\nObjectif: ${tp.objectif}\n\nVous pouvez consulter la fiche et vous préparer pour l'atelier.\n\nCordialement.`;
-
-        window.location.href = `mailto:${student.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        alert("La fonctionnalité d'envoi d'e-mail n'est pas entièrement implémentée dans cette version.");
     };
 
     return (
-        <Button onClick={handleSendEmail} className="print-hidden" disabled={!student}>
+        <Button onClick={handleSendEmail} className="print-hidden">
             <Mail className="mr-2" />
             Envoyer par E-mail
         </Button>
