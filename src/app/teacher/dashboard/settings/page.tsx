@@ -26,54 +26,6 @@ import Papa from 'papaparse';
 import { collection, writeBatch, doc, getDoc } from 'firebase/firestore';
 import { classNames } from '@/lib/data-manager';
 
-const CsvImportSection = ({ title, onImport }: { title: string, onImport: (studentNames: string[]) => void }) => {
-    const { toast } = useToast();
-
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        Papa.parse(file, {
-            header: false,
-            skipEmptyLines: true,
-            complete: (results) => {
-                const studentNames = results.data
-                    .map((row: any) => typeof row === 'string' ? row.trim() : (row[0] || '').trim())
-                    .filter(name => name !== '');
-                
-                if (studentNames.length > 0) {
-                    onImport(studentNames);
-                } else {
-                    toast({
-                        variant: "destructive",
-                        title: "Fichier CSV vide ou invalide",
-                        description: "Aucun nom d'élève n'a été trouvé dans le fichier.",
-                    });
-                }
-            },
-            error: (error: any) => {
-                toast({
-                    variant: "destructive",
-                    title: "Erreur de lecture du CSV",
-                    description: "Impossible de lire le fichier. Veuillez vérifier son format.",
-                });
-            }
-        });
-        event.target.value = ''; // Reset file input
-    };
-
-    return (
-        <div className="flex items-center gap-4">
-            <Label className="flex-1 font-bold">{title}</Label>
-            <Button asChild variant="outline" className="w-48">
-                <label className="cursor-pointer">
-                    <Upload className="mr-2" /> Importer CSV
-                    <Input type="file" accept=".csv" className="sr-only" onChange={handleFileUpload} />
-                </label>
-            </Button>
-        </div>
-    );
-};
 
 export default function SettingsPage() {
   const { toast } = useToast();
@@ -272,6 +224,59 @@ export default function SettingsPage() {
     
     event.target.value = '';
   };
+
+const CsvImportSection = ({ title, onImport }: { title: string, onImport: (studentNames: string[]) => void }) => {
+    const { toast } = useToast();
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        Papa.parse(file, {
+            header: false,
+            skipEmptyLines: true,
+            complete: (results) => {
+                const studentNames = results.data
+                    .map((row: any) => typeof row === 'string' ? row.trim() : (row[0] || '').trim())
+                    .filter(name => name !== '');
+                
+                if (studentNames.length > 0) {
+                    onImport(studentNames);
+                    toast({
+                        title: "Importation réussie",
+                        description: `${studentNames.length} élèves importés.`
+                    });
+                } else {
+                    toast({
+                        variant: "destructive",
+                        title: "Fichier CSV vide ou invalide",
+                        description: "Aucun nom d'élève n'a été trouvé dans le fichier.",
+                    });
+                }
+            },
+            error: (error: any) => {
+                toast({
+                    variant: "destructive",
+                    title: "Erreur de lecture du CSV",
+                    description: "Impossible de lire le fichier. Veuillez vérifier son format.",
+                });
+            }
+        });
+        event.target.value = ''; // Reset file input
+    };
+
+    return (
+        <div className="flex items-center gap-4">
+            <Label className="flex-1 font-bold">{title}</Label>
+            <Button asChild variant="outline" className="w-48">
+                <label className="cursor-pointer">
+                    <Upload className="mr-2" /> Importer CSV
+                    <Input type="file" accept=".csv" className="sr-only" onChange={handleFileUpload} />
+                </label>
+            </Button>
+        </div>
+    );
+};
 
   return (
     <div className="space-y-8">
