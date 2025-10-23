@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Student": {
@@ -156,36 +157,6 @@
         "completionDate",
         "score"
       ]
-    },
-    "AssignedTpList": {
-      "title": "Assigned Training Programs List",
-      "type": "object",
-      "description": "A document containing a list of training programs assigned to a student.",
-      "properties": {
-        "tps": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "number"
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "non-commencé",
-                  "en-cours",
-                  "terminé"
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "status"
-            ]
-          }
-        }
-      }
     }
   },
   "auth": {
@@ -292,22 +263,6 @@
             {
               "name": "studentProgressId",
               "description": "The unique identifier for the student progress record."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/assignedTps/{studentId}",
-        "definition": {
-          "entityName": "AssignedTpList",
-          "schema": {
-            "$ref": "#/backend/entities/AssignedTpList"
-          },
-          "description": "Stores the list of training programs assigned to a specific student. The studentId can be the student's name or a unique ID.",
-          "params": [
-            {
-              "name": "studentId",
-              "description": "The unique identifier for the student, which may be their name."
             }
           ]
         }

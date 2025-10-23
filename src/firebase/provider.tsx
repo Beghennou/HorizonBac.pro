@@ -3,11 +3,11 @@
 
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc } from 'firebase/firestore';
+import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDoc } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
-import { TP, initialTps } from '@/lib/data-manager';
+import { TP, initialTps, classNames as staticClasses } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
@@ -100,7 +100,7 @@ export interface FirebaseContextState {
   signInWithGoogle: () => Promise<void>;
   isLoaded: boolean;
   
-  classes: DocumentData[];
+  classes: string[];
   tps: Record<number, TP>;
   assignedTps: Record<string, AssignedTp[]>;
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
@@ -134,8 +134,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
   const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
   
-  const classes = useMemo(() => classesData || [], [classesData]);
-
   const assignedTps = useMemo(() => {
     if (!assignedTpsData) return {};
     return Object.fromEntries(assignedTpsData.map(doc => [doc.id, doc.tps]));
@@ -217,7 +215,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: userAuthState.userError,
     isLoaded,
     teacherName,
-    classes,
+    classes: staticClasses,
     tps,
     assignedTps,
     evaluations,
@@ -271,8 +269,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       });
     },
     resetAllStudentLists: async () => {
-        if (!firestore) return;
-        await resetAllStudentListsInClasses(firestore, classes);
+        if (!firestore || !classesData) return;
+        await resetAllStudentListsInClasses(firestore, classesData);
         toast({
             title: "Listes d'élèves réinitialisées",
             description: "Tous les élèves ont été retirés de toutes les classes.",

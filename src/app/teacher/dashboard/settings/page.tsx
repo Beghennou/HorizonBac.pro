@@ -23,7 +23,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import Papa from 'papaparse';
-import { collection, writeBatch, doc } from 'firebase/firestore';
+import { collection, writeBatch, doc, getDoc } from 'firebase/firestore';
+import { classNames } from '@/lib/data-manager';
 
 const CsvImportSection = ({ title, onImport }: { title: string, onImport: (studentNames: string[]) => void }) => {
     const { toast } = useToast();
@@ -76,12 +77,9 @@ const CsvImportSection = ({ title, onImport }: { title: string, onImport: (stude
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { firestore, teacherName, setTeacherName, updateClassWithCsv, deleteClass, classes, resetAllStudentLists } = useFirebase();
+  const { firestore, teacherName, setTeacherName, updateClassWithCsv, deleteClass, resetAllStudentLists } = useFirebase();
 
-  const classList = useMemo(() => {
-    if (!classes) return {};
-    return Object.fromEntries(classes.map(c => [c.id, c.studentNames || []]))
-  }, [classes]);
+  const [classList, setClassList] = useState<Record<string, string[]>>({});
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
@@ -100,13 +98,31 @@ export default function SettingsPage() {
   const [studentToDelete, setStudentToDelete] = useState('');
   const [classToDelete, setClassToDelete] = useState('');
 
-  const [newSecondeClassName, setNewSecondeClassName] = useState('2MV_NEW');
-  const [newPremiereClassName, setNewPremiereClassName] = useState('1VP_NEW');
-  const [newTerminaleClassName, setNewTerminaleClassName] = useState('TVP_NEW');
+  const [newSecondeClassName, setNewSecondeClassName] = useState('2MV');
+  const [newPremiereClassName, setNewPremiereClassName] = useState('1VP');
+  const [newTerminaleClassName, setNewTerminaleClassName] = useState('TVP');
 
   useEffect(() => {
     setLocalTeacherName(teacherName);
   }, [teacherName]);
+
+  useEffect(() => {
+    const fetchAllClasses = async () => {
+        if (!firestore) return;
+        const tempClassList: Record<string, string[]> = {};
+        for(const name of classNames) {
+            const classDocRef = doc(firestore, 'classes', name);
+            const classDocSnap = await getDoc(classDocRef);
+            if(classDocSnap.exists()) {
+                tempClassList[name] = classDocSnap.data().studentNames || [];
+            } else {
+                tempClassList[name] = [];
+            }
+        }
+        setClassList(tempClassList);
+    }
+    fetchAllClasses();
+  }, [firestore]);
   
   const handleAddStudent = async () => {
     if (!firstName || !lastName || (!newClassName && !selectedClass) || !firestore) {
@@ -137,6 +153,8 @@ export default function SettingsPage() {
       title: "Élève ajouté",
       description: `${studentName} a été ajouté à la classe ${finalClassName}.`,
     });
+    
+    setClassList(prev => ({...prev, [finalClassName]: [...(prev[finalClassName] || []), studentName]}));
 
     setFirstName('');
     setLastName('');
@@ -190,6 +208,7 @@ export default function SettingsPage() {
       const updatedStudents = currentStudents.filter((s: string) => s !== studentToDelete);
 
       updateClassWithCsv(deleteStudentClass, updatedStudents);
+      setClassList(prev => ({...prev, [deleteStudentClass]: updatedStudents}));
 
       setStudentToDelete('');
       setDeleteStudentClass('');
@@ -200,6 +219,9 @@ export default function SettingsPage() {
       if (!classToDelete || !firestore) return;
       deleteClass(classToDelete);
       setClassToDelete('');
+      // We don't remove from classNames as it's static now.
+      // But we can update the local state to reflect the students are gone
+      setClassList(prev => ({...prev, [classToDelete]: []}));
   }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -234,6 +256,7 @@ export default function SettingsPage() {
         }
 
         updateClassWithCsv(finalImportClassName, newStudentNames);
+        setClassList(prev => ({...prev, [finalImportClassName]: newStudentNames}));
         setImportClassName('');
         setNewImportClassName('');
       },
@@ -305,7 +328,7 @@ export default function SettingsPage() {
                             <SelectValue placeholder="Choisir une classe..." />
                         </SelectTrigger>
                         <SelectContent>
-                            {Object.keys(classList).sort().map(c => (
+                            {classNames.sort().map(c => (
                                 <SelectItem key={c} value={c}>{c}</SelectItem>
                             ))}
                         </SelectContent>
@@ -341,7 +364,7 @@ export default function SettingsPage() {
                               <SelectValue placeholder="Choisir une classe..." />
                           </SelectTrigger>
                           <SelectContent>
-                              {Object.keys(classList).sort().map(c => (
+                              {classNames.sort().map(c => (
                                   <SelectItem key={c} value={c}>{c}</SelectItem>
                               ))}
                           </SelectContent>
@@ -444,7 +467,7 @@ export default function SettingsPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 <div className="space-y-2 md:col-span-2">
-                     <Label htmlFor="delete-class-select-2">Classe à supprimer</Label>
+                     <Label htmlFor="delete-class-select-2">Vider une classe de ses élèves</Label>
                       <Select value={classToDelete} onValueChange={setClassToDelete}>
                         <SelectTrigger id="delete-class-select-2">
                             <SelectValue placeholder="Choisir une classe..."/>
@@ -458,18 +481,18 @@ export default function SettingsPage() {
                 </div>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
-                        <Button variant="destructive" disabled={!classToDelete}><FolderMinus className="mr-2" /> Supprimer cette classe</Button>
+                        <Button variant="destructive" disabled={!classToDelete}><FolderMinus className="mr-2" /> Vider cette classe</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmer la suppression de la classe</AlertDialogTitle>
+                            <AlertDialogTitle>Confirmer la suppression des élèves</AlertDialogTitle>
                             <AlertDialogDescription>
-                                Êtes-vous sûr de vouloir supprimer la classe <strong>{classToDelete}</strong> ? Tous les élèves de cette classe et leurs données seront définitivement effacés. Cette action est irréversible.
+                                Êtes-vous sûr de vouloir supprimer tous les élèves de la classe <strong>{classToDelete}</strong> ? Les données des élèves ne seront pas effacées, mais ils n'appartiendront plus à cette classe.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDeleteClass}>Supprimer la classe</AlertDialogAction>
+                            <AlertDialogAction onClick={handleDeleteClass}>Vider la classe</AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
@@ -498,7 +521,7 @@ export default function SettingsPage() {
                               <AlertDialogDescription>
                                   Cette action est irréversible. Toutes les listes d'élèves seront vidées. Pour confirmer, veuillez taper <strong>reset</strong> dans le champ ci-dessous.
                               </AlertDialogDescription>
-                          </AlertDialogHeader>
+                          </Header>
                           <div className="space-y-2">
                             <Label htmlFor="reset-lists-password">Mot de passe de confirmation</Label>
                             <Input 

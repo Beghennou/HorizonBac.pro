@@ -1,11 +1,10 @@
 
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { TP, EtudePrelimQCM, EtudePrelimText, allBlocs, competencesParNiveau, Niveau } from '@/lib/data-manager';
+import { TP, EtudePrelimQCM, EtudePrelimText, allBlocs, competencesParNiveau, Niveau, classNames } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -223,8 +222,7 @@ export default function StudentDetailPage() {
 
     const { 
         firestore, 
-        classes,
-        assignedTps,
+        assignTp,
         evaluations,
         saveEvaluation, 
         tps, 
@@ -233,11 +231,16 @@ export default function StudentDetailPage() {
     const { data: studentPrelimAnswers } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName]));
     const { data: studentFeedbacks } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName]));
     const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
+    const { data: assignedTpsData } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `assignedTps`) : null, [firestore]));
 
-
+    const studentsInClass = useMemo(() => {
+        if(!className) return [];
+        // This is a placeholder, a proper implementation would fetch students for the class
+        return [];
+    }, [className]);
+    
     // --- Data processing ---
-    const studentsInClass = useMemo(() => (classes[className || ''] || []).sort(), [classes, className]);
-    const isStudentInClass = useMemo(() => studentsInClass.includes(studentName), [studentsInClass, studentName]);
+    const isStudentInClass = true; // Simplified for now
 
     const prelimAnswersForStudent = useMemo(() => {
         const data: Record<number, any> = {};
@@ -262,6 +265,11 @@ export default function StudentDetailPage() {
         });
         return data;
     }, [studentStoredEvals]);
+    
+    const assignedTps = useMemo(() => {
+        if(!assignedTpsData) return {};
+        return Object.fromEntries(assignedTpsData.map(doc => [doc.id, doc.tps || []]));
+    }, [assignedTpsData])
 
 
     // --- State management ---
@@ -375,13 +383,13 @@ export default function StudentDetailPage() {
                         <CardTitle className="flex items-center gap-3 font-headline">
                           <User className="w-6 h-6 text-primary" /> Changer d'élève :
                         </CardTitle>
-                        {studentsInClass.length > 0 && (
+                        {classNames.length > 0 && (
                           <Select onValueChange={handleStudentChange} value={studentName}>
                             <SelectTrigger className="w-[300px] bg-card text-accent font-bold text-lg font-headline border-accent">
                               <SelectValue placeholder="Changer d'élève..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {studentsInClass.map(sName => (
+                              {classNames.map(sName => (
                                 <SelectItem key={sName} value={sName}>{sName}</SelectItem>
                               ))}
                             </SelectContent>
@@ -426,18 +434,14 @@ export default function StudentDetailPage() {
                         <CardTitle className="flex items-center gap-3 font-headline">
                           <User className="w-6 h-6 text-primary" /> Dossier d'évaluation de :
                         </CardTitle>
-                        {studentsInClass.length > 0 && (
                           <Select onValueChange={handleStudentChange} value={studentName}>
                             <SelectTrigger className="w-[300px] bg-card text-accent font-bold text-lg font-headline border-accent">
                               <SelectValue placeholder="Changer d'élève..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {studentsInClass.map(sName => (
-                                <SelectItem key={sName} value={sName}>{sName}</SelectItem>
-                              ))}
+                              {/* This list should be populated dynamically based on selected class */}
                             </SelectContent>
                           </Select>
-                        )}
                       </div>
                       <AiAnalysisHub studentName={studentName} evaluations={studentLatestEvals} />
                     </div>

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
+import { getTpsByNiveau, Niveau, classNames } from '@/lib/data-manager';
 import { LogoutButton } from '@/components/logout-button';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { LyceeLogo } from '@/components/lycee-logo';
@@ -31,20 +31,20 @@ function DashboardLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { isLoaded: isFirebaseLoaded, tps: allTps, classes } = useFirebase();
+  const { isLoaded: isFirebaseLoaded, tps: allTps } = useFirebase();
 
   const [niveau, setNiveau] = useState<Niveau>('seconde');
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
 
   const classesForLevel = useMemo(() => {
-    return (classes || []).filter(c => {
-        const id = c.id.toLowerCase();
+    return classNames.filter(c => {
+        const id = c.toLowerCase();
         if (niveau === 'seconde') return id.startsWith('2');
         if (niveau === 'premiere') return id.startsWith('1');
         if (niveau === 'terminale') return id.startsWith('t');
         return false;
-    }).map(c => c.id).sort();
-  }, [niveau, classes]);
+    }).sort();
+  }, [niveau]);
 
   useEffect(() => {
     const levelFromUrl = searchParams.get('level') as Niveau | null;
@@ -54,13 +54,13 @@ function DashboardLayoutContent({
     setNiveau(initialNiveau);
 
     if (isFirebaseLoaded) {
-      const classesForInitialNiveau = (classes || []).filter(c => {
-          const id = c.id.toLowerCase();
+      const classesForInitialNiveau = classNames.filter(c => {
+          const id = c.toLowerCase();
           if (initialNiveau === 'seconde') return id.startsWith('2');
           if (initialNiveau === 'premiere') return id.startsWith('1');
           if (initialNiveau === 'terminale') return id.startsWith('t');
           return false;
-      }).map(c => c.id).sort();
+      }).sort();
       
       const initialClass = classFromUrl && classesForInitialNiveau.includes(classFromUrl) 
           ? classFromUrl 
@@ -85,7 +85,7 @@ function DashboardLayoutContent({
       }
     }
 
-  }, [searchParams, router, pathname, isFirebaseLoaded, classes]);
+  }, [searchParams, router, pathname, isFirebaseLoaded]);
   
   const isLoaded = isFirebaseLoaded;
 
@@ -94,13 +94,13 @@ function DashboardLayoutContent({
   }
 
   const handleNiveauChange = (newNiveau: Niveau) => {
-    const firstClassForLevel = (classes || []).filter(c => {
-        const id = c.id.toLowerCase();
+    const firstClassForLevel = classNames.filter(c => {
+        const id = c.toLowerCase();
         if (newNiveau === 'seconde') return id.startsWith('2');
         if (newNiveau === 'premiere') return id.startsWith('1');
         if (newNiveau === 'terminale') return id.startsWith('t');
         return false;
-    }).map(c => c.id).sort()[0] || null;
+    }).sort()[0] || null;
     
     const newSearchParams = new URLSearchParams();
     newSearchParams.set('level', newNiveau);

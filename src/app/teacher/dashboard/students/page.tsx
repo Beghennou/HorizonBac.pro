@@ -26,7 +26,7 @@ import {
 import Link from 'next/link';
 import { Student } from '@/lib/types';
 import { TpStatus } from '@/firebase/provider';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, getDoc, doc } from 'firebase/firestore';
 
 
 const statusLabels: Record<TpStatus, string> = {
@@ -43,23 +43,29 @@ export default function StudentsPage() {
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const className = searchParams.get('class') || '';
-
-    const { data: classes } = useCollection(useMemoFirebase(() => firestore && className ? query(collection(firestore, 'classes'), where('__name__', '==', className)) : null, [firestore, className]));
-
+    
+    const [studentsInClass, setStudentsInClass] = useState<string[]>([]);
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
     
     useEffect(() => {
         // Reset selection when class or level changes
         setSelectedStudents([]);
-    }, [className, level]);
-    
-    const studentsInClass = useMemo(() => {
-        if (!classes || classes.length === 0) return [];
-        const classData = classes.find(c => c.id === className);
-        const studentNames = classData?.studentNames || [];
-        return studentNames.sort((a: string, b: string) => a.localeCompare(b));
-    }, [classes, className]);
-
+        const fetchStudents = async () => {
+            if (className && firestore) {
+                const classDocRef = doc(firestore, 'classes', className);
+                const classDocSnap = await getDoc(classDocRef);
+                if (classDocSnap.exists()) {
+                    const studentNames = classDocSnap.data().studentNames || [];
+                    setStudentsInClass(studentNames.sort((a: string, b: string) => a.localeCompare(b)));
+                } else {
+                    setStudentsInClass([]);
+                }
+            } else {
+                 setStudentsInClass([]);
+            }
+        }
+        fetchStudents();
+    }, [className, firestore]);
 
     const tpsForLevel = getTpsByNiveau(level, allTpsFromContext);
     const tpsIdsForCurrentLevel = new Set(tpsForLevel.map(tp => tp.id));

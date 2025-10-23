@@ -6,43 +6,44 @@ import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { collection } from 'firebase/firestore';
+import { collection, doc, getDoc } from 'firebase/firestore';
+import { classNames } from '@/lib/data-manager';
 
 export default function StudentSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { firestore, isLoaded, classes } = useFirebase();
+  const { firestore, isLoaded } = useFirebase();
 
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
-
-  const classNames = useMemo(() => {
-    return (classes || []).map(c => c.id).sort();
-  }, [classes]);
-
-  const studentsInClass = useMemo(() => {
-    if (selectedClass && classes) {
-        const currentClassDoc = classes.find(c => c.id === selectedClass);
-        if (currentClassDoc && currentClassDoc.studentNames) {
-            return (currentClassDoc.studentNames as string[]).sort((a, b) => a.localeCompare(b));
-        }
-    }
-    return [];
-  }, [selectedClass, classes]);
-
+  const [studentsInClass, setStudentsInClass] = useState<string[]>([]);
 
   useEffect(() => {
     if (isLoaded) {
       const classFromUrl = searchParams.get('class') || '';
       const studentFromUrl = searchParams.get('student') || '';
-      setSelectedClass(classFromUrl);
-      setSelectedStudent(studentFromUrl);
+      if(classFromUrl) {
+          handleClassChange(classFromUrl, studentFromUrl);
+      }
     }
   }, [searchParams, isLoaded]);
 
-  const handleClassChange = (newClass: string) => {
+  const handleClassChange = async (newClass: string, studentToSelect?: string) => {
     setSelectedClass(newClass);
-    setSelectedStudent(''); // Reset student when class changes
+    setSelectedStudent('');
+    setStudentsInClass([]);
+
+    if (newClass && firestore) {
+        const classDocRef = doc(firestore, 'classes', newClass);
+        const classDocSnap = await getDoc(classDocRef);
+        if (classDocSnap.exists()) {
+            const studentNames = (classDocSnap.data().studentNames as string[] || []).sort((a,b) => a.localeCompare(b));
+            setStudentsInClass(studentNames);
+            if(studentToSelect && studentNames.includes(studentToSelect)) {
+                setSelectedStudent(studentToSelect);
+            }
+        }
+    }
   };
 
   const handleStudentChange = (newStudent: string) => {
@@ -58,7 +59,6 @@ export default function StudentSelector() {
     }
   };
 
-
   if (!isLoaded) {
     return <div>Chargement...</div>;
   }
@@ -67,12 +67,12 @@ export default function StudentSelector() {
     <div className="flex flex-col space-y-4">
         <div className="space-y-2">
           <Label htmlFor="class-select" className="font-bold">Classe</Label>
-          <Select onValueChange={handleClassChange} value={selectedClass}>
+          <Select onValueChange={(val) => handleClassChange(val)} value={selectedClass}>
             <SelectTrigger id="class-select">
               <SelectValue placeholder="Choisir une classe..." />
             </SelectTrigger>
             <SelectContent>
-              {classNames.map(className => (
+              {classNames.sort().map(className => (
                 <SelectItem key={className} value={className}>{className}</SelectItem>
               ))}
             </SelectContent>
