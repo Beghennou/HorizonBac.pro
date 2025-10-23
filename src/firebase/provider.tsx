@@ -11,7 +11,7 @@ import { TP, initialTps } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
-import { useCollection, useMemoFirebase } from './firestore/use-collection';
+import { useCollection, useMemoFirebase } from '@/firebase';
 
 // Types definition
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
