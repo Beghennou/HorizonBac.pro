@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,10 +17,11 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
 import { Home, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { collection } from 'firebase/firestore';
 
 function DashboardLayoutContent({
   children,
@@ -30,17 +31,31 @@ function DashboardLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { classes: dynamicClasses, tps: allTps, isLoaded } = useFirebase();
+  const { firestore, tps: allTps, isLoaded: isAuthLoaded } = useFirebase();
+
+  const { data: dynamicClasses, isLoading: isLoadingClasses } = useCollection(
+      useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore])
+  );
+
+  const classes = useMemo(() => {
+      const classMap: Record<string, string[]> = {};
+      if (dynamicClasses) {
+          dynamicClasses.forEach(doc => {
+              classMap[doc.id] = doc.studentNames || [];
+          });
+      }
+      return classMap;
+  }, [dynamicClasses]);
 
   const [niveau, setNiveau] = useState<Niveau>('seconde');
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
 
-  const classesForLevel = useMemo(() => Object.keys(dynamicClasses).filter(c => {
+  const classesForLevel = useMemo(() => Object.keys(classes).filter(c => {
     if (niveau === 'seconde') return c.startsWith('2');
     if (niveau === 'premiere') return c.startsWith('1');
     if (niveau === 'terminale') return c.startsWith('T');
     return false;
-  }).sort(), [dynamicClasses, niveau]);
+  }).sort(), [classes, niveau]);
 
   useEffect(() => {
     const levelFromUrl = searchParams.get('level') as Niveau | null;
@@ -49,7 +64,9 @@ function DashboardLayoutContent({
     const initialNiveau = levelFromUrl || 'seconde';
     setNiveau(initialNiveau);
 
-    const classesForInitialNiveau = Object.keys(dynamicClasses).filter(c => {
+    if (isLoadingClasses) return;
+
+    const classesForInitialNiveau = Object.keys(classes).filter(c => {
         if (initialNiveau === 'seconde') return c.startsWith('2');
         if (initialNiveau === 'premiere') return c.startsWith('1');
         if (initialNiveau === 'terminale') return c.startsWith('T');
@@ -62,21 +79,23 @@ function DashboardLayoutContent({
 
     setSelectedClass(initialClass);
     
-    if (isLoaded && initialClass && (!classFromUrl || !levelFromUrl)) {
+    if (isAuthLoaded && !isLoadingClasses && initialClass && (!classFromUrl || !levelFromUrl)) {
         const newSearchParams = new URLSearchParams(searchParams.toString());
         newSearchParams.set('level', initialNiveau);
         newSearchParams.set('class', initialClass);
         router.replace(`${pathname}?${newSearchParams.toString()}`);
     }
 
-  }, [searchParams, dynamicClasses, router, pathname, isLoaded]);
+  }, [searchParams, classes, router, pathname, isAuthLoaded, isLoadingClasses]);
+  
+  const isLoaded = isAuthLoaded && !isLoadingClasses;
 
   if (!isLoaded) {
     return <TachometerAnimation />;
   }
 
   const handleNiveauChange = (newNiveau: Niveau) => {
-    const firstClassForLevel = Object.keys(dynamicClasses).find(c => {
+    const firstClassForLevel = Object.keys(classes).find(c => {
         if (newNiveau === 'seconde') return c.startsWith('2');
         if (newNiveau === 'premiere') return c.startsWith('1');
         if (newNiveau === 'terminale') return c.startsWith('T');
@@ -168,16 +187,20 @@ function DashboardLayoutContent({
 
                       <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
                         <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Sélection de la classe</h3>
-                        <Select value={selectedClass || ''} onValueChange={handleClassChange}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Choisir une classe..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {classesForLevel.map(className => (
-                                <SelectItem key={className} value={className}>{className}</SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
+                        {classesForLevel.length > 0 ? (
+                            <Select value={selectedClass || ''} onValueChange={handleClassChange}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Choisir une classe..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {classesForLevel.map(className => (
+                                    <SelectItem key={className} value={className}>{className}</SelectItem>
+                                ))}
+                            </SelectContent>
+                            </Select>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Aucune classe pour ce niveau.</p>
+                        )}
                       </div>
                     
                       <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl flex-1">
@@ -225,6 +248,8 @@ export default function TeacherDashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    <Suspense fallback={<TachometerAnimation />}>
+        <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </Suspense>
   );
 }

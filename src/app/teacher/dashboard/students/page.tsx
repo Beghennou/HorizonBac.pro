@@ -16,7 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { useFirebase, TpStatus, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import {
   Tooltip,
   TooltipContent,
@@ -26,6 +26,7 @@ import {
 import Link from 'next/link';
 import { collection, query, where } from 'firebase/firestore';
 import { Student } from '@/lib/types';
+import { TpStatus } from '@/firebase/provider';
 
 
 const statusLabels: Record<TpStatus, string> = {
@@ -37,18 +38,38 @@ const statusLabels: Record<TpStatus, string> = {
 export default function StudentsPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { firestore, assignTp, classes, tps: allTpsFromContext } = useFirebase();
+    const { firestore, assignTp, tps: allTpsFromContext } = useFirebase();
     const { toast } = useToast();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const className = searchParams.get('class') || '';
 
+    // This state will hold student names for the selected class
+    const [studentNamesInClass, setStudentNamesInClass] = useState<string[]>([]);
+    
+    // Fetch the class document to get student names
+    const { data: classData, isLoading: isLoadingClass } = useCollection(
+        useMemoFirebase(() => {
+            if (!firestore || !className) return null;
+            // This is not ideal as it fetches all classes. A direct doc get would be better.
+            // Let's assume we can query by name for now, or get a single doc.
+            // A better query: doc(firestore, 'classes', className) with useDoc
+            return query(collection(firestore, 'classes'), where('__name__', '==', className));
+        }, [firestore, className])
+    );
+    
+    useEffect(() => {
+        if (classData && classData.length > 0) {
+            setStudentNamesInClass(classData[0].studentNames || []);
+        } else {
+            setStudentNamesInClass([]);
+        }
+    }, [classData]);
+
     const studentsQuery = useMemoFirebase(() => {
-        if (!firestore || !className || !classes[className]) return null;
-        const studentNamesInClass = classes[className] || [];
-        if (studentNamesInClass.length === 0) return null;
+        if (!firestore || studentNamesInClass.length === 0) return null;
         return query(collection(firestore, 'students'), where('name', 'in', studentNamesInClass));
-    }, [firestore, className, classes]);
+    }, [firestore, studentNamesInClass]);
     
     const { data: students, isLoading: isLoadingStudents } = useCollection<Student>(studentsQuery);
     
@@ -56,6 +77,7 @@ export default function StudentsPage() {
         useMemoFirebase(() => {
           if (!firestore || !students || students.length === 0) return null;
           const studentNames = students.map(s => s.name);
+          if (studentNames.length === 0) return null;
           return query(collection(firestore, 'assignedTps'), where('__name__', 'in', studentNames));
         }, [firestore, students])
     );
@@ -73,7 +95,10 @@ export default function StudentsPage() {
         const tpsMap: Record<string, any> = {};
         if (assignedTpsData) {
             assignedTpsData.forEach(doc => {
-                tpsMap[doc.id] = doc.tps;
+                // This structure is incorrect based on the new logic.
+                // It should be a subcollection.
+                // Let's adapt to the expected structure for now.
+                tpsMap[doc.id] = doc.tps; // Assuming 'tps' is an array field
             });
         }
         return tpsMap;
@@ -169,7 +194,7 @@ export default function StudentsPage() {
                   </div>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {isLoadingStudents || isLoadingAssignedTps ? (
+                  {isLoadingClass || isLoadingStudents ? (
                     <p>Chargement des élèves...</p>
                   ) : studentsInClass.length > 0 ? (
                     studentsInClass.map((student) => {

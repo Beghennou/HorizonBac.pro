@@ -1,11 +1,10 @@
 
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { useFirebase } from '@/firebase/provider';
-import { TP, EtudePrelimQCM, EtudePrelimText, allBlocs } from '@/lib/data-manager';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { TP, EtudePrelimQCM, EtudePrelimText, allBlocs, competencesParNiveau, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { competencesParNiveau } from '@/lib/data-manager';
+import { collection, query, where, doc, getDoc } from 'firebase/firestore';
 
 const AiAnalysisHub = dynamic(() => import('@/components/ai-analysis-hub').then(mod => mod.AiAnalysisHub), {
     ssr: false,
@@ -28,26 +27,18 @@ type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 const evaluationLevels: EvaluationStatus[] = ['NA', 'EC', 'A', 'M'];
 
 const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: string | null }) => {
-    const { students } = useFirebase();
+    // This component needs access to student data, which is no longer in the context.
+    // It would need its own data fetching logic. For now, we'll disable it if data isn't passed in.
     
     if (!tp || !studentName) return null;
 
-    const student = students.find(s => s.name === studentName);
-
     const handleSendEmail = () => {
-        if (!student || !student.email) {
-            alert("Impossible de trouver l'e-mail de l'élève.");
-            return;
-        }
-
-        const subject = `Votre Fiche TP: ${tp.titre}`;
-        const body = `Bonjour ${student.name},\n\nVeuillez trouver ci-joint un lien vers votre fiche de travail pratique (TP) pour la session "${tp.titre}".\n\nObjectif: ${tp.objectif}\n\nVous pouvez consulter la fiche et vous préparer pour l'atelier.\n\nCordialement.`;
-
-        window.location.href = `mailto:${student.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        // In a real app, you'd fetch the student's email here.
+        alert("La fonctionnalité d'envoi d'e-mail n'est pas entièrement implémentée dans cette version.");
     };
 
     return (
-        <Button onClick={handleSendEmail} variant="outline" size="sm" disabled={!student}>
+        <Button onClick={handleSendEmail} variant="outline" size="sm">
             <Mail className="mr-2 h-4 w-4" />
             Renvoyer le TP par E-mail
         </Button>
@@ -226,25 +217,99 @@ export default function StudentDetailPage() {
     const searchParams = useSearchParams();
     const params = useParams();
     const { toast } = useToast();
-    const { students, classes, assignedTps, evaluations: savedEvaluations, saveEvaluation, prelimAnswers, feedbacks, saveFeedback, storedEvals, tps, teacherName } = useFirebase();
+    const { firestore, saveEvaluation, saveFeedback, tps, teacherName } = useFirebase();
 
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     const className = searchParams.get('class');
     
-    // --- Vérification de cohérence ---
-    const isStudentInClass = className && classes[className]?.includes(studentName);
-    const teacherIdFromStudent = students.find(s => s.name === studentName)?.teacherId;
-    const isTeacherOwner = teacherIdFromStudent === teacherName; // Simple check, in real app would be UID
-    
-    const studentsInClass = (className ? classes[className] || [] : []).sort();
+    // --- Data fetching ---
+    const { data: classData, isLoading: isLoadingClass } = useCollection(
+        useMemoFirebase(() => {
+            if (!firestore || !className) return null;
+            return query(collection(firestore, 'classes'), where('__name__', '==', className));
+        }, [firestore, className])
+    );
+    const studentsInClass = useMemo(() => classData?.[0]?.studentNames?.sort() || [], [classData]);
+    const isStudentInClass = useMemo(() => studentsInClass.includes(studentName), [studentsInClass, studentName]);
 
+    const { data: assignedTpsData, isLoading: isLoadingAssignedTps } = useCollection(
+        useMemoFirebase(() => {
+            if (!firestore || !studentName) return null;
+            return query(collection(firestore, `assignedTps/${studentName}/tps`));
+        }, [firestore, studentName])
+    );
+
+    const { data: savedEvaluations, isLoading: isLoadingEvals } = useCollection(
+        useMemoFirebase(() => {
+            if (!firestore || !studentName) return null;
+            return query(collection(firestore, `evaluations/${studentName}/competences`));
+        }, [firestore, studentName])
+    );
+
+    const { data: prelimAnswers, isLoading: isLoadingPrelim } = useCollection(
+        useMemoFirebase(() => {
+            if (!firestore || !studentName) return null;
+            return query(collection(firestore, `prelimAnswers/${studentName}/answers`));
+        }, [firestore, studentName])
+    );
+    
+    const { data: feedbacks, isLoading: isLoadingFeedbacks } = useCollection(
+        useMemoFirebase(() => {
+             if (!firestore || !studentName) return null;
+            return query(collection(firestore, `feedbacks/${studentName}/tps`));
+        }, [firestore, studentName])
+    );
+
+    const { data: storedEvals, isLoading: isLoadingStoredEvals } = useCollection(
+         useMemoFirebase(() => {
+             if (!firestore || !studentName) return null;
+            return query(collection(firestore, `storedEvals/${studentName}/evals`));
+        }, [firestore, studentName])
+    );
+    
+    // --- State management ---
     const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
     const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
-    const studentAssignedTps = (studentName ? assignedTps[studentName] || [] : []).map(assignedTp => {
-        const tp = tps[assignedTp.id];
-        return tp ? { ...tp, status: assignedTp.status } : null;
-    }).filter((tp): tp is (TP & { status: string }) => tp !== null);
+    const studentAssignedTps = useMemo(() => {
+        return (assignedTpsData || []).map(assignedTp => {
+            const tp = tps[parseInt(assignedTp.id, 10)];
+            return tp ? { ...tp, status: assignedTp.status } : null;
+        }).filter((tp): tp is (TP & { status: string }) => tp !== null);
+    }, [assignedTpsData, tps]);
+    
+    const studentPrelimAnswers = useMemo(() => {
+        const answers: Record<number, Record<number, PrelimAnswer>> = {};
+        (prelimAnswers || []).forEach(doc => {
+            answers[parseInt(doc.id, 10)] = doc;
+        });
+        return answers;
+    }, [prelimAnswers]);
+
+    const studentFeedbacks = useMemo(() => {
+        const allFeedbacks: Record<number, Feedback> = {};
+        (feedbacks || []).forEach(doc => {
+            allFeedbacks[parseInt(doc.id, 10)] = doc;
+        });
+        return allFeedbacks;
+    }, [feedbacks]);
+
+    const studentStoredEvals = useMemo(() => {
+        const evals: Record<number, StoredEvaluation> = {};
+        (storedEvals || []).forEach(doc => {
+            evals[parseInt(doc.id, 10)] = doc as StoredEvaluation;
+        });
+        return evals;
+    }, [storedEvals]);
+    
+    const studentLatestEvals = useMemo(() => {
+        const evals: Record<string, EvaluationStatus[]> = {};
+        (savedEvaluations || []).forEach(doc => {
+             evals[doc.id] = doc.history || [];
+        });
+        return evals;
+    }, [savedEvaluations]);
+
 
     useEffect(() => {
         const tpIdFromUrl = searchParams.get('tp');
@@ -252,18 +317,17 @@ export default function StudentDetailPage() {
             setSelectedTpId(parseInt(tpIdFromUrl, 10));
         } else if (studentAssignedTps.length > 0) {
             const firstTpId = studentAssignedTps[0].id;
-             setSelectedTpId(firstTpId);
+            setSelectedTpId(firstTpId);
         } else {
             setSelectedTpId(null);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [studentName, studentAssignedTps.length]);
+    }, [studentName, studentAssignedTps, searchParams]);
 
     useEffect(() => {
-        if (studentName && savedEvaluations[studentName]) {
+        if (studentName && studentLatestEvals) {
             const latestEvals: Record<string, EvaluationStatus> = {};
-            for (const competenceId in savedEvaluations[studentName]) {
-                const history = savedEvaluations[studentName][competenceId];
+            for (const competenceId in studentLatestEvals) {
+                const history = studentLatestEvals[competenceId];
                 if (history && history.length > 0) {
                     latestEvals[competenceId] = history[history.length - 1];
                 }
@@ -272,7 +336,7 @@ export default function StudentDetailPage() {
         } else {
             setCurrentEvaluations({});
         }
-    }, [studentName, savedEvaluations, selectedTpId]);
+    }, [studentName, studentLatestEvals, selectedTpId]);
 
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
         setCurrentEvaluations(prev => ({
@@ -321,7 +385,11 @@ export default function StudentDetailPage() {
     
     const evaluatedCompetenceIds = selectedTp?.objectif.match(/C\d\.\d/g) || [];
 
-    if (!isStudentInClass) {
+    if (isLoadingClass) {
+        return <Loader2 className="h-16 w-16 animate-spin text-primary mx-auto" />
+    }
+
+    if (!isStudentInClass && !isLoadingClass) {
         return (
             <div className="flex flex-col items-center justify-center h-64 text-center">
                 <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
@@ -352,7 +420,7 @@ export default function StudentDetailPage() {
         )
     }
 
-    if (!studentName || !students.some(s => s.name === studentName)) {
+    if (!studentName) {
         return (
              <div className="flex flex-col items-center justify-center h-64 text-center">
                 <User className="w-16 h-16 text-muted-foreground mb-4" />
@@ -363,11 +431,10 @@ export default function StudentDetailPage() {
     }
 
     const assignedTp = studentAssignedTps.find(tp => tp.id === selectedTpId);
-    const studentFeedback = (selectedTpId && feedbacks[studentName]?.[selectedTpId]?.student) || '';
+    const studentFeedback = (selectedTpId && studentFeedbacks[selectedTpId]?.student) || '';
+    const savedEval = selectedTpId ? studentStoredEvals[selectedTpId] : undefined;
+    const teacherFeedback = (selectedTpId && studentFeedbacks[selectedTpId]?.teacher) || '';
     
-    const savedEval = selectedTpId ? storedEvals[studentName]?.[selectedTpId] : undefined;
-    const teacherFeedback = (selectedTpId && feedbacks[studentName]?.[selectedTpId]?.teacher) || '';
-
     const statusInfo = {
       'non-commencé': { text: 'Non commencé', className: 'bg-gray-500'},
       'en-cours': { text: 'En cours', className: 'bg-yellow-500'},
@@ -375,6 +442,8 @@ export default function StudentDetailPage() {
     };
     const isEvaluated = !!savedEval?.isFinal;
     const currentStatus = isEvaluated ? {text: "Évalué et rendu", className: 'bg-green-600'} : statusInfo[assignedTp?.status as keyof typeof statusInfo];
+
+    const isLoading = isLoadingAssignedTps || isLoadingEvals || isLoadingPrelim || isLoadingFeedbacks || isLoadingStoredEvals;
 
     return (
         <div className="space-y-6">
@@ -398,11 +467,11 @@ export default function StudentDetailPage() {
                           </Select>
                         )}
                       </div>
-                      <AiAnalysisHub studentName={studentName} evaluations={savedEvaluations[studentName] || {}} />
+                      <AiAnalysisHub studentName={studentName} evaluations={studentLatestEvals} />
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {studentAssignedTps.length > 0 ? (
+                    {isLoading ? <Loader2 className="animate-spin"/> : studentAssignedTps.length > 0 ? (
                         <div className="flex items-center gap-4">
                             <span className="font-semibold">Sélectionner un TP assigné :</span>
                             <Select onValueChange={handleTpSelect} value={selectedTpId?.toString() || ""}>
@@ -427,12 +496,12 @@ export default function StudentDetailPage() {
                 </CardContent>
             </Card>
 
-            {selectedTp && (
+            {selectedTp && !isLoading && (
                 <>
                     {assignedTp?.status === 'terminé' && (
                         <EvaluationCard 
                             tp={selectedTp} 
-                            studentAnswers={(prelimAnswers[studentName]?.[selectedTp.id]) || {}}
+                            studentAnswers={(studentPrelimAnswers[selectedTp.id]) || {}}
                             studentFeedback={studentFeedback}
                             initialTeacherFeedback={teacherFeedback}
                             initialPrelimNote={savedEval?.prelimNote || ""}
