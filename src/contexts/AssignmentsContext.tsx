@@ -64,7 +64,35 @@ type AssignmentsContextType = {
 
 const AssignmentsContext = createContext<AssignmentsContextType | undefined>(undefined);
 
+const loadFromLocalStorage = <T,>(key: string, defaultValue: T): T => {
+  if (typeof window === 'undefined') {
+    return defaultValue;
+  }
+  try {
+    const item = window.localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.error(`Error loading from local storage: ${key}`, error);
+    return defaultValue;
+  }
+};
+
+const saveToLocalStorage = <T,>(key: string, value: T) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Error saving to local storage: ${key}`, error);
+  }
+};
+
+
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
+  const { toast } = useToast();
+  const [isLoaded, setIsLoaded] = useState(false);
+
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Record<string, string[]>>({});
   const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
@@ -74,17 +102,30 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [storedEvals, setStoredEvals] = useState<Record<string, Record<number, StoredEvaluation>>>({});
   const [teacherName, setTeacherName] = useState<string>('');
   const [tps, setTps] = useState<Record<number, TP>>({});
-  const [isLoaded, setIsLoaded] = useState(false);
-  const { toast } = useToast();
-
+  
   useEffect(() => {
-    // Initialiser les données directement depuis les fichiers, sans localStorage.
-    setStudents(initialStudentsData.map(student => ({ ...student, xp: 0, progress: 0 })));
-    setClasses(initialClasses);
-    setTeacherName('M. Dubois');
-    setTps(getTpById(-1, true) as Record<number, TP>);
+    setStudents(loadFromLocalStorage('students', initialStudentsData.map(student => ({ ...student, xp: 0, progress: 0 }))));
+    setClasses(loadFromLocalStorage('classes', initialClasses));
+    setAssignedTps(loadFromLocalStorage('assignedTps', {}));
+    setEvaluations(loadFromLocalStorage('evaluations', {}));
+    setPrelimAnswers(loadFromLocalStorage('prelimAnswers', {}));
+    setFeedbacks(loadFromLocalStorage('feedbacks', {}));
+    setStoredEvals(loadFromLocalStorage('storedEvals', {}));
+    setTeacherName(loadFromLocalStorage('teacherName', 'M. Dubois'));
+    setTps(loadFromLocalStorage('customTps', getTpById(-1, true) as Record<number, TP>));
     setIsLoaded(true);
   }, []);
+
+  useEffect(() => { if(isLoaded) saveToLocalStorage('students', students); }, [students, isLoaded]);
+  useEffect(() => { if(isLoaded) saveToLocalStorage('classes', classes); }, [classes, isLoaded]);
+  useEffect(() => { if(isLoaded) saveToLocalStorage('assignedTps', assignedTps); }, [assignedTps, isLoaded]);
+  useEffect(() => { if(isLoaded) saveToLocalStorage('evaluations', evaluations); }, [evaluations, isLoaded]);
+  useEffect(() => { if(isLoaded) saveToLocalStorage('prelimAnswers', prelimAnswers); }, [prelimAnswers, isLoaded]);
+  useEffect(() => { if(isLoaded) saveToLocalStorage('feedbacks', feedbacks); }, [feedbacks, isLoaded]);
+  useEffect(() => { if(isLoaded) saveToLocalStorage('storedEvals', storedEvals); }, [storedEvals, isLoaded]);
+  useEffect(() => { if(isLoaded) saveToLocalStorage('teacherName', teacherName); }, [teacherName, isLoaded]);
+  useEffect(() => { if(isLoaded) saveToLocalStorage('customTps', tps); }, [tps, isLoaded]);
+
 
   const addTp = (tp: TP) => {
     setTps(prev => ({...prev, [tp.id]: tp }));
@@ -210,18 +251,20 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const resetStudentData = () => {
-    // This now only resets the session state, not localStorage
+    localStorage.clear();
     setStudents(initialStudentsData.map(student => ({ ...student, xp: 0, progress: 0 })));
+    setClasses(initialClasses);
     setAssignedTps({});
     setEvaluations({});
     setPrelimAnswers({});
     setFeedbacks({});
     setStoredEvals({});
-    setClasses(initialClasses);
+    setTeacherName('M. Dubois');
+    setTps(getTpById(-1, true) as Record<number, TP>);
 
     toast({
-        title: "Données de la session réinitialisées",
-        description: "Les données sont revenues à leur état initial. Elles seront à nouveau perdues au rechargement.",
+        title: "Données de l'application réinitialisées",
+        description: "Toutes les données ont été effacées et restaurées à leur état d'origine.",
     });
   };
 
@@ -260,8 +303,8 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       return newEvals;
     });
     toast({
-        title: "Élève supprimé de la session",
-        description: `${studentName} a été retiré. Le changement sera perdu au rechargement.`,
+        title: "Élève supprimé",
+        description: `${studentName} et toutes ses données ont été retirés.`,
     });
   };
 
@@ -305,7 +348,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
 
     toast({
-        title: "Classe supprimée de la session",
+        title: "Classe supprimée",
         description: `La classe ${className} et tous ses élèves ont été supprimés.`,
     });
   };
@@ -314,10 +357,12 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     setClasses(prevClasses => {
       const updatedClasses = { ...prevClasses };
 
+      // Remove students from their old classes
       Object.keys(updatedClasses).forEach(key => {
         updatedClasses[key] = updatedClasses[key].filter(name => !studentNames.includes(name));
       });
 
+      // Add students to the new class
       updatedClasses[className] = studentNames;
       return updatedClasses;
     });
@@ -347,8 +392,8 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
     
     toast({
-      title: "Classe mise à jour (session)",
-      description: `La classe ${className} a été mise à jour. Les changements seront perdus au rechargement.`,
+      title: "Classe mise à jour",
+      description: `La classe ${className} a été mise à jour avec les élèves importés.`,
     });
   };
 

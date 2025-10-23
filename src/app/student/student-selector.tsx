@@ -1,5 +1,6 @@
+
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAssignments } from '@/contexts/AssignmentsContext';
 import { Button } from '@/components/ui/button';
@@ -10,28 +11,39 @@ import { Student } from '@/lib/types';
 export default function StudentSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { students, classes } = useAssignments();
+  const { students, classes, isLoaded } = useAssignments();
   
-  const [selectedClass, setSelectedClass] = useState<string>(searchParams.get('class') || '');
-  const [selectedStudent, setSelectedStudent] = useState<string>(searchParams.get('student') || '');
-  const [studentsInClass, setStudentsInClass] = useState<Student[]>([]);
+  const [selectedClass, setSelectedClass] = useState<string>('');
+  const [selectedStudent, setSelectedStudent] = useState<string>('');
 
-  useEffect(() => {
+  const sortedClasses = useMemo(() => {
+    return Object.keys(classes).sort((a, b) => {
+      const levelA = a.startsWith('T') ? 3 : a.startsWith('1') ? 2 : 1;
+      const levelB = b.startsWith('T') ? 3 : b.startsWith('1') ? 2 : 1;
+      if (levelA !== levelB) return levelA - levelB;
+      return a.localeCompare(b);
+    });
+  }, [classes]);
+
+  const studentsInClass = useMemo(() => {
     if (selectedClass && classes[selectedClass]) {
       const studentNames = classes[selectedClass];
       const filteredStudents = students
         .filter(student => studentNames.includes(student.name))
         .sort((a, b) => a.name.localeCompare(b.name));
-      setStudentsInClass(filteredStudents);
-    } else {
-      setStudentsInClass([]);
+      return filteredStudents;
     }
+    return [];
   }, [selectedClass, classes, students]);
-  
+
   useEffect(() => {
-    setSelectedClass(searchParams.get('class') || '');
-    setSelectedStudent(searchParams.get('student') || '');
-  }, [searchParams]);
+    if (isLoaded) {
+      const classFromUrl = searchParams.get('class') || '';
+      const studentFromUrl = searchParams.get('student') || '';
+      setSelectedClass(classFromUrl);
+      setSelectedStudent(studentFromUrl);
+    }
+  }, [searchParams, isLoaded]);
 
   const handleClassChange = (newClass: string) => {
     setSelectedClass(newClass);
@@ -51,12 +63,10 @@ export default function StudentSelector() {
     }
   };
 
-  const sortedClasses = Object.keys(classes).sort((a, b) => {
-    const levelA = a.startsWith('T') ? 3 : a.startsWith('1') ? 2 : 1;
-    const levelB = b.startsWith('T') ? 3 : b.startsWith('1') ? 2 : 1;
-    if (levelA !== levelB) return levelA - levelB;
-    return a.localeCompare(b);
-  });
+
+  if (!isLoaded) {
+    return <div>Chargement des données...</div>;
+  }
 
   return (
     <div className="flex flex-col space-y-4">
