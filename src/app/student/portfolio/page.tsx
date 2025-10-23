@@ -3,7 +3,7 @@
 'use client';
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
 import { allBlocs } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,13 +16,36 @@ import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getBadgesForStudent, allBadges } from '@/lib/badges-data';
+import { collection } from 'firebase/firestore';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
 function StudentPortfolio() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { evaluations, assignedTps, storedEvals, feedbacks, tps } = useFirebase();
+  const { firestore, evaluations, assignedTps, tps } = useFirebase();
+
+  // Load student-specific data
+  const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
+  const { data: studentFeedbacks } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName]));
+
+
+  const feedbacksForStudent = useMemo(() => {
+    const data: Record<number, any> = {};
+    studentFeedbacks?.forEach(doc => {
+      data[parseInt(doc.id, 10)] = doc.tps;
+    });
+    return data;
+  }, [studentFeedbacks]);
+
+  const storedEvalsForStudent = useMemo(() => {
+    const data: Record<string, any> = {};
+    studentStoredEvals?.forEach(doc => {
+      data[doc.id] = doc;
+    });
+    return data;
+  }, [studentStoredEvals]);
+
 
   if (!studentName) {
     return (
@@ -38,15 +61,15 @@ function StudentPortfolio() {
 
   const studentEvaluations = evaluations[studentName] || {};
   const studentCompletedTps = (assignedTps[studentName] || []).filter(tp => tp.status === 'terminé');
-  const studentStoredEvals = storedEvals[studentName] || {};
   const earnedBadges = getBadgesForStudent({ completedTps: studentCompletedTps.map(tp => tp.id) });
 
 
   const acquiredSkillsByBloc: Record<string, { title: string, colorClass: string, skills: Record<string, { description: string, history: EvaluationStatus[] }> }> = {};
 
   Object.entries(studentEvaluations).forEach(([competenceId, history]) => {
-    if (history.length > 0) {
-      const latestStatus = history[history.length - 1];
+    const histArray = (history as any)?.history || [];
+    if (histArray.length > 0) {
+      const latestStatus = histArray[histArray.length - 1];
       if (latestStatus === 'A' || latestStatus === 'M') {
         for (const blocKey in allBlocs) {
           if (allBlocs[blocKey].items.hasOwnProperty(competenceId)) {
@@ -59,7 +82,7 @@ function StudentPortfolio() {
             }
             acquiredSkillsByBloc[blocKey].skills[competenceId] = {
               description: allBlocs[blocKey].items[competenceId],
-              history: history,
+              history: histArray,
             };
             break;
           }
@@ -134,7 +157,7 @@ function StudentPortfolio() {
                       <FileText className="w-8 h-8 text-primary"/>
                       Synthèse des Évaluations
                   </h2>
-                  {Object.keys(studentStoredEvals).length > 0 ? (
+                  {Object.keys(storedEvalsForStudent).length > 0 ? (
                       <Card>
                         <Table>
                           <TableHeader>
@@ -147,17 +170,17 @@ function StudentPortfolio() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {Object.entries(studentStoredEvals).map(([tpId, evalData]) => {
+                            {Object.entries(storedEvalsForStudent).map(([tpId, evalData]) => {
                                 const tp = tps[parseInt(tpId, 10)];
-                                const teacherFeedback = feedbacks[studentName]?.[parseInt(tpId)]?.teacher;
-                                if (!tp || !evalData.isFinal) return null;
+                                const teacherFeedback = feedbacksForStudent[parseInt(tpId)]?.teacher;
+                                if (!tp || !(evalData as any).isFinal) return null;
 
                                 return (
                                   <TableRow key={tpId} className="break-inside-avoid">
                                     <TableCell className="font-medium">{tp.titre}</TableCell>
-                                    <TableCell className="text-center font-bold text-accent">{evalData.prelimNote ? `${evalData.prelimNote} / 10` : 'N/A'}</TableCell>
-                                    <TableCell className="text-center font-bold text-accent">{evalData.tpNote ? `${evalData.tpNote} / 20` : 'N/A'}</TableCell>
-                                    <TableCell className="text-center">{evalData.date}</TableCell>
+                                    <TableCell className="text-center font-bold text-accent">{(evalData as any).prelimNote ? `${(evalData as any).prelimNote} / 10` : 'N/A'}</TableCell>
+                                    <TableCell className="text-center font-bold text-accent">{(evalData as any).tpNote ? `${(evalData as any).tpNote} / 20` : 'N/A'}</TableCell>
+                                    <TableCell className="text-center">{(evalData as any).date}</TableCell>
                                     <TableCell className="text-muted-foreground italic">{teacherFeedback || "Aucune appréciation."}</TableCell>
                                   </TableRow>
                                 )

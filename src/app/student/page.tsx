@@ -1,6 +1,6 @@
 
 'use client';
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -11,13 +11,25 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { RacingHelmet } from '@/components/icons';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
 import { cn } from '@/lib/utils';
+import { collection } from 'firebase/firestore';
 
 function StudentDashboard() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { assignedTps, storedEvals, tps: allTps } = useFirebase();
+  const { firestore, assignedTps, tps: allTps } = useFirebase();
+
+  const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
+
+  const storedEvalsForStudent = useMemo(() => {
+    const data: Record<string, any> = {};
+    studentStoredEvals?.forEach(doc => {
+      data[doc.id] = doc;
+    });
+    return data;
+  }, [studentStoredEvals]);
+
 
   if (!studentName) {
     return (
@@ -32,11 +44,10 @@ function StudentDashboard() {
   }
 
   const studentTps = assignedTps[studentName] || [];
-  const studentStoredEvals = storedEvals[studentName] || {};
 
   const tpModules = studentTps.map(assignedTp => {
     const tp = allTps[assignedTp.id];
-    const isEvaluated = studentStoredEvals[tp?.id.toString()]?.isFinal;
+    const isEvaluated = storedEvalsForStudent[tp?.id.toString()]?.isFinal;
     return tp ? { ...tp, status: assignedTp.status, isEvaluated } : null;
   }).filter((tp): tp is TP & { status: string; isEvaluated: boolean } => tp !== null);
 

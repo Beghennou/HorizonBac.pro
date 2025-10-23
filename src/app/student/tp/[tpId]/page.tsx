@@ -1,7 +1,7 @@
 
 
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { TP, Etape, EtudePrelimQCM, EtudePrelimText } from '@/lib/data-manager';
@@ -9,11 +9,12 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Bot, Send, Loader2, Play, CheckCircle, MessageSquare, Award } from 'lucide-react';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
 import { Badge } from '@/components/ui/badge';
 import { CheckeredFlag } from '@/components/icons';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { collection } from 'firebase/firestore';
 
 const AssistantTP = dynamic(() => import('@/components/assistant-tp').then(mod => mod.AssistantTP), {
     ssr: false,
@@ -49,14 +50,29 @@ export default function TPPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { assignedTps, updateTpStatus, prelimAnswers, savePrelimAnswer, feedbacks, saveFeedback, tps } = useFirebase();
-
   const tpId = typeof params.tpId === 'string' ? parseInt(params.tpId, 10) : null;
+
+  const { firestore, assignedTps, updateTpStatus, savePrelimAnswer, saveFeedback, tps } = useFirebase();
+
+  const { data: studentPrelimAnswers } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName, tpId]));
+  const { data: studentFeedbacks } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName, tpId]));
+
+  const prelimAnswersForTp = useMemo(() => {
+    const doc = studentPrelimAnswers?.find(d => d.id === tpId?.toString());
+    return doc?.answers || {};
+  }, [studentPrelimAnswers, tpId]);
+
+  const feedbacksForTp = useMemo(() => {
+    const doc = studentFeedbacks?.find(d => d.id === tpId?.toString());
+    return doc?.tps || {};
+  }, [studentFeedbacks, tpId]);
+
+
   const tp = tpId ? tps[tpId] : null;
 
   const assignedTp = studentName && tpId ? assignedTps[studentName]?.find(t => t.id === tpId) : null;
-  const studentFeedback = (studentName && tpId && feedbacks[studentName]?.[tpId]?.student) || '';
-  const teacherFeedback = (studentName && tpId && feedbacks[studentName]?.[tpId]?.teacher) || '';
+  const studentFeedback = feedbacksForTp?.student || '';
+  const teacherFeedback = feedbacksForTp?.teacher || '';
   
   const handleAnswerChange = (qIndex: number, answer: string | string[]) => {
       if (studentName && tpId) {
@@ -104,7 +120,7 @@ export default function TPPage() {
     }
   }
   
-  const studentTpAnswers = (studentName && tpId && prelimAnswers[studentName]?.[tpId]) || {};
+  const studentTpAnswers = prelimAnswersForTp || {};
   const evaluatedCompetenceIds = tp.objectif.match(/C\d\.\d/g) || [];
 
 
@@ -278,5 +294,3 @@ export default function TPPage() {
     </div>
   );
 }
-
-    

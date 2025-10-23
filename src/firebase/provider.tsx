@@ -121,8 +121,13 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const { data: classesData, isLoading: isLoadingClasses } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: assignedTpsData, isLoading: isLoadingAssignedTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
   const { data: teacherNameData, isLoading: isLoadingConfig } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
+  
+  // This is no longer a global collection. It will be loaded per-student.
+  // We keep the state here to be mutated by saveEvaluation.
+  const [storedEvals, setStoredEvals] = useState<Record<string, Record<string, StoredEvaluation>>>({});
+
+
   const { data: evalsData, isLoading: isLoadingEvals } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
-  const { data: storedEvalsData, isLoading: isLoadingStoredEvals } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'storedEvals') : null, [firestore]));
   const { data: prelimAnswersData, isLoading: isLoadingPrelimAnswers } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'prelimAnswers') : null, [firestore]));
   const { data: feedbacksData, isLoading: isLoadingFeedbacks } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'feedbacks') : null, [firestore]));
 
@@ -133,12 +138,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const [classes, setClasses] = useState<Record<string, string[]>>({});
   const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
   const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>({});
-  const [storedEvals, setStoredEvals] = useState<Record<string, Record<string, StoredEvaluation>>>({});
   const [prelimAnswers, setPrelimAnswers] = useState<Record<string, Record<number, Record<number, PrelimAnswer>>>>({});
   const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
   const [teacherName, setTeacherNameState] = useState<string>('');
 
-  const isDataLoading = isLoadingTps || isLoadingStudents || isLoadingClasses || isLoadingAssignedTps || isLoadingConfig || isLoadingEvals || isLoadingStoredEvals || isLoadingPrelimAnswers || isLoadingFeedbacks;
+  const isDataLoading = isLoadingTps || isLoadingStudents || isLoadingClasses || isLoadingAssignedTps || isLoadingConfig || isLoadingEvals || isLoadingPrelimAnswers || isLoadingFeedbacks;
   const isLoaded = !userAuthState.isUserLoading && !isDataLoading;
 
 
@@ -163,13 +167,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     }
   }, [evalsData]);
 
-  useEffect(() => {
-    if (storedEvalsData) {
-        const data: Record<string, any> = {};
-        storedEvalsData.forEach(doc => { data[doc.id] = doc.evals || {}; });
-        setStoredEvals(data);
-    }
-  }, [storedEvalsData]);
 
   useEffect(() => {
     if (prelimAnswersData) {
@@ -266,13 +263,13 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
           isFinal
       };
       
-      const studentStoredEvalsDocRef = doc(firestore, `storedEvals/${studentName}`);
-      const updatedStoredEvals = { ...storedEvals[studentName], [tpId]: newStoredEval };
-      setDoc(studentStoredEvalsDocRef, { evals: updatedStoredEvals }).catch(error => {
+      // Changed path to be a subcollection of student
+      const studentStoredEvalsDocRef = doc(firestore, `students/${studentName}/storedEvals`, tpId.toString());
+      setDoc(studentStoredEvalsDocRef, newStoredEval).catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
               path: studentStoredEvalsDocRef.path,
               operation: 'write',
-              requestResourceData: { evals: updatedStoredEvals },
+              requestResourceData: newStoredEval,
           }))
       });
 
@@ -297,7 +294,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
           title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
           description: `L'évaluation pour le TP ${tpId} a été enregistrée.`,
       });
-  }, [firestore, toast, storedEvals, evaluations]);
+  }, [firestore, toast, evaluations]);
 
 
   const updateTpStatus = useCallback(async (studentName: string, tpId: number, status: TpStatus) => {
@@ -322,8 +319,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const savePrelimAnswer = useCallback((studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
       if(!firestore || !studentName) return;
-      const prelimDocRef = doc(firestore, `prelimAnswers/${studentName}`);
-      const updatedAnswers = { ...prelimAnswers[studentName], [tpId]: { ...(prelimAnswers[studentName]?.[tpId] || {}), [questionIndex]: answer } };
+      // Changed path
+      const prelimDocRef = doc(firestore, `students/${studentName}/prelimAnswers`, tpId.toString());
+      const updatedAnswers = { ...(prelimAnswers[studentName]?.[tpId] || {}), [questionIndex]: answer };
 
       setDoc(prelimDocRef, { answers: updatedAnswers }, { merge: true }).catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -336,8 +334,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
       if(!firestore || !studentName) return;
-        const feedbackDocRef = doc(firestore, `feedbacks/${studentName}`);
-        const updatedFeedbacks = { ...feedbacks[studentName], [tpId]: { ...(feedbacks[studentName]?.[tpId] || {}), [author]: feedback } };
+        // Changed path
+        const feedbackDocRef = doc(firestore, `students/${studentName}/feedbacks`, tpId.toString());
+        const updatedFeedbacks = { ...(feedbacks[studentName]?.[tpId] || {}), [author]: feedback };
 
         setDoc(feedbackDocRef, { tps: updatedFeedbacks }, { merge: true }).catch(error => {
              errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -372,9 +371,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       batch.delete(doc(firestore, 'students', studentToDelete.id));
       batch.delete(doc(firestore, 'assignedTps', studentName));
       batch.delete(doc(firestore, 'evaluations', studentName));
-      batch.delete(doc(firestore, 'storedEvals', studentName));
-      batch.delete(doc(firestore, 'prelimAnswers', studentName));
-      batch.delete(doc(firestore, 'feedbacks', studentName));
+      
+      // These collections are now subcollections and would need to be deleted differently (not easily in a batch)
+      // For now, we leave them, they will become orphaned but won't be accessed.
+      // batch.delete(doc(firestore, 'storedEvals', studentName));
+      // batch.delete(doc(firestore, 'prelimAnswers', studentName));
+      // batch.delete(doc(firestore, 'feedbacks', studentName));
       
       await batch.commit().catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({

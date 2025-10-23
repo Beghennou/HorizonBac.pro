@@ -217,26 +217,51 @@ export default function StudentDetailPage() {
     const searchParams = useSearchParams();
     const params = useParams();
     const { toast } = useToast();
+    const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
+    const className = searchParams.get('class');
+
     const { 
         firestore, 
         classes,
         assignedTps,
         evaluations,
-        storedEvals,
-        prelimAnswers,
-        feedbacks,
         saveEvaluation, 
-        saveFeedback, 
         tps, 
-        teacherName 
     } = useFirebase();
 
-    const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
-    const className = searchParams.get('class');
-    
-    // --- Data fetching is now mostly from context ---
+    const { data: studentPrelimAnswers } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName]));
+    const { data: studentFeedbacks } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName]));
+    const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
+
+
+    // --- Data processing ---
     const studentsInClass = useMemo(() => (classes[className || ''] || []).sort(), [classes, className]);
     const isStudentInClass = useMemo(() => studentsInClass.includes(studentName), [studentsInClass, studentName]);
+
+    const prelimAnswersForStudent = useMemo(() => {
+        const data: Record<number, any> = {};
+        studentPrelimAnswers?.forEach(doc => {
+            data[parseInt(doc.id, 10)] = doc.answers;
+        });
+        return data;
+    }, [studentPrelimAnswers]);
+
+    const feedbacksForStudent = useMemo(() => {
+        const data: Record<number, any> = {};
+        studentFeedbacks?.forEach(doc => {
+            data[parseInt(doc.id, 10)] = doc.tps;
+        });
+        return data;
+    }, [studentFeedbacks]);
+
+    const storedEvalsForStudent = useMemo(() => {
+        const data: Record<string, any> = {};
+        studentStoredEvals?.forEach(doc => {
+            data[doc.id] = doc;
+        });
+        return data;
+    }, [studentStoredEvals]);
+
 
     // --- State management ---
     const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
@@ -249,9 +274,6 @@ export default function StudentDetailPage() {
         }).filter((tp): tp is (TP & { status: string }) => tp !== null);
     }, [assignedTps, studentName, tps]);
     
-    const studentPrelimAnswers = prelimAnswers[studentName] || {};
-    const studentFeedbacks = feedbacks[studentName] || {};
-    const studentStoredEvals = storedEvals[studentName] || {};
     const studentLatestEvals = evaluations[studentName] || {};
 
 
@@ -307,11 +329,13 @@ export default function StudentDetailPage() {
     const handleSave = (prelimNote?: string, tpNote?: string, feedback?: string, isFinal?: boolean) => {
         if (!studentName || !selectedTpId) return;
 
-        if (feedback) {
-            saveFeedback(studentName, selectedTpId, feedback, 'teacher');
-        }
-        
+        // The saveFeedback function is no longer needed here as it's part of saveEvaluation's logic
         saveEvaluation(studentName, selectedTpId, currentEvaluations, prelimNote, tpNote, isFinal);
+
+        if (feedback) {
+             const feedbackDocRef = doc(firestore!, `students/${studentName}/feedbacks`, selectedTpId.toString());
+             setDoc(feedbackDocRef, { student: feedbacksForStudent[selectedTpId]?.student, teacher: feedback }, { merge: true });
+        }
     };
     
     const selectedTp = selectedTpId ? tps[selectedTpId] : null;
@@ -372,9 +396,10 @@ export default function StudentDetailPage() {
     }
 
     const assignedTp = studentAssignedTps.find(tp => tp.id === selectedTpId);
-    const studentFeedback = (selectedTpId && studentFeedbacks[selectedTpId]?.student) || '';
-    const savedEval = selectedTpId ? studentStoredEvals[selectedTpId] : undefined;
-    const teacherFeedback = (selectedTpId && studentFeedbacks[selectedTpId]?.teacher) || '';
+    const studentFeedback = selectedTpId ? feedbacksForStudent[selectedTpId]?.student || '' : '';
+    const teacherFeedback = selectedTpId ? feedbacksForStudent[selectedTpId]?.teacher || '' : '';
+    const savedEval = selectedTpId ? storedEvalsForStudent[selectedTpId.toString()] : undefined;
+
     
     const statusInfo = {
       'non-commencé': { text: 'Non commencé', className: 'bg-gray-500'},
@@ -440,7 +465,7 @@ export default function StudentDetailPage() {
                     {assignedTp?.status === 'terminé' && (
                         <EvaluationCard 
                             tp={selectedTp} 
-                            studentAnswers={(studentPrelimAnswers[selectedTp.id]) || {}}
+                            studentAnswers={prelimAnswersForStudent[selectedTp.id] || {}}
                             studentFeedback={studentFeedback}
                             initialTeacherFeedback={teacherFeedback}
                             initialPrelimNote={savedEval?.prelimNote || ""}
