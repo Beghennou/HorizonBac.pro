@@ -48,3 +48,13 @@ export * from './non-blocking-updates';
 export * from './non-blocking-login';
 export * from './errors';
 export * from './error-emitter';
+
+// This is the missing export
+export function useMemoFirebase<T>(factory: () => T, deps: React.DependencyList): T {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const result = React.useMemo(factory, deps);
+  if (result && typeof result === 'object') {
+    (result as any).__memo = true;
+  }
+  return result;
+}

@@ -42,11 +42,12 @@ export default function AnalyticsPage() {
     studentNamesInClass.forEach(studentName => {
         const studentEvals = evaluations[studentName] || {};
         Object.entries(studentEvals).forEach(([competenceId, history]) => {
-            if (history.length > 0) {
+            const historyArray = (history as any)?.history || [];
+            if (historyArray.length > 0) {
                 if (!competenceScores[competenceId]) {
                     competenceScores[competenceId] = { totalScore: 0, count: 0, description: allCompetencesForLevel[competenceId] || competenceId };
                 }
-                const latestStatus = history[history.length - 1];
+                const latestStatus = historyArray[historyArray.length - 1];
                 competenceScores[competenceId].totalScore += statusToScore[latestStatus];
                 competenceScores[competenceId].count++;
             }

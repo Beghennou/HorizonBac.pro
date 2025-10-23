@@ -131,16 +131,8 @@ export default function SettingsPage() {
         xp: 0
     };
 
-    setStudents(prevStudents => [...prevStudents, newStudent]);
+    updateClassWithCsv(finalClassName, [...(classes[finalClassName] || []), studentName]);
 
-    setClasses(prevClasses => {
-        const updatedClasses = { ...prevClasses };
-        if (!updatedClasses[finalClassName]) {
-            updatedClasses[finalClassName] = [];
-        }
-        updatedClasses[finalClassName].push(studentName);
-        return updatedClasses;
-    });
 
     toast({
       title: "Élève ajouté",
@@ -226,53 +218,7 @@ export default function SettingsPage() {
             return;
         }
 
-        let addedCount = 0;
-        const studentsToAdd: Student[] = [];
-        const studentNamesToAddToClass: string[] = [];
-        const existingStudentNames = new Set(students.map(s => s.name));
-
-        newStudentNames.forEach(name => {
-          studentNamesToAddToClass.push(name);
-          if (!existingStudentNames.has(name)) {
-            const nameParts = name.split(' ');
-            const lastName = nameParts[0] || '';
-            const firstName = nameParts.slice(1).join(' ') || 'Prénom';
-
-            const newStudent: Student = {
-              id: `student-${Date.now()}-${Math.random()}`,
-              name: name,
-              email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`,
-              progress: 0,
-              xp: 0,
-            };
-            studentsToAdd.push(newStudent);
-            addedCount++;
-          }
-        });
-
-        if (studentsToAdd.length > 0) {
-            setStudents(prev => [...prev, ...studentsToAdd]);
-        }
-        
-        setClasses(prevClasses => {
-            const updatedClasses = { ...prevClasses };
-            if (!updatedClasses[finalImportClassName]) {
-                updatedClasses[finalImportClassName] = [];
-            }
-            const existingStudentsInClass = new Set(updatedClasses[finalImportClassName]);
-            studentNamesToAddToClass.forEach(name => {
-                if (!existingStudentsInClass.has(name)) {
-                    updatedClasses[finalImportClassName].push(name);
-                }
-            });
-            return updatedClasses;
-        });
-
-        toast({
-          title: "Importation terminée",
-          description: `${addedCount} élève(s) ont été ajouté(s). ${studentNamesToAddToClass.length} élève(s) ont été assigné(s) à la classe ${finalImportClassName}.`,
-        });
-
+        updateClassWithCsv(finalImportClassName, newStudentNames);
         setImportClassName('');
         setNewImportClassName('');
       },

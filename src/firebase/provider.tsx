@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore, doc, setDoc, writeBatch, DocumentData } from 'firebase/firestore';
+import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +11,7 @@ import { TP, initialTps } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
+import { useCollection, useMemoFirebase } from './firestore/use-collection';
 
 // Types definition
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
@@ -77,13 +78,20 @@ export interface FirebaseContextState {
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
   teacherName: string;
   setTeacherName: (name: string) => void;
-  deleteStudent: (student: Student, currentClassName: string) => void;
+  deleteStudent: (studentName: string) => void;
   deleteClass: (className: string) => void;
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
   addTp: (tp: TP) => void;
   signInWithGoogle: () => Promise<void>;
   isLoaded: boolean;
   tps: Record<number, TP>;
+  students: Student[];
+  classes: Record<string, string[]>;
+  assignedTps: Record<string, AssignedTp[]>;
+  evaluations: Record<string, Record<string, EvaluationStatus[]>>;
+  storedEvals: Record<string, Record<string, StoredEvaluation>>;
+  prelimAnswers: Record<string, Record<number, Record<number, PrelimAnswer>>>;
+  feedbacks: Record<string, Record<number, Feedback>>;
 }
 
 // React Context
@@ -105,9 +113,77 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: null,
   });
 
-  const [tps, setTps] = useState<Record<number, TP>>(initialTps);
-  const [teacherName, setTeacherNameState] = useState<string>('M. Dubois');
+  // --- DATA LOADING ---
+  const { data: tpsData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
+  const { data: studentsData } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
+  const { data: classesData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
+  const { data: assignedTpsData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
+  const { data: teacherNameData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
+  const { data: evalsData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
+  const { data: storedEvalsData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'storedEvals') : null, [firestore]));
+  const { data: prelimAnswersData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'prelimAnswers') : null, [firestore]));
+  const { data: feedbacksData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'feedbacks') : null, [firestore]));
+
+  // --- STATE MANAGEMENT ---
+  const [tps, setTps] = useState<Record<number, TP>>({});
+  const [students, setStudents] = useState<Student[]>([]);
+  const [classes, setClasses] = useState<Record<string, string[]>>({});
+  const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
+  const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>({});
+  const [storedEvals, setStoredEvals] = useState<Record<string, Record<string, StoredEvaluation>>>({});
+  const [prelimAnswers, setPrelimAnswers] = useState<Record<string, Record<number, Record<number, PrelimAnswer>>>>({});
+  const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
+  const [teacherName, setTeacherNameState] = useState<string>('');
+
   const isLoaded = !userAuthState.isUserLoading;
+
+  useEffect(() => setTps(tpsData ? Object.fromEntries(tpsData.map(tp => [tp.id, tp])) : initialTps), [tpsData]);
+  useEffect(() => setStudents(studentsData || []), [studentsData]);
+  useEffect(() => setClasses(classesData ? Object.fromEntries(classesData.map(c => [c.id, c.studentNames || []])) : {}), [classesData]);
+  useEffect(() => setTeacherNameState(teacherNameData?.find(d => d.id === 'teacher')?.name || 'M. Dubois'), [teacherNameData]);
+  
+  // This is a placeholder for a more complex data structure loading
+  useEffect(() => {
+    if (assignedTpsData) {
+        const data: Record<string, any> = {};
+        assignedTpsData.forEach(doc => { data[doc.id] = doc.tps || []; });
+        setAssignedTps(data);
+    }
+  }, [assignedTpsData]);
+  
+  useEffect(() => {
+    if (evalsData) {
+        const data: Record<string, any> = {};
+        evalsData.forEach(doc => { data[doc.id] = doc.competences || {}; });
+        setEvaluations(data);
+    }
+  }, [evalsData]);
+
+  useEffect(() => {
+    if (storedEvalsData) {
+        const data: Record<string, any> = {};
+        storedEvalsData.forEach(doc => { data[doc.id] = doc.evals || {}; });
+        setStoredEvals(data);
+    }
+  }, [storedEvalsData]);
+
+  useEffect(() => {
+    if (prelimAnswersData) {
+        const data: Record<string, any> = {};
+        prelimAnswersData.forEach(doc => { data[doc.id] = doc.answers || {}; });
+        setPrelimAnswers(data);
+    }
+  }, [prelimAnswersData]);
+  
+  useEffect(() => {
+    if (feedbacksData) {
+        const data: Record<string, any> = {};
+        feedbacksData.forEach(doc => { data[doc.id] = doc.tps || {}; });
+        setFeedbacks(data);
+    }
+  }, [feedbacksData]);
+
+
 
   // Auth state listener
   useEffect(() => {
@@ -121,8 +197,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         if (firebaseUser) {
           setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
         } else {
-            // No user, but we are not handling anonymous sign-in globally anymore
-            setUserAuthState({ user: null, isUserLoading: false, userError: null });
+            signInAnonymously(auth).catch((error) => {
+                 setUserAuthState({ user: null, isUserLoading: false, userError: error });
+            });
         }
       },
       (error) => {
@@ -155,8 +232,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     const batch = writeBatch(firestore);
 
     studentNames.forEach(studentName => {
-        const tpDocRef = doc(firestore, `assignedTps/${studentName}/tps/${tpId}`);
-        batch.set(tpDocRef, { status: 'non-commencé' });
+        const currentTps = assignedTps[studentName] || [];
+        if (!currentTps.some(tp => tp.id === tpId)) {
+            const newTps = [...currentTps, { id: tpId, status: 'non-commencé' as TpStatus }];
+            const studentDocRef = doc(firestore, `assignedTps/${studentName}`);
+            batch.set(studentDocRef, { tps: newTps });
+        }
     });
 
     await batch.commit().catch(error => {
@@ -166,7 +247,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         }));
     });
 
-  }, [firestore]);
+  }, [firestore, assignedTps]);
 
   const saveEvaluation = useCallback(async (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => {
       if (!studentName || !tpId || !firestore) return;
@@ -181,75 +262,87 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
           isFinal
       };
       
-      const studentStoredEvalsDocRef = doc(firestore, `storedEvals/${studentName}/evals/${tpId}`);
-      setDoc(studentStoredEvalsDocRef, newStoredEval).catch(error => {
+      const studentStoredEvalsDocRef = doc(firestore, `storedEvals/${studentName}`);
+      const updatedStoredEvals = { ...storedEvals[studentName], [tpId]: newStoredEval };
+      setDoc(studentStoredEvalsDocRef, { evals: updatedStoredEvals }).catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
               path: studentStoredEvalsDocRef.path,
               operation: 'write',
-              requestResourceData: newStoredEval,
+              requestResourceData: { evals: updatedStoredEvals },
           }))
       });
 
       const batch = writeBatch(firestore);
+      const studentEvalsDocRef = doc(firestore, `evaluations/${studentName}`);
+      const updatedCompetences: Record<string, any> = { ...evaluations[studentName] };
        Object.entries(currentEvals).forEach(([competenceId, status]) => {
-          const competenceDocRef = doc(firestore, `evaluations/${studentName}/competences/${competenceId}`);
-          // This should be an arrayUnion, but for simplicity let's overwrite/merge
-          batch.set(competenceDocRef, { history: [status] }, { merge: true });
+          const history = updatedCompetences[competenceId]?.history || [];
+          updatedCompetences[competenceId] = { history: [...history, status] };
        });
        
+      batch.set(studentEvalsDocRef, { competences: updatedCompetences });
+
       await batch.commit().catch(error => {
            errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: `evaluations/${studentName}/competences`,
+              path: `evaluations/${studentName}`,
               operation: 'write',
           }))
       });
-
 
       toast({
           title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
           description: `L'évaluation pour le TP ${tpId} a été enregistrée.`,
       });
-  }, [firestore, toast]);
+  }, [firestore, toast, storedEvals, evaluations]);
 
 
   const updateTpStatus = useCallback(async (studentName: string, tpId: number, status: TpStatus) => {
     if (!firestore || !studentName) return;
 
-    const tpDocRef = doc(firestore, `assignedTps/${studentName}/tps/${tpId}`);
-    setDoc(tpDocRef, { status: status }, { merge: true }).catch(error => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: tpDocRef.path,
-            operation: 'update',
-            requestResourceData: { status }
-        }));
-    });
-  }, [firestore]);
+    const studentDocRef = doc(firestore, `assignedTps/${studentName}`);
+    const currentTps = assignedTps[studentName] || [];
+    const tpIndex = currentTps.findIndex(tp => tp.id === tpId);
+    
+    if (tpIndex > -1) {
+        const newTps = [...currentTps];
+        newTps[tpIndex] = { ...newTps[tpIndex], status };
+         setDoc(studentDocRef, { tps: newTps }).catch(error => {
+            errorEmitter.emit('permission-error', new FirestorePermissionError({
+                path: studentDocRef.path,
+                operation: 'update',
+                requestResourceData: { tps: newTps }
+            }));
+        });
+    }
+  }, [firestore, assignedTps]);
 
   const savePrelimAnswer = useCallback((studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
       if(!firestore || !studentName) return;
-      const prelimDocRef = doc(firestore, `prelimAnswers/${studentName}/answers/${tpId}`);
-      const payload = { [questionIndex]: answer };
-      setDoc(prelimDocRef, payload, { merge: true }).catch(error => {
+      const prelimDocRef = doc(firestore, `prelimAnswers/${studentName}`);
+      const updatedAnswers = { ...prelimAnswers[studentName], [tpId]: { ...(prelimAnswers[studentName]?.[tpId] || {}), [questionIndex]: answer } };
+
+      setDoc(prelimDocRef, { answers: updatedAnswers }, { merge: true }).catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
               path: prelimDocRef.path,
               operation: 'update',
-              requestResourceData: payload,
+              requestResourceData: { answers: updatedAnswers },
           }));
       });
-  }, [firestore]);
+  }, [firestore, prelimAnswers]);
 
   const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
       if(!firestore || !studentName) return;
-        const feedbackDocRef = doc(firestore, `feedbacks/${studentName}/tps/${tpId}`);
-        const payload = { [author]: feedback };
-        setDoc(feedbackDocRef, payload, { merge: true }).catch(error => {
+        const feedbackDocRef = doc(firestore, `feedbacks/${studentName}`);
+        const updatedFeedbacks = { ...feedbacks[studentName], [tpId]: { ...(feedbacks[studentName]?.[tpId] || {}), [author]: feedback } };
+
+        setDoc(feedbackDocRef, { tps: updatedFeedbacks }, { merge: true }).catch(error => {
              errorEmitter.emit('permission-error', new FirestorePermissionError({
                 path: feedbackDocRef.path,
                 operation: 'update',
-                requestResourceData: payload,
+                requestResourceData: { tps: updatedFeedbacks },
             }));
         });
-  }, [firestore]);
+  }, [firestore, feedbacks]);
   
   const setTeacherName = useCallback((name: string) => {
       if(!firestore) return;
@@ -264,54 +357,92 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       });
   }, [firestore]);
 
-  const deleteStudent = useCallback(async (student: Student, currentClassName: string) => {
-      if(!firestore || !student) return;
+  const deleteStudent = useCallback(async (studentName: string) => {
+      if(!firestore || !studentName) return;
       
+      const studentToDelete = students.find(s => s.name === studentName);
+      if (!studentToDelete) return;
+
       const batch = writeBatch(firestore);
       
-      // Delete student document
-      batch.delete(doc(firestore, 'students', student.id));
+      batch.delete(doc(firestore, 'students', studentToDelete.id));
+      batch.delete(doc(firestore, 'assignedTps', studentName));
+      batch.delete(doc(firestore, 'evaluations', studentName));
+      batch.delete(doc(firestore, 'storedEvals', studentName));
+      batch.delete(doc(firestore, 'prelimAnswers', studentName));
+      batch.delete(doc(firestore, 'feedbacks', studentName));
       
       await batch.commit().catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: `batch delete for student ${student.name}`,
+            path: `batch delete for student ${studentName}`,
             operation: 'delete',
         }));
       });
-      toast({ title: "Élève supprimé", description: `${student.name} et toutes ses données ont été supprimés.` });
-  }, [firestore, toast]);
+      toast({ title: "Élève supprimé", description: `${studentName} et toutes ses données ont été supprimés.` });
+  }, [firestore, toast, students]);
 
   const deleteClass = useCallback(async (className: string) => {
       if (!firestore || !className) return;
-      const classDocRef = doc(firestore, 'classes', className);
       
-      await writeBatch(firestore).delete(classDocRef).commit().catch(error => {
+      const studentNames = classes[className] || [];
+      const batch = writeBatch(firestore);
+
+      batch.delete(doc(firestore, 'classes', className));
+
+      studentNames.forEach(studentName => {
+        const studentToDelete = students.find(s => s.name === studentName);
+        if (studentToDelete) {
+             batch.delete(doc(firestore, 'students', studentToDelete.id));
+        }
+      });
+      
+      await batch.commit().catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: classDocRef.path,
+              path: 'batch delete class',
               operation: 'delete',
           }));
       });
 
-      toast({ title: "Classe supprimée", description: `La classe ${className} a été supprimée.` });
-  }, [firestore, toast]);
+      toast({ title: "Classe supprimée", description: `La classe ${className} et ses élèves ont été supprimés.` });
+  }, [firestore, toast, classes, students]);
 
   const updateClassWithCsv = useCallback(async (className: string, studentNames: string[]) => {
       if(!firestore) return;
       
+      const batch = writeBatch(firestore);
       const classDocRef = doc(firestore, 'classes', className);
-      setDoc(classDocRef, { studentNames }).catch(error => {
+      batch.set(classDocRef, { studentNames });
+
+      studentNames.forEach(name => {
+          const existingStudent = students.find(s => s.name === name);
+          if (!existingStudent) {
+              const nameParts = name.split(' ');
+              const lastName = nameParts[0] || '';
+              const firstName = nameParts.slice(1).join(' ') || 'Prénom';
+              const newStudentId = `student-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+              const studentDocRef = doc(firestore, 'students', newStudentId);
+              batch.set(studentDocRef, { 
+                id: newStudentId, 
+                name, 
+                email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`, 
+                progress: 0, 
+                xp: 0
+              });
+          }
+      });
+      
+      await batch.commit().catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: classDocRef.path,
-              operation: 'write',
-              requestResourceData: { studentNames }
+              path: 'batch update class with CSV',
+              operation: 'write'
           }));
       });
 
       toast({
           title: "Classe mise à jour",
-          description: `${studentNames.length} élèves assignés à la classe ${className}.`
+          description: `La classe ${className} a été mise à jour avec ${studentNames.length} élèves.`
       });
-  }, [firestore, toast]);
+  }, [firestore, toast, students]);
 
   const addTp = useCallback((newTp: TP) => {
       if(!firestore) return;
@@ -336,6 +467,13 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     isLoaded,
     teacherName,
     tps,
+    students,
+    classes,
+    assignedTps,
+    evaluations,
+    storedEvals,
+    prelimAnswers,
+    feedbacks,
     assignTp,
     saveEvaluation,
     updateTpStatus,
@@ -349,7 +487,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     signInWithGoogle,
   }), [
       firebaseApp, firestore, auth, userAuthState,
-      isLoaded, teacherName, tps,
+      isLoaded, teacherName, tps, students, classes, assignedTps, evaluations, storedEvals, prelimAnswers, feedbacks,
       assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer,
       saveFeedback, setTeacherName, deleteStudent, deleteClass,
       updateClassWithCsv, addTp, signInWithGoogle
@@ -389,20 +527,7 @@ export const useFirebaseApp = (): FirebaseApp => {
   return firebaseApp;
 };
 
-type MemoFirebase <T> = T & {__memo?: boolean};
-
-export function useMemoFirebase<T>(factory: () => T, deps: React.DependencyList): T | (MemoFirebase<T>) {
-  const memoized = useMemo(factory, deps);
-  
-  if(typeof memoized !== 'object' || memoized === null) return memoized;
-  (memoized as MemoFirebase<T>).__memo = true;
-  
-  return memoized;
-}
-
 export const useUser = () => {
     const { user, isUserLoading, userError } = useFirebase();
     return { user, isUserLoading, userError };
 }
-
-    

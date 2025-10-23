@@ -43,7 +43,7 @@ function StudentDashboard() {
   const getTpCategory = (tpId: number): string => {
     if (tpId >= 1000) return "TP Personnalisé";
     if (tpId >= 301) return 'Terminale / Diagnostic Avancé';
-    if (tpId >= 1) return 'Première / Maintenance Corrective';
+    if (tpId >= 1 && tpId < 101) return 'Première / Maintenance Corrective';
     if (tpId >= 101) return 'Seconde / Entretien Périodique';
     return 'Général';
   };

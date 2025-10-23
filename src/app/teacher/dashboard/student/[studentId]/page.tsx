@@ -217,98 +217,42 @@ export default function StudentDetailPage() {
     const searchParams = useSearchParams();
     const params = useParams();
     const { toast } = useToast();
-    const { firestore, saveEvaluation, saveFeedback, tps, teacherName } = useFirebase();
+    const { 
+        firestore, 
+        classes,
+        assignedTps,
+        evaluations,
+        storedEvals,
+        prelimAnswers,
+        feedbacks,
+        saveEvaluation, 
+        saveFeedback, 
+        tps, 
+        teacherName 
+    } = useFirebase();
 
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     const className = searchParams.get('class');
     
-    // --- Data fetching ---
-    const { data: classData, isLoading: isLoadingClass } = useCollection(
-        useMemoFirebase(() => {
-            if (!firestore || !className) return null;
-            return query(collection(firestore, 'classes'), where('__name__', '==', className));
-        }, [firestore, className])
-    );
-    const studentsInClass = useMemo(() => classData?.[0]?.studentNames?.sort() || [], [classData]);
+    // --- Data fetching is now mostly from context ---
+    const studentsInClass = useMemo(() => (classes[className || ''] || []).sort(), [classes, className]);
     const isStudentInClass = useMemo(() => studentsInClass.includes(studentName), [studentsInClass, studentName]);
 
-    const { data: assignedTpsData, isLoading: isLoadingAssignedTps } = useCollection(
-        useMemoFirebase(() => {
-            if (!firestore || !studentName) return null;
-            return query(collection(firestore, `assignedTps/${studentName}/tps`));
-        }, [firestore, studentName])
-    );
-
-    const { data: savedEvaluations, isLoading: isLoadingEvals } = useCollection(
-        useMemoFirebase(() => {
-            if (!firestore || !studentName) return null;
-            return query(collection(firestore, `evaluations/${studentName}/competences`));
-        }, [firestore, studentName])
-    );
-
-    const { data: prelimAnswers, isLoading: isLoadingPrelim } = useCollection(
-        useMemoFirebase(() => {
-            if (!firestore || !studentName) return null;
-            return query(collection(firestore, `prelimAnswers/${studentName}/answers`));
-        }, [firestore, studentName])
-    );
-    
-    const { data: feedbacks, isLoading: isLoadingFeedbacks } = useCollection(
-        useMemoFirebase(() => {
-             if (!firestore || !studentName) return null;
-            return query(collection(firestore, `feedbacks/${studentName}/tps`));
-        }, [firestore, studentName])
-    );
-
-    const { data: storedEvals, isLoading: isLoadingStoredEvals } = useCollection(
-         useMemoFirebase(() => {
-             if (!firestore || !studentName) return null;
-            return query(collection(firestore, `storedEvals/${studentName}/evals`));
-        }, [firestore, studentName])
-    );
-    
     // --- State management ---
     const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
     const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
     const studentAssignedTps = useMemo(() => {
-        return (assignedTpsData || []).map(assignedTp => {
-            const tp = tps[parseInt(assignedTp.id, 10)];
+        return (assignedTps[studentName] || []).map(assignedTp => {
+            const tp = tps[assignedTp.id];
             return tp ? { ...tp, status: assignedTp.status } : null;
         }).filter((tp): tp is (TP & { status: string }) => tp !== null);
-    }, [assignedTpsData, tps]);
+    }, [assignedTps, studentName, tps]);
     
-    const studentPrelimAnswers = useMemo(() => {
-        const answers: Record<number, Record<number, PrelimAnswer>> = {};
-        (prelimAnswers || []).forEach(doc => {
-            answers[parseInt(doc.id, 10)] = doc;
-        });
-        return answers;
-    }, [prelimAnswers]);
-
-    const studentFeedbacks = useMemo(() => {
-        const allFeedbacks: Record<number, Feedback> = {};
-        (feedbacks || []).forEach(doc => {
-            allFeedbacks[parseInt(doc.id, 10)] = doc;
-        });
-        return allFeedbacks;
-    }, [feedbacks]);
-
-    const studentStoredEvals = useMemo(() => {
-        const evals: Record<number, StoredEvaluation> = {};
-        (storedEvals || []).forEach(doc => {
-            evals[parseInt(doc.id, 10)] = doc as StoredEvaluation;
-        });
-        return evals;
-    }, [storedEvals]);
-    
-    const studentLatestEvals = useMemo(() => {
-        const evals: Record<string, EvaluationStatus[]> = {};
-        (savedEvaluations || []).forEach(doc => {
-             evals[doc.id] = doc.history || [];
-        });
-        return evals;
-    }, [savedEvaluations]);
+    const studentPrelimAnswers = prelimAnswers[studentName] || {};
+    const studentFeedbacks = feedbacks[studentName] || {};
+    const studentStoredEvals = storedEvals[studentName] || {};
+    const studentLatestEvals = evaluations[studentName] || {};
 
 
     useEffect(() => {
@@ -385,11 +329,8 @@ export default function StudentDetailPage() {
     
     const evaluatedCompetenceIds = selectedTp?.objectif.match(/C\d\.\d/g) || [];
 
-    if (isLoadingClass) {
-        return <Loader2 className="h-16 w-16 animate-spin text-primary mx-auto" />
-    }
 
-    if (!isStudentInClass && !isLoadingClass) {
+    if (!isStudentInClass) {
         return (
             <div className="flex flex-col items-center justify-center h-64 text-center">
                 <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
@@ -443,8 +384,6 @@ export default function StudentDetailPage() {
     const isEvaluated = !!savedEval?.isFinal;
     const currentStatus = isEvaluated ? {text: "Évalué et rendu", className: 'bg-green-600'} : statusInfo[assignedTp?.status as keyof typeof statusInfo];
 
-    const isLoading = isLoadingAssignedTps || isLoadingEvals || isLoadingPrelim || isLoadingFeedbacks || isLoadingStoredEvals;
-
     return (
         <div className="space-y-6">
             <Card>
@@ -471,7 +410,7 @@ export default function StudentDetailPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {isLoading ? <Loader2 className="animate-spin"/> : studentAssignedTps.length > 0 ? (
+                    {studentAssignedTps.length > 0 ? (
                         <div className="flex items-center gap-4">
                             <span className="font-semibold">Sélectionner un TP assigné :</span>
                             <Select onValueChange={handleTpSelect} value={selectedTpId?.toString() || ""}>
@@ -496,7 +435,7 @@ export default function StudentDetailPage() {
                 </CardContent>
             </Card>
 
-            {selectedTp && !isLoading && (
+            {selectedTp && (
                 <>
                     {assignedTp?.status === 'terminé' && (
                         <EvaluationCard 

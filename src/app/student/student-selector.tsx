@@ -28,13 +28,10 @@ export default function StudentSelector() {
   const studentsInClass = useMemo(() => {
     if (selectedClass && classes[selectedClass]) {
       const studentNames = classes[selectedClass];
-      const filteredStudents = students
-        .filter(student => studentNames.includes(student.name))
-        .sort((a, b) => a.name.localeCompare(b.name));
-      return filteredStudents;
+      return studentNames.sort((a, b) => a.localeCompare(b));
     }
     return [];
-  }, [selectedClass, classes, students]);
+  }, [selectedClass, classes]);
 
   useEffect(() => {
     if (isLoaded) {
@@ -91,9 +88,9 @@ export default function StudentSelector() {
               <SelectValue placeholder={!selectedClass ? "Choisis d'abord une classe" : "Choisir ton nom..."} />
             </SelectTrigger>
             <SelectContent>
-              {studentsInClass.map(student => (
-                <SelectItem key={student.id} value={student.name}>
-                  {student.name}
+              {studentsInClass.map(studentName => (
+                <SelectItem key={studentName} value={studentName}>
+                  {studentName}
                 </SelectItem>
               ))}
             </SelectContent>
