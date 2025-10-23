@@ -3,7 +3,7 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { useAuth, useFirestore } from '@/firebase/provider';
-import { collection, doc, getDocs, writeBatch, query, where, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, writeBatch, query, where, getDoc, setDoc, deleteDoc, Firestore } from 'firebase/firestore';
 import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -84,7 +84,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [teacherName, setTeacherName] = useState<string>('M. Dubois');
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const resetAndSeedDatabase = useCallback(async () => {
+  const resetAndSeedDatabase = useCallback(async (db: Firestore) => {
     if (!db) return;
     toast({ title: "Initialisation de la base de données...", description: "Veuillez patienter." });
 
@@ -105,7 +105,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
       // Ensure other collections exist by adding a placeholder doc
       for (const collName of collectionsToManage) {
-        if (!['students', 'classes'].includes(collName)) {
+        if (!['students', 'classes', 'config'].includes(collName)) {
            const placeholderRef = doc(db, collName, '_placeholder');
            batch.set(placeholderRef, { initialized: true });
         }
@@ -123,19 +123,19 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       toast({ variant: 'destructive', title: "Erreur d'initialisation", description: error.message });
       return false;
     }
-  }, [db, toast]);
+  }, [toast]);
 
-  const loadAllData = useCallback(async () => {
+  const loadAllData = useCallback(async (db: Firestore) => {
     if (!db) return;
     setIsLoaded(false);
 
     try {
       const studentsSnapshot = await getDocs(collection(db, 'students'));
       if (studentsSnapshot.empty) {
-        const success = await resetAndSeedDatabase();
+        const success = await resetAndSeedDatabase(db);
         if (success) {
            // Reload data after seeding
-           loadAllData();
+           loadAllData(db);
         } else {
             setIsLoaded(true);
         }
@@ -183,11 +183,11 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsLoaded(true);
     }
-  }, [db, toast, resetAndSeedDatabase]);
+  }, [toast, resetAndSeedDatabase]);
 
   useEffect(() => {
     if (user && db) {
-      loadAllData();
+      loadAllData(db);
     } else if (!user) {
       // Handle logout, clear data
       setIsLoaded(true); // Or set to false until user logs in
@@ -433,21 +433,5 @@ export const useAssignments = () => {
   }
   return context;
 };
-
-// Helper function to create an object from entries, because Object.fromEntries is not available in all environments
-function fromEntries<T>(entries: [string, T][]): Record<string, T> {
-  return entries.reduce((acc, [key, value]) => {
-    acc[key] = value;
-    return acc;
-  }, {} as Record<string, T>);
-}
-
-function ObjectfromEntries<T>(docs: { id: string; data: () => T; }[]): Record<string, T> {
-    const obj: Record<string, T> = {};
-    docs.forEach(doc => {
-        obj[doc.id] = doc.data();
-    });
-    return obj;
-}
 
     
