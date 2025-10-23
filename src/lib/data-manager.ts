@@ -1,3 +1,4 @@
+
 import { tpSeconde, TP as TPSeconde } from './tp-seconde';
 import { tpPremiere, TP as TPPremiere } from './tp-premiere';
 import { tpTerminale, TP as TPTerminale } from './tp-terminale';
@@ -78,23 +79,26 @@ export const getTpById = (id: number, all?: boolean, allTpsFromContext?: Record<
 };
 
 export const initialClasses: Record<string, string[]> = {
+    // Terminale
     "TVP1": [],
     "TVP2": [],
     "TVP3": [],
     "TAPP 1": [],
     "TAPP 2": [],
+    // Première
     "1APP1": [],
     "1APP2": [],
     "1VP1": [],
     "1VP2": [],
     "1VP3": [],
-    "2MV1": [],
-    "2MV2": [],
-    "2MV3": [],
-    "2MV4": [],
-    "2MV5": [],
-    "2MV6": [],
-    "2APP-RCVP": [],
+    // Seconde
+    "2MV1 - Pierre Latirgue": [],
+    "2MV2 - Carol Shelby": [],
+    "2MV3 - Amédée Gordini": [],
+    "2MV4 - Les frères Michelin": [],
+    "2MV5 - Michèle Mouton": [],
+    "2MV6 - Valentino Rossi": [],
+    "2APP-RCVP - John Copper": [],
 };
 
 export const allBlocs: Record<string, CompetenceBloc> = {
