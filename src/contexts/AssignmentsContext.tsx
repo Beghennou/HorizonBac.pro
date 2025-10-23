@@ -2,11 +2,13 @@
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
-import { Firestore, collection, doc, getDocs, writeBatch, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { Firestore, collection, doc, getDocs, writeBatch, setDoc, deleteDoc, getDoc, DocumentSnapshot, QuerySnapshot, DocumentData } from 'firebase/firestore';
 import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase/provider';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 // Types definition
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
@@ -86,7 +88,18 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     try {
         const collectionsToFetch = ['students', 'classes', 'tps', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'config'];
         
-        const snapshots = await Promise.all(collectionsToFetch.map(colName => getDocs(collection(db, colName))));
+        const promises = collectionsToFetch.map(colName => 
+            getDocs(collection(db, colName)).catch(serverError => {
+                const contextualError = new FirestorePermissionError({
+                    operation: 'list',
+                    path: colName,
+                });
+                errorEmitter.emit('permission-error', contextualError);
+                throw contextualError; // Re-throw to make Promise.all fail
+            })
+        );
+
+        const snapshots = await Promise.all(promises);
 
         const [studentsSnapshot, classesSnapshot, tpsSnapshot, assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, configSnapshot] = snapshots;
 
@@ -117,27 +130,17 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
             loadedClasses = Object.fromEntries(classesSnapshot.docs.map(d => [d.id, d.data().studentNames]));
         }
 
-        const createPlaceholderIfNeeded = async (snapshot: any, colName: string) => {
-          if (snapshot.empty) {
-            await setDoc(doc(db, colName, '_placeholder'), { initialized: true });
-          }
-        };
-
-        await createPlaceholderIfNeeded(assignedTpsSnapshot, 'assignedTps');
-        await createPlaceholderIfNeeded(evalsSnapshot, 'evaluations');
-        await createPlaceholderIfNeeded(prelimsSnapshot, 'prelimAnswers');
-        await createPlaceholderIfNeeded(feedbacksSnapshot, 'feedbacks');
-        await createPlaceholderIfNeeded(storedEvalsSnapshot, 'storedEvals');
-
+        const dataReducer = (snapshot: QuerySnapshot<DocumentData>) => Object.fromEntries(snapshot.docs.map(d => [d.id, d.data()]));
+        
         setStudents(loadedStudents);
         setClasses(loadedClasses);
-        setAssignedTps(Object.fromEntries(assignedTpsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data().assignments])));
-        setEvaluations(Object.fromEntries(evalsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data()])));
-        setPrelimAnswers(Object.fromEntries(prelimsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data()])));
-        setFeedbacks(Object.fromEntries(feedbacksSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, 'data' in d.data() ? d.data().data : {}])));
-        setStoredEvals(Object.fromEntries(storedEvalsSnapshot.docs.filter(d => d.id !== '_placeholder').map(d => [d.id, d.data()])));
+        setAssignedTps(dataReducer(assignedTpsSnapshot));
+        setEvaluations(dataReducer(evalsSnapshot));
+        setPrelimAnswers(dataReducer(prelimsSnapshot));
+        setFeedbacks(dataReducer(feedbacksSnapshot));
+        setStoredEvals(dataReducer(storedEvalsSnapshot));
         
-        const customTpsData = Object.fromEntries(tpsSnapshot.docs.filter(d => d.id !== '_placeholder').map(doc => [doc.id, doc.data() as TP]));
+        const customTpsData = dataReducer(tpsSnapshot);
         const allTps = { ...getTpById(-1, true) as Record<number, TP>, ...customTpsData };
         setTps(allTps);
         
@@ -145,15 +148,15 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         if (teacherNameDoc) {
             setTeacherNameState(teacherNameDoc.data().name);
         }
+
     } catch (error: any) {
-        // This is a simplified error handling. 
-        // A more robust solution was attempted but failed, this is a fallback.
-        console.error("Erreur de chargement Firestore:", error);
-        toast({
-            variant: "destructive",
-            title: "Erreur de chargement des données",
-            description: "Impossible de lire les données depuis la base de données. Vérifiez les règles de sécurité Firestore.",
-        });
+        if (!(error instanceof FirestorePermissionError)) {
+             toast({
+                variant: "destructive",
+                title: "Erreur de chargement des données",
+                description: error.message || "Impossible de lire les données depuis la base de données. Vérifiez la console pour plus de détails.",
+            });
+        }
     } finally {
         setIsLoaded(true);
     }
@@ -220,7 +223,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         const batch = writeBatch(db);
         for(const name of studentNames) {
             const studentRef = doc(db, 'assignedTps', name);
-            batch.set(studentRef, { assignments: updatedAssignedTps[name] });
+            batch.set(studentRef, updatedAssignedTps[name]);
         }
         await batch.commit();
     } catch(error) {
@@ -372,8 +375,8 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
     try {
         const studentRef = doc(db, 'assignedTps', studentName);
-        const currentData = (await getDoc(studentRef)).data()?.assignments || [];
-        const updatedData = currentData.map((tp: AssignedTp) => tp.id === tpId ? { ...tp, status } : tp);
+        const currentData = ((await getDoc(studentRef)).data() || {}) as Record<string, any>;
+        const updatedData = (currentData.assignments || []).map((tp: AssignedTp) => tp.id === tpId ? { ...tp, status } : tp);
         await setDoc(studentRef, { assignments: updatedData });
     } catch(error) {
         console.error("Failed to update TP status", error);
@@ -407,7 +410,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
      try {
         const feedbackRef = doc(db, 'feedbacks', studentName);
-        const existingFeedbacks = (await getDoc(feedbackRef)).data()?.data || {};
+        const existingFeedbacks = ((await getDoc(feedbackRef)).data() || {}).data || {};
         if(!existingFeedbacks[tpId]) existingFeedbacks[tpId] = {};
         existingFeedbacks[tpId][author] = feedbackText;
         await setDoc(feedbackRef, { data: existingFeedbacks });
@@ -436,4 +439,3 @@ export const useAssignments = () => {
   }
   return context;
 };
-
