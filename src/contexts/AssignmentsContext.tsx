@@ -6,7 +6,7 @@ import { Firestore, collection, doc, getDocs, writeBatch, setDoc, deleteDoc, get
 import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useUser } from '@/firebase/provider';
+import { useFirestore } from '@/firebase/provider';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
 
@@ -72,7 +72,6 @@ const collectionsToManage = ['students', 'classes', 'assignedTps', 'evaluations'
 
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const db = useFirestore();
-  const { isUserLoading } = useUser();
   const { toast } = useToast();
 
   const [students, setStudents] = useState<Student[]>([]);
@@ -191,10 +190,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }, [toast, resetAndSeedDatabase]);
 
   useEffect(() => {
-    if (db && !isUserLoading) {
+    if (db) {
       loadAllData(db);
     }
-  }, [db, isUserLoading, loadAllData]);
+  }, [db, loadAllData]);
 
   const addTp = async (tp: TP) => {
     if(!db) return;
