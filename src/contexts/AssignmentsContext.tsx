@@ -55,8 +55,8 @@ type AssignmentsContextType = {
   savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => void;
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
   teacherName: string;
-  setTeacherName: React.Dispatch<React.SetStateAction<string>>;
-  resetStudentData: () => void;
+  setTeacherName: (name: string) => void;
+  resetStudentData: () => Promise<void>;
   deleteStudent: (studentName: string) => void;
   deleteClass: (className: string) => void;
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
@@ -79,11 +79,48 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
 
+  const resetStudentData = useCallback(async (initialSetup = false) => {
+    const batch = writeBatch(db);
+
+    initialStudentsData.forEach(student => {
+        const studentRef = doc(db, 'students', student.id);
+        batch.set(studentRef, student);
+    });
+    
+    Object.entries(initialClasses).forEach(([className, studentNames]) => {
+        const classRef = doc(db, 'classes', className);
+        batch.set(classRef, { studentNames });
+    });
+
+    const collectionsToClear = ['assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
+    for (const coll of collectionsToClear) {
+        const snapshot = await getDocs(collection(db, coll));
+        snapshot.forEach(doc => batch.delete(doc.ref));
+    }
+
+    await batch.commit();
+
+    if (!initialSetup) {
+      toast({
+          title: "Données réinitialisées sur Firestore",
+          description: "La base de données a été réinitialisée avec les données initiales.",
+      });
+      loadData();
+    }
+  }, [toast]);
+
+
   const loadData = useCallback(async () => {
     setIsLoaded(false);
     try {
-        const [studentsSnapshot, classesSnapshot, tpsSnapshot, assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, teacherSnapshot] = await Promise.all([
-            getDocs(collection(db, 'students')),
+        let studentsSnapshot = await getDocs(collection(db, 'students'));
+
+        if (studentsSnapshot.empty) {
+            await resetStudentData(true);
+            studentsSnapshot = await getDocs(collection(db, 'students'));
+        }
+
+        const [classesSnapshot, tpsSnapshot, assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, teacherSnapshot] = await Promise.all([
             getDocs(collection(db, 'classes')),
             getDocs(collection(db, 'tps')),
             getDocs(collection(db, 'assignedTps')),
@@ -94,43 +131,39 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
             getDoc(doc(db, 'settings', 'teacher')),
         ]);
 
-        if (studentsSnapshot.empty) {
-            // If no data, populate with initial data
-            await resetStudentData(true);
-        } else {
-            setStudents(studentsSnapshot.docs.map(doc => doc.data() as Student));
-            const classesData: Record<string, string[]> = {};
-            classesSnapshot.forEach(doc => classesData[doc.id] = doc.data().studentNames);
-            setClasses(classesData);
+        setStudents(studentsSnapshot.docs.map(doc => doc.data() as Student));
+        const classesData: Record<string, string[]> = {};
+        classesSnapshot.forEach(doc => classesData[doc.id] = doc.data().studentNames);
+        setClasses(classesData);
 
-            const tpsData: Record<number, TP> = { ...tps };
-            tpsSnapshot.forEach(doc => tpsData[doc.data().id] = doc.data() as TP);
-            setTps(tpsData);
-            
-            const assignedTpsData: Record<string, AssignedTp[]> = {};
-            assignedTpsSnapshot.forEach(doc => assignedTpsData[doc.id] = doc.data().tps);
-            setAssignedTps(assignedTpsData);
-            
-            const evalsData: Record<string, Record<string, EvaluationStatus[]>> = {};
-            evalsSnapshot.forEach(doc => evalsData[doc.id] = doc.data());
-            setEvaluations(evalsData);
+        const tpsData: Record<number, TP> = { ...tps };
+        tpsSnapshot.forEach(doc => tpsData[doc.data().id] = doc.data() as TP);
+        setTps(tpsData);
+        
+        const assignedTpsData: Record<string, AssignedTp[]> = {};
+        assignedTpsSnapshot.forEach(doc => assignedTpsData[doc.id] = doc.data().tps);
+        setAssignedTps(assignedTpsData);
+        
+        const evalsData: Record<string, Record<string, EvaluationStatus[]>> = {};
+        evalsSnapshot.forEach(doc => evalsData[doc.id] = doc.data());
+        setEvaluations(evalsData);
 
-            const prelimsData: Record<string, Record<number, Record<number, PrelimAnswer>>> = {};
-            prelimsSnapshot.forEach(doc => prelimsData[doc.id] = JSON.parse(doc.data().answers));
-            setPrelimAnswers(prelimsData);
+        const prelimsData: Record<string, Record<number, Record<number, PrelimAnswer>>> = {};
+        prelimsSnapshot.forEach(doc => prelimsData[doc.id] = JSON.parse(doc.data().answers));
+        setPrelimAnswers(prelimsData);
 
-            const feedbacksData: Record<string, Record<number, Feedback>> = {};
-            feedbacksSnapshot.forEach(doc => feedbacksData[doc.id] = JSON.parse(doc.data().feedbacks));
-            setFeedbacks(feedbacksData);
+        const feedbacksData: Record<string, Record<number, Feedback>> = {};
+        feedbacksSnapshot.forEach(doc => feedbacksData[doc.id] = JSON.parse(doc.data().feedbacks));
+        setFeedbacks(feedbacksData);
 
-            const storedEvalsData: Record<string, Record<number, StoredEvaluation>> = {};
-            storedEvalsSnapshot.forEach(doc => storedEvalsData[doc.id] = JSON.parse(doc.data().evals));
-            setStoredEvals(storedEvalsData);
+        const storedEvalsData: Record<string, Record<number, StoredEvaluation>> = {};
+        storedEvalsSnapshot.forEach(doc => storedEvalsData[doc.id] = JSON.parse(doc.data().evals));
+        setStoredEvals(storedEvalsData);
 
-            if (teacherSnapshot.exists()) {
-                setTeacherName(teacherSnapshot.data().name);
-            }
+        if (teacherSnapshot.exists()) {
+            setTeacherName(teacherSnapshot.data().name);
         }
+        
         toast({ title: "Connecté à Firestore", description: "Les données sont lues depuis la base de données." });
     } catch (error) {
         console.error("Error loading data from Firestore:", error);
@@ -139,13 +172,12 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
             title: "Erreur de connexion à Firestore",
             description: "Impossible de lire les données. Vérifiez votre configuration Firebase et vos règles de sécurité.",
         });
-        // Fallback to initial data if firestore fails
         setStudents(initialStudentsData);
         setClasses(initialClasses);
     } finally {
         setIsLoaded(true);
     }
-  }, [toast]);
+  }, [toast, resetStudentData]);
 
   useEffect(() => {
     loadData();
@@ -295,44 +327,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     await setDoc(feedbackRef, { feedbacks: JSON.stringify(newFeedbacks[studentName]) });
     setFeedbacks(newFeedbacks);
   };
-  
-  const resetStudentData = async (initialSetup = false) => {
-    const batch = writeBatch(db);
-
-    initialStudentsData.forEach(student => {
-        const studentRef = doc(db, 'students', student.id);
-        batch.set(studentRef, student);
-    });
-    
-    Object.entries(initialClasses).forEach(([className, studentNames]) => {
-        const classRef = doc(db, 'classes', className);
-        batch.set(classRef, { studentNames });
-    });
-
-    // Clear other collections
-    (await getDocs(collection(db, 'assignedTps'))).forEach(doc => batch.delete(doc.ref));
-    (await getDocs(collection(db, 'evaluations'))).forEach(doc => batch.delete(doc.ref));
-    (await getDocs(collection(db, 'prelimAnswers'))).forEach(doc => batch.delete(doc.ref));
-    (await getDocs(collection(db, 'feedbacks'))).forEach(doc => batch.delete(doc.ref));
-    (await getDocs(collection(db, 'storedEvals'))).forEach(doc => batch.delete(doc.ref));
-
-    await batch.commit();
-
-    setStudents(initialStudentsData);
-    setClasses(initialClasses);
-    setAssignedTps({});
-    setEvaluations({});
-    setPrelimAnswers({});
-    setFeedbacks({});
-    setStoredEvals({});
-    
-    if (!initialSetup) {
-      toast({
-          title: "Données réinitialisées sur Firestore",
-          description: "La base de données a été réinitialisée avec les données initiales.",
-      });
-    }
-  };
 
   const deleteStudent = async (studentName: string) => {
       const studentToDelete = students.find(s => s.name === studentName);
@@ -359,7 +353,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       
       setStudents(prev => prev.filter(s => s.name !== studentName));
       setClasses(updatedClasses);
-      // Local state updates for other data will follow naturally from a reload or can be done manually
       loadData();
 
       toast({
