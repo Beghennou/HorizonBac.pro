@@ -123,12 +123,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const [prelimAnswers, setPrelimAnswers] = useState<Record<string, Record<number, Record<number, PrelimAnswer>>>>({});
   const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
   const [storedEvals, setStoredEvals] = useState<Record<string, Record<number, StoredEvaluation>>>({});
-  const [tps, setTps] = useState<Record<number, TP>>(getTpById(-1, true) as Record<number, TP>);
+  const [tps, setTps] = useState<Record<number, TP>>(() => getTpById(-1, true) as Record<number, TP>);
   const [teacherName, setTeacherNameState] = useState<string>('M. Dubois');
 
   const isLoaded = !userAuthState.isUserLoading;
 
-  // Auth state listener & data loader
+  // Auth state listener
   useEffect(() => {
     if (!auth || !firestore) {
       setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Firebase services not provided.") });
