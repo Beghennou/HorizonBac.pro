@@ -6,8 +6,8 @@
  *
  * Data Structure:
  * - `/teachers/{teacherId}`: Stores teacher profiles, accessible only by the teacher themselves.
- * - `/teachers/{teacherId}/students/{studentId}`: Stores student profiles, accessible only by the teacher who owns them.
- * - `/teachers/{teacherId}/trainingPrograms/{trainingProgramId}`: Stores training programs, accessible only by the teacher who created them.
+ * - `/teachers/{teacherId}/students/{studentId}`: Stores student profiles, accessible only by the teacher who owns them. The `teacherId` is denormalized onto the student document.
+ * - `/teachers/{teacherId}/trainingPrograms/{trainingProgramId}`: Stores training programs, accessible only by the teacher who created them. The `teacherId` is denormalized onto the training program document.
  * - `/teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}`: Stores simulation data, accessible only by the teacher who owns the parent training program.
  * - `/students/{studentId}/studentProgress/{studentProgressId}`: Stores student progress, accessible only by the student themselves.
  *
@@ -27,10 +27,11 @@ service cloud.firestore {
     /**
      * @description Protects teacher profiles, ensuring only the authenticated user can manage their own profile.
      * @path /teachers/{teacherId}
-     * @allow (create, update, delete) - User with matching auth.uid creates, updates, or deletes their own profile.
-     *   Example: `auth.uid: "teacher123", request.resource.data.id: "teacher123"`
-     * @deny (create, update, delete) - User attempts to create, update, or delete a profile with a mismatched teacherId.
-     *   Example: `auth.uid: "teacher456", request.resource.data.id: "teacher123"`
+     * @allow (create) - User with matching auth.uid creates their own profile. Example: `auth.uid: "teacher123", teacherId: "teacher123"`
+     * @allow (get) - Any authenticated user can read a teacher profile.
+     * @allow (update, delete) - User with matching auth.uid updates or deletes their own profile. Example: `auth.uid: "teacher123", teacherId: "teacher123"`
+     * @deny (create, update, delete) - User attempts to create, update, or delete a profile with a mismatched teacherId. Example: `auth.uid: "teacher456", teacherId: "teacher123"`
+     * @deny (list) - Listing teacher documents is disallowed.
      * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /teachers/{teacherId} {
@@ -39,22 +40,22 @@ service cloud.firestore {
       allow list: if false;
 
       // Teachers can only create their own profile, and the teacherId must match the authenticated user's uid
-      allow create: if isSignedIn() && request.auth.uid == teacherId;
+      allow create: if isSignedIn() && isOwner(teacherId);
 
       // Teachers can only update their own profile, and the teacherId in the document must match the authenticated user's uid
-      allow update: if isSignedIn() && isExistingOwner(teacherId) && request.auth.uid == teacherId;
+      allow update: if isSignedIn() && isExistingOwner(teacherId) && isOwner(teacherId);
 
       // Teachers can only delete their own profile, and the teacherId in the document must match the authenticated user's uid
-      allow delete: if isSignedIn() && isExistingOwner(teacherId) && request.auth.uid == teacherId;
+      allow delete: if isSignedIn() && isExistingOwner(teacherId) && isOwner(teacherId);
     }
 
     /**
      * @description Protects student profiles, ensuring only the owning teacher can manage them.
      * @path /teachers/{teacherId}/students/{studentId}
-     * @allow (create, update, delete) - Teacher with matching teacherId creates, updates, or deletes a student profile.
-     *   Example: `auth.uid: "teacher123", resource.data.teacherId: "teacher123"`
-     * @deny (create, update, delete) - User attempts to create, update, or delete a student profile with a mismatched teacherId.
-     *   Example: `auth.uid: "teacher456", resource.data.teacherId: "teacher123"`
+     * @allow (create) - Teacher with matching teacherId creates a student profile with the same teacherId. Example: `auth.uid: "teacher123", request.resource.data.teacherId: "teacher123"`
+     * @allow (get, list) - Teacher with matching teacherId gets or lists student profiles.
+     * @allow (update, delete) - Teacher with matching teacherId updates or deletes a student profile, ensuring teacherId remains unchanged. Example: `auth.uid: "teacher123", resource.data.teacherId: "teacher123"`
+     * @deny (create, update, delete) - User attempts to create, update, or delete a student profile with a mismatched teacherId. Example: `auth.uid: "teacher456", resource.data.teacherId: "teacher123"`
      * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /teachers/{teacherId}/students/{studentId} {
@@ -62,7 +63,7 @@ service cloud.firestore {
       allow get: if isSignedIn() && isOwner(teacherId);
       allow list: if isSignedIn() && isOwner(teacherId);
 
-      // Teachers can only create students for themselves
+      // Teachers can only create students for themselves, and the teacherId in the student document must match the path
       allow create: if isSignedIn() && isOwner(teacherId) && request.resource.data.teacherId == teacherId;
 
       // Teachers can only update students that belong to them, and the teacherId must not be changed.
@@ -75,10 +76,10 @@ service cloud.firestore {
     /**
      * @description Protects training programs, ensuring only the owning teacher can manage them.
      * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}
-     * @allow (create, update, delete) - Teacher with matching teacherId creates, updates, or deletes a training program.
-     *   Example: `auth.uid: "teacher123", resource.data.teacherId: "teacher123"`
-     * @deny (create, update, delete) - User attempts to create, update, or delete a training program with a mismatched teacherId.
-     *   Example: `auth.uid: "teacher456", resource.data.teacherId: "teacher123"`
+     * @allow (create) - Teacher with matching teacherId creates a training program with the same teacherId. Example: `auth.uid: "teacher123", request.resource.data.teacherId: "teacher123"`
+     * @allow (get, list) - Teacher with matching teacherId gets or lists training programs.
+     * @allow (update, delete) - Teacher with matching teacherId updates or deletes a training program, ensuring teacherId remains unchanged. Example: `auth.uid: "teacher123", resource.data.teacherId: "teacher123"`
+     * @deny (create, update, delete) - User attempts to create, update, or delete a training program with a mismatched teacherId. Example: `auth.uid: "teacher456", resource.data.teacherId: "teacher123"`
      * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /teachers/{teacherId}/trainingPrograms/{trainingProgramId} {
@@ -86,7 +87,7 @@ service cloud.firestore {
       allow get: if isSignedIn() && isOwner(teacherId);
       allow list: if isSignedIn() && isOwner(teacherId);
 
-      // Teachers can only create training programs for themselves
+      // Teachers can only create training programs for themselves, and the teacherId in the training program document must match the path
       allow create: if isSignedIn() && isOwner(teacherId) && request.resource.data.teacherId == teacherId;
 
       // Teachers can only update training programs that belong to them, and the teacherId must not be changed.
@@ -99,16 +100,16 @@ service cloud.firestore {
     /**
      * @description Protects simulations, ensuring only the owning teacher (via the training program) can manage them.
      * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}
-     * @allow (create, update, delete) - Teacher with matching teacherId creates, updates, or deletes a simulation within their training program.
-     *   Example: `auth.uid: "teacher123", get(/databases/$(database)/documents/teachers/teacher123/trainingPrograms/tp123").data.teacherId == "teacher123"`
-     * @deny (create, update, delete) - User attempts to create, update, or delete a simulation with a mismatched teacherId or trainingProgramId.
-     *   Example: `auth.uid: "teacher456", get(/databases/$(database)/documents/teachers/teacher123/trainingPrograms/tp123").data.teacherId == "teacher123"`
+     * @allow (create) - Teacher with matching teacherId creates a simulation if the parent training program also belongs to them. Example: `auth.uid: "teacher123", get(/databases/$(database)/documents/teachers/teacher123/trainingPrograms/tp123).data.teacherId == "teacher123"`
+     * @allow (get, list) - Teacher with matching teacherId gets or lists simulations if the parent training program also belongs to them.
+     * @allow (update, delete) - Teacher with matching teacherId updates or deletes a simulation if the parent training program also belongs to them.
+     * @deny (create, update, delete) - User attempts to create, update, or delete a simulation with a mismatched teacherId or trainingProgramId. Example: `auth.uid: "teacher456", get(/databases/$(database)/documents/teachers/123/trainingPrograms/tp123).data.teacherId == "123"`
      * @principle Enforces document ownership for writes and restricts access to a user's own data tree, using a get() call to check the parent document.
      */
     match /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId} {
-      // Only allow authenticated users to access simulation data
-      allow get: if isSignedIn() && isOwner(teacherId);
-      allow list: if isSignedIn() && isOwner(teacherId);
+      // Only allow authenticated users to access simulation data if the parent training program belongs to them
+      allow get: if isSignedIn() && isOwner(teacherId) && get(/databases/$(database)/documents/teachers/$(teacherId)/trainingPrograms/$(trainingProgramId)).data.teacherId == teacherId;
+      allow list: if isSignedIn() && isOwner(teacherId) && get(/databases/$(database)/documents/teachers/$(teacherId)/trainingPrograms/$(trainingProgramId)).data.teacherId == teacherId;
 
       // Teachers can only create simulations for training programs that belong to them
       allow create: if isSignedIn() && isOwner(teacherId) && get(/databases/$(database)/documents/teachers/$(teacherId)/trainingPrograms/$(trainingProgramId)).data.teacherId == teacherId;
@@ -123,10 +124,10 @@ service cloud.firestore {
     /**
      * @description Protects student progress data, ensuring only the student themselves can manage their own progress.
      * @path /students/{studentId}/studentProgress/{studentProgressId}
-     * @allow (create, update, delete) - User with matching auth.uid creates, updates, or deletes their own progress data.
-     *   Example: `auth.uid: "student123", resource.data.studentId: "student123"`
-     * @deny (create, update, delete) - User attempts to create, update, or delete progress data with a mismatched studentId.
-     *   Example: `auth.uid: "student456", resource.data.studentId: "student123"`
+     * @allow (create) - User with matching auth.uid creates their own progress data with the same studentId. Example: `auth.uid: "student123", request.resource.data.studentId: "student123"`
+     * @allow (get, list) - User with matching auth.uid gets or lists their own progress data.
+     * @allow (update, delete) - User with matching auth.uid updates or deletes their own progress data, ensuring studentId remains unchanged. Example: `auth.uid: "student123", resource.data.studentId: "student123"`
+     * @deny (create, update, delete) - User attempts to create, update, or delete progress data with a mismatched studentId. Example: `auth.uid: "student456", resource.data.studentId: "student123"`
      * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /students/{studentId}/studentProgress/{studentProgressId} {
@@ -134,7 +135,7 @@ service cloud.firestore {
       allow get: if isSignedIn() && isOwner(studentId);
       allow list: if isSignedIn() && isOwner(studentId);
 
-      // Students can only create progress records for themselves
+      // Students can only create progress records for themselves, and the studentId in the progress document must match the path
       allow create: if isSignedIn() && isOwner(studentId) && request.resource.data.studentId == studentId;
 
       // Students can only update progress records that belong to them, and the studentId must not be changed.

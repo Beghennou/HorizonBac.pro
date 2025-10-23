@@ -1,15 +1,12 @@
 
 'use client';
 
-import React, { DependencyList, createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore, collection, getDocs } from 'firebase/firestore';
+import { Firestore } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
-import { AssignmentsContext, AssignmentsContextType } from '@/contexts/AssignmentsContext';
-import { TachometerAnimation } from '@/components/TachometerAnimation';
-import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
-import { Student } from '@/lib/types';
+import { AssignmentsProvider } from '@/contexts/AssignmentsContext';
 
 interface FirebaseProviderProps {
   children: ReactNode;
@@ -48,7 +45,7 @@ export interface FirebaseServicesAndUser {
 }
 
 // Return type for useUser() - specific to user auth state
-export interface UserHookResult { // Renamed from UserAuthHookResult for consistency if desired, or keep as UserAuthHookResult
+export interface UserHookResult { 
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
@@ -71,9 +68,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     isUserLoading: true, // Start loading until first auth event
     userError: null,
   });
-  
-  const [appData, setAppData] = useState<Omit<AssignmentsContextType, 'children' | 'setStudents' | 'setClasses' | 'addTp' | 'assignTp' | 'deleteClass'| 'updateClassWithCsv'|'saveEvaluation'|'updateTpStatus'|'savePrelimAnswer'|'saveFeedback'|'deleteStudent'| 'setTeacherName' > | null>(null);
-  const [isDataLoading, setIsDataLoading] = useState(true);
 
   // Effect to subscribe to Firebase auth state changes
   useEffect(() => {
@@ -82,6 +76,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       return;
     }
     
+    // Ensure anonymous sign-in is attempted
     signInAnonymously(auth).catch((error) => {
         console.error("Anonymous sign-in failed:", error);
     });
@@ -99,56 +94,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     return () => unsubscribe();
   }, [auth]);
 
-  useEffect(() => {
-    async function loadInitialData() {
-        if (!firestore || userAuthState.isUserLoading) return;
-
-        setIsDataLoading(true);
-        try {
-            const studentsSnapshot = await getDocs(collection(firestore, 'students'));
-            let studentsData: Student[];
-
-            if (studentsSnapshot.empty) {
-                studentsData = initialStudents;
-            } else {
-                studentsData = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
-            }
-            
-            const classesSnapshot = await getDocs(collection(firestore, 'classes'));
-            let classesData: Record<string, string[]>;
-            if(classesSnapshot.empty){
-                classesData = initialClasses;
-            } else {
-                classesData = Object.fromEntries(classesSnapshot.docs.map(doc => [doc.id, doc.data().studentNames]));
-            }
-
-            const customTpsSnapshot = await getDocs(collection(firestore, 'tps'));
-            const customTpsData = Object.fromEntries(customTpsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(doc => [doc.id, doc.data() as TP]));
-            const allTps = { ...getTpById(-1, true) as Record<number, TP>, ...customTpsData };
-            
-            const contextData = {
-                students: studentsData,
-                classes: classesData,
-                assignedTps: {},
-                evaluations: {},
-                prelimAnswers: {},
-                feedbacks: {},
-                storedEvals: {},
-                tps: allTps,
-                teacherName: 'M. Dubois',
-                isLoaded: true,
-            };
-
-            setAppData(contextData);
-        } catch (error) {
-            console.error("Failed to load initial data:", error);
-        } finally {
-            setIsDataLoading(false);
-        }
-    }
-    loadInitialData();
-  }, [firestore, userAuthState.isUserLoading]);
-
 
   const contextValue = useMemo((): FirebaseContextState => {
     const servicesAvailable = !!(firebaseApp && firestore && auth);
@@ -163,16 +108,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     };
   }, [firebaseApp, firestore, auth, userAuthState]);
 
-  if (isDataLoading || userAuthState.isUserLoading || !appData) {
-    return <TachometerAnimation />;
-  }
-
   return (
     <FirebaseContext.Provider value={contextValue}>
-      <AssignmentsContext.Provider value={{...appData, setStudents: ()=>{}, setClasses: ()=>{}, addTp: ()=>{}, assignTp: ()=>{}, deleteClass: ()=>{}, updateClassWithCsv: ()=>{}, saveEvaluation: ()=>{}, updateTpStatus: ()=>{}, savePrelimAnswer: ()=>{}, saveFeedback: ()=>{}, deleteStudent: ()=>{}, setTeacherName: ()=>{} }}>
+      <AssignmentsProvider>
         <FirebaseErrorListener />
         {children}
-      </AssignmentsContext.Provider>
+      </AssignmentsProvider>
     </FirebaseContext.Provider>
   );
 };
@@ -222,7 +163,7 @@ export const useFirebaseApp = (): FirebaseApp => {
 
 type MemoFirebase <T> = T & {__memo?: boolean};
 
-export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T | (MemoFirebase<T>) {
+export function useMemoFirebase<T>(factory: () => T, deps: React.DependencyList): T | (MemoFirebase<T>) {
   const memoized = useMemo(factory, deps);
   
   if(typeof memoized !== 'object' || memoized === null) return memoized;
@@ -236,7 +177,7 @@ export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T | 
  * This provides the User object, loading status, and any auth errors.
  * @returns {UserHookResult} Object with user, isUserLoading, userError.
  */
-export const useUser = (): UserHookResult => { // Renamed from useAuthUser
-  const { user, isUserLoading, userError } = useFirebase(); // Leverages the main hook
+export const useUser = (): UserHookResult => {
+  const { user, isUserLoading, userError } = useFirebase();
   return { user, isUserLoading, userError };
 };
