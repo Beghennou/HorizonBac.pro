@@ -71,12 +71,12 @@ export interface FirebaseContextState {
   isUserLoading: boolean;
   userError: Error | null;
   
-  // App Data
-  students: Student[];
+  // App Data - These are now mostly setters, data is fetched in components
+  students: Student[]; // Kept for settings page for now
   setStudents: React.Dispatch<React.SetStateAction<Student[]>>;
-  classes: Record<string, string[]>;
+  classes: Record<string, string[]>; // Kept for selectors
   setClasses: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
-  assignedTps: Record<string, AssignedTp[]>;
+  assignedTps: Record<string, AssignedTp[]>; // Kept for local updates
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
   prelimAnswers: Record<string, Record<number, Record<number, PrelimAnswer>>>;
   feedbacks: Record<string, Record<number, Feedback>>;
@@ -137,8 +137,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     const unsubscribe = onAuthStateChanged(
       auth,
       async (firebaseUser) => {
-        setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
-        if (!firebaseUser) {
+        if (firebaseUser) {
+          setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
+        } else {
             try {
                 await signInAnonymously(auth);
             } catch (error) {

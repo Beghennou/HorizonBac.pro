@@ -36,7 +36,7 @@ const statusLabels: Record<TpStatus, string> = {
 export default function StudentsPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { firestore, assignTp, classes, assignedTps: localAssignedTps, tps: allTpsFromContext } = useFirebase();
+    const { firestore, assignTp, classes, tps: allTpsFromContext } = useFirebase();
     const { toast } = useToast();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
