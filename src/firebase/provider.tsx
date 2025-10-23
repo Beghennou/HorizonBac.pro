@@ -111,15 +111,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: null,
   });
 
-  // --- DATA IS NOW LOADED IN COMPONENTS THAT NEED IT, NOT GLOBALLY ---
-  const { data: tpsData, isLoading: isLoadingTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
-  const { data: studentsData, isLoading: isLoadingStudents } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
-  const { data: classesData, isLoading: isLoadingClasses } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
-  const { data: assignedTpsData, isLoading: isLoadingAssignedTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
-  const { data: teacherNameData, isLoading: isLoadingConfig } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
-  const { data: evalsData, isLoading: isLoadingEvals } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
-  
-  // --- STATE MANAGEMENT ---
+  // --- DATA FETCHING HAS BEEN MOVED TO INDIVIDUAL COMPONENTS ---
+  // The global data loading has been removed to prevent permission errors at startup.
+  // We keep the state management here so mutation functions can update the local cache if needed.
   const [tps, setTps] = useState<Record<number, TP>>(initialTps);
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Record<string, string[]>>({});
@@ -127,30 +121,38 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>({});
   const [teacherName, setTeacherNameState] = useState<string>('');
 
-  const isDataLoading = isLoadingTps || isLoadingStudents || isLoadingClasses || isLoadingAssignedTps || isLoadingConfig || isLoadingEvals;
-  const isLoaded = !userAuthState.isUserLoading && !isDataLoading;
-
-
-  useEffect(() => setTps(tpsData ? Object.fromEntries(tpsData.map(tp => [tp.id, tp])) : initialTps), [tpsData]);
-  useEffect(() => setStudents(studentsData || []), [studentsData]);
-  useEffect(() => setClasses(classesData ? Object.fromEntries(classesData.map(c => [c.id, c.studentNames || []])) : {}), [classesData]);
-  useEffect(() => setTeacherNameState(teacherNameData?.find(d => d.id === 'teacher')?.name || 'M. Dubois'), [teacherNameData]);
+  // --- We now use live collections in components that need them ---
+  const { data: dynamicTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
+  const { data: dynamicStudents } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
+  const { data: dynamicClasses } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
+  const { data: dynamicAssignedTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
+  const { data: dynamicEvals } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
+  const { data: configData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
+  
+  useEffect(() => setTps(dynamicTps ? Object.fromEntries(dynamicTps.map(tp => [tp.id, tp])) : initialTps), [dynamicTps]);
+  useEffect(() => setStudents(dynamicStudents || []), [dynamicStudents]);
+  useEffect(() => setClasses(dynamicClasses ? Object.fromEntries(dynamicClasses.map(c => [c.id, c.studentNames || []])) : {}), [dynamicClasses]);
+  useEffect(() => setTeacherNameState(configData?.find(d => d.id === 'teacher')?.name || 'M. Dubois'), [configData]);
   
   useEffect(() => {
-    if (assignedTpsData) {
+    if (dynamicAssignedTps) {
         const data: Record<string, any> = {};
-        assignedTpsData.forEach(doc => { data[doc.id] = doc.tps || []; });
+        dynamicAssignedTps.forEach(doc => { data[doc.id] = doc.tps || []; });
         setAssignedTps(data);
     }
-  }, [assignedTpsData]);
+  }, [dynamicAssignedTps]);
   
   useEffect(() => {
-    if (evalsData) {
+    if (dynamicEvals) {
         const data: Record<string, any> = {};
-        evalsData.forEach(doc => { data[doc.id] = doc.competences || {}; });
+        dynamicEvals.forEach(doc => { data[doc.id] = doc.competences || {}; });
         setEvaluations(data);
     }
-  }, [evalsData]);
+  }, [dynamicEvals]);
+
+
+  const isLoaded = !userAuthState.isUserLoading;
+
 
   // Auth state listener
   useEffect(() => {
