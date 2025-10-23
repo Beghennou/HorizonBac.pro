@@ -123,7 +123,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const [storedEvals, setStoredEvals] = useState<Record<string, Record<number, StoredEvaluation>>>({});
   const [tps, setTps] = useState<Record<number, TP>>({});
   const [teacherName, setTeacherNameState] = useState<string>('M. Dubois');
-  const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
     const allTps = getTpsByNiveau('seconde').concat(getTpsByNiveau('premiere'), getTpsByNiveau('terminale'));
@@ -134,68 +133,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     setTps(tpsFromData);
   }, []);
 
-  const isLoaded = !userAuthState.isUserLoading && dataLoaded;
-
-  const loadInitialData = useCallback(async (db: Firestore) => {
-      try {
-        const collectionsToFetch = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
-        const snapshots = await Promise.all(collectionsToFetch.map(colName => 
-            getDocs(collection(db, colName)).catch(serverError => {
-                const contextualError = new FirestorePermissionError({
-                    operation: 'list',
-                    path: colName,
-                });
-                errorEmitter.emit('permission-error', contextualError);
-                throw contextualError;
-            })
-        ));
-
-        const [studentsSnap, classesSnap, assignedTpsSnap, evaluationsSnap, prelimAnswersSnap, feedbacksSnap, storedEvalsSnap] = snapshots;
-
-        setStudents(studentsSnap.docs.map(d => ({...d.data(), id: d.id })) as Student[]);
-        const classesData: Record<string, string[]> = {};
-        classesSnap.forEach(d => classesData[d.id] = d.data().studentNames);
-        setClasses(classesData);
-        
-        const assignedTpsData: Record<string, AssignedTp[]> = {};
-        assignedTpsSnap.forEach(d => assignedTpsData[d.id] = d.data().tps);
-        setAssignedTps(assignedTpsData);
-
-        const evalsData: Record<string, Record<string, EvaluationStatus[]>> = {};
-        evaluationsSnap.forEach(d => evalsData[d.id] = d.data());
-        setEvaluations(evalsData);
-
-        const prelimsData: Record<string, Record<number, Record<number, PrelimAnswer>>> = {};
-        prelimAnswersSnap.forEach(d => prelimsData[d.id] = d.data());
-        setPrelimAnswers(prelimsData);
-
-        const feedbacksData: Record<string, Record<number, Feedback>> = {};
-        feedbacksSnap.forEach(d => feedbacksData[d.id] = d.data());
-        setFeedbacks(feedbacksData);
-
-        const storedEvalsData: Record<string, Record<number, StoredEvaluation>> = {};
-        storedEvalsSnap.forEach(d => storedEvalsData[d.id] = d.data());
-        setStoredEvals(storedEvalsData);
-
-        const teacherDoc = await getDoc(doc(db, 'config', 'teacher'));
-        if (teacherDoc.exists()) {
-            setTeacherNameState(teacherDoc.data().name);
-        }
-
-        const tpsQuery = query(collection(db, 'tps'), where('id', '>=', 1000));
-        const customTpsSnap = await getDocs(tpsQuery);
-        const customTpsData: Record<number, TP> = {};
-        customTpsSnap.forEach(d => customTpsData[d.data().id] = d.data() as TP);
-        setTps(prev => ({...prev, ...customTpsData}));
-
-
-      } catch (error) {
-          console.error("Error loading initial data:", error);
-      } finally {
-        setDataLoaded(true);
-      }
-  }, []);
-
+  const isLoaded = !userAuthState.isUserLoading;
 
   // Auth state listener
   useEffect(() => {
@@ -208,9 +146,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       async (firebaseUser) => {
         if (firebaseUser) {
           setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
-          if (!dataLoaded) {
-            //loadInitialData(firestore);
-          }
         } else {
             try {
                 await signInAnonymously(auth);
@@ -226,11 +161,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       }
     );
     return () => unsubscribe();
-  }, [auth, firestore, dataLoaded, loadInitialData]);
+  }, [auth, firestore]);
 
   const assignTp = useCallback(async (studentNames: string[], tpId: number) => {
     if (!firestore) return;
-    const batch = writeBatch(firestore);
     
     const newAssignedTpsState = { ...assignedTps };
     studentNames.forEach(name => {
@@ -245,14 +179,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     studentNames.forEach(studentName => {
         const studentTpDoc = doc(firestore, 'assignedTps', studentName);
         setDocumentNonBlocking(studentTpDoc, { tps: newAssignedTpsState[studentName] }, { merge: true });
-    });
-    
-    batch.commit().catch(error => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: `assignedTps (batch operation for ${studentNames.join(', ')})`,
-            operation: 'write',
-            requestResourceData: { students: studentNames, tpId }
-        }));
     });
 
   }, [firestore, assignedTps]);

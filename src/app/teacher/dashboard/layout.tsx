@@ -71,7 +71,7 @@ function DashboardLayoutContent({
 
   }, [searchParams, dynamicClasses, router, pathname, isLoaded]);
 
-  if (!isLoaded || !selectedClass) {
+  if (!isLoaded) {
     return <TachometerAnimation />;
   }
 

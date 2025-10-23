@@ -2,7 +2,7 @@
 'use client';
 
 import { Suspense } from 'react';
-import { FirebaseProvider, useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase/provider';
 import StudentLayoutContent from './student-layout-content';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
 
