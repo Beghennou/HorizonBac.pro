@@ -86,41 +86,17 @@ export const getTpById = (id: number, all?: boolean, allTpsFromContext?: Record<
 };
 
 export const classes = {
-    "2MV1": [
-        "LUI Essai",
-        "Dupont Jean", "Martin Paul",
-        "Bernard Luc", "Robert Jacques",
-        "Petit Pierre", "Dubois Michel",
-        "Durand Alain", "Leroy Philippe",
-        "Moreau Louis", "Simon André",
-        "Laurent Nicolas", "Lefebvre Marc",
-        "Roux Julien", "Fournier David",
-        "Girard Vincent", "Bonnet Christian",
-        "Lambert Thierry", "Francois Patrick",
-        "Martinez Serge", "Legrand Daniel",
-        "Garnier Jean-Luc", "Faure Pascal",
-        "Rousseau Olivier", "Blanc Frédéric",
-        "Guerin Hervé", "Muller Christophe",
-        "Henry Denis", "Leclercq Bruno",
-        "Lecomte Fabrice", "Perez Alain",
-        "Marchand Éric", "Morel Stéphane"
-    ],
-    "TVP1": [],
-    "TVP2": [],
-    "TVP3": [],
-    "2MV2": ["Chevalier Gilles", "Lambert Patrick", "Caron Jean-Michel", "Fontaine Dominique"],
-    "2MV3": ["VINCENT Christophe", "GAUTIER Guillaume", "MASSON Antoine", "ETIENNE Yann"],
-    "2MV4": ["TESSIER Sébastien", "MARIE Alexandre"],
-    "2MV5": [],
-    "2MV6": [],
-    "TAPP 1": [],
-    "TAPP 2": [],
-    "1APP1": [],
-    "1APP2": [],
-    "1VP1": [],
-    "1VP2": [],
-    "1VP3": [],
-    "2APP-RC/VP": []
+    "2MV1": ["Dupont Jean", "Martin Paul"],
+    "2MV2": ["Bernard Luc", "Robert Jacques"],
+    "2MV3": ["Petit Pierre", "Dubois Michel"],
+    "2MV4": ["Durand Alain", "Leroy Philippe"],
+    "2MV5": ["Michel Mouton", "Agha Azzouz"],
+    "1VP1": ["Simon André", "Laurent Nicolas"],
+    "1VP2": ["Lefebvre Marc", "Roux Julien"],
+    "1VP3": ["Fournier David", "Girard Vincent"],
+    "TVP1": ["Bonnet Christian", "Lambert Thierry"],
+    "TVP2": ["Francois Patrick", "Martinez Serge"],
+    "TVP3": ["Legrand Daniel", "Garnier Jean-Luc"]
 };
 
 export const allBlocs: Record<string, CompetenceBloc> = {

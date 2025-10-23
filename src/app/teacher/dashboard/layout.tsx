@@ -34,7 +34,21 @@ function DashboardLayoutContent({
 
   const [isLoading, setIsLoading] = useState(true);
   const [niveau, setNiveau] = useState<Niveau>((searchParams.get('level') as Niveau) ||'seconde');
-  const [selectedClass, setSelectedClass] = useState<string>(searchParams.get('class') || Object.keys(dynamicClasses).find(c => c.startsWith('2')) || '2MV1 - Pierre Latirgue');
+  
+  const getInitialClass = () => {
+    const classFromUrl = searchParams.get('class');
+    if (classFromUrl) return classFromUrl;
+    
+    const firstClassForLevel = Object.keys(dynamicClasses).find(c => {
+        if (niveau === 'seconde') return c.startsWith('2');
+        if (niveau === 'premiere') return c.startsWith('1');
+        if (niveau === 'terminale') return c.startsWith('T');
+        return false;
+    });
+    return firstClassForLevel || Object.keys(dynamicClasses)[0];
+  }
+  
+  const [selectedClass, setSelectedClass] = useState<string>(getInitialClass());
   
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 3000);
@@ -50,7 +64,14 @@ function DashboardLayoutContent({
      if (levelFromUrl && levelFromUrl !== niveau) {
       setNiveau(levelFromUrl);
     }
-  }, [searchParams, selectedClass, niveau]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  useEffect(() => {
+      setSelectedClass(getInitialClass());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [niveau, dynamicClasses]);
+
 
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
   const selectedStudent = searchParams.get('student');

@@ -51,7 +51,12 @@ export default function StudentSelector() {
     }
   };
 
-  const sortedClasses = Object.keys(classes).filter(c => classes[c] && classes[c].length > 0).sort();
+  const sortedClasses = Object.keys(classes).sort((a, b) => {
+    const levelA = a.startsWith('T') ? 3 : a.startsWith('1') ? 2 : 1;
+    const levelB = b.startsWith('T') ? 3 : b.startsWith('1') ? 2 : 1;
+    if (levelA !== levelB) return levelA - levelB;
+    return a.localeCompare(b);
+  });
 
   return (
     <div className="flex flex-col space-y-4">
