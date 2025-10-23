@@ -299,13 +299,6 @@ export default function StudentDetailPage() {
         }
         
         saveEvaluation(studentName, selectedTpId, currentEvaluations, prelimNote, tpNote, isFinal);
-
-        toast({
-            title: isFinal ? "Évaluation rendue" : "Évaluation enregistrée",
-            description: isFinal 
-                ? `L'évaluation pour ${studentName} a été finalisée et est visible par l'élève.`
-                : `Les compétences pour ${studentName} ont été sauvegardées en brouillon.`,
-        });
     };
     
     const selectedTp = selectedTpId ? tps[selectedTpId] : null;
@@ -489,5 +482,6 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+
 
 
