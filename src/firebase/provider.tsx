@@ -84,6 +84,7 @@ export interface FirebaseContextState {
   addTp: (tp: TP) => void;
   signInWithGoogle: () => Promise<void>;
   isLoaded: boolean;
+  // This data is now loaded in specific components, but we keep the state here for mutation functions
   tps: Record<number, TP>;
   students: Student[];
   classes: Record<string, string[]>;
@@ -113,16 +114,18 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: null,
   });
 
-  // --- DATA LOADING ---
-  const { data: tpsData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
-  const { data: studentsData } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
-  const { data: classesData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
-  const { data: assignedTpsData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
-  const { data: teacherNameData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
-  const { data: evalsData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
-  const { data: storedEvalsData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'storedEvals') : null, [firestore]));
-  const { data: prelimAnswersData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'prelimAnswers') : null, [firestore]));
-  const { data: feedbacksData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'feedbacks') : null, [firestore]));
+  // --- DATA LOADING is now handled by individual components ---
+  // --- We still need to fetch some data for the provider's mutation functions ---
+  const { data: tpsData, isLoading: isLoadingTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
+  const { data: studentsData, isLoading: isLoadingStudents } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
+  const { data: classesData, isLoading: isLoadingClasses } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
+  const { data: assignedTpsData, isLoading: isLoadingAssignedTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
+  const { data: teacherNameData, isLoading: isLoadingConfig } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
+  const { data: evalsData, isLoading: isLoadingEvals } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
+  const { data: storedEvalsData, isLoading: isLoadingStoredEvals } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'storedEvals') : null, [firestore]));
+  const { data: prelimAnswersData, isLoading: isLoadingPrelimAnswers } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'prelimAnswers') : null, [firestore]));
+  const { data: feedbacksData, isLoading: isLoadingFeedbacks } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'feedbacks') : null, [firestore]));
+
 
   // --- STATE MANAGEMENT ---
   const [tps, setTps] = useState<Record<number, TP>>({});
@@ -135,14 +138,15 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const [feedbacks, setFeedbacks] = useState<Record<string, Record<number, Feedback>>>({});
   const [teacherName, setTeacherNameState] = useState<string>('');
 
-  const isLoaded = !userAuthState.isUserLoading;
+  const isDataLoading = isLoadingTps || isLoadingStudents || isLoadingClasses || isLoadingAssignedTps || isLoadingConfig || isLoadingEvals || isLoadingStoredEvals || isLoadingPrelimAnswers || isLoadingFeedbacks;
+  const isLoaded = !userAuthState.isUserLoading && !isDataLoading;
+
 
   useEffect(() => setTps(tpsData ? Object.fromEntries(tpsData.map(tp => [tp.id, tp])) : initialTps), [tpsData]);
   useEffect(() => setStudents(studentsData || []), [studentsData]);
   useEffect(() => setClasses(classesData ? Object.fromEntries(classesData.map(c => [c.id, c.studentNames || []])) : {}), [classesData]);
   useEffect(() => setTeacherNameState(teacherNameData?.find(d => d.id === 'teacher')?.name || 'M. Dubois'), [teacherNameData]);
   
-  // This is a placeholder for a more complex data structure loading
   useEffect(() => {
     if (assignedTpsData) {
         const data: Record<string, any> = {};

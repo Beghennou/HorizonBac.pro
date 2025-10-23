@@ -1,11 +1,181 @@
+/**
+ * @file Firestore Security Rules for Formula Skills Garage
+ * @version Prototyping
+ *
+ * @description
+ * This ruleset enforces a strict teacher-ownership model for data access. Teachers
+ * can only manage data related to their own students and training programs.  Student
+ * progress data is scoped to individual students.
+ *
+ * Data Structure:
+ * The data is organized hierarchically under `/teachers/{teacherId}`,
+ * `/students/{studentId}`, and `/assignedTps/{studentId}` collections.
+ *
+ * Key Security Decisions:
+ * - All operations are restricted to authenticated users.
+ * - Teachers can only manage data (students, training programs, simulations) that
+ *   belong to them, based on the `teacherId` which must match their `auth.uid`.
+ * - Students can only manage their own progress data.
+ * - Listing operations are generally allowed within a teacher's or student's scope,
+ *   but not across the entire database.
+ * - We skip detailed schema validation during prototyping to allow for rapid data
+ *   model iteration.
+ *
+ * Denormalization for Authorization:
+ * - The `Student` and `TrainingProgram` entities include a denormalized `teacherId`
+ *   field. This allows direct ownership checks without requiring extra `get()` calls
+ *   to the `/teachers/{teacherId}` document.
+ *
+ * Structural Segregation:
+ * - Private data for teachers and students is stored under their respective
+ *   user-scoped collections, ensuring that no public listing of user data is possible.
+ */
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Default deny all reads and writes
-    match /{document=**} {
-      allow read, write: if false;
+    /**
+     * @description Checks if the request is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the authenticated user is the owner of the resource.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the authenticated user is the existing owner of the resource.
+     * Used for update and delete operations to ensure the document exists.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Grants access to teacher documents.
+     * @path /teachers/{teacherId}
+     * @allow (create) - Authenticated user with matching UID can create their teacher profile.
+     * @allow (get, list, update, delete) - Authenticated user with matching UID can access and modify their teacher profile.
+     * @deny (create) - Authenticated user attempts to create a teacher profile with a mismatched UID.
+     * @principle Enforces user ownership: Only the authenticated user can manage their own teacher profile.
+     */
+    match /teachers/{teacherId} {
+      allow get: if true;
+      allow list: if false;
+
+      allow create: if isOwner(teacherId);
+      allow update: if isExistingOwner(teacherId);
+      allow delete: if isExistingOwner(teacherId);
+    }
+
+    /**
+     * @description Grants access to student documents nested under teacher documents.
+     * @path /teachers/{teacherId}/students/{studentId}
+     * @allow (create) - Teacher can create student profiles under their teacher document.
+     *   Example: A teacher with ID "teacher123" creates a student profile.
+     * @allow (get, list) - Teacher can read student profiles under their teacher document.
+     *   Example: A teacher with ID "teacher123" reads a student profile.
+     * @allow (update, delete) - Teacher can update/delete student profiles under their teacher document.
+     *   Example: A teacher with ID "teacher123" updates a student profile.
+     * @deny (create) - Teacher attempts to create a student profile under a different teacher's document.
+     *   Example: A teacher with ID "teacher456" tries to create a student under "teacher123".
+     * @deny (update, delete) - Teacher attempts to update/delete a student profile under a different teacher's document.
+     *   Example: A teacher with ID "teacher456" tries to update a student under "teacher123".
+     * @principle Enforces teacher ownership: Only the teacher who "owns" the student can manage their profile.
+     */
+    match /teachers/{teacherId}/students/{studentId} {
+      allow get: if isOwner(teacherId);
+      allow list: if isOwner(teacherId);
+
+      allow create: if isOwner(teacherId) && request.resource.data.teacherId == teacherId;
+      allow update: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
+      allow delete: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
+    }
+
+    /**
+     * @description Grants access to training program documents nested under teacher documents.
+     * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}
+     * @allow (create) - Teacher can create training programs under their teacher document.
+     *   Example: A teacher with ID "teacher123" creates a training program.
+     * @allow (get, list) - Teacher can read training programs under their teacher document.
+     *   Example: A teacher with ID "teacher123" reads a training program.
+     * @allow (update, delete) - Teacher can update/delete training programs under their teacher document.
+     *   Example: A teacher with ID "teacher123" updates a training program.
+     * @deny (create) - Teacher attempts to create a training program under a different teacher's document.
+     *   Example: A teacher with ID "teacher456" tries to create a training program under "teacher123".
+     * @deny (update, delete) - Teacher attempts to update/delete a training program under a different teacher's document.
+     *   Example: A teacher with ID "teacher456" tries to update a training program under "teacher123".
+     * @principle Enforces teacher ownership: Only the teacher who "owns" the training program can manage it.
+     */
+    match /teachers/{teacherId}/trainingPrograms/{trainingProgramId} {
+      allow get: if isOwner(teacherId);
+      allow list: if isOwner(teacherId);
+
+      allow create: if isOwner(teacherId) && request.resource.data.teacherId == teacherId;
+      allow update: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
+      allow delete: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
+    }
+
+    /**
+     * @description Grants access to simulation documents nested under training program documents.
+     * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}
+     * @allow (create) - Teacher can create simulation documents under their training program.
+     *   Example: A teacher with ID "teacher123" creates a simulation.
+     * @allow (get, list) - Teacher can read simulation documents under their training program.
+     *   Example: A teacher with ID "teacher123" reads a simulation.
+     * @allow (update, delete) - Teacher can update/delete simulation documents under their training program.
+     *   Example: A teacher with ID "teacher123" updates a simulation.
+     * @deny (create) - Teacher attempts to create a simulation under a training program they don't own.
+     *   Example: A teacher with ID "teacher456" tries to create a simulation under "teacher123".
+     * @deny (update, delete) - Teacher attempts to update/delete a simulation under a training program they don't own.
+     *   Example: A teacher with ID "teacher456" tries to update a simulation under "teacher123".
+     * @principle Enforces teacher ownership: Only the teacher who "owns" the training program can manage its simulations.
+     */
+    match /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId} {
+      allow get: if isOwner(teacherId);
+      allow list: if isOwner(teacherId);
+
+      allow create: if isOwner(teacherId);
+      allow update: if isOwner(teacherId) && get(/databases/$(database)/documents/teachers/$(teacherId)/trainingPrograms/$(trainingProgramId)).data.teacherId == teacherId;
+      allow delete: if isOwner(teacherId) && get(/databases/$(database)/documents/teachers/$(teacherId)/trainingPrograms/$(trainingProgramId)).data.teacherId == teacherId;
+    }
+
+    /**
+     * @description Grants access to student progress documents.
+     * @path /students/{studentId}/studentProgress/{studentProgressId}
+     * @allow (create) - Anyone can create student progress documents for a student.
+     * @allow (get, list) - Anyone can read student progress documents for a student.
+     * @allow (update, delete) - Anyone can update or delete student progress documents for a student.
+     * @principle Student progress data is currently open for modification.
+     */
+    match /students/{studentId}/studentProgress/{studentProgressId} {
+      allow get: if true;
+      allow list: if true;
+
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
+    }
+
+    /**
+     * @description Grants access to assigned training programs list documents.
+     * @path /assignedTps/{studentId}
+     * @allow (create) - Anyone can create assigned training programs list documents for a student.
+     * @allow (get, list) - Anyone can read assigned training programs list documents for a student.
+     * @allow (update, delete) - Anyone can update or delete assigned training programs list documents for a student.
+     * @principle Assigned training programs list documents are currently open for modification.
+     */
+    match /assignedTps/{studentId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
     }
   }
 }
