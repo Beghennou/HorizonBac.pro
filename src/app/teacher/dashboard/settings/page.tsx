@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight, Eraser } from "lucide-react";
 import { useFirebase } from '@/firebase';
-import { Student } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   AlertDialog,
@@ -23,67 +22,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import Papa from 'papaparse';
-import { collection, writeBatch, doc, getDoc } from 'firebase/firestore';
-import { classNames } from '@/lib/data-manager';
-
-// Définition du composant CsvImportSection en dehors du composant principal
-const CsvImportSection = ({ title, onImport }: { title: string, onImport: (studentNames: string[]) => void }) => {
-    const { toast } = useToast();
-
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        Papa.parse(file, {
-            header: false,
-            skipEmptyLines: true,
-            complete: (results) => {
-                const studentNames = (results.data as string[][])
-                    .map(row => row[0]?.trim())
-                    .filter(name => name);
-                
-                if (studentNames.length > 0) {
-                    onImport(studentNames);
-                    toast({
-                        title: "Importation réussie",
-                        description: `${studentNames.length} élèves importés.`
-                    });
-                } else {
-                    toast({
-                        variant: "destructive",
-                        title: "Fichier CSV vide ou invalide",
-                        description: "Aucun nom d'élève n'a été trouvé dans le fichier.",
-                    });
-                }
-            },
-            error: (error: any) => {
-                toast({
-                    variant: "destructive",
-                    title: "Erreur de lecture du CSV",
-                    description: "Impossible de lire le fichier. Veuillez vérifier son format.",
-                });
-            }
-        });
-        event.target.value = ''; // Reset file input
-    };
-
-    return (
-        <div className="flex items-center gap-4">
-            <Label className="flex-1 font-bold">{title}</Label>
-            <Button asChild variant="outline" className="w-48">
-                <label className="cursor-pointer">
-                    <Upload className="mr-2 h-4 w-4" /> Importer CSV
-                    <Input type="file" accept=".csv" className="sr-only" onChange={handleFileUpload} />
-                </label>
-            </Button>
-        </div>
-    );
-};
+import { doc, getDoc } from 'firebase/firestore';
 
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { firestore, teacherName, setTeacherName, updateClassWithCsv, deleteClass, resetAllStudentLists } = useFirebase();
+  const { firestore, teacherName, setTeacherName, updateClassWithCsv, deleteClass, resetAllStudentLists, classes: classNames } = useFirebase();
 
   const [classList, setClassList] = useState<Record<string, string[]>>({});
 
@@ -128,7 +72,55 @@ export default function SettingsPage() {
         setClassList(tempClassList);
     }
     fetchAllClasses();
-  }, [firestore]);
+  }, [firestore, classNames]);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, targetClassName: string) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!targetClassName) {
+        toast({
+            variant: 'destructive',
+            title: 'Classe non sélectionnée',
+            description: "Veuillez spécifier un nom de classe avant d'importer."
+        });
+        event.target.value = '';
+        return;
+    }
+
+    Papa.parse(file, {
+        header: false,
+        skipEmptyLines: true,
+        complete: (results) => {
+            const studentNames = (results.data as string[][])
+                .map(row => row[0]?.trim())
+                .filter(name => name);
+            
+            if (studentNames.length > 0) {
+                updateClassWithCsv(targetClassName, studentNames);
+                setClassList(prev => ({...prev, [targetClassName]: studentNames}));
+                toast({
+                    title: "Importation réussie",
+                    description: `${studentNames.length} élèves importés dans la classe ${targetClassName}.`
+                });
+            } else {
+                toast({
+                    variant: "destructive",
+                    title: "Fichier CSV vide ou invalide",
+                    description: "Aucun nom d'élève n'a été trouvé dans le fichier.",
+                });
+            }
+        },
+        error: () => {
+            toast({
+                variant: "destructive",
+                title: "Erreur de lecture du CSV",
+                description: "Impossible de lire le fichier. Veuillez vérifier son format.",
+            });
+        }
+    });
+    event.target.value = ''; // Reset file input
+  };
   
   const handleAddStudent = async () => {
     if (!firstName || !lastName || (!newClassName && !selectedClass) || !firestore) {
@@ -225,60 +217,15 @@ export default function SettingsPage() {
       if (!classToDelete || !firestore) return;
       deleteClass(classToDelete);
       setClassToDelete('');
-      // We don't remove from classNames as it's static now.
-      // But we can update the local state to reflect the students are gone
       setClassList(prev => ({...prev, [classToDelete]: []}));
   }
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    const finalImportClassName = newImportClassName || importClassName;
-
-    if (!file) return;
-    if (!finalImportClassName) {
-        toast({
-            variant: 'destructive',
-            title: 'Classe non sélectionnée',
-            description: "Veuillez choisir ou créer une classe pour l'importation."
-        });
-        return;
-    }
-
-    Papa.parse(file, {
-      header: false,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const newStudentNames = (results.data as string[][])
-          .map(row => row[0]?.trim())
-          .filter(name => name);
-
-        if (newStudentNames.length === 0) {
-            toast({
-                variant: "destructive",
-                title: "Aucun élève trouvé",
-                description: "Le fichier CSV semble vide ou mal formaté.",
-            });
-            return;
-        }
-
-        updateClassWithCsv(finalImportClassName, newStudentNames);
-        setClassList(prev => ({...prev, [finalImportClassName]: newStudentNames}));
-        setImportClassName('');
-        setNewImportClassName('');
-      },
-      error: (error: any) => {
-        toast({
-          variant: "destructive",
-          title: "Erreur d'importation",
-          description: "Impossible de lire le fichier CSV. Veuillez vérifier son format.",
-        });
-        console.error("CSV Parsing Error:", error);
-      }
-    });
-    
-    event.target.value = '';
+  const handleLegacyCsvImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const finalImportClassName = newImportClassName || importClassName;
+      handleFileUpload(event, finalImportClassName);
+      setImportClassName('');
+      setNewImportClassName('');
   };
-
 
   return (
     <div className="space-y-8">
@@ -297,19 +244,33 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                 <Input value={newSecondeClassName} onChange={(e) => setNewSecondeClassName(e.target.value)} placeholder="Nom classe Seconde..."/>
-                <CsvImportSection title="Nouvelles Classes de Seconde" onImport={(studentNames) => updateClassWithCsv(newSecondeClassName, studentNames)} />
+                <Button asChild variant="outline">
+                    <label className="cursor-pointer w-full">
+                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Seconde
+                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, newSecondeClassName)} />
+                    </label>
+                </Button>
             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                 <Input value={newPremiereClassName} onChange={(e) => setNewPremiereClassName(e.target.value)} placeholder="Nom classe Première..."/>
-                <CsvImportSection title="Nouvelles Classes de Première" onImport={(studentNames) => updateClassWithCsv(newPremiereClassName, studentNames)} />
+                 <Button asChild variant="outline">
+                    <label className="cursor-pointer w-full">
+                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Première
+                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, newPremiereClassName)} />
+                    </label>
+                </Button>
             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                 <Input value={newTerminaleClassName} onChange={(e) => setNewTerminaleClassName(e.target.value)} placeholder="Nom classe Terminale..."/>
-                <CsvImportSection title="Nouvelles Classes de Terminale" onImport={(studentNames) => updateClassWithCsv(newTerminaleClassName, studentNames)} />
+                 <Button asChild variant="outline">
+                    <label className="cursor-pointer w-full">
+                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Terminale
+                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, newTerminaleClassName)} />
+                    </label>
+                </Button>
             </div>
         </CardContent>
       </Card>
-
 
        <Card>
         <CardHeader>
@@ -381,19 +342,13 @@ export default function SettingsPage() {
                       <Label htmlFor="import-new-class">Ou créer une nouvelle classe</Label>
                       <Input id="import-new-class" placeholder="ex: 2MV6" value={newImportClassName} onChange={(e) => setNewImportClassName(e.target.value)} disabled={!!importClassName} />
                   </div>
-              </div>
-
-          <div className="flex items-center gap-4">
-            <Label htmlFor="csv-upload" className="flex-grow">
-              <Button asChild className="w-full cursor-pointer" disabled={!importClassName && !newImportClassName}>
-                <label>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Choisir un fichier CSV et Importer
-                  <Input id="csv-upload" type="file" accept=".csv" className="sr-only" onChange={handleFileUpload} disabled={!importClassName && !newImportClassName}/>
+            </div>
+             <Button asChild variant="outline">
+                <label className="cursor-pointer w-full">
+                    <Upload className="mr-2 h-4 w-4" /> Importer le fichier CSV
+                    <Input type="file" accept=".csv" className="sr-only" onChange={handleLegacyCsvImport} />
                 </label>
-              </Button>
-            </Label>
-          </div>
+            </Button>
            <p className="text-sm text-muted-foreground text-center">Les élèves existants seront ignorés mais ajoutés à la classe si besoin.</p>
         </CardContent>
       </Card>
@@ -517,7 +472,7 @@ export default function SettingsPage() {
                   <p>Vider les listes d'élèves de **toutes** les classes. Utile pour une réinitialisation avant une nouvelle année scolaire.</p>
                    <AlertDialog>
                       <AlertDialogTrigger asChild>
-                          <Button variant="destructive" outline>
+                          <Button variant="destructive" outline="true">
                               <Eraser className="mr-2 h-4 w-4" />
                               Vider toutes les listes
                           </Button>
@@ -593,7 +548,6 @@ export default function SettingsPage() {
               </div>
           </CardContent>
       </Card>
-
     </div>
   );
 }
