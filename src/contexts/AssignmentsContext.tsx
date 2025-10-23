@@ -80,60 +80,30 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        const savedStudents = localStorage.getItem('students');
-        const studentsData = savedStudents ? JSON.parse(savedStudents) : initialStudentsData;
-        
-        const savedClasses = localStorage.getItem('classes');
-        const classesData = savedClasses ? JSON.parse(savedClasses) : initialClasses;
+        // Force re-initialization from code by clearing localStorage
+        localStorage.clear();
 
-        const savedAssignedTps = localStorage.getItem('assignedTps');
-        setAssignedTps(savedAssignedTps ? JSON.parse(savedAssignedTps) : {});
+        const studentsData = initialStudentsData;
+        const classesData = initialClasses;
+        const customTps = {}; // No custom TPs initially
 
-        const savedEvaluations = localStorage.getItem('evaluations');
-        const evaluationsData = savedEvaluations ? JSON.parse(savedEvaluations) : {};
-        setEvaluations(evaluationsData);
-
-        const savedPrelimAnswers = localStorage.getItem('prelimAnswers');
-        setPrelimAnswers(savedPrelimAnswers ? JSON.parse(savedPrelimAnswers) : {});
-        
-        const savedFeedbacks = localStorage.getItem('feedbacks');
-        setFeedbacks(savedFeedbacks ? JSON.parse(savedFeedbacks) : {});
-        
-        const savedStoredEvals = localStorage.getItem('storedEvals');
-        setStoredEvals(savedStoredEvals ? JSON.parse(savedStoredEvals) : {});
-
-        const savedTps = localStorage.getItem('customTps');
-        const customTps = savedTps ? JSON.parse(savedTps) : {};
-
-        const allTps = { 
-          ...getTpById(-1, true), // get all default TPs
-          ...customTps 
-        };
-        setTps(allTps);
+        setAssignedTps({});
+        setEvaluations({});
+        setPrelimAnswers({});
+        setFeedbacks({});
+        setStoredEvals({});
+        setTps({ ...getTpById(-1, true), ...customTps });
+        setTeacherName('M. Dubois');
 
         const updatedStudents = studentsData.map((student: Student) => {
-          const studentEvaluations = evaluationsData[student.name] || {};
-          let totalXp = 0;
-          for (const competenceId in studentEvaluations) {
-              const history = studentEvaluations[competenceId];
-              if (Array.isArray(history) && history.length > 0) {
-                const latestStatus = history[history.length - 1];
-                totalXp += xpPerLevel[latestStatus] || 0;
-              }
-          }
-          const allCompetencesCount = Object.values(allBlocs).reduce((acc, bloc) => acc + Object.keys(bloc.items).length, 0);
-          const maxPossibleXp = allCompetencesCount * xpPerLevel['M'];
-          const progressPercentage = maxPossibleXp > 0 ? Math.round((totalXp / maxPossibleXp) * 100) : 0;
-          return { ...student, xp: totalXp, progress: progressPercentage };
+          return { ...student, xp: 0, progress: 0 };
         });
 
         setStudents(updatedStudents);
         setClasses(classesData);
-
-        const savedTeacherName = localStorage.getItem('teacherName');
-        setTeacherName(savedTeacherName ? JSON.parse(savedTeacherName) : 'M. Dubois');
+        
       } catch (error) {
-        console.error("Failed to load data from localStorage, using initial data.", error);
+        console.error("Failed to initialize data, using hardcoded initial data.", error);
         setStudents(initialStudentsData);
         setClasses(initialClasses);
         setAssignedTps({});
@@ -150,6 +120,8 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    // This effect now serves to persist any changes made during the session,
+    // but it will be cleared on the next full app load by the effect above.
     if (isLoaded) {
       localStorage.setItem('students', JSON.stringify(students));
       localStorage.setItem('classes', JSON.stringify(classes));
