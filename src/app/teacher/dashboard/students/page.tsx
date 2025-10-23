@@ -44,7 +44,22 @@ export default function StudentsPage() {
     const { toast } = useToast();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
-    const className = searchParams.get('class') || Object.keys(classes).find(c => c.startsWith('2')) || '2MV1';
+    const getInitialClass = () => {
+        const classFromUrl = searchParams.get('class');
+        if (classFromUrl && classes[classFromUrl]) return classFromUrl;
+        
+        const sortedClasses = Object.keys(classes).sort();
+        const firstClassForLevel = sortedClasses.find(c => {
+            if (level === 'seconde') return c.startsWith('2');
+            if (level === 'premiere') return c.startsWith('1');
+            if (level === 'terminale') return c.startsWith('T');
+            return false;
+        });
+
+        return firstClassForLevel || sortedClasses[0] || '';
+    };
+
+    const className = getInitialClass();
     
     const studentNamesInClass = classes[className as keyof typeof classes] || [];
     const studentsInClass = students.filter(student => studentNamesInClass.includes(student.name));
@@ -116,6 +131,7 @@ export default function StudentsPage() {
                             id="select-all"
                             checked={allStudentsSelected}
                             onCheckedChange={handleSelectAll}
+                            disabled={studentsInClass.length === 0}
                         />
                         <label htmlFor="select-all" className="text-sm font-medium">Tout sélectionner</label>
                     </div>
