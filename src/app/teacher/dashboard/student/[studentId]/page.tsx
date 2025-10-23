@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { competencesParNiveau } from '@/lib/data-manager';
 
 const AiAnalysisHub = dynamic(() => import('@/components/ai-analysis-hub').then(mod => mod.AiAnalysisHub), {
     ssr: false,
@@ -313,12 +314,11 @@ export default function StudentDetailPage() {
     if (selectedTp) {
         const niveau = selectedTp.id >= 1000 ? (selectedTp as any).niveau :
                        selectedTp.id >= 301 ? 'terminale' :
-                       selectedTp.id >= 1 ? 'premiere' : 'seconde';
-        currentBlocs = {
-            seconde: { ...allBlocs.BLOC_1 },
-            premiere: { ...allBlocs.BLOC_2 },
-            terminale: { ...allBlocs.BLOC_3 },
-        }[niveau] || {};
+                       selectedTp.id >= 101 ? 'seconde' : 'premiere';
+        
+        if (competencesParNiveau[niveau]) {
+             currentBlocs = competencesParNiveau[niveau];
+        }
     }
     
     const evaluatedCompetenceIds = selectedTp?.objectif.match(/C\d\.\d/g) || [];
@@ -489,4 +489,5 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+
 
