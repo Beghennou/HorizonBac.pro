@@ -78,69 +78,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const storedStudents = localStorage.getItem('students');
-        const storedClasses = localStorage.getItem('classes');
-        const storedAssignedTps = localStorage.getItem('assignedTps');
-        const storedEvaluations = localStorage.getItem('evaluations');
-        const storedPrelimAnswers = localStorage.getItem('prelimAnswers');
-        const storedFeedbacks = localStorage.getItem('feedbacks');
-        const storedStoredEvals = localStorage.getItem('storedEvals');
-        const storedTeacherName = localStorage.getItem('teacherName');
-        const storedCustomTps = localStorage.getItem('customTps');
-        
-        if (storedStudents && storedClasses) {
-          setStudents(JSON.parse(storedStudents));
-          setClasses(JSON.parse(storedClasses));
-          setAssignedTps(storedAssignedTps ? JSON.parse(storedAssignedTps) : {});
-          setEvaluations(storedEvaluations ? JSON.parse(storedEvaluations) : {});
-          setPrelimAnswers(storedPrelimAnswers ? JSON.parse(storedPrelimAnswers) : {});
-          setFeedbacks(storedFeedbacks ? JSON.parse(storedFeedbacks) : {});
-          setStoredEvals(storedStoredEvals ? JSON.parse(storedStoredEvals) : {});
-          setTeacherName(storedTeacherName ? JSON.parse(storedTeacherName) : 'M. Dubois');
-          
-          const customTps = storedCustomTps ? JSON.parse(storedCustomTps) : {};
-          setTps({ ...getTpById(-1, true), ...customTps });
-        } else {
-          // If no data, initialize from hardcoded data
-          const studentsData = initialStudentsData;
-          const classesData = initialClasses;
-          const customTps = {};
-
-          setAssignedTps({});
-          setEvaluations({});
-          setPrelimAnswers({});
-          setFeedbacks({});
-          setStoredEvals({});
-          setTps({ ...getTpById(-1, true), ...customTps });
-          setTeacherName('M. Dubois');
-
-          const updatedStudents = studentsData.map((student: Student) => {
-            return { ...student, xp: 0, progress: 0 };
-          });
-
-          setStudents(updatedStudents);
-          setClasses(classesData);
-        }
-      } catch (error) {
-        console.error("Failed to initialize data from localStorage, using hardcoded initial data.", error);
-        setStudents(initialStudentsData);
-        setClasses(initialClasses);
-        setAssignedTps({});
-        setEvaluations({});
-        setPrelimAnswers({});
-        setFeedbacks({});
-        setStoredEvals({});
-        setTps(getTpById(-1, true) as Record<number, TP>);
-        setTeacherName('M. Dubois');
-      }
-      setIsLoaded(true);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     // This effect now serves to persist any changes made during the session.
     if (isLoaded) {
       localStorage.setItem('students', JSON.stringify(students));
@@ -158,6 +95,32 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('customTps', JSON.stringify(customTps));
     }
   }, [students, classes, assignedTps, evaluations, prelimAnswers, feedbacks, storedEvals, teacherName, tps, isLoaded]);
+
+  useEffect(() => {
+    // This effect ensures data is always re-initialized from the code base on load.
+    if (typeof window !== 'undefined' && !isLoaded) {
+      // Clear localStorage to ensure a clean state
+      localStorage.clear();
+
+      // Initialize from hardcoded data
+      const studentsData = initialStudentsData;
+      const classesData = initialClasses;
+      const customTps = {}; // Custom TPs are not persisted across reloads
+
+      setStudents(studentsData.map(student => ({ ...student, xp: 0, progress: 0 })));
+      setClasses(classesData);
+      setTps({ ...getTpById(-1, true), ...customTps });
+      setTeacherName('M. Dubois');
+      setAssignedTps({});
+      setEvaluations({});
+      setPrelimAnswers({});
+      setFeedbacks({});
+      setStoredEvals({});
+      
+      setIsLoaded(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const addTp = (tp: TP) => {
     setTps(prev => ({...prev, [tp.id]: tp }));
