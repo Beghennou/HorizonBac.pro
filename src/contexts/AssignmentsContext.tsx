@@ -191,6 +191,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }, [toast, resetAndSeedDatabase]);
 
   useEffect(() => {
+    // Only attempt to load data once the database is available AND the initial auth check is complete.
     if (db && !isUserLoading) {
       loadAllData(db);
     }
