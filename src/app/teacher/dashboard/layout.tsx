@@ -32,6 +32,24 @@ function DashboardLayoutContent({
   const searchParams = useSearchParams();
   const { classes: dynamicClasses, tps: allTps, isLoaded } = useAssignments();
 
+  const niveau = (searchParams.get('level') as Niveau) || 'seconde';
+  const currentClassFromUrl = searchParams.get('class');
+
+  const classesForLevel = useMemo(() => Object.keys(dynamicClasses).filter(c => {
+    if (niveau === 'seconde') return c.startsWith('2');
+    if (niveau === 'premiere') return c.startsWith('1');
+    if (niveau === 'terminale') return c.startsWith('T');
+    return false;
+  }).sort(), [dynamicClasses, niveau]);
+
+  const selectedClass = currentClassFromUrl && classesForLevel.includes(currentClassFromUrl) 
+    ? currentClassFromUrl 
+    : classesForLevel[0] || null;
+
+  if (!isLoaded || !selectedClass) {
+    return <TachometerAnimation />;
+  }
+
   const handleNiveauChange = (newNiveau: Niveau) => {
     const firstClassForLevel = Object.keys(dynamicClasses).find(c => {
         if (newNiveau === 'seconde') return c.startsWith('2');
@@ -52,7 +70,7 @@ function DashboardLayoutContent({
   const handleClassChange = (className: string) => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('class', className);
-    newSearchParams.delete('student'); // Remove student when class changes
+    newSearchParams.delete('student');
     
     const basePath = pathname.split('/').slice(0, 4).join('/');
     router.push(`${basePath}?${newSearchParams.toString()}`);
@@ -70,27 +88,8 @@ function DashboardLayoutContent({
     router.push(`/teacher/dashboard/tp-designer?${newSearchParams.toString()}`);
   };
 
-  const niveau = (searchParams.get('level') as Niveau) || 'seconde';
-  const currentClassFromUrl = searchParams.get('class');
-
-  const classesForLevel = useMemo(() => Object.keys(dynamicClasses).filter(c => {
-    if (niveau === 'seconde') return c.startsWith('2');
-    if (niveau === 'premiere') return c.startsWith('1');
-    if (niveau === 'terminale') return c.startsWith('T');
-    return false;
-  }).sort(), [dynamicClasses, niveau]);
-
-  const selectedClass = currentClassFromUrl && dynamicClasses[currentClassFromUrl] 
-    ? currentClassFromUrl 
-    : classesForLevel[0] || null;
-
-  if (!isLoaded || !selectedClass) {
-    return <TachometerAnimation />;
-  }
-
   const tps = getTpsByNiveau(niveau, allTps);
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
-  const selectedStudent = searchParams.get('student');
 
   return (
       <SidebarProvider>
