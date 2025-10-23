@@ -30,9 +30,8 @@ function DashboardLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { classes: dynamicClasses, tps: allTps } = useAssignments();
+  const { classes: dynamicClasses, tps: allTps, isLoaded } = useAssignments();
 
-  const [isLoading, setIsLoading] = useState(true);
   const [niveau, setNiveau] = useState<Niveau>((searchParams.get('level') as Niveau) ||'seconde');
   
   const getInitialClass = () => {
@@ -51,10 +50,12 @@ function DashboardLayoutContent({
   const [selectedClass, setSelectedClass] = useState<string>(getInitialClass());
   
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
+    if (isLoaded) {
+      setSelectedClass(getInitialClass());
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, niveau, dynamicClasses]);
+  
   useEffect(() => {
     const classFromUrl = searchParams.get('class');
     if (classFromUrl && classFromUrl !== selectedClass) {
@@ -66,12 +67,6 @@ function DashboardLayoutContent({
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
-
-  useEffect(() => {
-      setSelectedClass(getInitialClass());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [niveau, dynamicClasses]);
-
 
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
   const selectedStudent = searchParams.get('student');
@@ -118,7 +113,7 @@ function DashboardLayoutContent({
     router.push(`/teacher/dashboard/tp-designer?${newSearchParams.toString()}`);
   };
 
-  if (isLoading) {
+  if (!isLoaded) {
     return <TachometerAnimation />;
   }
 
@@ -244,3 +239,5 @@ export default function TeacherDashboardLayout({
     </AssignmentsProvider>
   );
 }
+
+    

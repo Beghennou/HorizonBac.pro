@@ -24,10 +24,12 @@ export default function StudentLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <Suspense fallback={<TachometerAnimation />}>
-      <AssignmentsProvider>
+    <AssignmentsProvider>
+      <Suspense fallback={<TachometerAnimation />}>
         <LayoutWrapper>{children}</LayoutWrapper>
-      </AssignmentsProvider>
-    </Suspense>
+      </Suspense>
+    </AssignmentsProvider>
   );
 }
+
+    

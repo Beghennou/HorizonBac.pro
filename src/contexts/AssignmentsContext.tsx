@@ -79,6 +79,38 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
 
+  const resetStudentData = useCallback(async () => {
+    const { students: initialStudentsData, classes: initialClasses } = await import('@/lib/data-manager');
+    const batch = writeBatch(db);
+
+    initialStudentsData.forEach(student => {
+        const studentRef = doc(db, 'students', student.id);
+        batch.set(studentRef, student);
+    });
+    
+    Object.entries(initialClasses).forEach(([className, studentNames]) => {
+        const classRef = doc(db, 'classes', className);
+        batch.set(classRef, { studentNames });
+    });
+
+    const collectionsToClear = ['assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
+    for (const coll of collectionsToClear) {
+        try {
+            const snapshot = await getDocs(collection(db, coll));
+            snapshot.forEach(doc => batch.delete(doc.ref));
+        } catch (error) {
+            console.error(`Could not clear collection ${coll}`, error);
+        }
+    }
+
+    await batch.commit();
+
+    toast({
+        title: "Données réinitialisées sur Firestore",
+        description: "La base de données a été réinitialisée avec les données initiales.",
+    });
+  }, [toast]);
+
   const loadData = useCallback(async () => {
     setIsLoaded(false);
     try {
@@ -86,21 +118,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         let classesSnapshot = await getDocs(collection(db, 'classes'));
 
         if (studentsSnapshot.empty || classesSnapshot.empty) {
-            const { students: initialStudentsData, classes: initialClasses } = await import('@/lib/data-manager');
-            const batch = writeBatch(db);
-
-            initialStudentsData.forEach(student => {
-                const studentRef = doc(db, 'students', student.id);
-                batch.set(studentRef, student);
-            });
-            
-            Object.entries(initialClasses).forEach(([className, studentNames]) => {
-                const classRef = doc(db, 'classes', className);
-                batch.set(classRef, { studentNames });
-            });
-
-            await batch.commit();
-
+            await resetStudentData();
             studentsSnapshot = await getDocs(collection(db, 'students'));
             classesSnapshot = await getDocs(collection(db, 'classes'));
         }
@@ -161,40 +179,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     } finally {
         setIsLoaded(true);
     }
-  }, [toast, tps]);
-
-  const resetStudentData = useCallback(async () => {
-    const { students: initialStudentsData, classes: initialClasses } = await import('@/lib/data-manager');
-    const batch = writeBatch(db);
-
-    initialStudentsData.forEach(student => {
-        const studentRef = doc(db, 'students', student.id);
-        batch.set(studentRef, student);
-    });
-    
-    Object.entries(initialClasses).forEach(([className, studentNames]) => {
-        const classRef = doc(db, 'classes', className);
-        batch.set(classRef, { studentNames });
-    });
-
-    const collectionsToClear = ['assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
-    for (const coll of collectionsToClear) {
-        try {
-            const snapshot = await getDocs(collection(db, coll));
-            snapshot.forEach(doc => batch.delete(doc.ref));
-        } catch (error) {
-            console.error(`Could not clear collection ${coll}`, error);
-        }
-    }
-
-    await batch.commit();
-
-    toast({
-        title: "Données réinitialisées sur Firestore",
-        description: "La base de données a été réinitialisée avec les données initiales.",
-    });
-    await loadData();
-  }, [toast, loadData]);
+  }, [toast, tps, resetStudentData]);
 
   useEffect(() => {
     loadData();
@@ -468,3 +453,5 @@ export const useAssignments = () => {
   }
   return context;
 };
+
+    
