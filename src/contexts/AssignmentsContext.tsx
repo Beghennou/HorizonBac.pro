@@ -2,8 +2,7 @@
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { students as initialStudentsData } from './data-manager';
-import { classes as initialClasses, getTpById, allBlocs, TP } from '@/lib/data-manager';
+import { students as initialStudentsData, classes as initialClasses, getTpById, allBlocs, TP } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
