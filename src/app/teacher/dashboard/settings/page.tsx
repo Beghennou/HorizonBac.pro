@@ -560,7 +560,7 @@ export default function SettingsPage() {
                               <AlertDialogDescription>
                                   Cette action est irréversible. Toutes les données des élèves (progrès, évaluations) seront supprimées. Pour confirmer, veuillez taper <strong>Mongy</strong> dans le champ ci-dessous.
                               </AlertDialogDescription>
-                          </AlertDialogHeader>
+                          </Header>
                           <div className="space-y-2">
                             <Label htmlFor="reset-data-password">Mot de passe de confirmation</Label>
                             <Input 
@@ -590,3 +590,7 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
+
+    
