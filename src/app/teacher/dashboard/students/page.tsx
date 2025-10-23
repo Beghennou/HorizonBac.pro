@@ -16,7 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
 import {
   Tooltip,
   TooltipContent,
@@ -26,6 +26,7 @@ import {
 import Link from 'next/link';
 import { Student } from '@/lib/types';
 import { TpStatus } from '@/firebase/provider';
+import { collection, query, where } from 'firebase/firestore';
 
 
 const statusLabels: Record<TpStatus, string> = {
@@ -37,11 +38,14 @@ const statusLabels: Record<TpStatus, string> = {
 export default function StudentsPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { students, classes, assignedTps, assignTp, tps: allTpsFromContext } = useFirebase();
+    const { firestore, assignedTps, assignTp, tps: allTpsFromContext } = useFirebase();
     const { toast } = useToast();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const className = searchParams.get('class') || '';
+
+    const { data: students } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
+    const { data: classes } = useCollection(useMemoFirebase(() => firestore && className ? query(collection(firestore, 'classes'), where('__name__', '==', className)) : null, [firestore, className]));
 
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
     
@@ -51,7 +55,9 @@ export default function StudentsPage() {
     }, [className, level]);
     
     const studentsInClass = useMemo(() => {
-        const studentNames = classes[className] || [];
+        if (!students || !classes || classes.length === 0) return [];
+        const classData = classes.find(c => c.id === className);
+        const studentNames = classData?.studentNames || [];
         return students
             .filter(student => studentNames.includes(student.name))
             .sort((a, b) => a.name.localeCompare(b.name));

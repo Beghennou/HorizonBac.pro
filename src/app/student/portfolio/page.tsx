@@ -1,7 +1,7 @@
 
 
 'use client';
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
 import { allBlocs } from '@/lib/data-manager';
@@ -23,12 +23,12 @@ type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 function StudentPortfolio() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { firestore, evaluations, assignedTps, tps } = useFirebase();
+  const { firestore, assignedTps, tps } = useFirebase();
 
   // Load student-specific data
   const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
   const { data: studentFeedbacks } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName]));
-
+  const { data: studentEvaluationsData } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `evaluations`) : null, [firestore, studentName]));
 
   const feedbacksForStudent = useMemo(() => {
     const data: Record<number, any> = {};
@@ -45,6 +45,11 @@ function StudentPortfolio() {
     });
     return data;
   }, [studentStoredEvals]);
+  
+  const studentEvaluations = useMemo(() => {
+    const studentEvalDoc = studentEvaluationsData?.find(d => d.id === studentName);
+    return studentEvalDoc?.competences || {};
+  }, [studentEvaluationsData, studentName]);
 
 
   if (!studentName) {
@@ -59,7 +64,6 @@ function StudentPortfolio() {
     );
   }
 
-  const studentEvaluations = evaluations[studentName] || {};
   const studentCompletedTps = (assignedTps[studentName] || []).filter(tp => tp.status === 'terminé');
   const earnedBadges = getBadgesForStudent({ completedTps: studentCompletedTps.map(tp => tp.id) });
 

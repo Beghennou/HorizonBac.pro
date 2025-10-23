@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { TP, EtudePrelimQCM } from "@/lib/data-manager";
 import { useSearchParams } from "next/navigation";
 import { Mail, User, Users, Printer, Bot } from "lucide-react";
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+import { collection } from 'firebase/firestore';
+import { Student } from '@/lib/types';
 
 const TpAssistantDialog = dynamic(() => import('@/components/tp-assistant-dialog').then(mod => mod.TpAssistantDialog), {
     ssr: false,
@@ -28,7 +30,8 @@ const PrintButton = () => {
 }
 
 const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: string | null }) => {
-    const { students } = useFirebase();
+    const { firestore } = useFirebase();
+    const { data: students } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
     
     if (!tp || !studentName) {
         return (
@@ -39,7 +42,7 @@ const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: stri
         )
     };
 
-    const student = students.find(s => s.name === studentName);
+    const student = students?.find(s => s.name === studentName);
 
     const handleSendEmail = () => {
         if (!student || !student.email) {

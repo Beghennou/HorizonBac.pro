@@ -7,12 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
 import { Bot, SlidersHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Student } from '@/lib/types';
+import { collection } from 'firebase/firestore';
 
 function AdaptiveDifficultyForm() {
-  const { students } = useFirebase();
+  const { firestore } = useFirebase();
+  const { data: students } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const { toast } = useToast();
 
@@ -27,6 +30,7 @@ function AdaptiveDifficultyForm() {
         return;
     }
     
+    if (!students) return;
     const student = students.find(s => s.id === selectedStudentId);
     if (!student) return;
 
@@ -76,7 +80,7 @@ function AdaptiveDifficultyForm() {
                             <SelectValue placeholder="Sélectionnez un élève" />
                         </SelectTrigger>
                         <SelectContent>
-                            {students.map(student => (
+                            {students?.map(student => (
                                 <SelectItem key={student.id} value={student.id}>{student.name}</SelectItem>
                             ))}
                         </SelectContent>

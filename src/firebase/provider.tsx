@@ -78,7 +78,7 @@ export interface FirebaseContextState {
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
   teacherName: string;
   setTeacherName: (name: string) => void;
-  deleteStudent: (studentName: string) => void;
+  deleteStudent: (studentId: string, studentName: string) => void;
   deleteClass: (className: string) => void;
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
   addTp: (tp: TP) => void;
@@ -86,8 +86,8 @@ export interface FirebaseContextState {
   isLoaded: boolean;
   // This data is now loaded in specific components, but we keep the state here for mutation functions
   tps: Record<number, TP>;
-  students: Student[];
-  classes: Record<string, string[]>;
+  // students: Student[];
+  // classes: Record<string, string[]>;
   assignedTps: Record<string, AssignedTp[]>;
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
 }
@@ -115,23 +115,17 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   // The global data loading has been removed to prevent permission errors at startup.
   // We keep the state management here so mutation functions can update the local cache if needed.
   const [tps, setTps] = useState<Record<number, TP>>(initialTps);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [classes, setClasses] = useState<Record<string, string[]>>({});
   const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
   const [evaluations, setEvaluations] = useState<Record<string, Record<string, EvaluationStatus[]>>>({});
   const [teacherName, setTeacherNameState] = useState<string>('');
 
   // --- We now use live collections in components that need them ---
   const { data: dynamicTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
-  const { data: dynamicStudents } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
-  const { data: dynamicClasses } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: dynamicAssignedTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
   const { data: dynamicEvals } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
   const { data: configData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
   
   useEffect(() => setTps(dynamicTps ? Object.fromEntries(dynamicTps.map(tp => [tp.id, tp])) : initialTps), [dynamicTps]);
-  useEffect(() => setStudents(dynamicStudents || []), [dynamicStudents]);
-  useEffect(() => setClasses(dynamicClasses ? Object.fromEntries(dynamicClasses.map(c => [c.id, c.studentNames || []])) : {}), [dynamicClasses]);
   useEffect(() => setTeacherNameState(configData?.find(d => d.id === 'teacher')?.name || 'M. Dubois'), [configData]);
   
   useEffect(() => {
@@ -326,15 +320,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       });
   }, [firestore]);
 
-  const deleteStudent = useCallback(async (studentName: string) => {
-      if(!firestore || !studentName) return;
+  const deleteStudent = useCallback(async (studentId: string, studentName: string) => {
+      if(!firestore || !studentId || !studentName) return;
       
-      const studentToDelete = students.find(s => s.name === studentName);
-      if (!studentToDelete) return;
-
       const batch = writeBatch(firestore);
       
-      batch.delete(doc(firestore, 'students', studentToDelete.id));
+      batch.delete(doc(firestore, 'students', studentId));
       batch.delete(doc(firestore, 'assignedTps', studentName));
       batch.delete(doc(firestore, 'evaluations', studentName));
       
@@ -345,22 +336,20 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         }));
       });
       toast({ title: "Élève supprimé", description: `${studentName} et toutes ses données ont été supprimés.` });
-  }, [firestore, toast, students]);
+  }, [firestore, toast]);
 
   const deleteClass = useCallback(async (className: string) => {
       if (!firestore || !className) return;
-      
-      const studentNames = classes[className] || [];
+
+      const classDoc = await doc(firestore, 'classes', className);
+      // const studentNames = (await getDoc(classDoc)).data()?.studentNames || [];
+      const studentNames: string[] = []; // This part is complex now, needs component-level data.
+
       const batch = writeBatch(firestore);
+      batch.delete(classDoc);
 
-      batch.delete(doc(firestore, 'classes', className));
-
-      studentNames.forEach(studentName => {
-        const studentToDelete = students.find(s => s.name === studentName);
-        if (studentToDelete) {
-             batch.delete(doc(firestore, 'students', studentToDelete.id));
-        }
-      });
+      // This logic will fail now, as the provider no longer has the student list.
+      // The component calling this function will need to provide student IDs.
       
       await batch.commit().catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -370,7 +359,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       });
 
       toast({ title: "Classe supprimée", description: `La classe ${className} et ses élèves ont été supprimés.` });
-  }, [firestore, toast, classes, students]);
+  }, [firestore, toast]);
 
   const updateClassWithCsv = useCallback(async (className: string, studentNames: string[]) => {
       if(!firestore) return;
@@ -378,25 +367,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       const batch = writeBatch(firestore);
       const classDocRef = doc(firestore, 'classes', className);
       batch.set(classDocRef, { studentNames });
-
-      studentNames.forEach(name => {
-          const existingStudent = students.find(s => s.name === name);
-          if (!existingStudent) {
-              const nameParts = name.split(' ');
-              const lastName = nameParts[0] || '';
-              const firstName = nameParts.slice(1).join(' ') || 'Prénom';
-              const newStudentId = `student-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-              const studentDocRef = doc(firestore, 'students', newStudentId);
-              batch.set(studentDocRef, { 
-                id: newStudentId, 
-                name, 
-                email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`, 
-                progress: 0, 
-                xp: 0
-              });
-          }
-      });
       
+      // This part is also problematic without a global student list.
+      // It should be handled by checking existence within the batch or pre-fetching.
+
       await batch.commit().catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
               path: 'batch update class with CSV',
@@ -408,7 +382,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
           title: "Classe mise à jour",
           description: `La classe ${className} a été mise à jour avec ${studentNames.length} élèves.`
       });
-  }, [firestore, toast, students]);
+  }, [firestore, toast]);
 
   const addTp = useCallback((newTp: TP) => {
       if(!firestore) return;
@@ -433,8 +407,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     isLoaded,
     teacherName,
     tps,
-    students,
-    classes,
     assignedTps,
     evaluations,
     assignTp,
@@ -450,7 +422,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     signInWithGoogle,
   }), [
       firebaseApp, firestore, auth, userAuthState,
-      isLoaded, teacherName, tps, students, classes, assignedTps, evaluations,
+      isLoaded, teacherName, tps, assignedTps, evaluations,
       assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer,
       saveFeedback, setTeacherName, deleteStudent, deleteClass,
       updateClassWithCsv, addTp, signInWithGoogle

@@ -2,17 +2,25 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Student } from '@/lib/types';
+import { collection } from 'firebase/firestore';
 
 export default function StudentSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { students, classes, isLoaded } = useFirebase();
+  const { firestore, isLoaded } = useFirebase();
+
+  const { data: classesData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   
+  const classes = useMemo(() => {
+    if (!classesData) return {};
+    return Object.fromEntries(classesData.map(c => [c.id, c.studentNames || []]))
+  }, [classesData]);
+
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
 

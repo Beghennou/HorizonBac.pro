@@ -1,14 +1,14 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight } from "lucide-react";
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
 import { Student } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -23,6 +23,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import Papa from 'papaparse';
+import { collection, writeBatch, doc } from 'firebase/firestore';
 
 const CsvImportSection = ({ title, onImport }: { title: string, onImport: (studentNames: string[]) => void }) => {
     const { toast } = useToast();
@@ -75,7 +76,15 @@ const CsvImportSection = ({ title, onImport }: { title: string, onImport: (stude
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { students, classes, setStudents, setClasses, teacherName, setTeacherName, deleteStudent, deleteClass, updateClassWithCsv } = useFirebase();
+  const { firestore, teacherName, setTeacherName } = useFirebase();
+
+  const { data: students } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
+  const { data: classesData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
+
+  const classes = useMemo(() => {
+    if (!classesData) return {};
+    return Object.fromEntries(classesData.map(c => [c.id, c.studentNames || []]))
+  }, [classesData]);
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
@@ -101,8 +110,41 @@ export default function SettingsPage() {
     setLocalTeacherName(teacherName);
   }, [teacherName]);
   
-  const handleAddStudent = () => {
-    if (!firstName || !lastName || (!newClassName && !selectedClass)) {
+  const updateClassWithCsv = async (className: string, studentNames: string[]) => {
+      if(!firestore) return;
+      
+      const batch = writeBatch(firestore);
+      const classDocRef = doc(firestore, 'classes', className);
+      batch.set(classDocRef, { studentNames });
+
+      studentNames.forEach(name => {
+          const existingStudent = students?.find(s => s.name === name);
+          if (!existingStudent) {
+              const nameParts = name.split(' ');
+              const lastName = nameParts[0] || '';
+              const firstName = nameParts.slice(1).join(' ') || 'Prénom';
+              const newStudentId = `student-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+              const studentDocRef = doc(firestore, 'students', newStudentId);
+              batch.set(studentDocRef, { 
+                id: newStudentId, 
+                name, 
+                email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`, 
+                progress: 0, 
+                xp: 0
+              });
+          }
+      });
+      
+      await batch.commit();
+
+      toast({
+          title: "Classe mise à jour",
+          description: `La classe ${className} a été mise à jour avec ${studentNames.length} élèves.`
+      });
+  };
+
+  const handleAddStudent = async () => {
+    if (!firstName || !lastName || (!newClassName && !selectedClass) || !firestore) {
       toast({
         variant: 'destructive',
         title: "Champs manquants",
@@ -114,7 +156,7 @@ export default function SettingsPage() {
     const finalClassName = newClassName || selectedClass;
     const studentName = `${lastName.toUpperCase()} ${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}`;
     
-    if (students.some(s => s.name === studentName)) {
+    if (students?.some(s => s.name === studentName)) {
       toast({
         variant: 'destructive',
         title: "Élève déjà existant",
@@ -123,16 +165,24 @@ export default function SettingsPage() {
       return;
     }
 
+    const newStudentId = `student-${Date.now()}`;
     const newStudent: Student = {
-        id: `student-${Date.now()}`,
+        id: newStudentId,
         name: studentName,
         email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@school.com`,
         progress: 0,
         xp: 0
     };
 
-    updateClassWithCsv(finalClassName, [...(classes[finalClassName] || []), studentName]);
+    const batch = writeBatch(firestore);
+    const studentDocRef = doc(firestore, 'students', newStudentId);
+    batch.set(studentDocRef, newStudent);
 
+    const classDocRef = doc(firestore, 'classes', finalClassName);
+    const updatedStudentNames = [...(classes[finalClassName] || []), studentName];
+    batch.set(classDocRef, { studentNames: updatedStudentNames }, { merge: true });
+
+    await batch.commit();
 
     toast({
       title: "Élève ajouté",
@@ -155,8 +205,6 @@ export default function SettingsPage() {
 
   const handleReset = () => {
     if (resetPassword === 'Mongy') {
-        // This function does not exist in the context, so it will cause an error
-        // resetStudentData();
         console.error("resetStudentData function is not available in this component's context.");
         toast({
             variant: 'destructive',
@@ -173,17 +221,39 @@ export default function SettingsPage() {
     }
   };
   
-  const handleDeleteStudent = () => {
-      if (!studentToDelete) return;
-      deleteStudent(studentToDelete);
+  const handleDeleteStudent = async () => {
+      if (!studentToDelete || !firestore) return;
+      const studentData = students?.find(s => s.name === studentToDelete);
+      if (!studentData) return;
+      
+      const batch = writeBatch(firestore);
+      batch.delete(doc(firestore, 'students', studentData.id));
+      batch.delete(doc(firestore, 'assignedTps', studentToDelete));
+      batch.delete(doc(firestore, 'evaluations', studentToDelete));
+      await batch.commit();
+
       setStudentToDelete('');
       setDeleteStudentClass('');
+      toast({ title: "Élève supprimé", description: `${studentToDelete} et toutes ses données ont été supprimés.` });
   }
   
-  const handleDeleteClass = () => {
-      if (!classToDelete) return;
-      deleteClass(classToDelete);
+  const handleDeleteClass = async () => {
+      if (!classToDelete || !firestore) return;
+
+      const batch = writeBatch(firestore);
+      batch.delete(doc(firestore, 'classes', classToDelete));
+
+      const studentNames = classes[classToDelete] || [];
+      studentNames.forEach(studentName => {
+          const studentData = students?.find(s => s.name === studentName);
+          if (studentData) {
+              batch.delete(doc(firestore, 'students', studentData.id));
+          }
+      });
+
+      await batch.commit();
       setClassToDelete('');
+      toast({ title: "Classe supprimée", description: `La classe ${classToDelete} et ses élèves ont été supprimés.` });
   }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {

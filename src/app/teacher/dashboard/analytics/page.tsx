@@ -1,12 +1,15 @@
 
 'use client';
 import { useSearchParams } from 'next/navigation';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
 import { allBlocs, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { BarChart3, Users, Target, BookOpen } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { collection } from 'firebase/firestore';
+import { Student } from '@/lib/types';
+import React from 'react';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
@@ -20,13 +23,20 @@ const MAX_SCORE = 3;
 
 export default function AnalyticsPage() {
     const searchParams = useSearchParams();
-    const { students, classes, evaluations } = useFirebase();
+    const { firestore, evaluations } = useFirebase();
+
+    const { data: students } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
+    const { data: classes } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
     
     const level = (searchParams.get('level') as Niveau) || 'seconde';
-    const currentClassName = searchParams.get('class') || Object.keys(classes).find(c => c.startsWith('2')) || '2MV1';
+    const currentClassName = searchParams.get('class') || (classes?.find(c => c.id.startsWith('2'))?.id || '');
 
-    const studentNamesInClass = classes[currentClassName] || [];
-    const studentsInClass = students.filter(s => studentNamesInClass.includes(s.name));
+    const studentsInClass = React.useMemo(() => {
+        if (!students || !classes) return [];
+        const classData = classes.find(c => c.id === currentClassName);
+        const studentNames = classData?.studentNames || [];
+        return students.filter(s => studentNames.includes(s.name));
+    }, [students, classes, currentClassName]);
 
     // 1. Average Class Progression
     const totalProgress = studentsInClass.reduce((acc, student) => acc + (student.progress || 0), 0);
@@ -38,6 +48,8 @@ export default function AnalyticsPage() {
     Object.values(allBlocs).forEach(bloc => {
          Object.assign(allCompetencesForLevel, bloc.items);
     });
+
+    const studentNamesInClass = studentsInClass.map(s => s.name);
 
     studentNamesInClass.forEach(studentName => {
         const studentEvals = evaluations[studentName] || {};
@@ -64,16 +76,20 @@ export default function AnalyticsPage() {
     const bottom5Competences = competenceMasteryData.slice(0, 5);
     
     // 3. Class Comparison
-    const classesForLevel = Object.keys(classes).filter(cName => {
-        if (level === 'seconde') return cName.startsWith('2');
-        if (level === 'premiere') return cName.startsWith('1');
-        if (level === 'terminale') return cName.startsWith('T');
+    const classesForLevel = React.useMemo(() => (classes || []).filter(c => {
+        if (level === 'seconde') return c.id.startsWith('2');
+        if (level === 'premiere') return c.id.startsWith('1');
+        if (level === 'terminale') return c.id.startsWith('T');
         return false;
-    }).sort();
+    }).map(c => c.id).sort(), [classes, level]);
+
 
     const classComparisonData = classesForLevel.map(className => {
-        const studentNames = classes[className] || [];
+        if (!students || !classes) return { name: className, "Progression Moyenne": 0 };
+        const classData = classes.find(c => c.id === className);
+        const studentNames = classData?.studentNames || [];
         const classStudents = students.filter(s => studentNames.includes(s.name));
+
         if (classStudents.length === 0) return { name: className, "Progression Moyenne": 0 };
         
         const total = classStudents.reduce((acc, s) => acc + (s.progress || 0), 0);
