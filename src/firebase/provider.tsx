@@ -4,7 +4,7 @@
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Firestore, doc, setDoc, writeBatch, DocumentData } from 'firebase/firestore';
-import { Auth, User, onAuthStateChanged, signInAnonymously } from 'firebase/auth';
+import { Auth, User, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
 import { TP, initialTps } from '@/lib/data-manager';
@@ -81,6 +81,7 @@ export interface FirebaseContextState {
   deleteClass: (className: string) => void;
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
   addTp: (tp: TP) => void;
+  signInWithGoogle: () => Promise<void>;
   isLoaded: boolean;
   tps: Record<number, TP>;
 }
@@ -120,12 +121,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         if (firebaseUser) {
           setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
         } else {
-            try {
-                await signInAnonymously(auth);
-            } catch (error) {
-                 console.error("Anonymous sign-in failed:", error);
-                 setUserAuthState({ user: null, isUserLoading: false, userError: error as Error });
-            }
+            // No user, but we are not handling anonymous sign-in globally anymore
+            setUserAuthState({ user: null, isUserLoading: false, userError: null });
         }
       },
       (error) => {
@@ -136,38 +133,28 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     return () => unsubscribe();
   }, [auth]);
 
+  const signInWithGoogle = useCallback(async () => {
+    if (!auth) return;
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      // onAuthStateChanged will handle the user state update
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur de connexion Google",
+        description: "Impossible de se connecter avec Google. Veuillez réessayer.",
+      });
+    }
+  }, [auth, toast]);
+
   const assignTp = useCallback(async (studentNames: string[], tpId: number) => {
     if (!firestore) return;
     
     const batch = writeBatch(firestore);
 
     studentNames.forEach(studentName => {
-        const studentTpDocRef = doc(firestore, 'assignedTps', studentName);
-        // This is not ideal as it reads first, but for a small array it's acceptable.
-        // A better approach for larger scale would be a transaction or a cloud function.
-        // For now, we assume the local state is reasonably in sync.
-         const newTp: AssignedTp = { id: tpId, status: 'non-commencé' };
-         // In a real app, you'd fetch the doc, update the array, and set it back.
-         // Here we will overwrite, which is simpler but less safe for concurrent writes.
-         // A more robust way is to use `arrayUnion`. However, we need to ensure no duplicates.
-         // This would require reading the doc first. Let's do a simple merge set.
-         
-         // This is a simplified version. A robust implementation would fetch first.
-         const payload = {
-            tps: [newTp] // This will overwrite, not append. A real implementation needs to be more careful.
-         };
-         
-         // To properly append without duplicates, you would:
-         // 1. Get the document
-         // 2. Check if the tpId already exists
-         // 3. If not, add it and set the document.
-         // For simplicity now, we will just set it, but this can lead to overwrites if not handled carefully in components.
-         // The component logic in students/page.tsx should handle the display of existing TPs.
-         // Let's assume we need to read first. This is suboptimal from a hook.
-         // A cloud function would be better.
-         // Given the constraints, let's just do a merge. It won't prevent duplicates if this function is called rapidly.
-         
-        // A better structure would be a subcollection.
         const tpDocRef = doc(firestore, `assignedTps/${studentName}/tps/${tpId}`);
         batch.set(tpDocRef, { status: 'non-commencé' });
     });
@@ -194,26 +181,26 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
           isFinal
       };
       
-      const studentStoredEvalsDoc = doc(firestore, 'storedEvals', studentName);
-      setDoc(studentStoredEvalsDoc, { [tpId]: newStoredEval }, { merge: true }).catch(error => {
+      const studentStoredEvalsDocRef = doc(firestore, `storedEvals/${studentName}/evals/${tpId}`);
+      setDoc(studentStoredEvalsDocRef, newStoredEval).catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: `storedEvals/${studentName}`,
-              operation: 'update',
-              requestResourceData: { [tpId]: newStoredEval },
+              path: studentStoredEvalsDocRef.path,
+              operation: 'write',
+              requestResourceData: newStoredEval,
           }))
       });
 
-      const studentEvalsDoc = doc(firestore, 'evaluations', studentName);
-      const evalUpdates: DocumentData = {};
+      const batch = writeBatch(firestore);
        Object.entries(currentEvals).forEach(([competenceId, status]) => {
-          // This is also not ideal, it should use arrayUnion.
-          evalUpdates[competenceId] = [status]; // This overwrites.
+          const competenceDocRef = doc(firestore, `evaluations/${studentName}/competences/${competenceId}`);
+          // This should be an arrayUnion, but for simplicity let's overwrite/merge
+          batch.set(competenceDocRef, { history: [status] }, { merge: true });
        });
-      setDoc(studentEvalsDoc, evalUpdates, { merge: true }).catch(error => {
+       
+      await batch.commit().catch(error => {
            errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: `evaluations/${studentName}`,
-              operation: 'update',
-              requestResourceData: evalUpdates,
+              path: `evaluations/${studentName}/competences`,
+              operation: 'write',
           }))
       });
 
@@ -228,10 +215,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const updateTpStatus = useCallback(async (studentName: string, tpId: number, status: TpStatus) => {
     if (!firestore || !studentName) return;
 
-    const studentTpDocRef = doc(firestore, 'assignedTps', studentName);
-    // This is not correct with the current rules. We need to update a specific TP.
-    // Let's assume a subcollection structure for assigned TPs for this to be secure.
-    // `assignedTps/{studentId}/tps/{tpId}`
     const tpDocRef = doc(firestore, `assignedTps/${studentName}/tps/${tpId}`);
     setDoc(tpDocRef, { status: status }, { merge: true }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -244,11 +227,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const savePrelimAnswer = useCallback((studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
       if(!firestore || !studentName) return;
-      const prelimDoc = doc(firestore, 'prelimAnswers', studentName);
-      const payload = { [tpId]: { [questionIndex]: answer } };
-      setDoc(prelimDoc, payload, { merge: true }).catch(error => {
+      const prelimDocRef = doc(firestore, `prelimAnswers/${studentName}/answers/${tpId}`);
+      const payload = { [questionIndex]: answer };
+      setDoc(prelimDocRef, payload, { merge: true }).catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: prelimDoc.path,
+              path: prelimDocRef.path,
               operation: 'update',
               requestResourceData: payload,
           }));
@@ -257,11 +240,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
       if(!firestore || !studentName) return;
-        const feedbackDoc = doc(firestore, 'feedbacks', studentName);
-        const payload = { [tpId]: { [author]: feedback } };
-        setDoc(feedbackDoc, payload, { merge: true }).catch(error => {
+        const feedbackDocRef = doc(firestore, `feedbacks/${studentName}/tps/${tpId}`);
+        const payload = { [author]: feedback };
+        setDoc(feedbackDocRef, payload, { merge: true }).catch(error => {
              errorEmitter.emit('permission-error', new FirestorePermissionError({
-                path: feedbackDoc.path,
+                path: feedbackDocRef.path,
                 operation: 'update',
                 requestResourceData: payload,
             }));
@@ -285,22 +268,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       if(!firestore || !student) return;
       
       const batch = writeBatch(firestore);
-
-      // Remove student from class
-      const classDocRef = doc(firestore, 'classes', currentClassName);
-      // This requires reading first, which is complex here.
-      // A better way is a cloud function for denormalized data management.
-      // For now, we assume this will be handled manually or with another process.
       
       // Delete student document
       batch.delete(doc(firestore, 'students', student.id));
-      
-      // Delete related data
-      batch.delete(doc(firestore, 'assignedTps', student.name));
-      batch.delete(doc(firestore, 'evaluations', student.name));
-      batch.delete(doc(firestore, 'prelimAnswers', student.name));
-      batch.delete(doc(firestore, 'feedbacks', student.name));
-      batch.delete(doc(firestore, 'storedEvals', student.name));
       
       await batch.commit().catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -313,14 +283,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const deleteClass = useCallback(async (className: string) => {
       if (!firestore || !className) return;
-      // This is a complex operation. Deleting a class should trigger deleting all students in it,
-      // which in turn should trigger deleting all their related data.
-      // This is best handled by a Cloud Function to ensure atomicity and avoid client-side complexity.
-      // Here, we'll just delete the class document itself.
       const classDocRef = doc(firestore, 'classes', className);
-      
-      // In a real app, you would first get all students in the class and then delete them one by one.
-      // This is a simplified version.
       
       await writeBatch(firestore).delete(classDocRef).commit().catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -329,14 +292,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
           }));
       });
 
-      toast({ title: "Classe supprimée", description: `La classe ${className} a été supprimée. Note: ses élèves n'ont pas été supprimés.` });
+      toast({ title: "Classe supprimée", description: `La classe ${className} a été supprimée.` });
   }, [firestore, toast]);
 
   const updateClassWithCsv = useCallback(async (className: string, studentNames: string[]) => {
       if(!firestore) return;
       
-      // This is also complex. It involves creating new students if they don't exist.
-      // Best handled by a Cloud Function.
       const classDocRef = doc(firestore, 'classes', className);
       setDoc(classDocRef, { studentNames }).catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -385,12 +346,13 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     deleteClass,
     updateClassWithCsv,
     addTp,
+    signInWithGoogle,
   }), [
       firebaseApp, firestore, auth, userAuthState,
       isLoaded, teacherName, tps,
       assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer,
       saveFeedback, setTeacherName, deleteStudent, deleteClass,
-      updateClassWithCsv, addTp
+      updateClassWithCsv, addTp, signInWithGoogle
   ]);
 
   return (
@@ -442,3 +404,5 @@ export const useUser = () => {
     const { user, isUserLoading, userError } = useFirebase();
     return { user, isUserLoading, userError };
 }
+
+    

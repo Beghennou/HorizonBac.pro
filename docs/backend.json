@@ -191,7 +191,8 @@
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "google.com"
     ]
   },
   "firestore": {
@@ -316,4 +317,4 @@
     "reasoning": "The Firestore structure is designed to ensure authorization independence, clarity, and scalability for the Formula Skills Garage application. We leverage path-based ownership for user-related data and denormalization where necessary to avoid `get()` calls in security rules. Each collection is designed with a homogeneous security posture to simplify rule definitions and ensure QAPs.\n\nSpecifically, teacherId fields are denormalized into the Student and TrainingProgram collections to enforce a teacher can only access or modify Students and TrainingPrograms they are responsible for.\n\nThe following collections and subcollections have been created:\n\n*   `/teachers/{teacherId}`: Stores teacher profiles, with `teacherId` matching the Firebase `auth.uid`.\n*   `/teachers/{teacherId}/students/{studentId}`: Stores student profiles, with explicit `teacherId` fields. Allows teacher to list all students that belong to the teacher. This collection leverages Path-Based ownership.\n*   `/teachers/{teacherId}/trainingPrograms/{trainingProgramId}`: Stores training programs created by teachers, with explicit `teacherId` fields. Allows teachers to list all training programs that belong to the teacher. This collection leverages Path-Based ownership.\n*   `/teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}`: Stores simulation data associated with training programs, with an explicit `trainingProgramId`. This collection leverages Path-Based ownership.\n*   `/students/{studentId}/studentProgress/{studentProgressId}`: Stores student progress data, with explicit `studentId`, `trainingProgramId`, and `simulationId` fields. This collection leverages Path-Based ownership.\n*   `/assignedTps/{studentId}`: Stores the list of TPs assigned to a student."
   }
 }
-  
+    
