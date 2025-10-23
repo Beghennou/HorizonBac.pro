@@ -82,7 +82,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const resetStudentData = useCallback(async () => {
     const batch = writeBatch(db);
 
-    const collectionsToDelete = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals'];
+    const collectionsToDelete = ['students', 'classes', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'tps', 'settings'];
     for (const coll of collectionsToDelete) {
         try {
             const snapshot = await getDocs(collection(db, coll));
@@ -94,14 +94,12 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         }
     }
     
-    // Commit deletions first
     try {
         await batch.commit();
     } catch(e) {
         console.error("Error committing deletions", e);
     }
 
-    // Re-create initial data in a new batch
     const writeBatch2 = writeBatch(db);
     initialStudents.forEach(student => {
         const studentRef = doc(db, 'students', student.id);
@@ -112,6 +110,15 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         const classRef = doc(db, 'classes', className);
         writeBatch2.set(classRef, { studentNames });
     });
+    
+    const localTps = getTpById(-1, true) as Record<number, TP>;
+    Object.values(localTps).forEach(tp => {
+        const tpRef = doc(db, 'tps', tp.id.toString());
+        writeBatch2.set(tpRef, tp);
+    });
+    
+    writeBatch2.set(doc(db, 'settings', 'teacher'), { name: 'M. Dubois' });
+
 
     try {
         await writeBatch2.commit();
@@ -203,7 +210,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }, [toast, resetStudentData]);
 
   useEffect(() => {
-    // Force a check on initial load. If DB is empty, it will reset.
     loadData(true); 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
