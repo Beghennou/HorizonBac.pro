@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
+import { getTpsByNiveau, Niveau, getTpById } from '@/lib/data-manager';
 import { ChevronDown, Users } from 'lucide-react';
 import {
   DropdownMenu,
