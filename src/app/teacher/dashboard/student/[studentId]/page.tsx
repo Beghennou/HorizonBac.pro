@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
@@ -15,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { collection, query, where, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, doc, getDoc, setDoc } from 'firebase/firestore';
 
 const AiAnalysisHub = dynamic(() => import('@/components/ai-analysis-hub').then(mod => mod.AiAnalysisHub), {
     ssr: false,
@@ -326,15 +327,22 @@ export default function StudentDetailPage() {
         router.push(`${newPath}?${newSearchParams.toString()}`);
     };
 
-    const handleSave = (prelimNote?: string, tpNote?: string, feedback?: string, isFinal?: boolean) => {
-        if (!studentName || !selectedTpId) return;
+    const handleSave = async (prelimNote?: string, tpNote?: string, feedback?: string, isFinal?: boolean) => {
+        if (!studentName || !selectedTpId || !firestore) return;
 
-        // The saveFeedback function is no longer needed here as it's part of saveEvaluation's logic
         saveEvaluation(studentName, selectedTpId, currentEvaluations, prelimNote, tpNote, isFinal);
 
         if (feedback) {
-             const feedbackDocRef = doc(firestore!, `students/${studentName}/feedbacks`, selectedTpId.toString());
-             setDoc(feedbackDocRef, { student: feedbacksForStudent[selectedTpId]?.student, teacher: feedback }, { merge: true });
+             const feedbackDocRef = doc(firestore, `students/${studentName}/feedbacks`, selectedTpId.toString());
+             try {
+                await setDoc(feedbackDocRef, { tps: { ...feedbacksForStudent[selectedTpId], teacher: feedback } }, { merge: true });
+             } catch(error) {
+                errorEmitter.emit('permission-error', new FirestorePermissionError({
+                    path: feedbackDocRef.path,
+                    operation: 'update',
+                    requestResourceData: { tps: { ...feedbacksForStudent[selectedTpId], teacher: feedback } },
+                }));
+             }
         }
     };
     

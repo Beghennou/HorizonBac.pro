@@ -90,7 +90,6 @@ export interface FirebaseContextState {
   classes: Record<string, string[]>;
   assignedTps: Record<string, AssignedTp[]>;
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
-  storedEvals: Record<string, Record<string, StoredEvaluation>>;
   prelimAnswers: Record<string, Record<number, Record<number, PrelimAnswer>>>;
   feedbacks: Record<string, Record<number, Feedback>>;
 }
@@ -114,19 +113,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: null,
   });
 
-  // --- DATA LOADING is now handled by individual components ---
-  // --- We still need to fetch some data for the provider's mutation functions ---
   const { data: tpsData, isLoading: isLoadingTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
   const { data: studentsData, isLoading: isLoadingStudents } = useCollection<Student>(useMemoFirebase(() => firestore ? collection(firestore, 'students') : null, [firestore]));
   const { data: classesData, isLoading: isLoadingClasses } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: assignedTpsData, isLoading: isLoadingAssignedTps } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
   const { data: teacherNameData, isLoading: isLoadingConfig } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
   
-  // This is no longer a global collection. It will be loaded per-student.
-  // We keep the state here to be mutated by saveEvaluation.
-  const [storedEvals, setStoredEvals] = useState<Record<string, Record<string, StoredEvaluation>>>({});
-
-
   const { data: evalsData, isLoading: isLoadingEvals } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
   const { data: prelimAnswersData, isLoading: isLoadingPrelimAnswers } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'prelimAnswers') : null, [firestore]));
   const { data: feedbacksData, isLoading: isLoadingFeedbacks } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'feedbacks') : null, [firestore]));
@@ -263,7 +255,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
           isFinal
       };
       
-      // Changed path to be a subcollection of student
       const studentStoredEvalsDocRef = doc(firestore, `students/${studentName}/storedEvals`, tpId.toString());
       setDoc(studentStoredEvalsDocRef, newStoredEval).catch(error => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -319,7 +310,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const savePrelimAnswer = useCallback((studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
       if(!firestore || !studentName) return;
-      // Changed path
       const prelimDocRef = doc(firestore, `students/${studentName}/prelimAnswers`, tpId.toString());
       const updatedAnswers = { ...(prelimAnswers[studentName]?.[tpId] || {}), [questionIndex]: answer };
 
@@ -334,7 +324,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
       if(!firestore || !studentName) return;
-        // Changed path
         const feedbackDocRef = doc(firestore, `students/${studentName}/feedbacks`, tpId.toString());
         const updatedFeedbacks = { ...(feedbacks[studentName]?.[tpId] || {}), [author]: feedback };
 
@@ -371,12 +360,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       batch.delete(doc(firestore, 'students', studentToDelete.id));
       batch.delete(doc(firestore, 'assignedTps', studentName));
       batch.delete(doc(firestore, 'evaluations', studentName));
-      
-      // These collections are now subcollections and would need to be deleted differently (not easily in a batch)
-      // For now, we leave them, they will become orphaned but won't be accessed.
-      // batch.delete(doc(firestore, 'storedEvals', studentName));
-      // batch.delete(doc(firestore, 'prelimAnswers', studentName));
-      // batch.delete(doc(firestore, 'feedbacks', studentName));
       
       await batch.commit().catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -463,7 +446,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       });
   }, [firestore]);
 
-  const contextValue = useMemo((): FirebaseContextState => ({
+  const contextValue = useMemo((): Omit<FirebaseContextState, 'storedEvals'> => ({
     firebaseApp,
     firestore,
     auth,
@@ -477,7 +460,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     classes,
     assignedTps,
     evaluations,
-    storedEvals,
     prelimAnswers,
     feedbacks,
     assignTp,
@@ -493,14 +475,14 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     signInWithGoogle,
   }), [
       firebaseApp, firestore, auth, userAuthState,
-      isLoaded, teacherName, tps, students, classes, assignedTps, evaluations, storedEvals, prelimAnswers, feedbacks,
+      isLoaded, teacherName, tps, students, classes, assignedTps, evaluations, prelimAnswers, feedbacks,
       assignTp, saveEvaluation, updateTpStatus, savePrelimAnswer,
       saveFeedback, setTeacherName, deleteStudent, deleteClass,
       updateClassWithCsv, addTp, signInWithGoogle
   ]);
 
   return (
-    <FirebaseContext.Provider value={contextValue}>
+    <FirebaseContext.Provider value={contextValue as FirebaseContextState}>
       <FirebaseErrorListener />
       {children}
     </FirebaseContext.Provider>
