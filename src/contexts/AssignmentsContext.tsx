@@ -2,11 +2,11 @@
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
-import { db } from '@/firebase';
-import { collection, doc, getDoc, getDocs, setDoc, writeBatch, deleteDoc } from 'firebase/firestore';
+import { Firestore, collection, doc, getDoc, getDocs, setDoc, writeBatch, deleteDoc } from 'firebase/firestore';
 import { getTpById, TP, initialStudents, initialClasses } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { useFirestore } from '@/firebase';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 export type TpStatus = 'non-commencé' | 'en-cours' | 'terminé';
@@ -67,6 +67,7 @@ type AssignmentsContextType = {
 const AssignmentsContext = createContext<AssignmentsContextType | undefined>(undefined);
 
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
+  const db = useFirestore();
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Record<string, string[]>>({});
   const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
@@ -141,9 +142,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         });
     }
 
-  }, [toast]);
+  }, [db, toast]);
   
   const loadData = useCallback(async () => {
+    if (!db) return;
     setIsLoaded(false);
     try {
         const studentsSnapshot = await getDocs(collection(db, 'students'));
@@ -213,12 +215,13 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     } finally {
         setIsLoaded(true);
     }
-  }, [toast, resetStudentData]);
+  }, [db, toast, resetStudentData]);
 
   useEffect(() => {
-    loadData(); 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (db) {
+        loadData();
+    }
+  }, [db, loadData]);
 
 
   const addTp = async (tp: TP) => {
@@ -339,7 +342,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     };
 
     calculateProgress();
-  }, [evaluations, isLoaded, students]);
+  }, [db, evaluations, isLoaded, students]);
 
   const savePrelimAnswer = async (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
     const newPrelimAnswers = { ...prelimAnswers };
@@ -490,3 +493,5 @@ export const useAssignments = () => {
   }
   return context;
 };
+
+    
