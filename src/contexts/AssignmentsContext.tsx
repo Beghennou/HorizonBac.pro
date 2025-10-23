@@ -6,7 +6,7 @@ import { Firestore, collection, doc, getDocs, writeBatch, setDoc, deleteDoc, get
 import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth, useFirestore } from '@/firebase/provider';
+import { useFirestore } from '@/firebase/provider';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
 
@@ -72,7 +72,6 @@ const collectionsToManage = ['students', 'classes', 'assignedTps', 'evaluations'
 
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const db = useFirestore();
-  const { user, isUserLoading } = useAuth();
   const { toast } = useToast();
 
   const [students, setStudents] = useState<Student[]>([]);
@@ -133,7 +132,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }, [toast]);
 
   const loadAllData = useCallback(async (db: Firestore) => {
-    if (!db) return;
+    if (!db || isLoaded) return; // Prevent re-loading
     setIsLoaded(false);
 
     try {
@@ -141,9 +140,9 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       if (studentsSnapshot.empty) {
         const success = await resetAndSeedDatabase(db);
         if (success) {
-           loadAllData(db);
+           await loadAllData(db); // Recursive call after seeding
         } else {
-            setIsLoaded(true);
+            setIsLoaded(true); // Stop if seeding fails
         }
         return;
       }
@@ -188,14 +187,13 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsLoaded(true);
     }
-  }, [toast, resetAndSeedDatabase]);
+  }, [toast, resetAndSeedDatabase, isLoaded]);
 
   useEffect(() => {
-    // Only attempt to load data once the database is available AND the initial auth check is complete.
-    if (db && !isUserLoading) {
+    if (db) {
       loadAllData(db);
     }
-  }, [db, isUserLoading, loadAllData]);
+  }, [db, loadAllData]);
 
   const addTp = async (tp: TP) => {
     if(!db) return;
