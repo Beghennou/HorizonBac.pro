@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { RacingHelmet } from '@/components/icons';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { collection } from 'firebase/firestore';
 

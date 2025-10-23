@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau } from "@/lib/data-manager";
 import { useSearchParams, useRouter } from "next/navigation";
 import { User, Users, Printer, Bot } from "lucide-react";
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase';
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";

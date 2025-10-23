@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { TP, EtudePrelimQCM } from "@/lib/data-manager";
 import { useSearchParams } from "next/navigation";
 import { Mail, User, Users, Printer, Bot } from "lucide-react";
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { collection } from 'firebase/firestore';
