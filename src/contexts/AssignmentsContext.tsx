@@ -92,9 +92,10 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
             console.error(`Could not clear collection ${coll}`, error);
         }
     }
+    // We commit the delete batch first
     await batch.commit();
 
-    // Re-create initial data
+    // Re-create initial data in a new batch
     const writeBatch2 = writeBatch(db);
     initialStudents.forEach(student => {
         const studentRef = doc(db, 'students', student.id);
@@ -110,7 +111,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     
     toast({
         title: "Données réinitialisées",
-        description: "La base de données a été réinitialisée avec les données initiales.",
+        description: "La base de données a été synchronisée avec les données initiales de l'application.",
     });
 
   }, [toast]);
@@ -123,6 +124,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
 
         if (forceReset || studentsSnapshot.empty || classesSnapshot.empty) {
             await resetStudentData();
+            // We need to re-fetch after reset
             studentsSnapshot = await getDocs(collection(db, 'students'));
             classesSnapshot = await getDocs(collection(db, 'classes'));
         }
@@ -187,7 +189,8 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   }, [toast, resetStudentData]);
 
   useEffect(() => {
-    loadData(true); // Force reset on initial load
+    // We force a check on initial load. If DB is empty, it will reset.
+    loadData(true); 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
