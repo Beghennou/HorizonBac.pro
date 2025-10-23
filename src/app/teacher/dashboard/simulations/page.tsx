@@ -1,18 +1,33 @@
+
+'use client';
+import { useState } from 'react';
 import { adaptSimulationDifficulty } from "@/ai/flows/adaptive-simulation-difficulty";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { students } from "@/lib/mock-data";
+import { useAssignments } from "@/contexts/AssignmentsContext";
 import { Bot, SlidersHorizontal } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-async function AdaptiveDifficultyForm() {
+function AdaptiveDifficultyForm() {
+  const { students } = useAssignments();
+  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const { toast } = useToast();
 
-  async function handleSubmit(formData: FormData) {
-    'use server';
-    const studentId = formData.get('studentId') as string;
-    const student = students.find(s => s.id === studentId);
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedStudentId) {
+        toast({
+            variant: "destructive",
+            title: "Aucun élève sélectionné",
+            description: "Veuillez sélectionner un élève avant de lancer l'analyse.",
+        });
+        return;
+    }
+    
+    const student = students.find(s => s.id === selectedStudentId);
     if (!student) return;
 
     // Dans une vraie application, ce seraient des données de simulation dynamiques
@@ -24,11 +39,20 @@ async function AdaptiveDifficultyForm() {
     };
     
     try {
-        const result = await adaptSimulationDifficulty({ studentId, performanceData });
+        const result = await adaptSimulationDifficulty({ studentId: student.id, performanceData });
         // Ici, vous mettriez à jour les paramètres de simulation de l'élève dans la base de données
         console.log('Ajustements recommandés par l\'IA:', result);
+        toast({
+            title: "Analyse IA terminée",
+            description: `Nouveau niveau pour ${student.name}: ${result.newDifficultyLevel}. Suggestions: ${result.suggestedAdjustments}`,
+        });
     } catch (error) {
         console.error("Erreur lors de l'adaptation de la difficulté de la simulation:", error);
+         toast({
+            variant: "destructive",
+            title: "Erreur de l'IA",
+            description: "L'adaptation de la difficulté a échoué.",
+        });
     }
   }
 
@@ -44,10 +68,10 @@ async function AdaptiveDifficultyForm() {
             </CardDescription>
         </CardHeader>
         <CardContent>
-            <form action={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="student">Élève</Label>
-                    <Select name="studentId">
+                    <Select name="studentId" onValueChange={setSelectedStudentId} value={selectedStudentId}>
                         <SelectTrigger id="student">
                             <SelectValue placeholder="Sélectionnez un élève" />
                         </SelectTrigger>

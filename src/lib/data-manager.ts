@@ -1,12 +1,12 @@
 
 
-
 import { tpSeconde, TP as TPSeconde } from './tp-seconde';
 import { tpPremiere, TP as TPPremiere } from './tp-premiere';
 import { tpTerminale, TP as TPTerminale } from './tp-terminale';
 import type { EtudePrelim as EtudePrelimSeconde } from './tp-seconde';
 import type { EtudePrelim as EtudePrelimPremiere } from './tp-premiere';
 import type { EtudePrelimQCM as EtudePrelimQCMTerminale, EtudePrelimText as EtudePrelimTextTerminale } from './tp-terminale';
+import { Student } from './types';
 
 
 export type EtudePrelimQCM = EtudePrelimQCMTerminale;
@@ -128,3 +128,19 @@ export const allBlocs: Record<string, CompetenceBloc> = {
     ...competencesParNiveau.premiere,
     ...competencesParNiveau.terminale,
 };
+
+const allStudentNames = [...new Set(Object.values(classes).flat())];
+
+export const students: Student[] = allStudentNames.map((name, index) => {
+    const nameParts = name.split(' ');
+    const lastName = nameParts[0] || '';
+    const firstName = nameParts.slice(1).join(' ') || `Prénom${index + 1}`;
+    
+    return {
+        id: `student-${index + 1}`,
+        name: name,
+        email: `${firstName.toLowerCase().replace(' ','.')}.${lastName.toLowerCase()}@school.com`,
+        progress: Math.floor(Math.random() * 100),
+        xp: Math.floor(Math.random() * 500)
+    };
+});

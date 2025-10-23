@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { students as initialStudents } from '@/lib/mock-data';
+import { students as initialStudentsData } from './data-manager';
 import { classes as initialClasses, getTpById, allBlocs, TP } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -82,7 +82,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window !== 'undefined') {
       try {
         const savedStudents = localStorage.getItem('students');
-        const studentsData = savedStudents ? JSON.parse(savedStudents) : initialStudents;
+        const studentsData = savedStudents ? JSON.parse(savedStudents) : initialStudentsData;
         
         const savedClasses = localStorage.getItem('classes');
         const classesData = savedClasses ? JSON.parse(savedClasses) : initialClasses;
@@ -135,7 +135,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         setTeacherName(savedTeacherName ? JSON.parse(savedTeacherName) : 'M. Dubois');
       } catch (error) {
         console.error("Failed to load data from localStorage, using initial data.", error);
-        setStudents(initialStudents);
+        setStudents(initialStudentsData);
         setClasses(initialClasses);
         setAssignedTps({});
         setEvaluations({});
