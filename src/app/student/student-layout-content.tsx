@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { LyceeLogo } from '@/components/lycee-logo';
-import { Home, BookOpen } from 'lucide-react';
+import { Home, BookOpen, Book } from 'lucide-react';
 import { Award } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +28,7 @@ function StudentNav() {
 
   const navItems = [
     { href: '/student', label: 'Mes TP', icon: BookOpen, base: '/student', exact: true },
+    { href: '/student/tp-list', label: 'Fiches TP', icon: Book, base: '/student/tp-list' },
     { href: '/student/portfolio', label: 'Mon Portfolio', icon: Award, base: '/student/portfolio' },
   ];
 
