@@ -6,7 +6,7 @@ import { Firestore, collection, doc, getDocs, writeBatch, setDoc, deleteDoc, get
 import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore } from '@/firebase/provider';
+import { useFirestore, useUser } from '@/firebase/provider';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
 
@@ -70,6 +70,7 @@ export const AssignmentsContext = createContext<AssignmentsContextType | undefin
 
 export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
   const db = useFirestore();
+  const { isUserLoading } = useUser();
   const { toast } = useToast();
 
   const [students, setStudents] = useState<Student[]>([]);
@@ -88,18 +89,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     try {
         const collectionsToFetch = ['students', 'classes', 'tps', 'assignedTps', 'evaluations', 'prelimAnswers', 'feedbacks', 'storedEvals', 'config'];
         
-        const promises = collectionsToFetch.map(colName => 
-            getDocs(collection(db, colName)).catch(serverError => {
-                const contextualError = new FirestorePermissionError({
-                    operation: 'list',
-                    path: colName,
-                });
-                errorEmitter.emit('permission-error', contextualError);
-                throw contextualError; // Re-throw to make Promise.all fail
-            })
-        );
-
-        const snapshots = await Promise.all(promises);
+        const snapshots = await Promise.all(collectionsToFetch.map(colName => getDocs(collection(db, colName))));
 
         const [studentsSnapshot, classesSnapshot, tpsSnapshot, assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, configSnapshot] = snapshots;
 
@@ -150,23 +140,21 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         }
 
     } catch (error: any) {
-        if (!(error instanceof FirestorePermissionError)) {
-             toast({
-                variant: "destructive",
-                title: "Erreur de chargement des données",
-                description: error.message || "Impossible de lire les données depuis la base de données. Vérifiez la console pour plus de détails.",
-            });
-        }
+        toast({
+            variant: "destructive",
+            title: "Erreur de chargement des données",
+            description: error.message || "Impossible de lire les données depuis la base de données. Vérifiez la console pour plus de détails.",
+        });
     } finally {
         setIsLoaded(true);
     }
   }, [toast]);
 
   useEffect(() => {
-    if (db) {
+    if (db && !isUserLoading) {
       loadAllData(db);
     }
-  }, [db, loadAllData]);
+  }, [db, isUserLoading, loadAllData]);
 
   useEffect(() => {
     if (!isLoaded || students.length === 0) return;
@@ -223,7 +211,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         const batch = writeBatch(db);
         for(const name of studentNames) {
             const studentRef = doc(db, 'assignedTps', name);
-            batch.set(studentRef, updatedAssignedTps[name]);
+            batch.set(studentRef, { assignments: updatedAssignedTps[name] });
         }
         await batch.commit();
     } catch(error) {
@@ -375,7 +363,7 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
     });
     try {
         const studentRef = doc(db, 'assignedTps', studentName);
-        const currentData = ((await getDoc(studentRef)).data() || {}) as Record<string, any>;
+        const currentData = ((await getDoc(studentRef)).data() || {}) as { assignments?: AssignedTp[] };
         const updatedData = (currentData.assignments || []).map((tp: AssignedTp) => tp.id === tpId ? { ...tp, status } : tp);
         await setDoc(studentRef, { assignments: updatedData });
     } catch(error) {
