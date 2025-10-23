@@ -1,3 +1,4 @@
+
 import { LyceeLogo } from '@/components/lycee-logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';

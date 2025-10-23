@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getTpsByNiveau, Niveau, classNames } from '@/lib/data-manager';
-import { LogoutButton } from '@/components/logout-button';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { LyceeLogo } from '@/components/lycee-logo';
 import {
@@ -172,7 +171,6 @@ function DashboardLayoutContent({
                       Accueil
                     </Link>
                 </Button>
-                <LogoutButton />
               </div>
             </div>
           </header>
