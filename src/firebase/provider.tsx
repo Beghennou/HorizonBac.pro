@@ -167,9 +167,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
          // A cloud function would be better.
          // Given the constraints, let's just do a merge. It won't prevent duplicates if this function is called rapidly.
          
-         // The logic in `students/page.tsx` prevents assigning already assigned TPs from the UI,
-         // so a simple set with merge is acceptable for this demo.
-         
         // A better structure would be a subcollection.
         const tpDocRef = doc(firestore, `assignedTps/${studentName}/tps/${tpId}`);
         batch.set(tpDocRef, { status: 'non-commencé' });
