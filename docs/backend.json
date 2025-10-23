@@ -1,0 +1,272 @@
+{
+  "entities": {
+    "Student": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Student",
+      "type": "object",
+      "description": "Represents a student in the Formula Skills Garage application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the student."
+        },
+        "name": {
+          "type": "string",
+          "description": "The student's name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The student's email address.",
+          "format": "email"
+        },
+        "teacherId": {
+          "type": "string",
+          "description": "Reference to the Teacher who is responsible for the student. (Relationship: Teacher 1:N Student)"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "teacherId"
+      ]
+    },
+    "Teacher": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Teacher",
+      "type": "object",
+      "description": "Represents a teacher in the Formula Skills Garage application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the teacher."
+        },
+        "name": {
+          "type": "string",
+          "description": "The teacher's name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The teacher's email address.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email"
+      ]
+    },
+    "TrainingProgram": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TrainingProgram",
+      "type": "object",
+      "description": "Represents a training program (TP) module.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the training program."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the training program."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the training program."
+        },
+        "teacherId": {
+          "type": "string",
+          "description": "Reference to the Teacher who created the training program. (Relationship: Teacher 1:N TrainingProgram)"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "teacherId"
+      ]
+    },
+    "Simulation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Simulation",
+      "type": "object",
+      "description": "Represents a racing simulation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the simulation."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the simulation."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the simulation."
+        },
+        "trainingProgramId": {
+          "type": "string",
+          "description": "Reference to the TrainingProgram this simulation belongs to. (Relationship: TrainingProgram 1:N Simulation)"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "trainingProgramId"
+      ]
+    },
+    "StudentProgress": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "StudentProgress",
+      "type": "object",
+      "description": "Represents a student's progress on a specific training program or simulation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the student progress record."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the Student. (Relationship: Student 1:N StudentProgress)"
+        },
+        "trainingProgramId": {
+          "type": "string",
+          "description": "Reference to the TrainingProgram. (Relationship: TrainingProgram 1:N StudentProgress)"
+        },
+        "simulationId": {
+          "type": "string",
+          "description": "Reference to the Simulation. (Relationship: Simulation 1:N StudentProgress)"
+        },
+        "completionDate": {
+          "type": "string",
+          "description": "The date and time the student completed the training program or simulation.",
+          "format": "date-time"
+        },
+        "score": {
+          "type": "number",
+          "description": "The student's score on the training program or simulation."
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "trainingProgramId",
+        "completionDate",
+        "score"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/teachers/{teacherId}",
+        "definition": {
+          "entityName": "Teacher",
+          "schema": {
+            "$ref": "#/backend/entities/Teacher"
+          },
+          "description": "Stores teacher profiles. The teacherId matches the Firebase auth.uid.",
+          "params": [
+            {
+              "name": "teacherId",
+              "description": "The unique identifier for the teacher, matching the Firebase auth.uid."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/teachers/{teacherId}/students/{studentId}",
+        "definition": {
+          "entityName": "Student",
+          "schema": {
+            "$ref": "#/backend/entities/Student"
+          },
+          "description": "Stores student profiles. Includes denormalized 'teacherId' for authorization independence.",
+          "params": [
+            {
+              "name": "teacherId",
+              "description": "The unique identifier for the teacher, matching the Firebase auth.uid."
+            },
+            {
+              "name": "studentId",
+              "description": "The unique identifier for the student."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/teachers/{teacherId}/trainingPrograms/{trainingProgramId}",
+        "definition": {
+          "entityName": "TrainingProgram",
+          "schema": {
+            "$ref": "#/backend/entities/TrainingProgram"
+          },
+          "description": "Stores training programs created by teachers. Includes denormalized 'teacherId' for authorization independence.",
+          "params": [
+            {
+              "name": "teacherId",
+              "description": "The unique identifier for the teacher, matching the Firebase auth.uid."
+            },
+            {
+              "name": "trainingProgramId",
+              "description": "The unique identifier for the training program."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}",
+        "definition": {
+          "entityName": "Simulation",
+          "schema": {
+            "$ref": "#/backend/entities/Simulation"
+          },
+          "description": "Stores simulation data associated with training programs. Uses trainingProgramId as foreign key.",
+          "params": [
+            {
+              "name": "teacherId",
+              "description": "The unique identifier for the teacher, matching the Firebase auth.uid."
+            },
+            {
+              "name": "trainingProgramId",
+              "description": "The unique identifier for the training program."
+            },
+            {
+              "name": "simulationId",
+              "description": "The unique identifier for the simulation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/students/{studentId}/studentProgress/{studentProgressId}",
+        "definition": {
+          "entityName": "StudentProgress",
+          "schema": {
+            "$ref": "#/backend/entities/StudentProgress"
+          },
+          "description": "Stores student progress data, with explicit studentId, trainingProgramId, and simulationId foreign keys.",
+          "params": [
+            {
+              "name": "studentId",
+              "description": "The unique identifier for the student."
+            },
+            {
+              "name": "studentProgressId",
+              "description": "The unique identifier for the student progress record."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure authorization independence, clarity, and scalability for the Formula Skills Garage application. We leverage path-based ownership for user-related data and denormalization where necessary to avoid `get()` calls in security rules. Each collection is designed with a homogeneous security posture to simplify rule definitions and ensure QAPs.\n\nSpecifically, teacherId fields are denormalized into the Student and TrainingProgram collections to enforce a teacher can only access or modify Students and TrainingPrograms they are responsible for.\n\nThe following collections and subcollections have been created:\n\n*   `/teachers/{teacherId}`: Stores teacher profiles, with `teacherId` matching the Firebase `auth.uid`.\n*   `/teachers/{teacherId}/students/{studentId}`: Stores student profiles, with explicit `teacherId` fields. Allows teacher to list all students that belong to the teacher. This collection leverages Path-Based ownership.\n*   `/teachers/{teacherId}/trainingPrograms/{trainingProgramId}`: Stores training programs created by teachers, with explicit `teacherId` fields. Allows teachers to list all training programs that belong to the teacher. This collection leverages Path-Based ownership.\n*   `/teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}`: Stores simulation data associated with training programs, with an explicit `trainingProgramId`. This collection leverages Path-Based ownership.\n*   `/students/{studentId}/studentProgress/{studentProgressId}`: Stores student progress data, with explicit `studentId`, `trainingProgramId`, and `simulationId` fields. This collection leverages Path-Based ownership."
+  }
+}
