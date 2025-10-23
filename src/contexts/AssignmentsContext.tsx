@@ -1,12 +1,13 @@
-
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback, useMemo } from 'react';
-import { useAuth, useFirestore } from '@/firebase/provider';
-import { collection, doc, getDocs, writeBatch, query, where, getDoc, setDoc, deleteDoc, Firestore } from 'firebase/firestore';
+import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
+import { Firestore, collection, doc, getDocs, writeBatch, setDoc, deleteDoc } from 'firebase/firestore';
 import { TP, initialStudents, initialClasses, getTpById } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth, useFirestore } from '@/firebase/provider';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 // Types definition
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
@@ -134,7 +135,6 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
       if (studentsSnapshot.empty) {
         const success = await resetAndSeedDatabase(db);
         if (success) {
-           // Reload data after seeding
            loadAllData(db);
         } else {
             setIsLoaded(true);
@@ -156,30 +156,29 @@ export const AssignmentsProvider = ({ children }: { children: ReactNode }) => {
         getDocs(collection(db, 'feedbacks')),
         getDocs(collection(db, 'storedEvals')),
         getDocs(collection(db, 'tps')),
+        doc(db, 'config', 'teacher')
       ];
 
-      const [assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, tpsSnapshot] = await Promise.all(collectionsPromises);
+      const [assignedTpsSnapshot, evalsSnapshot, prelimsSnapshot, feedbacksSnapshot, storedEvalsSnapshot, tpsSnapshot, teacherConfigDoc] = await Promise.all(collectionsPromises.map(p => p instanceof Promise ? p : getDoc(p)));
       
       setAssignedTps(Object.fromEntries(assignedTpsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data().assigned])));
       setEvaluations(Object.fromEntries(evalsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data()])));
       setPrelimAnswers(Object.fromEntries(prelimsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data()])));
-      setFeedbacks(Object.fromEntries(feedbacksSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, 'data' in d.data() ? d.data().data : {}])));
+      setFeedbacks(Object.fromEntries(feedbacksSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data().data || {}])));
       setStoredEvals(Object.fromEntries(storedEvalsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(d => [d.id, d.data()])));
       
       const customTpsData = Object.fromEntries(tpsSnapshot.docs.filter(d=>d.id !== '_placeholder').map(doc => [doc.id, doc.data() as TP]));
       setTps(prev => ({...prev, ...customTpsData}));
       
-      const teacherConfigDoc = await getDoc(doc(db, 'config', 'teacher'));
       if(teacherConfigDoc.exists()) setTeacherName(teacherConfigDoc.data().name);
 
 
     } catch (error: any) {
-      console.error("Failed to load data from Firestore", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur de chargement des données",
-        description: error.message,
-      });
+        const contextualError = new FirestorePermissionError({
+          operation: 'list',
+          path: error.message.includes('students') ? 'students' : 'unknown collection'
+        });
+        errorEmitter.emit('permission-error', contextualError);
     } finally {
       setIsLoaded(true);
     }
@@ -430,3 +429,5 @@ export const useAssignments = () => {
   }
   return context;
 };
+
+    
