@@ -25,23 +25,19 @@ export type TP = Omit<TPSeconde, 'etudePrelim'> & {
 export type Niveau = 'seconde' | 'premiere' | 'terminale';
 
 export const classNames: string[] = [
-    '2MV1',
-    '2MV2',
-    '2MV3',
-    '2MV4',
-    '2MV5',
-    '1VP1',
-    '1VP2',
-    '1VP3',
-    '2APP',
-    'TVP1',
-    'TVP2',
-    'TVP3',
-    '1APP1',
-    '1APP2',
-    'TAPP1',
-    'TAPP2'
-];
+    '2MV1', '2MV2', '2MV3', '2MV4', '2MV5',
+    '1VP1', '1VP2', '1VP3',
+    'TVP1', 'TVP2', 'TVP3',
+    '2APP', '1APP1', '1APP2', 'TAPP1', 'TAPP2'
+].sort();
+
+export const studentLists: Record<string, string[]> = {
+    '2MV1': ["BAKHTAR Adam", "BANZOUZI Aaron", "BATISTA Samuel", "BLONDEL Alan", "BOAIME-SABINO Daivy", "BOURGEOIS-BATISTA Jordan", "BOYER Kelvin", "BRABANT Maxime", "CORREIA-GONCALVES Dylan", "DIALLO Mamadou", "GASMI Sofiane", "HASSAINE-DAOUADJI Naïm", "MAIZI Yanis", "MARIE-LUCE Kilyan"],
+    '2MV2': ["ARMOUGON Andy", "AZEVEDO-VIEIRA Tiago", "BELABED Chaïmae", "BELHANI Mohamed-Amine", "BERKOUKI Ahmed", "BLOT Owen", "BOUSSAINGAULT-BARROS Davilson", "CABRAL-BORGES Daniel", "DACOSTA-GOMES Ryan", "DE-OLIVEIRA-DA-SILVA Mickaël", "DIABY Bamba", "DIARRA Souleymane", "FERREIRA-DA-SILVA-SAMPAIO Alex"],
+    '2MV3': ["ALVES-RIBEIRO Dany", "ANTUNES-FERREIRA Tiago", "BALDE Mamadou", "BAPTISTA-SOARES Wilson", "BARBOSA-GOMES Wilson", "BORGES-LOPES Elton", "CAMARA Fode", "DA-SILVA-MONTEIRO Fabio", "DE-ALMEIDA-PINHO Bryan", "DELORME-CASTANHEIRA Ryan", "DEMBELE Bakari", "EL-HAFYANI Ayoub", "FERNANDES-DA-SILVA Bryan", "FERREIRA-DA-SILVA Fabio", "GOMES-BAPTISTA Kelton"],
+    '1VP1': ["ALVES-DOS-REIS Luis", "AQUILINA-DA-SILVA Dylan", "BARBOSA-DJALO Samba", "BARROS-LOPES Anderson", "BASSOKA-BANZOUZI Glenn", "BATISTA-MARQUES Ryan", "BATY Steve", "BEN-ALI Anis", "BENFODDA Mohamed", "BORGES-SEMEDO Dany", "CABRAL-GOMES Ruben", "CARDOSO-PINTO Dany", "CASTANHEIRA-MONTEIRO Wilson"],
+    'TVP1': ["ALEXANDRE Steven", "ALVES-DOS-SANTOS Filipe", "ANTUNES-GOMES Brian", "BARBOSA-GOMES Helder", "BARROS-SEMEDO Wilson", "BATISTA-MARQUES Ricardo", "BELLO-PEREIRA Mickaël", "BENGUESMIA Anis", "BERTOGAL Ryan", "BORGES-DJALO Milton", "CABRAL-FURTADO Elton", "CAMARA Lamine", "CORREIA-GOMES Brian", "COULIBALY Lassana"],
+};
 
 export type CompetenceBloc = {
   title: string;

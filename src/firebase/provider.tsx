@@ -100,7 +100,7 @@ export interface FirebaseContextState {
   signInWithGoogle: () => Promise<void>;
   isLoaded: boolean;
   
-  classes: string[];
+  classes: string[]; // This will now come from local data
   tps: Record<number, TP>;
   assignedTps: Record<string, AssignedTp[]>;
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
@@ -130,7 +130,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
-  const { data: classesData, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
   const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
   
@@ -158,7 +157,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     }
   }, [configData]);
 
-  const isLoaded = !userAuthState.isUserLoading && !isTpsLoading && !isConfigLoading && !isClassesLoading && !isAssignedTpsLoading && !isEvaluationsLoading;
+  // Classes data is now local, so we don't fetch it. The 'isClassesLoading' is removed.
+  const isLoaded = !userAuthState.isUserLoading && !isTpsLoading && !isConfigLoading && !isAssignedTpsLoading && !isEvaluationsLoading;
 
   useEffect(() => {
     if (!auth) {
@@ -215,7 +215,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: userAuthState.userError,
     isLoaded,
     teacherName,
-    classes: staticClasses,
+    classes: staticClasses, // Using local data
     tps,
     assignedTps,
     evaluations,
@@ -257,24 +257,14 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     },
     deleteClass: (className: string) => {
       if (!firestore) return;
-      deleteClassFromDb(firestore, className);
-      toast({ title: "Classe supprimée", description: `La classe ${className} a été supprimée.` });
+      // This function would now just be a local state update if we remove DB persistence for class lists
+      console.warn("deleteClass from DB is not aligned with hardcoded lists.");
     },
     updateClassWithCsv: (className: string, studentNames: string[]) => {
-      if (!firestore) return;
-      updateClassWithStudents(firestore, className, studentNames);
-       toast({
-          title: "Classe mise à jour",
-          description: `La classe ${className} a été mise à jour avec ${studentNames.length} élèves.`
-      });
+       console.warn("updateClassWithCsv to DB is not aligned with hardcoded lists.");
     },
     resetAllStudentLists: async () => {
-        if (!firestore || !classesData) return;
-        await resetAllStudentListsInClasses(firestore, classesData);
-        toast({
-            title: "Listes d'élèves réinitialisées",
-            description: "Tous les élèves ont été retirés de toutes les classes.",
-        });
+        console.warn("resetAllStudentLists from DB is not aligned with hardcoded lists.");
     },
     addTp: (newTp: TP) => {
       if (!firestore) return;

@@ -2,28 +2,24 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { collection, doc, getDoc } from 'firebase/firestore';
-import { classNames } from '@/lib/data-manager';
+import { classNames, studentLists } from '@/lib/data-manager';
 
 export default function StudentSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { firestore, isLoaded, classes: allClassData } = useFirebase();
-
-  const { data: classes } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
+  const { isLoaded } = useFirebase();
 
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
   
   const studentsInClass = useMemo(() => {
-    if (!selectedClass || !classes) return [];
-    const classData = classes.find(c => c.id === selectedClass);
-    return (classData?.studentNames as string[] || []).sort((a,b) => a.localeCompare(b));
-  }, [selectedClass, classes]);
+    if (!selectedClass) return [];
+    return (studentLists[selectedClass] || []).sort((a,b) => a.localeCompare(b));
+  }, [selectedClass]);
 
   useEffect(() => {
     if (isLoaded) {
@@ -69,7 +65,7 @@ export default function StudentSelector() {
               <SelectValue placeholder="Choisir une classe..." />
             </SelectTrigger>
             <SelectContent>
-              {classNames.sort().map(className => (
+              {classNames.map(className => (
                 <SelectItem key={className} value={className}>{className}</SelectItem>
               ))}
             </SelectContent>

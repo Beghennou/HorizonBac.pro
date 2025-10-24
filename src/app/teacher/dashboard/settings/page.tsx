@@ -22,14 +22,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import Papa from 'papaparse';
-import { doc, getDoc } from 'firebase/firestore';
+import { classNames, studentLists } from '@/lib/data-manager';
 
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { firestore, teacherName, setTeacherName, updateClassWithCsv, deleteClass, resetAllStudentLists, classes: classNames } = useFirebase();
+  const { firestore, teacherName, setTeacherName, updateClassWithCsv, deleteClass, resetAllStudentLists } = useFirebase();
 
-  const [classList, setClassList] = useState<Record<string, string[]>>({});
+  const [classList, setClassList] = useState<Record<string, string[]>>(studentLists);
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
@@ -55,25 +55,7 @@ export default function SettingsPage() {
   useEffect(() => {
     setLocalTeacherName(teacherName);
   }, [teacherName]);
-
-  useEffect(() => {
-    const fetchAllClasses = async () => {
-        if (!firestore) return;
-        const tempClassList: Record<string, string[]> = {};
-        for(const name of classNames) {
-            const classDocRef = doc(firestore, 'classes', name);
-            const classDocSnap = await getDoc(classDocRef);
-            if(classDocSnap.exists()) {
-                tempClassList[name] = classDocSnap.data().studentNames || [];
-            } else {
-                tempClassList[name] = [];
-            }
-        }
-        setClassList(tempClassList);
-    }
-    fetchAllClasses();
-  }, [firestore, classNames]);
-
+  
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, targetClassName: string) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -97,11 +79,12 @@ export default function SettingsPage() {
                 .filter(name => name);
             
             if (studentNames.length > 0) {
-                updateClassWithCsv(targetClassName, studentNames);
+                // Since this now updates a local variable, we don't call updateClassWithCsv from FirebaseProvider
+                console.warn("CSV import now only works for show. Data is not persisted.");
                 setClassList(prev => ({...prev, [targetClassName]: studentNames.sort((a,b) => a.localeCompare(b))}));
                 toast({
-                    title: "Importation réussie",
-                    description: `${studentNames.length} élèves importés dans la classe ${targetClassName}.`
+                    title: "Importation réussie (simulation)",
+                    description: `${studentNames.length} élèves importés dans la classe ${targetClassName}. Modifiez data-manager.ts pour sauvegarder.`,
                 });
             } else {
                 toast({
@@ -123,42 +106,7 @@ export default function SettingsPage() {
   };
   
   const handleAddStudent = async () => {
-    if (!firstName || !lastName || (!newClassName && !selectedClass) || !firestore) {
-      toast({
-        variant: 'destructive',
-        title: "Champs manquants",
-        description: "Veuillez remplir le prénom, le nom et choisir ou créer une classe."
-      });
-      return;
-    }
-
-    const finalClassName = newClassName || selectedClass;
-    const studentName = `${lastName.toUpperCase()} ${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}`;
-    
-    const existingStudents = classList[finalClassName] || [];
-    if (existingStudents.includes(studentName)) {
-        toast({
-            variant: 'destructive',
-            title: "Élève déjà existant",
-            description: `${studentName} est déjà dans la classe ${finalClassName}.`
-        });
-        return;
-    }
-
-    const updatedStudentList = [...existingStudents, studentName].sort((a, b) => a.localeCompare(b));
-    updateClassWithCsv(finalClassName, updatedStudentList);
-
-    toast({
-      title: "Élève ajouté",
-      description: `${studentName} a été ajouté à la classe ${finalClassName}.`,
-    });
-    
-    setClassList(prev => ({...prev, [finalClassName]: updatedStudentList}));
-
-    setFirstName('');
-    setLastName('');
-    setNewClassName('');
-    setSelectedClass('');
+    toast({ variant: 'destructive', title: 'Fonctionnalité désactivée', description: 'Ajoutez les élèves dans le fichier `src/lib/data-manager.ts`.'});
   };
 
   const handleSaveSettings = () => {
@@ -170,60 +118,20 @@ export default function SettingsPage() {
   };
 
   const handleResetData = () => {
-    if (resetDataPassword === 'Mongy') {
-        console.error("resetStudentData function is not available in this component's context.");
-        toast({
-            variant: 'destructive',
-            title: 'Fonctionnalité non implémentée',
-            description: 'La réinitialisation des données n\'est pas connectée dans cette interface.'
-        });
-        setResetDataPassword('');
-    } else {
-        toast({
-            variant: 'destructive',
-            title: "Mot de passe incorrect",
-            description: "La réinitialisation a été annulée.",
-        });
-    }
+    console.error("Fonctionnalité non implémentée.");
+     toast({ variant: 'destructive', title: 'Fonctionnalité non implémentée', description: 'La réinitialisation des données n\'est pas connectée dans cette interface.' });
   };
 
   const handleResetLists = () => {
-    if (resetListsPassword === 'reset') {
-        resetAllStudentLists();
-        setResetListsPassword('');
-    } else {
-        toast({
-            variant: 'destructive',
-            title: "Mot de passe incorrect",
-            description: "La réinitialisation a été annulée.",
-        });
-    }
+     toast({ variant: 'destructive', title: 'Fonctionnalité désactivée', description: 'Gérez les listes dans le fichier `src/lib/data-manager.ts`.'});
   }
   
   const handleDeleteStudent = async () => {
-      if (!studentToDelete || !deleteStudentClass || !firestore) return;
-      
-      const currentStudents = classList[deleteStudentClass] || [];
-      const updatedStudents = currentStudents.filter((s: string) => s !== studentToDelete);
-
-      updateClassWithCsv(deleteStudentClass, updatedStudents);
-      setClassList(prev => ({...prev, [deleteStudentClass]: updatedStudents}));
-
-      setStudentToDelete('');
-      setDeleteStudentClass('');
-      toast({ title: "Élève retiré", description: `${studentToDelete} a été retiré de la classe.` });
+      toast({ variant: 'destructive', title: 'Fonctionnalité désactivée', description: 'Gérez les listes dans le fichier `src/lib/data-manager.ts`.'});
   }
   
   const handleDeleteClass = async () => {
-      if (!classToDelete || !firestore) return;
-      deleteClass(classToDelete);
-      setClassToDelete('');
-      setClassList(prev => {
-          const newList = {...prev};
-          delete newList[classToDelete];
-          return newList;
-      });
-      toast({ title: "Classe vidée", description: `Les élèves de la classe ${classToDelete} ont été retirés.` });
+      toast({ variant: 'destructive', title: 'Fonctionnalité désactivée', description: 'Gérez les listes dans le fichier `src/lib/data-manager.ts`.'});
   }
 
   const handleLegacyCsvImport = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,14 +153,17 @@ export default function SettingsPage() {
        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><ChevronsRight /> Mise à Jour Annuelle des Classes</CardTitle>
-          <CardDescription>Importez les listes CSV pour chaque niveau. Les élèves existants seront déplacés dans leur nouvelle classe et leurs données (évaluations, TPs) seront conservées. Les nouveaux élèves seront créés automatiquement.</CardDescription>
+          <CardDescription>
+            La gestion des élèves se fait maintenant directement dans le fichier <code>src/lib/data-manager.ts</code>.
+            Modifiez ce fichier pour mettre à jour les listes de manière permanente. Les imports CSV ne sont plus persistés.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                 <Input value={newSecondeClassName} onChange={(e) => setNewSecondeClassName(e.target.value)} placeholder="Nom classe Seconde..."/>
                 <Button asChild variant="outline">
                     <label className="cursor-pointer w-full">
-                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Seconde
+                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Seconde (simulation)
                         <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, newSecondeClassName)} />
                     </label>
                 </Button>
@@ -261,7 +172,7 @@ export default function SettingsPage() {
                 <Input value={newPremiereClassName} onChange={(e) => setNewPremiereClassName(e.target.value)} placeholder="Nom classe Première..."/>
                  <Button asChild variant="outline">
                     <label className="cursor-pointer w-full">
-                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Première
+                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Première (simulation)
                         <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, newPremiereClassName)} />
                     </label>
                 </Button>
@@ -270,7 +181,7 @@ export default function SettingsPage() {
                 <Input value={newTerminaleClassName} onChange={(e) => setNewTerminaleClassName(e.target.value)} placeholder="Nom classe Terminale..."/>
                  <Button asChild variant="outline">
                     <label className="cursor-pointer w-full">
-                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Terminale
+                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Terminale (simulation)
                         <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, newTerminaleClassName)} />
                     </label>
                 </Button>
@@ -281,23 +192,23 @@ export default function SettingsPage() {
        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><UserPlus /> Ajouter un nouvel élève</CardTitle>
-          <CardDescription>Remplissez le formulaire pour inscrire un nouvel élève et l'assigner à une classe.</CardDescription>
+          <CardDescription>Cette fonctionnalité est maintenant gérée dans <code>src/lib/data-manager.ts</code>.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 opacity-50">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="first-name">Prénom de l'élève</Label>
-                    <Input id="first-name" placeholder="ex: Adam" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                    <Input id="first-name" placeholder="ex: Adam" value={firstName} onChange={(e) => setFirstName(e.target.value)} disabled />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="last-name">Nom de l'élève</Label>
-                    <Input id="last-name" placeholder="ex: BAKHTAR" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                    <Input id="last-name" placeholder="ex: BAKHTAR" value={lastName} onChange={(e) => setLastName(e.target.value)} disabled/>
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <div className="space-y-2">
                     <Label htmlFor="select-class">Assigner à une classe existante</Label>
-                    <Select onValueChange={setSelectedClass} value={selectedClass} disabled={!!newClassName}>
+                    <Select onValueChange={setSelectedClass} value={selectedClass} disabled>
                         <SelectTrigger id="select-class">
                             <SelectValue placeholder="Choisir une classe..." />
                         </SelectTrigger>
@@ -310,52 +221,15 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="new-class">Ou créer une nouvelle classe</Label>
-                    <Input id="new-class" placeholder="ex: 2MV6" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} disabled={!!selectedClass} />
+                    <Input id="new-class" placeholder="ex: 2MV6" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} disabled />
                 </div>
             </div>
              <div className="flex justify-end">
-                <Button onClick={handleAddStudent}>
+                <Button onClick={handleAddStudent} disabled>
                     <UserPlus className="mr-2 h-4 w-4" />
                     Ajouter l'élève
                 </Button>
             </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Upload /> Importer des élèves (Ancienne méthode)</CardTitle>
-          <CardDescription>
-              Sélectionnez ou créez une classe, puis importez un fichier CSV. Seule la première colonne (nom de l'élève) sera utilisée.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div className="space-y-2">
-                      <Label htmlFor="import-select-class">Choisir une classe de destination</Label>
-                      <Select onValueChange={setImportClassName} value={importClassName} disabled={!!newImportClassName}>
-                          <SelectTrigger id="import-select-class">
-                              <SelectValue placeholder="Choisir une classe..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                              {classNames.sort().map(c => (
-                                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                              ))}
-                          </SelectContent>
-                      </Select>
-                  </div>
-                  <div className="space-y-2">
-                      <Label htmlFor="import-new-class">Ou créer une nouvelle classe</Label>
-                      <Input id="import-new-class" placeholder="ex: 2MV6" value={newImportClassName} onChange={(e) => setNewImportClassName(e.target.value)} disabled={!!importClassName} />
-                  </div>
-            </div>
-             <Button asChild variant="outline">
-                <label className="cursor-pointer w-full">
-                    <Upload className="mr-2 h-4 w-4" /> Importer le fichier CSV
-                    <Input type="file" accept=".csv" className="sr-only" onChange={handleLegacyCsvImport} />
-                </label>
-            </Button>
-           <p className="text-sm text-muted-foreground text-center">Les élèves existants seront ignorés mais ajoutés à la classe si besoin.</p>
         </CardContent>
       </Card>
 
@@ -385,13 +259,13 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><UserMinus /> Gestion des données</CardTitle>
-          <CardDescription>Supprimez des élèves ou des classes entières de l'application.</CardDescription>
+          <CardDescription>La suppression des élèves et des classes se fait maintenant dans <code>src/lib/data-manager.ts</code>.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 opacity-50">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 <div className="space-y-2">
                     <Label htmlFor="delete-class-select">Classe</Label>
-                    <Select value={deleteStudentClass} onValueChange={setDeleteStudentClass}>
+                    <Select value={deleteStudentClass} onValueChange={setDeleteStudentClass} disabled>
                         <SelectTrigger id="delete-class-select">
                             <SelectValue placeholder="Choisir une classe..."/>
                         </SelectTrigger>
@@ -404,7 +278,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="delete-student-select">Élève à supprimer</Label>
-                    <Select value={studentToDelete} onValueChange={setStudentToDelete} disabled={!deleteStudentClass}>
+                    <Select value={studentToDelete} onValueChange={setStudentToDelete} disabled>
                         <SelectTrigger id="delete-student-select">
                             <SelectValue placeholder="Choisir un élève..."/>
                         </SelectTrigger>
@@ -415,28 +289,12 @@ export default function SettingsPage() {
                         </SelectContent>
                     </Select>
                 </div>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="destructive" disabled={!studentToDelete}><UserMinus className="mr-2" /> Supprimer cet élève</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Êtes-vous sûr de vouloir supprimer l'élève <strong>{studentToDelete}</strong> de la classe ? Ses données personnelles ne seront pas supprimées.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDeleteStudent}>Supprimer</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <Button variant="destructive" disabled><UserMinus className="mr-2" /> Supprimer cet élève</Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 <div className="space-y-2 md:col-span-2">
                      <Label htmlFor="delete-class-select-2">Vider une classe de ses élèves</Label>
-                      <Select value={classToDelete} onValueChange={setClassToDelete}>
+                      <Select value={classToDelete} onValueChange={setClassToDelete} disabled>
                         <SelectTrigger id="delete-class-select-2">
                             <SelectValue placeholder="Choisir une classe..."/>
                         </SelectTrigger>
@@ -447,23 +305,7 @@ export default function SettingsPage() {
                         </SelectContent>
                     </Select>
                 </div>
-                 <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="destructive" disabled={!classToDelete}><FolderMinus className="mr-2" /> Vider cette classe</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmer la suppression des élèves</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Êtes-vous sûr de vouloir supprimer tous les élèves de la classe <strong>{classToDelete}</strong> ? Les données des élèves ne seront pas effacées, mais ils n'appartiendront plus à cette classe.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDeleteClass}>Vider la classe</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                 <Button variant="destructive" disabled><FolderMinus className="mr-2" /> Vider cette classe</Button>
             </div>
         </CardContent>
       </Card>
@@ -471,14 +313,14 @@ export default function SettingsPage() {
       <Card className="border-destructive">
           <CardHeader>
               <CardTitle className="flex items-center gap-2 text-destructive"><AlertTriangle/> Zone de danger</CardTitle>
-              <CardDescription>Ces actions sont irréversibles. Soyez certain avant de continuer.</CardDescription>
+              <CardDescription>Ces actions sont irréversibles et affectent les données en base. Soyez certain avant de continuer.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
                <div className="flex justify-between items-center p-4 border border-destructive/50 rounded-lg">
-                  <p>Vider les listes d'élèves de **toutes** les classes. Utile pour une réinitialisation avant une nouvelle année scolaire.</p>
+                  <p>Vider les listes d'élèves de **toutes** les classes (en base de données).</p>
                    <AlertDialog>
                       <AlertDialogTrigger asChild>
-                          <Button variant="destructive" outline="true">
+                          <Button variant="destructive" outline="true" disabled>
                               <Eraser className="mr-2 h-4 w-4" />
                               Vider toutes les listes
                           </Button>

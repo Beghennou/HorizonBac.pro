@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
+import { getTpsByNiveau, Niveau, studentLists } from '@/lib/data-manager';
 import { ChevronDown, Users } from 'lucide-react';
 import {
   DropdownMenu,
@@ -45,19 +45,9 @@ export default function StudentsPage() {
     
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
     
-    const classDocRef = useMemoFirebase(() => {
-        if (!firestore || !className) return null;
-        return doc(firestore, 'classes', className);
-    }, [firestore, className]);
-
-    const { data: classData } = useDoc(classDocRef);
-
     const studentsInClass = useMemo(() => {
-        if (classData && classData.studentNames) {
-            return (classData.studentNames as string[]).sort((a: string, b: string) => a.localeCompare(b));
-        }
-        return [];
-    }, [classData]);
+        return (studentLists[className] || []).sort((a: string, b: string) => a.localeCompare(b));
+    }, [className]);
     
     useEffect(() => {
         // Reset selection when class or level changes
