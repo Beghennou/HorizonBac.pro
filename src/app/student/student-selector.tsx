@@ -12,38 +12,35 @@ import { classNames } from '@/lib/data-manager';
 export default function StudentSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { firestore, isLoaded } = useFirebase();
+  const { firestore, isLoaded, classes: allClassData } = useFirebase();
+
+  const { data: classes } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
 
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
-  const [studentsInClass, setStudentsInClass] = useState<string[]>([]);
+  
+  const studentsInClass = useMemo(() => {
+    if (!selectedClass || !classes) return [];
+    const classData = classes.find(c => c.id === selectedClass);
+    return (classData?.studentNames as string[] || []).sort((a,b) => a.localeCompare(b));
+  }, [selectedClass, classes]);
 
   useEffect(() => {
     if (isLoaded) {
       const classFromUrl = searchParams.get('class') || '';
       const studentFromUrl = searchParams.get('student') || '';
       if(classFromUrl) {
-          handleClassChange(classFromUrl, studentFromUrl);
+          setSelectedClass(classFromUrl);
+          if (studentFromUrl) {
+            setSelectedStudent(studentFromUrl);
+          }
       }
     }
   }, [searchParams, isLoaded]);
 
-  const handleClassChange = async (newClass: string, studentToSelect?: string) => {
+  const handleClassChange = (newClass: string) => {
     setSelectedClass(newClass);
     setSelectedStudent('');
-    setStudentsInClass([]);
-
-    if (newClass && firestore) {
-        const classDocRef = doc(firestore, 'classes', newClass);
-        const classDocSnap = await getDoc(classDocRef);
-        if (classDocSnap.exists()) {
-            const studentNames = (classDocSnap.data().studentNames as string[] || []).sort((a,b) => a.localeCompare(b));
-            setStudentsInClass(studentNames);
-            if(studentToSelect && studentNames.includes(studentToSelect)) {
-                setSelectedStudent(studentToSelect);
-            }
-        }
-    }
   };
 
   const handleStudentChange = (newStudent: string) => {
@@ -67,7 +64,7 @@ export default function StudentSelector() {
     <div className="flex flex-col space-y-4">
         <div className="space-y-2">
           <Label htmlFor="class-select" className="font-bold">Classe</Label>
-          <Select onValueChange={(val) => handleClassChange(val)} value={selectedClass}>
+          <Select onValueChange={handleClassChange} value={selectedClass}>
             <SelectTrigger id="class-select">
               <SelectValue placeholder="Choisir une classe..." />
             </SelectTrigger>
@@ -81,7 +78,7 @@ export default function StudentSelector() {
 
         <div className="space-y-2">
           <Label htmlFor="student-select" className="font-bold">Élève</Label>
-          <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={!selectedClass}>
+          <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={!selectedClass || studentsInClass.length === 0}>
             <SelectTrigger id="student-select">
               <SelectValue placeholder={!selectedClass ? "Choisis d'abord une classe" : "Choisir ton nom..."} />
             </SelectTrigger>
