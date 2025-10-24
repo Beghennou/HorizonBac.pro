@@ -33,13 +33,13 @@ export const classNames: string[] = [
     '1VP1',
     '1VP2',
     '1VP3',
-    '2APP', 
-    'TVP1', 
-    'TVP2', 
-    'TVP3', 
-    '1APP1', 
-    '1APP2', 
-    'TAPP1', 
+    '2APP',
+    'TVP1',
+    'TVP2',
+    'TVP3',
+    '1APP1',
+    '1APP2',
+    'TAPP1',
     'TAPP2'
 ];
 
