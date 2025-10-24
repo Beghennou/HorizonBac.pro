@@ -6,20 +6,25 @@ import { useFirebase } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { classNames, studentLists } from '@/lib/data-manager';
 
 export default function StudentSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isLoaded } = useFirebase();
+  const { classes: allClassData, isLoaded } = useFirebase();
 
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
   
+  const classNames = useMemo(() => {
+    if (!allClassData) return [];
+    return allClassData.map(c => c.id).sort();
+  }, [allClassData]);
+
   const studentsInClass = useMemo(() => {
-    if (!selectedClass) return [];
-    return (studentLists[selectedClass] || []).sort((a,b) => a.localeCompare(b));
-  }, [selectedClass]);
+    if (!selectedClass || !allClassData) return [];
+    const classData = allClassData.find(c => c.id === selectedClass);
+    return classData?.studentNames.sort((a:string,b:string) => a.localeCompare(b)) || [];
+  }, [selectedClass, allClassData]);
 
   useEffect(() => {
     if (isLoaded) {

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { TP, EtudePrelimQCM, EtudePrelimText, allBlocs, competencesParNiveau, Niveau, studentLists } from '@/lib/data-manager';
+import { TP, EtudePrelimQCM, EtudePrelimText, allBlocs, competencesParNiveau, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -233,9 +233,21 @@ export default function StudentDetailPage() {
     const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
     const { data: assignedTpsData } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `assignedTps`) : null, [firestore]));
 
+     const classDocRef = useMemoFirebase(() => {
+      if (className && firestore) {
+        return doc(firestore, 'classes', className);
+      }
+      return null;
+    }, [className, firestore]);
+
+    const { data: classData } = useDoc(classDocRef);
+    
     const studentsInClass = useMemo(() => {
-        return (studentLists[className] || []).sort((a,b) => a.localeCompare(b));
-    }, [className]);
+        if (classData && classData.studentNames) {
+            return (classData.studentNames as string[]).sort((a: string, b: string) => a.localeCompare(b));
+        }
+        return [];
+    }, [classData]);
 
     const isStudentInClass = useMemo(() => {
         return studentsInClass.includes(studentName);

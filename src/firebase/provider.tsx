@@ -7,7 +7,7 @@ import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc
 import { Auth, User, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
-import { TP, initialTps, classNames as staticClasses } from '@/lib/data-manager';
+import { TP, initialTps } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
@@ -100,7 +100,7 @@ export interface FirebaseContextState {
   signInWithGoogle: () => Promise<void>;
   isLoaded: boolean;
   
-  classes: string[]; // This will now come from local data
+  classes: DocumentData[];
   tps: Record<number, TP>;
   assignedTps: Record<string, AssignedTp[]>;
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
@@ -129,6 +129,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const [teacherName, setTeacherNameState] = useState<string>('');
 
   const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
+  const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
   const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
   const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
@@ -157,8 +158,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     }
   }, [configData]);
 
-  // Classes data is now local, so we don't fetch it. The 'isClassesLoading' is removed.
-  const isLoaded = !userAuthState.isUserLoading && !isTpsLoading && !isConfigLoading && !isAssignedTpsLoading && !isEvaluationsLoading;
+  const isLoaded = !userAuthState.isUserLoading && !isTpsLoading && !isClassesLoading && !isConfigLoading && !isAssignedTpsLoading && !isEvaluationsLoading;
 
   useEffect(() => {
     if (!auth) {
@@ -215,7 +215,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: userAuthState.userError,
     isLoaded,
     teacherName,
-    classes: staticClasses, // Using local data
+    classes: classes || [],
     tps,
     assignedTps,
     evaluations,
@@ -256,15 +256,19 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         toast({ title: "Élève supprimé", description: `${studentName} et toutes ses données ont été supprimés.` });
     },
     deleteClass: (className: string) => {
-      if (!firestore) return;
-      // This function would now just be a local state update if we remove DB persistence for class lists
-      console.warn("deleteClass from DB is not aligned with hardcoded lists.");
+        if (!firestore) return;
+        deleteClassFromDb(firestore, className);
+        toast({ title: "Classe supprimée", description: `La classe ${className} a été vidée.` });
     },
     updateClassWithCsv: (className: string, studentNames: string[]) => {
-       console.warn("updateClassWithCsv to DB is not aligned with hardcoded lists.");
+        if (!firestore) return;
+        updateClassWithStudents(firestore, className, studentNames);
+        toast({ title: "Importation réussie", description: `La classe ${className} a été mise à jour.` });
     },
     resetAllStudentLists: async () => {
-        console.warn("resetAllStudentLists from DB is not aligned with hardcoded lists.");
+        if (!firestore || !classes) return;
+        await resetAllStudentListsInClasses(firestore, classes);
+        toast({ title: "Listes réinitialisées", description: `Toutes les listes d'élèves ont été vidées.` });
     },
     addTp: (newTp: TP) => {
       if (!firestore) return;
