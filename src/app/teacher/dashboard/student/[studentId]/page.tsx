@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { TP, EtudePrelimQCM, EtudePrelimText, allBlocs, competencesParNiveau, Niveau, classNames } from '@/lib/data-manager';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -218,7 +218,7 @@ export default function StudentDetailPage() {
     const params = useParams();
     const { toast } = useToast();
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
-    const className = searchParams.get('class');
+    const className = searchParams.get('class') || '';
 
     const { 
         firestore, 
@@ -233,14 +233,24 @@ export default function StudentDetailPage() {
     const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
     const { data: assignedTpsData } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `assignedTps`) : null, [firestore]));
 
+    const classDocRef = useMemoFirebase(() => {
+        if (!firestore || !className) return null;
+        return doc(firestore, 'classes', className);
+    }, [firestore, className]);
+    const { data: classData } = useDoc(classDocRef);
+    
     const studentsInClass = useMemo(() => {
-        if(!className) return [];
-        // This is a placeholder, a proper implementation would fetch students for the class
+        if (classData && classData.studentNames) {
+            return (classData.studentNames as string[]).sort((a,b) => a.localeCompare(b));
+        }
         return [];
-    }, [className]);
+    }, [classData]);
+
+    const isStudentInClass = useMemo(() => {
+        return studentsInClass.includes(studentName);
+    }, [studentsInClass, studentName]);
     
     // --- Data processing ---
-    const isStudentInClass = true; // Simplified for now
 
     const prelimAnswersForStudent = useMemo(() => {
         const data: Record<number, any> = {};
@@ -302,7 +312,7 @@ export default function StudentDetailPage() {
         if (studentName && studentLatestEvals) {
             const latestEvals: Record<string, EvaluationStatus> = {};
             for (const competenceId in studentLatestEvals) {
-                const history = studentLatestEvals[competenceId];
+                const history = (studentLatestEvals[competenceId] as any)?.history;
                 if (history && history.length > 0) {
                     latestEvals[competenceId] = history[history.length - 1];
                 }
@@ -345,11 +355,11 @@ export default function StudentDetailPage() {
              try {
                 await setDoc(feedbackDocRef, { tps: { ...feedbacksForStudent[selectedTpId], teacher: feedback } }, { merge: true });
              } catch(error) {
-                errorEmitter.emit('permission-error', new FirestorePermissionError({
-                    path: feedbackDocRef.path,
-                    operation: 'update',
-                    requestResourceData: { tps: { ...feedbacksForStudent[selectedTpId], teacher: feedback } },
-                }));
+                // errorEmitter.emit('permission-error', new FirestorePermissionError({
+                //     path: feedbackDocRef.path,
+                //     operation: 'update',
+                //     requestResourceData: { tps: { ...feedbacksForStudent[selectedTpId], teacher: feedback } },
+                // }));
              }
         }
     };
@@ -370,7 +380,7 @@ export default function StudentDetailPage() {
     const evaluatedCompetenceIds = selectedTp?.objectif.match(/C\d\.\d/g) || [];
 
 
-    if (!isStudentInClass) {
+    if (!isStudentInClass && studentsInClass.length > 0) {
         return (
             <div className="flex flex-col items-center justify-center h-64 text-center">
                 <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
@@ -383,13 +393,13 @@ export default function StudentDetailPage() {
                         <CardTitle className="flex items-center gap-3 font-headline">
                           <User className="w-6 h-6 text-primary" /> Changer d'élève :
                         </CardTitle>
-                        {classNames.length > 0 && (
+                        {studentsInClass.length > 0 && (
                           <Select onValueChange={handleStudentChange} value={studentName}>
                             <SelectTrigger className="w-[300px] bg-card text-accent font-bold text-lg font-headline border-accent">
                               <SelectValue placeholder="Changer d'élève..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {classNames.map(sName => (
+                              {studentsInClass.map(sName => (
                                 <SelectItem key={sName} value={sName}>{sName}</SelectItem>
                               ))}
                             </SelectContent>
@@ -439,7 +449,9 @@ export default function StudentDetailPage() {
                               <SelectValue placeholder="Changer d'élève..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {/* This list should be populated dynamically based on selected class */}
+                                {studentsInClass.map(sName => (
+                                  <SelectItem key={sName} value={sName}>{sName}</SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                       </div>

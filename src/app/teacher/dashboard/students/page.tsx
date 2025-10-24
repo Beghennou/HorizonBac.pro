@@ -16,7 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import {
   Tooltip,
   TooltipContent,
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/tooltip";
 import Link from 'next/link';
 import { TpStatus } from '@/firebase/provider';
-import { collection } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 
 
 const statusLabels: Record<TpStatus, string> = {
@@ -45,16 +45,19 @@ export default function StudentsPage() {
     
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
     
-    const { data: classesData } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
+    const classDocRef = useMemoFirebase(() => {
+        if (!firestore || !className) return null;
+        return doc(firestore, 'classes', className);
+    }, [firestore, className]);
+
+    const { data: classData } = useDoc(classDocRef);
 
     const studentsInClass = useMemo(() => {
-        if (!classesData || !className) return [];
-        const currentClass = classesData.find(c => c.id === className);
-        if (currentClass && currentClass.studentNames) {
-            return (currentClass.studentNames as string[]).sort((a: string, b: string) => a.localeCompare(b));
+        if (classData && classData.studentNames) {
+            return (classData.studentNames as string[]).sort((a: string, b: string) => a.localeCompare(b));
         }
         return [];
-    }, [classesData, className]);
+    }, [classData]);
     
     useEffect(() => {
         // Reset selection when class or level changes
