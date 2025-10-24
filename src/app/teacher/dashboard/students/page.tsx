@@ -44,28 +44,26 @@ export default function StudentsPage() {
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const className = searchParams.get('class') || '';
     
-    const [studentsInClass, setStudentsInClass] = useState<string[]>([]);
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+
+    const classDocRef = useMemoFirebase(() => {
+        if (!className || !firestore) return null;
+        return doc(firestore, 'classes', className);
+    }, [className, firestore]);
+
+    const { data: classData } = useDoc(classDocRef);
+
+    const studentsInClass = useMemo(() => {
+        if (classData && classData.studentNames) {
+            return (classData.studentNames as string[]).sort((a: string, b: string) => a.localeCompare(b));
+        }
+        return [];
+    }, [classData]);
     
     useEffect(() => {
         // Reset selection when class or level changes
         setSelectedStudents([]);
-        const fetchStudents = async () => {
-            if (className && firestore) {
-                const classDocRef = doc(firestore, 'classes', className);
-                const classDocSnap = await getDoc(classDocRef);
-                if (classDocSnap.exists()) {
-                    const studentNames = classDocSnap.data().studentNames || [];
-                    setStudentsInClass(studentNames.sort((a: string, b: string) => a.localeCompare(b)));
-                } else {
-                    setStudentsInClass([]);
-                }
-            } else {
-                 setStudentsInClass([]);
-            }
-        }
-        fetchStudents();
-    }, [className, firestore]);
+    }, [className, level]);
 
     const tpsForLevel = getTpsByNiveau(level, allTpsFromContext);
     const tpsIdsForCurrentLevel = new Set(tpsForLevel.map(tp => tp.id));
