@@ -6,7 +6,8 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getTpsByNiveau, Niveau, classNames } from '@/lib/data-manager';
+import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
+import { classNames } from '@/lib/class-data';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { LyceeLogo } from '@/components/lycee-logo';
 import {

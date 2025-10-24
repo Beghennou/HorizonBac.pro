@@ -22,7 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import Papa from 'papaparse';
-import { classNames, studentLists } from '@/lib/data-manager';
+import { studentLists, classNames } from '@/lib/class-data';
 
 
 export default function SettingsPage() {
@@ -154,7 +154,7 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><ChevronsRight /> Mise à Jour Annuelle des Classes</CardTitle>
           <CardDescription>
-            La gestion des élèves se fait maintenant directement dans le fichier <code>src/lib/data-manager.ts</code>.
+            La gestion des élèves se fait maintenant directement dans le fichier <code>src/lib/class-data.ts</code>.
             Modifiez ce fichier pour mettre à jour les listes de manière permanente. Les imports CSV ne sont plus persistés.
           </CardDescription>
         </CardHeader>
@@ -192,7 +192,7 @@ export default function SettingsPage() {
        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><UserPlus /> Ajouter un nouvel élève</CardTitle>
-          <CardDescription>Cette fonctionnalité est maintenant gérée dans <code>src/lib/data-manager.ts</code>.</CardDescription>
+          <CardDescription>Cette fonctionnalité est maintenant gérée dans <code>src/lib/class-data.ts</code>.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 opacity-50">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -259,7 +259,7 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><UserMinus /> Gestion des données</CardTitle>
-          <CardDescription>La suppression des élèves et des classes se fait maintenant dans <code>src/lib/data-manager.ts</code>.</CardDescription>
+          <CardDescription>La suppression des élèves et des classes se fait maintenant dans <code>src/lib/class-data.ts</code>.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 opacity-50">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">

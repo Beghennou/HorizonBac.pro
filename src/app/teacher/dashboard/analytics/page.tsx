@@ -2,7 +2,8 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { allBlocs, Niveau, classNames as staticClassNames } from '@/lib/data-manager';
+import { allBlocs, Niveau } from '@/lib/data-manager';
+import { classNames as staticClassNames } from '@/lib/class-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { BarChart3, Users, Target, BookOpen } from 'lucide-react';
