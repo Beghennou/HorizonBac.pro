@@ -5,7 +5,7 @@ export const classNames = [
 ];
 
 export const studentLists: Record<string, string[]> = {
-    '2MV1': ['BAKHTAR Adam', 'CHABOISSEAU Kenji', 'FARGUES Mathis', 'LEIGNEL Dylan', 'RODFRIGUES Leo', 'MOUSSAOUI Kaïs'],
+    '2MV1': ['BAKHTAR Adam', 'CHABOISSEAU Kenji', 'FARGUES Mathis', 'LEIGNEL Dylan', 'LARTIGUE Pierre', 'RODFRIGUES Leo', 'MOUSSAOUI Kaïs'],
     '2MV2': ['ANFANE Zaid', 'BOURREZ Nicolas', 'DA SILVA Enzo', 'DELAHAYE Enzo', 'DUFOUR Louis', 'FEZARD Matheo', 'GASPAR Nelson', 'HAMDI Naïm', 'HEROIN Nolann', 'LAMBERT Ethan', 'LEFEVRE Enzo', 'PINTO DOS SANTOS Fabio'],
     '2MV3': ['ARNOULT Isaac', 'BOUTARFA Ilyes', 'BRADI Yanis', 'CHAVIGNY Bryan', 'DA COSTA Evan', 'GALLON Tom', 'GUERBET Noam', 'HADJ-SAID Ismaël', 'JOURDAIN Nathan', 'LEROUX Lenny', 'PISIGO Killian', 'RENONCOURT Axel'],
     '2VP': ['BRIGNONE Enzo', 'CHIKH Rayan', 'DELAUNAY Jordan', 'GOUIN Léopold', 'LESCUYER Loan', 'PEREIRA Leo', 'PEREIRA DOS SANTOS Tiago', 'VACHER Gabriel', 'Xiong Vangkong'],
@@ -17,3 +17,4 @@ export const studentLists: Record<string, string[]> = {
     '1MA': ['DE ALMEIDA Tiago', 'EVRATTE Lucas', 'FERNANDES Noa', 'FOUQUET Louis', 'GILLESPIE Lénaïc', 'GOMES DE OLIVEIRA Diogo', 'LEFEBVRE Hugo', 'LEVEQUE Mathéo', 'LOPES Fabio', 'MARTINS Noa', 'PEREIRA Leo', 'PEREIRA PINTO Lucas', 'RENAUDINEAU Arthur', 'VACHER Gabriel', 'XIONG Vang-Kong'],
     '1APP': ['BLOTIERE Evan', 'BOULAY Antoine', 'FERREIRA Dylan', 'FERREIRA Tiago', 'GOMES DE OLIVEIRA Diogo', 'LE PENNEC Mathis', 'MARTINS Noa']
 };
+
