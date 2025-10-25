@@ -57,18 +57,24 @@ export function useDoc<T = any>(
 
     setIsLoading(true);
     setError(null);
-    // Optional: setData(null); // Clear previous data instantly
 
     const unsubscribe = onSnapshot(
       memoizedDocRef,
       (snapshot: DocumentSnapshot<DocumentData>) => {
+        let newData: StateDataType = null;
         if (snapshot.exists()) {
-          setData({ ...(snapshot.data() as T), id: snapshot.id });
-        } else {
-          // Document does not exist
-          setData(null);
+          newData = { ...(snapshot.data() as T), id: snapshot.id };
         }
-        setError(null); // Clear any previous error on successful snapshot (even if doc doesn't exist)
+
+        // Only update state if data has actually changed to prevent infinite loops
+        setData(currentData => {
+            if (JSON.stringify(currentData) !== JSON.stringify(newData)) {
+                return newData;
+            }
+            return currentData;
+        });
+
+        setError(null);
         setIsLoading(false);
       },
       (error: FirestoreError) => {

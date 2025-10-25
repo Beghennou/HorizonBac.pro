@@ -77,11 +77,19 @@ export function useCollection<T = any>(
     const unsubscribe = onSnapshot(
       memoizedTargetRefOrQuery,
       (snapshot: QuerySnapshot<DocumentData>) => {
-        const results: ResultItemType[] = [];
+        const newData: ResultItemType[] = [];
         for (const doc of snapshot.docs) {
-          results.push({ ...(doc.data() as T), id: doc.id });
+          newData.push({ ...(doc.data() as T), id: doc.id });
         }
-        setData(results);
+
+        // Only update state if data has actually changed to prevent infinite loops
+        setData(currentData => {
+            if (JSON.stringify(currentData) !== JSON.stringify(newData)) {
+                return newData;
+            }
+            return currentData;
+        });
+
         setError(null);
         setIsLoading(false);
       },
