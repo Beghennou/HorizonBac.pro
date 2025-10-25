@@ -332,14 +332,6 @@ export default function StudentDetailPage() {
         router.push(`${pathname}?${newSearchParams.toString()}`);
     }
 
-    const handleStudentChange = (newStudentName: string) => {
-        if (!newStudentName || newStudentName === studentName) return;
-        const newPath = `/teacher/dashboard/student/${encodeURIComponent(newStudentName)}`;
-        const newSearchParams = new URLSearchParams(searchParams.toString());
-        newSearchParams.delete('tp'); 
-        router.push(`${newPath}?${newSearchParams.toString()}`);
-    };
-
     const handleSave = async (prelimNote?: string, tpNote?: string, feedback?: string, isFinal?: boolean) => {
         if (!studentName || !selectedTpId || !firestore) return;
 
@@ -375,27 +367,8 @@ export default function StudentDetailPage() {
                 <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
                 <h1 className="font-headline text-3xl tracking-wide text-destructive">Accès non autorisé</h1>
                 <p className="text-muted-foreground text-lg mt-2 max-w-md">
-                    L'élève <strong>{studentName}</strong> ne fait pas partie de la classe <strong>{className}</strong> sélectionnée. Veuillez sélectionner un élève dans la liste déroulante ou retourner au suivi des classes.
+                    L'élève <strong>{studentName}</strong> ne fait pas partie de la classe <strong>{className}</strong> sélectionnée. Veuillez retourner au suivi des classes pour sélectionner un élève.
                 </p>
-                 <div className="flex items-center gap-4 mt-8">
-                      <div className="flex items-center gap-4">
-                        <CardTitle className="flex items-center gap-3 font-headline">
-                          <User className="w-6 h-6 text-primary" /> Changer d'élève :
-                        </CardTitle>
-                        {studentsInClass.length > 0 && (
-                          <Select onValueChange={handleStudentChange} value={studentName}>
-                            <SelectTrigger className="w-[300px] bg-card text-accent font-bold text-lg font-headline border-accent">
-                              <SelectValue placeholder="Changer d'élève..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {studentsInClass.map(sName => (
-                                <SelectItem key={sName} value={sName}>{sName}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </div>
-                </div>
             </div>
         )
     }
@@ -431,18 +404,8 @@ export default function StudentDetailPage() {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-4">
                         <CardTitle className="flex items-center gap-3 font-headline">
-                          <User className="w-6 h-6 text-primary" /> Dossier d'évaluation de :
+                          <User className="w-6 h-6 text-primary" /> Dossier d'évaluation de : <span className="text-accent">{studentName}</span>
                         </CardTitle>
-                          <Select onValueChange={handleStudentChange} value={studentName}>
-                            <SelectTrigger className="w-[300px] bg-card text-accent font-bold text-lg font-headline border-accent">
-                              <SelectValue placeholder="Changer d'élève..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {studentsInClass.map(sName => (
-                                  <SelectItem key={sName} value={sName}>{sName}</SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
                       </div>
                       <AiAnalysisHub studentName={studentName} evaluations={studentLatestEvals} />
                     </div>
