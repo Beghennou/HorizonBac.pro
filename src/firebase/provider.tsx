@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDoc, query, where } from 'firebase/firestore';
+import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDoc, query, where, getDocs } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
@@ -128,21 +128,39 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const [tps, setTps] = useState<Record<number, TP>>(initialTps);
   const [teacherName, setTeacherNameState] = useState<string>('');
   const { user } = userAuthState;
+  const [isTpsLoading, setIsTpsLoading] = useState(true);
 
-  const tpsQuery = useMemoFirebase(() => {
-    if (firestore && user) {
-        // Query for public TPs OR TPs created by the current user
-        return query(collection(firestore, 'tps'), where('author', '==', user.uid));
-    }
-    // Fallback for anonymous/loading state to fetch only public TPs
-    if (firestore) {
-        return query(collection(firestore, 'tps'));
-    }
-    return null;
+  // Fetch TPs from Firestore
+  useEffect(() => {
+    if (!firestore) return;
+
+    const fetchTps = async () => {
+        setIsTpsLoading(true);
+        try {
+            const publicTpsQuery = query(collection(firestore, 'tps'), where('id', '<', 1000));
+            const publicTpsSnapshot = await getDocs(publicTpsQuery);
+            const publicTps = Object.fromEntries(publicTpsSnapshot.docs.map(doc => [doc.id, doc.data() as TP]));
+            
+            let userTps = {};
+            if (user) {
+                const userTpsQuery = query(collection(firestore, 'tps'), where('author', '==', user.uid));
+                const userTpsSnapshot = await getDocs(userTpsQuery);
+                userTps = Object.fromEntries(userTpsSnapshot.docs.map(doc => [doc.id, doc.data() as TP]));
+            }
+            
+            setTps({ ...initialTps, ...publicTps, ...userTps });
+
+        } catch (error) {
+            console.error("Failed to fetch TPs:", error);
+        } finally {
+            setIsTpsLoading(false);
+        }
+    };
+
+    fetchTps();
   }, [firestore, user]);
 
 
-  const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(tpsQuery);
   const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
   const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
@@ -165,13 +183,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
      if (!evaluationsData) return {};
      return Object.fromEntries(evaluationsData.map(doc => [doc.id, doc.competences]));
   }, [evaluationsData]);
-
-  useEffect(() => {
-    if (dynamicTps) {
-        const tpsFromDb = Object.fromEntries(dynamicTps.map(tp => [tp.id, tp]));
-        setTps(prevTps => ({ ...initialTps, ...tpsFromDb }));
-    }
-  }, [dynamicTps]);
 
   useEffect(() => {
     if (configData) {
