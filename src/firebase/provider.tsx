@@ -134,8 +134,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
 
-  // Teacher-specific data, only loaded if a user is properly authenticated
-  const assignedTpsQuery = useMemoFirebase(() => (firestore && user && !user.isAnonymous) ? collection(firestore, 'assignedTps') : null, [firestore, user]);
+  // This query will be used for both anonymous and authenticated users.
+  // For anonymous users, it will fetch the necessary data for the student view.
+  // For teachers, it provides the full set of data they are allowed to see.
+  const assignedTpsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]);
   const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(assignedTpsQuery);
 
   const evaluationsQuery = useMemoFirebase(() => (firestore && user && !user.isAnonymous) ? collection(firestore, 'evaluations') : null, [firestore, user]);
