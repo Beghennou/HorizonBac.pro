@@ -32,29 +32,30 @@ function DashboardLayoutContent({
   const searchParams = useSearchParams();
   const { isLoaded: isFirebaseLoaded, tps: allTps, classes } = useFirebase();
 
-  const [niveau, setNiveau] = useState<Niveau>('seconde');
-  const [selectedClass, setSelectedClass] = useState<string | null>(null);
+  const level = (searchParams.get('level') as Niveau) || 'seconde';
+  const selectedClass = searchParams.get('class') || null;
 
   const classNames = useMemo(() => classes.map(c => c.id), [classes]);
 
   const classesForLevel = useMemo(() => {
     return classNames.filter(c => {
         const id = c.toLowerCase();
-        if (niveau === 'seconde') return id.startsWith('2');
-        if (niveau === 'premiere') return id.startsWith('1');
-        if (niveau === 'terminale') return id.startsWith('t');
+        if (level === 'seconde') return id.startsWith('2');
+        if (level === 'premiere') return id.startsWith('1');
+        if (level === 'terminale') return id.startsWith('t');
         return false;
     }).sort();
-  }, [niveau, classNames]);
+  }, [level, classNames]);
 
   useEffect(() => {
-    const levelFromUrl = searchParams.get('level') as Niveau | null;
-    const classFromUrl = searchParams.get('class');
+    if (isFirebaseLoaded && pathname.startsWith('/teacher/dashboard')) {
+      const currentClass = searchParams.get('class');
+      const currentLevel = searchParams.get('level') as Niveau;
 
-    const initialNiveau = levelFromUrl || 'seconde';
-    setNiveau(initialNiveau);
+      // Determine the initial level if not present
+      const initialNiveau = currentLevel || 'seconde';
 
-    if (isFirebaseLoaded) {
+      // Get classes for the determined level
       const classesForInitialNiveau = classNames.filter(c => {
           const id = c.toLowerCase();
           if (initialNiveau === 'seconde') return id.startsWith('2');
@@ -63,21 +64,29 @@ function DashboardLayoutContent({
           return false;
       }).sort();
       
-      const initialClass = classFromUrl && classesForInitialNiveau.includes(classFromUrl) 
-          ? classFromUrl 
+      const initialClass = currentClass && classesForInitialNiveau.includes(currentClass) 
+          ? currentClass 
           : classesForInitialNiveau[0] || null;
 
-      setSelectedClass(initialClass);
-      
       const newSearchParams = new URLSearchParams(searchParams.toString());
       let needsRedirect = false;
       
-      if (!levelFromUrl) {
+      if (!currentLevel) {
         newSearchParams.set('level', initialNiveau);
         needsRedirect = true;
       }
-      if (!classFromUrl && initialClass) {
+
+      if (!currentClass && initialClass) {
         newSearchParams.set('class', initialClass);
+        needsRedirect = true;
+      } else if (currentClass && !initialClass) {
+        // If the class in URL is invalid for the level, clear it and set a default
+        const defaultClass = classesForInitialNiveau[0] || null;
+        if(defaultClass) {
+          newSearchParams.set('class', defaultClass);
+        } else {
+          newSearchParams.delete('class');
+        }
         needsRedirect = true;
       }
 
@@ -85,10 +94,9 @@ function DashboardLayoutContent({
           router.replace(`${pathname}?${newSearchParams.toString()}`);
       }
     }
-
   }, [searchParams, router, pathname, isFirebaseLoaded, classNames]);
   
-  const isLoaded = isFirebaseLoaded;
+  const isLoaded = isFirebaseLoaded && selectedClass !== null;
 
   if (!isLoaded) {
     return <TachometerAnimation />;
@@ -133,7 +141,7 @@ function DashboardLayoutContent({
     router.push(`/teacher/dashboard/tp-designer?${newSearchParams.toString()}`);
   };
 
-  const tps = getTpsByNiveau(niveau, allTps);
+  const tps = getTpsByNiveau(level, allTps);
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
 
   return (
@@ -161,7 +169,7 @@ function DashboardLayoutContent({
                     <button
                       key={lvl}
                       onClick={() => handleNiveauChange(lvl)}
-                      className={`px-4 py-2 font-headline uppercase tracking-wider text-sm transition-colors ${niveau === lvl ? 'bg-gradient-to-r from-primary to-racing-orange text-white' : 'hover:bg-primary/20'}`}
+                      className={`px-4 py-2 font-headline uppercase tracking-wider text-sm transition-colors ${level === lvl ? 'bg-gradient-to-r from-primary to-racing-orange text-white' : 'hover:bg-primary/20'}`}
                     >
                       {lvl}
                     </button>
@@ -204,7 +212,7 @@ function DashboardLayoutContent({
                       </div>
                     
                       <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl flex-1">
-                        <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Liste des TP ({niveau})</h3>
+                        <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Liste des TP ({level})</h3>
                         <ScrollArea className="h-[calc(100%-3rem)]">
                            <div className="space-y-2 pr-4">
                             {tps.map(tp => (
