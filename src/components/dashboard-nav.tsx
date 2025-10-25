@@ -15,8 +15,7 @@ export function DashboardNav() {
   const navItems = [
     { href: `/teacher/dashboard/class-progress`, label: 'Suivi Classe', icon: CheckSquare, base: '/teacher/dashboard/class-progress', exact: true },
     { href: '/teacher/dashboard/students', label: 'Assigner des TP', icon: Users, base: '/teacher/dashboard/students' },
-    { href: `/teacher/dashboard/student/${studentName}`, label: 'Dossier Élève', icon: FileText, base: '/teacher/dashboard/student'},
-    { href: '/teacher/dashboard/analytics', label: 'Analyses', icon: BarChart3, base: '/teacherdashboard/analytics' },
+    { href: '/teacher/dashboard/analytics', label: 'Analyses', icon: BarChart3, base: '/teacher/dashboard/analytics' },
     { href: '/teacher/dashboard/tp-designer', label: 'Concepteur TP', icon: DraftingCompass, base: '/teacher/dashboard/tp-designer' },
     { href: `/teacher/dashboard/settings`, label: 'Paramètres', icon: Cog, base: '/teacher/dashboard/settings' },
   ];
@@ -42,11 +41,7 @@ export function DashboardNav() {
              isActive = item.exact ? pathname === item.base : pathname.startsWith(item.base);
         }
 
-        const finalHref = item.base === '/teacher/dashboard/student' 
-            ? studentName
-                ? `/teacher/dashboard/student/${encodeURIComponent(studentName)}?${searchParams.toString()}`
-                : `/teacher/dashboard/class-progress?${searchParams.toString()}`
-            : createUrl(item.base);
+        const finalHref = createUrl(item.base);
 
 
         return (
