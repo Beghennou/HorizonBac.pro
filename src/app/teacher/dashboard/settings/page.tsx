@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -47,9 +47,15 @@ export default function SettingsPage() {
   const [classToDelete, setClassToDelete] = useState('');
   
   const [classStudents, setClassStudents] = useState<string[]>([]);
-  const [newSecondeClassName, setNewSecondeClassName] = useState('2MV1');
-  const [newPremiereClassName, setNewPremiereClassName] = useState('1VP1');
-  const [newTerminaleClassName, setNewTerminaleClassName] = useState('TVP1');
+  const [secondeClassToUpdate, setSecondeClassToUpdate] = useState('');
+  const [premiereClassToUpdate, setPremiereClassToUpdate] = useState('');
+  const [terminaleClassToUpdate, setTerminaleClassToUpdate] = useState('');
+
+  const classNames = useMemo(() => classes.map(c => c.id).sort(), [classes]);
+
+  const secondeClasses = useMemo(() => classNames.filter(name => name.startsWith('2')), [classNames]);
+  const premiereClasses = useMemo(() => classNames.filter(name => name.startsWith('1')), [classNames]);
+  const terminaleClasses = useMemo(() => classNames.filter(name => name.startsWith('T')), [classNames]);
 
   useEffect(() => {
     setLocalTeacherName(teacherName);
@@ -63,7 +69,7 @@ export default function SettingsPage() {
         toast({
             variant: 'destructive',
             title: 'Classe non sélectionnée',
-            description: "Veuillez spécifier un nom de classe avant d'importer."
+            description: "Veuillez choisir une classe dans le menu déroulant avant d'importer."
         });
         event.target.value = '';
         return;
@@ -174,8 +180,6 @@ export default function SettingsPage() {
         setClassStudents([]);
     }
   }, [deleteStudentClass, classes]);
-  
-  const classNames = classes.map(c => c.id).sort();
 
   return (
     <div className="space-y-8">
@@ -195,29 +199,44 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                <Input value={newSecondeClassName} onChange={(e) => setNewSecondeClassName(e.target.value)} placeholder="Nom classe Seconde..."/>
+                <Select value={secondeClassToUpdate} onValueChange={setSecondeClassToUpdate}>
+                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Seconde..."/></SelectTrigger>
+                    <SelectContent>
+                        {secondeClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                </Select>
                 <Button asChild variant="outline">
                     <label className="cursor-pointer w-full">
                         <Upload className="mr-2 h-4 w-4" /> Importer CSV Seconde
-                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, newSecondeClassName)} />
+                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, secondeClassToUpdate)} />
                     </label>
                 </Button>
             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                <Input value={newPremiereClassName} onChange={(e) => setNewPremiereClassName(e.target.value)} placeholder="Nom classe Première..."/>
+                <Select value={premiereClassToUpdate} onValueChange={setPremiereClassToUpdate}>
+                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Première..."/></SelectTrigger>
+                    <SelectContent>
+                        {premiereClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                </Select>
                  <Button asChild variant="outline">
                     <label className="cursor-pointer w-full">
                         <Upload className="mr-2 h-4 w-4" /> Importer CSV Première
-                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, newPremiereClassName)} />
+                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, premiereClassToUpdate)} />
                     </label>
                 </Button>
             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                <Input value={newTerminaleClassName} onChange={(e) => setNewTerminaleClassName(e.target.value)} placeholder="Nom classe Terminale..."/>
+                <Select value={terminaleClassToUpdate} onValueChange={setTerminaleClassToUpdate}>
+                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Terminale..."/></SelectTrigger>
+                    <SelectContent>
+                        {terminaleClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                </Select>
                  <Button asChild variant="outline">
                     <label className="cursor-pointer w-full">
                         <Upload className="mr-2 h-4 w-4" /> Importer CSV Terminale
-                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, newTerminaleClassName)} />
+                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, terminaleClassToUpdate)} />
                     </label>
                 </Button>
             </div>
