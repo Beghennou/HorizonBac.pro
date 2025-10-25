@@ -27,13 +27,9 @@ type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 const evaluationLevels: EvaluationStatus[] = ['NA', 'EC', 'A', 'M'];
 
 const SendEmailButton = ({ tp, studentName }: { tp: TP | null, studentName: string | null }) => {
-    // This component needs access to student data, which is no longer in the context.
-    // It would need its own data fetching logic. For now, we'll disable it if data isn't passed in.
-    
     if (!tp || !studentName) return null;
 
     const handleSendEmail = () => {
-        // In a real app, you'd fetch the student's email here.
         alert("La fonctionnalité d'envoi d'e-mail n'est pas entièrement implémentée dans cette version.");
     };
 
@@ -223,17 +219,26 @@ export default function StudentDetailPage() {
     const { 
         firestore, 
         assignTp,
-        evaluations,
         saveEvaluation, 
         tps, 
+        user
     } = useFirebase();
 
+    // Data fetching hooks specific to this component
+    const studentDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, 'students', studentName) : null, [firestore, studentName]);
+    const { data: studentData } = useDoc(studentDocRef);
+
+    const assignedTpsDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `assignedTps/${studentName}`) : null, [firestore, studentName]);
+    const { data: assignedTpsData } = useDoc<{ tps: any[] }>(assignedTpsDocRef);
+
+    const studentEvalsDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `evaluations/${studentName}`) : null, [firestore, studentName]);
+    const { data: studentEvalsData } = useDoc(studentEvalsDocRef);
+    
     const { data: studentPrelimAnswers } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName]));
     const { data: studentFeedbacks } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName]));
     const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
-    const { data: assignedTpsData } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `assignedTps`) : null, [firestore]));
-
-     const classDocRef = useMemoFirebase(() => {
+    
+    const classDocRef = useMemoFirebase(() => {
       if (className && firestore) {
         return doc(firestore, 'classes', className);
       }
@@ -253,8 +258,6 @@ export default function StudentDetailPage() {
         return studentsInClass.includes(studentName);
     }, [studentsInClass, studentName]);
     
-    // --- Data processing ---
-
     const prelimAnswersForStudent = useMemo(() => {
         const data: Record<number, any> = {};
         studentPrelimAnswers?.forEach(doc => {
@@ -279,25 +282,17 @@ export default function StudentDetailPage() {
         return data;
     }, [studentStoredEvals]);
     
-    const assignedTps = useMemo(() => {
-        if(!assignedTpsData) return {};
-        return Object.fromEntries(assignedTpsData.map(doc => [doc.id, doc.tps || []]));
-    }, [assignedTpsData])
-
-
-    // --- State management ---
-    const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
-    const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
-
     const studentAssignedTps = useMemo(() => {
-        return (assignedTps[studentName] || []).map(assignedTp => {
+        return (assignedTpsData?.tps || []).map((assignedTp: any) => {
             const tp = tps[assignedTp.id];
             return tp ? { ...tp, status: assignedTp.status } : null;
-        }).filter((tp): tp is (TP & { status: string }) => tp !== null);
-    }, [assignedTps, studentName, tps]);
-    
-    const studentLatestEvals = evaluations[studentName] || {};
+        }).filter((tp: any): tp is (TP & { status: string }) => tp !== null);
+    }, [assignedTpsData, tps]);
 
+    const studentLatestEvals = studentEvalsData?.competences || {};
+
+    const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
+    const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
     useEffect(() => {
         const tpIdFromUrl = searchParams.get('tp');
@@ -358,11 +353,11 @@ export default function StudentDetailPage() {
              try {
                 await setDoc(feedbackDocRef, { tps: { ...feedbacksForStudent[selectedTpId], teacher: feedback } }, { merge: true });
              } catch(error) {
-                // errorEmitter.emit('permission-error', new FirestorePermissionError({
-                //     path: feedbackDocRef.path,
-                //     operation: 'update',
-                //     requestResourceData: { tps: { ...feedbacksForStudent[selectedTpId], teacher: feedback } },
-                // }));
+                 // errorEmitter.emit('permission-error', new FirestorePermissionError({
+                 //     path: feedbackDocRef.path,
+                 //     operation: 'update',
+                 //     requestResourceData: { tps: { ...feedbacksForStudent[selectedTpId], teacher: feedback } },
+                 // }));
              }
         }
     };
