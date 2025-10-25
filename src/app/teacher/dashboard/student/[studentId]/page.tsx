@@ -216,6 +216,11 @@ export default function StudentDetailPage() {
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     const className = searchParams.get('class') || '';
 
+    const selectedTpId = useMemo(() => {
+        const tpIdParam = searchParams.get('tp');
+        return tpIdParam ? parseInt(tpIdParam, 10) : null;
+    }, [searchParams]);
+
     const { 
         firestore, 
         assignTp,
@@ -223,12 +228,7 @@ export default function StudentDetailPage() {
         tps, 
         user
     } = useFirebase();
-
-    const selectedTpId = useMemo(() => {
-        const tpIdParam = searchParams.get('tp');
-        return tpIdParam ? parseInt(tpIdParam, 10) : null;
-    }, [searchParams]);
-
+    
     // Data fetching hooks specific to this component
     const assignedTpsDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `assignedTps/${studentName}`) : null, [firestore, studentName]);
     const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useDoc<{ tps: any[] }>(assignedTpsDocRef);
@@ -312,11 +312,14 @@ export default function StudentDetailPage() {
     }, [studentName, studentLatestEvals]);
     
     useEffect(() => {
-        // Only run this if the data is loaded and there is no TP in the URL
-        if (!isAssignedTpsLoading && studentAssignedTps.length > 0 && !searchParams.has('tp')) {
+        // This effect runs only when the component loads or the student changes.
+        // It's responsible for setting the initial TP if none is in the URL.
+        const hasTpInUrl = searchParams.has('tp');
+        if (!isAssignedTpsLoading && studentAssignedTps.length > 0 && !hasTpInUrl) {
             const firstTpId = studentAssignedTps[0].id;
             const newSearchParams = new URLSearchParams(searchParams.toString());
             newSearchParams.set('tp', firstTpId.toString());
+            // Using replace to avoid adding a new entry to the browser history
             router.replace(`${pathname}?${newSearchParams.toString()}`);
         }
     }, [isAssignedTpsLoading, studentAssignedTps, searchParams, pathname, router]);
@@ -573,7 +576,5 @@ export default function StudentDetailPage() {
         </div>
     );
 }
-
-    
 
     
