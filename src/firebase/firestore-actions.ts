@@ -128,7 +128,7 @@ export const setTeacherName = (firestore: Firestore, name: string) => {
     setDoc(configDoc, { name }, { merge: true }).catch(error => {
          errorEmitter.emit('permission-error', new FirestorePermissionError({
               path: configDoc.path,
-              operation: 'update',
+              operation: 'write',
               requestResourceData: { name },
           }));
     });

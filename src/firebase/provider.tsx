@@ -128,23 +128,68 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const [tps, setTps] = useState<Record<number, TP>>(initialTps);
   const [teacherName, setTeacherNameState] = useState<string>('');
   const { user } = userAuthState;
-
+  
   const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
   const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
-  const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(useMemoFirebase(() => firestore && user && !user.isAnonymous ? collection(firestore, 'assignedTps') : null, [firestore, user]));
-  const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(useMemoFirebase(() => firestore && user && !user.isAnonymous ? collection(firestore, 'evaluations') : null, [firestore, user]));
+
+  // Teacher-specific data, only loaded if a user is properly authenticated
+  const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(useMemoFirebase(() => (firestore && user && !user.isAnonymous) ? collection(firestore, 'assignedTps') : null, [firestore, user]));
+  const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(useMemoFirebase(() => (firestore && user && !user.isAnonymous) ? collection(firestore, 'evaluations') : null, [firestore, user]));
 
   useEffect(() => {
-    if (dynamicTps) {
-      const allTpsMap = new Map<number, TP>();
-      Object.values(initialTps).forEach(tp => allTpsMap.set(tp.id, tp));
-      dynamicTps.forEach(doc => {
-          allTpsMap.set(doc.id, doc as TP);
-      });
-      setTps(Object.fromEntries(allTpsMap));
-    }
-  }, [dynamicTps]);
+    const fetchTps = async () => {
+        if (!firestore) return;
+        
+        // 1. Fetch public TPs (id < 1000)
+        const publicTpsQuery = query(collection(firestore, 'tps'), where('id', '<', 1000));
+        
+        // 2. Fetch user-owned TPs if user is authenticated
+        let userTpsQuery = null;
+        if (user && !user.isAnonymous) {
+            userTpsQuery = query(collection(firestore, 'tps'), where('author', '==', user.uid));
+        }
+
+        try {
+            const queryPromises = [getDocs(publicTpsQuery)];
+            if(userTpsQuery) {
+                queryPromises.push(getDocs(userTpsQuery));
+            }
+            
+            const [publicTpsSnapshot, userTpsSnapshot] = await Promise.all(queryPromises);
+
+            const allTpsMap = new Map<number, TP>();
+            
+            // Add initial static TPs
+            Object.values(initialTps).forEach(tp => allTpsMap.set(tp.id, tp));
+            
+            // Add public TPs from Firestore
+            publicTpsSnapshot.forEach(doc => {
+                allTpsMap.set(doc.data().id, doc.data() as TP);
+            });
+            
+            // Add user-owned TPs from Firestore
+            if(userTpsSnapshot) {
+                userTpsSnapshot.forEach(doc => {
+                    allTpsMap.set(doc.data().id, doc.data() as TP);
+                });
+            }
+            
+            setTps(Object.fromEntries(allTpsMap));
+        } catch (error: any) {
+            console.error("Erreur de récupération des TPs:", error);
+            if(error.code === 'permission-denied') {
+                 errorEmitter.emit('permission-error', new FirestorePermissionError({
+                    path: 'tps',
+                    operation: 'list',
+                }));
+            }
+        }
+    };
+
+    fetchTps();
+  }, [firestore, user]);
+
 
   
   const assignedTps = useMemo(() => {
@@ -164,7 +209,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     }
   }, [configData]);
 
-  const isLoaded = !userAuthState.isUserLoading && !isClassesLoading && !isConfigLoading && !isTpsLoading;
+  const isLoaded = !userAuthState.isUserLoading && !isClassesLoading && !isConfigLoading;
 
   useEffect(() => {
     if (!auth) {
@@ -206,9 +251,17 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   }, [auth, toast]);
   
   const setTeacherName = useCallback((name: string) => {
-    if(!firestore) return;
+    if(!firestore || !user || user.isAnonymous) {
+        toast({
+            variant: "destructive",
+            title: "Action non autorisée",
+            description: "Vous devez être connecté pour modifier ce paramètre.",
+        });
+        return;
+    }
     setTeacherNameState(name);
-  }, [firestore]);
+    setTeacherNameInDb(firestore, name);
+  }, [firestore, user, toast]);
 
 
   const contextValue = {
