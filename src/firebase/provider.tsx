@@ -18,7 +18,7 @@ import {
     updateStudentTpStatus,
     saveStudentPrelimAnswer,
     saveStudentFeedback,
-    setTeacherName as setTeacherNameInDb,
+    setTeacherNameInDb,
     deleteStudent as deleteStudentFromDb,
     deleteClass as deleteClassFromDb,
     updateClassWithStudents,

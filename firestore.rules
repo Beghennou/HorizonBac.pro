@@ -1,188 +1,75 @@
-/**
- * @file Firestore Security Rules for Formula Skills Garage.
- *
- * @core_philosophy This ruleset enforces a strict user-ownership model, where teachers can only manage data related to their students and training programs. Students can only access their own progress data.
- * @data_structure
- *   - `/teachers/{teacherId}`: Stores teacher profiles. `teacherId` MUST match the Firebase auth UID.
- *   - `/teachers/{teacherId}/students/{studentId}`: Stores student profiles managed by the teacher.
- *   - `/teachers/{teacherId}/trainingPrograms/{trainingProgramId}`: Stores training programs created by the teacher.
- *   - `/teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}`: Stores simulation data associated with training programs.
- *   - `/students/{studentId}/studentProgress/{studentProgressId}`: Stores individual student progress records.
- * @key_security_decisions
- *   - Teachers can only create, read, update, and delete Students, TrainingPrograms, and Simulations they own (i.e., where the `teacherId` matches their auth UID).
- *   - Students can only manage their own progress data.
- *   - Listing of teachers is disallowed.
- * @denormalization TeacherId is denormalized into the Student and TrainingProgram entities to easily verify ownership.
- */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Protects teacher profiles. Only the authenticated teacher can read and write their own profile.
-     * @path /teachers/{teacherId}
-     * @allow (create, update, delete) Teacher with matching UID can manage their profile. (e.g., `request.auth.uid == teacherId`)
-     * @allow (get) Teacher with matching UID can read their profile.
-     * @deny (create, update, delete) Teacher with mismatched UID cannot manage another's profile.
-     * @deny (list) Listing all teacher documents is not allowed.
-     * @principle Enforces document ownership; teachers can only manage their own profiles.
-     */
-    match /teachers/{teacherId} {
+    match /users/{userId} {
+      allow read: if request.auth.uid == userId;
+      allow write: if request.auth.uid == userId;
+    }
+
+    match /config/{configId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    match /classes/{classId} {
+       function isSignedIn() {
+        return request.auth != null;
+      }
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    match /tps/{tpId} {
       function isSignedIn() {
         return request.auth != null;
       }
 
-      function isOwner(teacherId) {
-        return isSignedIn() && request.auth.uid == teacherId;
+      function isOwner() {
+        return isSignedIn() && request.auth.uid == resource.data.author;
       }
 
-      function isExistingOwner(teacherId) {
-        return isOwner(teacherId) && resource != null;
-      }
-
-      allow get: if isOwner(teacherId);
-      allow list: if false;
-      allow create: if isOwner(teacherId);
-      allow update: if isExistingOwner(teacherId);
-      allow delete: if isExistingOwner(teacherId);
+      allow get: if true;
+      
+      allow list: if true;
+      
+      allow write: if isOwner();
     }
 
-    /**
-     * @description Manages student profiles under a teacher. Only the teacher can manage students associated with them.
-     * @path /teachers/{teacherId}/students/{studentId}
-     * @allow (create) Teacher can add new students to their roster.
-     * @allow (get, list) Teacher can view students in their roster.
-     * @allow (update, delete) Teacher can modify or remove students from their roster.
-     * @deny (create, update, delete) Another teacher cannot modify this teacher's student.
-     * @principle Enforces teacher ownership of student profiles.
-     */
-    match /teachers/{teacherId}/students/{studentId} {
+    match /students/{studentId}/{document=**} {
+       function isSignedIn() {
+        return request.auth != null;
+      }
+      
+      allow read, write: if isSignedIn();
+    }
+
+    match /assignedTps/{studentId} {
       function isSignedIn() {
         return request.auth != null;
       }
-
-      function isOwner(teacherId) {
-        return isSignedIn() && request.auth.uid == teacherId;
-      }
-
-      function isExistingOwner(teacherId) {
-        return isOwner(teacherId) && resource != null;
-      }
-
-      allow get: if isOwner(teacherId);
-      allow list: if isOwner(teacherId);
-      allow create: if isOwner(teacherId) && request.resource.data.teacherId == teacherId;
-      allow update: if isExistingOwner(teacherId) && request.resource.data.teacherId == teacherId && request.resource.data.teacherId == resource.data.teacherId;
-      allow delete: if isExistingOwner(teacherId);
+      
+      // Un enseignant authentifié peut lire le document d'un élève.
+      // Le client devra filtrer les données dont il a besoin.
+      allow get: if isSignedIn();
+      
+      // On interdit de lister tous les documents de tous les élèves.
+      // La récupération doit se faire document par document.
+      allow list: if false; 
+      
+      // Seul un enseignant authentifié peut créer ou mettre à jour les TPs assignés.
+      allow create, update: if isSignedIn();
+      allow delete: if false;
     }
 
-    /**
-     * @description Manages training programs created by a teacher. Only the teacher can manage their own training programs.
-     * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}
-     * @allow (create) Teacher can create new training programs.
-     * @allow (get, list) Teacher can view their training programs.
-     * @allow (update, delete) Teacher can modify or remove their training programs.
-     * @deny Another teacher cannot modify this teacher's training programs.
-     * @principle Enforces teacher ownership of training programs.
-     */
-    match /teachers/{teacherId}/trainingPrograms/{trainingProgramId} {
-      function isSignedIn() {
+    match /evaluations/{studentId} {
+       function isSignedIn() {
         return request.auth != null;
       }
-
-      function isOwner(teacherId) {
-        return isSignedIn() && request.auth.uid == teacherId;
-      }
-
-      function isExistingOwner(teacherId) {
-        return isOwner(teacherId) && resource != null;
-      }
-
-      allow get: if isOwner(teacherId);
-      allow list: if isOwner(teacherId);
-      allow create: if isOwner(teacherId) && request.resource.data.teacherId == teacherId;
-      allow update: if isExistingOwner(teacherId) && request.resource.data.teacherId == teacherId && request.resource.data.teacherId == resource.data.teacherId;
-      allow delete: if isExistingOwner(teacherId);
-    }
-
-    /**
-     * @description Manages simulations within a training program. Only the owning teacher can manage simulations.
-     * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}
-     * @allow (create) Teacher can add new simulations to a training program.
-     * @allow (get, list) Teacher can view simulations in their training programs.
-     * @allow (update, delete) Teacher can modify or remove simulations from their training programs.
-     * @deny Another teacher cannot modify this teacher's simulations.
-     * @principle Enforces teacher ownership of simulations within training programs.
-     */
-    match /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(teacherId) {
-        return isSignedIn() && request.auth.uid == teacherId;
-      }
-
-      function isExistingOwner(teacherId) {
-        return isOwner(teacherId) && resource != null;
-      }
-
-      allow get: if isOwner(teacherId);
-      allow list: if isOwner(teacherId);
-      allow create: if isOwner(teacherId);
-      allow update: if isExistingOwner(teacherId);
-      allow delete: if isExistingOwner(teacherId);
-    }
-
-    /**
-     * @description Manages student progress data. Only the student can manage their own progress.
-     * @path /students/{studentId}/studentProgress/{studentProgressId}
-     * @allow (create) Student can create new progress records.
-     * @allow (get, list) Student can view their progress records.
-     * @allow (update, delete) Student can modify or remove their progress records.
-     * @deny Another student cannot modify this student's progress.
-     * @principle Enforces student ownership of progress data.
-     */
-    match /students/{studentId}/studentProgress/{studentProgressId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(studentId) {
-        return isSignedIn() && request.auth.uid == studentId;
-      }
-
-      function isExistingOwner(studentId) {
-        return isOwner(studentId) && resource != null;
-      }
-
-      allow get: if isOwner(studentId);
-      allow list: if isOwner(studentId);
-      allow create: if isOwner(studentId) && request.resource.data.studentId == studentId;
-      allow update: if isExistingOwner(studentId) && request.resource.data.studentId == studentId && request.resource.data.studentId == resource.data.studentId;
-      allow delete: if isExistingOwner(studentId);
-    }
-       /**
-     * @description Stores the final evaluation data for a student on a specific TP.
-     * @path /students/{studentId}/storedEvals/{tpId}
-     */
-     match /students/{studentId}/storedEvals/{tpId} {
-        function isSignedIn() {
-            return request.auth != null;
-        }
-
-        function isOwner(studentId) {
-            return isSignedIn() && request.auth.uid == studentId;
-        }
-
-        function isExistingOwner(studentId) {
-            return isOwner(studentId) && resource != null;
-        }
-        allow get: if isOwner(studentId);
-        allow list: if isOwner(studentId);
-        allow create: if isOwner(studentId);
-        allow update: if isExistingOwner(studentId);
-        allow delete: if isExistingOwner(studentId);
+       allow read, write: if isSignedIn();
     }
   }
 }

@@ -123,7 +123,7 @@ export const saveStudentFeedback = (firestore: Firestore, studentName: string, t
     });
 };
 
-export const setTeacherName = (firestore: Firestore, name: string) => {
+export const setTeacherNameInDb = (firestore: Firestore, name: string) => {
     const configDoc = doc(firestore, 'config', 'teacher');
     setDoc(configDoc, { name }, { merge: true }).catch(error => {
          errorEmitter.emit('permission-error', new FirestorePermissionError({
