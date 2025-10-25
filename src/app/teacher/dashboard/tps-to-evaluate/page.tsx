@@ -86,21 +86,14 @@ export default function TpsToEvaluatePage() {
                                     <AccordionContent>
                                         <div className="space-y-2 pt-2 pl-4">
                                             {tps.map(({ tpId, titre, className }) => {
-                                                const params = new URLSearchParams(searchParams.toString());
-                                                params.set('class', className);
-                                                
-                                                const href = `/teacher/dashboard/student/${encodeURIComponent(studentName)}?${params.toString()}`;
-
                                                 return (
                                                     <div key={tpId} className="flex items-center justify-between p-3 rounded-md bg-background/50">
                                                         <div>
                                                             <p className="font-semibold text-primary">TP {tpId}</p>
                                                             <p>{titre}</p>
                                                         </div>
-                                                        <Button asChild>
-                                                            <Link href={href}>
-                                                                Évaluer ce TP
-                                                            </Link>
+                                                        <Button disabled>
+                                                            Évaluation (bientôt disponible)
                                                         </Button>
                                                     </div>
                                                 );
