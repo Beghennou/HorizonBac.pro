@@ -143,21 +143,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         Object.values(initialTps).forEach(tp => allTpsMap.set(tp.id, tp));
 
         try {
-            // 2. Fetch public TPs (id < 1000)
-            const publicTpsQuery = query(tpsRef, where('id', '<', 1000));
-            const publicTpsSnapshot = await getDocs(publicTpsQuery);
-            publicTpsSnapshot.forEach(doc => {
-                allTpsMap.set(doc.data().id, doc.data() as TP);
+            // 2. Fetch all TPs. Security rules will enforce access.
+            const tpsSnapshot = await getDocs(tpsRef);
+            tpsSnapshot.forEach(doc => {
+                 allTpsMap.set(doc.data().id, doc.data() as TP);
             });
-
-            // 3. If user is authenticated, fetch their own TPs
-            if (user) {
-                const ownedTpsQuery = query(tpsRef, where('author', '==', user.uid));
-                const ownedTpsSnapshot = await getDocs(ownedTpsQuery);
-                ownedTpsSnapshot.forEach(doc => {
-                    allTpsMap.set(doc.data().id, doc.data() as TP);
-                });
-            }
             
             setTps(Object.fromEntries(allTpsMap));
 
@@ -175,11 +165,20 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
-  const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
+  
+  // Conditionally fetch assignedTps only for authenticated (non-anonymous) users
+  const assignedTpsQuery = useMemoFirebase(() => {
+    if (firestore && user && !user.isAnonymous) {
+      return collection(firestore, 'assignedTps');
+    }
+    return null; // Don't fetch for anonymous users
+  }, [firestore, user]);
+
+  const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(assignedTpsQuery);
   
   const evaluationsQuery = useMemoFirebase(() => {
-    if (firestore && user) {
-        return query(collection(firestore, 'evaluations'), where('studentId', '==', user.uid));
+    if (firestore && user && !user.isAnonymous) {
+        return collection(firestore, 'evaluations');
     }
     return null;
   }, [firestore, user]);
@@ -188,7 +187,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   
   const assignedTps = useMemo(() => {
     if (!assignedTpsData) return {};
-    return Object.fromEntries(assignedTpsData.map(doc => [doc.id, doc.tps]));
+    return Object.fromEntries(assignedTpsData.map(doc => [doc.id, doc.tps || []]));
   }, [assignedTpsData]);
   
   const evaluations = useMemo(() => {
