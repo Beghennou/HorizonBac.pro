@@ -225,9 +225,6 @@ export default function StudentDetailPage() {
     } = useFirebase();
 
     // Data fetching hooks specific to this component
-    const studentDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, 'students', studentName) : null, [firestore, studentName]);
-    const { data: studentData } = useDoc(studentDocRef);
-
     const assignedTpsDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `assignedTps/${studentName}`) : null, [firestore, studentName]);
     const { data: assignedTpsData } = useDoc<{ tps: any[] }>(assignedTpsDocRef);
 
