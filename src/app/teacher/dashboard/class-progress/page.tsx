@@ -1,21 +1,27 @@
 
 'use client';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
+import { TP, getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Check, Clock, X, CheckSquare, Loader2, AlertTriangle } from 'lucide-react';
+import { Check, Clock, X, CheckSquare, Loader2, AlertTriangle, BookOpen } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function ClassProgressPage() {
     const searchParams = useSearchParams();
-    const { firestore, tps: allTps, assignedTps, classes, user } = useFirebase();
+    const { firestore, tps: allTps, assignedTps, assignTp, user } = useFirebase();
 
     const currentClassName = searchParams.get('class');
+    const level = (searchParams.get('level') as Niveau) || 'seconde';
+    const [selectedTpId, setSelectedTpId] = useState<string>('');
+
 
     const { data: classData, isLoading: isClassLoading } = useDoc(useMemoFirebase(() => {
       if (currentClassName && firestore) {
@@ -31,16 +37,15 @@ export default function ClassProgressPage() {
         return [];
     }, [classData]);
 
-    const { data: allStoredEvals, isLoading: areEvalsLoading } = useCollection(useMemoFirebase(() => {
-        // Since we can't do a collectionGroup query for all students in a class easily,
-        // we fetch all storedEvals for the teacher's students. This is a simplification.
-        // A better approach in a large-scale app would be a backend function.
-        if (firestore && user) {
-             const studentProgressCollection = `teachers/${user.uid}/studentProgress`;
-             return null; // Not implemented yet
+    const tpsForLevel = useMemo(() => getTpsByNiveau(level, allTps), [level, allTps]);
+
+    const handleAssignTpToClass = () => {
+        if (studentsInClass.length > 0 && selectedTpId) {
+            assignTp(studentsInClass, parseInt(selectedTpId, 10));
+            setSelectedTpId('');
         }
-        return null;
-    }, [firestore, user]));
+    }
+
 
     const studentProgressData = useMemo(() => {
         const progressMap: Record<string, Record<string, { status: string; date?: string }>> = {};
@@ -53,11 +58,8 @@ export default function ClassProgressPage() {
             });
         });
         
-        // This part would be populated by allStoredEvals if the query was effective.
-        // For now, it will only show status, not completion date.
-
         return progressMap;
-    }, [studentsInClass, assignedTps, allStoredEvals]);
+    }, [studentsInClass, assignedTps]);
 
 
     const allAssignedTpIdsInClass = useMemo(() => {
@@ -70,7 +72,7 @@ export default function ClassProgressPage() {
     }, [studentsInClass, assignedTps]);
 
 
-    const isLoading = isClassLoading || areEvalsLoading;
+    const isLoading = isClassLoading;
 
     if (!currentClassName) {
         return (
@@ -137,13 +139,33 @@ export default function ClassProgressPage() {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-3 font-headline text-4xl">
-                        <CheckSquare className="w-10 h-10 text-primary" />
-                        Suivi de la Classe: {currentClassName}
-                    </CardTitle>
-                    <CardDescription>
-                        Vue d'ensemble de la progression des élèves sur les travaux pratiques assignés. Cliquez sur un nom pour accéder au dossier détaillé.
-                    </CardDescription>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle className="flex items-center gap-3 font-headline text-4xl">
+                                <CheckSquare className="w-10 h-10 text-primary" />
+                                Suivi de la Classe: {currentClassName}
+                            </CardTitle>
+                            <CardDescription>
+                                Vue d'ensemble de la progression des élèves. Cliquez sur un nom pour accéder au dossier détaillé.
+                            </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                             <Select onValueChange={setSelectedTpId} value={selectedTpId}>
+                                <SelectTrigger className="w-[350px]">
+                                    <SelectValue placeholder="Assigner un TP à toute la classe..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {tpsForLevel.map(tp => (
+                                        <SelectItem key={tp.id} value={tp.id.toString()}>TP {tp.id} - {tp.titre}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Button onClick={handleAssignTpToClass} disabled={!selectedTpId}>
+                                <BookOpen className="mr-2"/>
+                                Assigner
+                            </Button>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
                    <div className="overflow-x-auto">
