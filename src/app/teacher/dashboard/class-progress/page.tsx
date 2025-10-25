@@ -146,7 +146,7 @@ export default function ClassProgressPage() {
                                 Suivi de la Classe: {currentClassName}
                             </CardTitle>
                             <CardDescription>
-                                Vue d'ensemble de la progression des élèves. Cliquez sur un nom pour accéder au dossier détaillé.
+                                Vue d'ensemble de la progression des élèves.
                             </CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
@@ -193,10 +193,8 @@ export default function ClassProgressPage() {
                             <TableBody>
                                 {studentsInClass.map(studentName => (
                                     <TableRow key={studentName}>
-                                        <TableCell className="sticky left-0 bg-card z-10 font-bold">
-                                             <Link href={`/teacher/dashboard/student/${encodeURIComponent(studentName)}?${searchParams.toString()}`} className="text-accent hover:underline">
-                                                {studentName}
-                                            </Link>
+                                        <TableCell className="sticky left-0 bg-card z-10 font-bold text-accent">
+                                            {studentName}
                                         </TableCell>
                                         {allAssignedTpIdsInClass.map(tpId => {
                                             const progress = studentProgressData[studentName]?.[tpId.toString()];
