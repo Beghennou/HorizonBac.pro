@@ -17,7 +17,6 @@ export function DashboardNav() {
     { href: '/teacher/dashboard/students', label: 'Assigner des TPs', icon: Users, base: '/teacher/dashboard/students' },
     { href: `/teacher/dashboard/student/${studentName}`, label: 'Dossier Élève', icon: FileText, base: '/teacher/dashboard/student'},
     { href: '/teacher/dashboard/analytics', label: 'Analyses', icon: BarChart3, base: '/teacher/dashboard/analytics' },
-    { href: '/teacher/dashboard', label: 'Fiches TP', icon: Book, base: '/teacher/dashboard', exact: true },
     { href: '/teacher/dashboard/tp-designer', label: 'Concepteur TP', icon: DraftingCompass, base: '/teacher/dashboard/tp-designer' },
     { href: `/teacher/dashboard/settings`, label: 'Paramètres', icon: Cog, base: '/teacher/dashboard/settings' },
   ];
