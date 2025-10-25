@@ -34,11 +34,11 @@ export function DashboardNav() {
       {navItems.map((item) => {
         const Icon = item.icon;
         
-        let isActive = false;
-        if (item.base === '/teacher/dashboard/student') {
-             isActive = pathname.startsWith(item.base);
-        } else {
-             isActive = item.exact ? pathname === item.base : pathname.startsWith(item.base);
+        let isActive = item.exact ? pathname === item.base : pathname.startsWith(item.base);
+        
+        // If we are on a student detail page, no nav item should be active.
+        if (pathname.startsWith('/teacher/dashboard/student/')) {
+          isActive = false;
         }
 
         const finalHref = createUrl(item.base);
