@@ -14,7 +14,7 @@ export function DashboardNav() {
   
   const navItems = [
     { href: `/teacher/dashboard/class-progress`, label: 'Suivi Classe', icon: CheckSquare, base: '/teacher/dashboard/class-progress'},
-    { href: '/teacher/dashboard/students', label: 'Assigner des TPs', icon: Users, base: '/teacher/dashboard/students' },
+    { href: '/teacher/dashboard/students', label: 'Assigner des TP', icon: Users, base: '/teacher/dashboard/students' },
     { href: `/teacher/dashboard/student/${studentName}`, label: 'Dossier Élève', icon: FileText, base: '/teacher/dashboard/student'},
     { href: '/teacher/dashboard/analytics', label: 'Analyses', icon: BarChart3, base: '/teacher/dashboard/analytics' },
     { href: '/teacher/dashboard/tp-designer', label: 'Concepteur TP', icon: DraftingCompass, base: '/teacher/dashboard/tp-designer' },
