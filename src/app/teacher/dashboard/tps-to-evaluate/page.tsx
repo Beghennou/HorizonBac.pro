@@ -79,7 +79,7 @@ export default function TpsToEvaluatePage() {
                                         <div className="flex items-center gap-4">
                                             <User className="w-6 h-6 text-accent" />
                                             <span>{studentName}</span>
-                                            <Badge variant="secondary">{tps[0].className}</Badge>
+                                            {tps.length > 0 && <Badge variant="secondary">{tps[0].className}</Badge>}
                                             <Badge>{tps.length} TP à évaluer</Badge>
                                         </div>
                                     </AccordionTrigger>
