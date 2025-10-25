@@ -1,58 +1,67 @@
 /**
- * @file Firestore Security Rules for Formula Skills Garage application.
+ * @fileoverview Firestore Security Rules for Formula Skills Garage.
  *
- * @Core Philosophy:
- * This ruleset enforces a strict user-ownership model. Teachers can only manage their own students,
- * training programs, and simulations. Students can only access their own progress data.
+ * Core Philosophy: This ruleset enforces a strict owner-only access model for
+ * user-specific data, with teachers owning students and training programs.
+ * Data is segregated under user-specific paths (teachers and students) to
+ * leverage path-based authorization.
  *
- * @Data Structure:
- * - /teachers/{teacherId}: Stores teacher profiles, where teacherId matches the Firebase auth.uid.
- * - /teachers/{teacherId}/students/{studentId}: Stores student profiles managed by a teacher.
- * - /teachers/{teacherId}/trainingPrograms/{trainingProgramId}: Stores training programs created by a teacher.
- * - /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}: Stores simulations belonging to a training program.
- * - /students/{studentId}/studentProgress/{studentProgressId}: Stores student progress data.
+ * Data Structure:
+ * - /teachers/{teacherId}: Teacher profiles (teacherId == auth.uid).
+ * - /teachers/{teacherId}/students/{studentId}: Student profiles.
+ * - /teachers/{teacherId}/trainingPrograms/{trainingProgramId}: Training programs.
+ * - /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}: Simulations.
+ * - /students/{studentId}/studentProgress/{studentProgressId}: Student progress records.
+ * - /students/{studentId}/storedEvals/{tpId}: Stores the final evaluation data for a student on a specific TP.
  *
- * @Key Security Decisions:
- * - Teachers have full control over their own data (students, training programs, simulations).
- * - Students can only manage their own progress data.
- * - Data consistency between path segments and document fields is enforced on creation and updates.
- * - Listing all users is disallowed.
- *
- * @Denormalization for Authorization:
- * The `teacherId` is denormalized into the Student and TrainingProgram collections to avoid
- * needing `get()` calls to the `/teachers/{teacherId}` document for authorization.
+ * Key Security Decisions:
+ * - Teachers can only manage data (students, training programs, simulations) under their own teacherId.
+ * - Students can only manage their own progress records and stored evaluations.
+ * - Listing of user subcollections is allowed only to the owner.
+ * - Data ownership is enforced using path-based rules and denormalized teacherId fields.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows teachers to manage their own profile.
+     * @description Checks if the user is signed in.
+     * @return {bool} True if the user is signed in, false otherwise.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the authenticated user is the owner of the resource.
+     * @param {string} userId The user ID to compare against the authenticated user's ID.
+     * @return {bool} True if the user is the owner, false otherwise.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the authenticated user is the existing owner of the resource.
+     *              Also verifies that the resource exists.  Useful for update/delete.
+     * @param {string} userId The user ID to compare against the authenticated user's ID.
+     * @return {bool} True if the user is the owner and the resource exists, false otherwise.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Enforces teacher-only access to teacher profiles.
      * @path /teachers/{teacherId}
-     * @allow (get) Authenticated user can read their own teacher profile.
-     * @allow (create) Authenticated user can create their own teacher profile if the teacherId matches their auth.uid.
-     * @allow (update) Authenticated user can update their own teacher profile if the teacherId matches their auth.uid.
-     * @allow (delete) Authenticated user can delete their own teacher profile if the teacherId matches their auth.uid.
-     * @deny (get) Authenticated user cannot read other teacher profiles.
-     * @deny (create) Authenticated user cannot create a teacher profile with a mismatched teacherId.
-     * @deny (update) Authenticated user cannot update other teacher profiles.
-     * @deny (delete) Authenticated user cannot delete other teacher profiles.
-     * @principle Enforces document ownership for writes, restricts access to a user's own data tree.
+     * @allow (create) Teacher with matching teacherId can create their profile.
+     * @allow (get, list, update, delete) Teacher with matching teacherId can access and manage their profile.
+     * @deny (create) Non-teacher attempts to create a profile.
+     * @deny (get, list, update, delete) Other teachers or non-authenticated users attempt to access.
+     * @principle Enforces document ownership for writes.
      */
     match /teachers/{teacherId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(teacherId) {
-        return request.auth.uid == teacherId;
-      }
-
-      function isExistingOwner(teacherId) {
-        return isOwner(teacherId) && resource != null;
-      }
-
-      allow get: if isSignedIn();
+      allow get: if isOwner(teacherId);
       allow list: if false;
       allow create: if isOwner(teacherId);
       allow update: if isExistingOwner(teacherId);
@@ -60,103 +69,46 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows teachers to manage students.
+     * @description Enforces teacher-only access to student profiles under their control.
      * @path /teachers/{teacherId}/students/{studentId}
-     * @allow (get) Teacher can read a student's profile if the teacherId matches.
-     * @allow (list) Teacher can list all students if the teacherId matches.
-     * @allow (create) Teacher can create a student's profile if the teacherId matches and the student's teacherId field also matches.
-     * @allow (update) Teacher can update a student's profile if the teacherId matches and the existing student's teacherId field also matches.
-     * @allow (delete) Teacher can delete a student's profile if the teacherId matches and the existing student's teacherId field also matches.
-     * @deny (get) Teacher cannot read students under other teacher profiles.
-     * @deny (list) Teacher cannot list students under other teacher profiles.
-     * @deny (create) Teacher cannot create a student profile with a mismatched teacherId.
-     * @deny (update) Teacher cannot update students under other teacher profiles.
-     * @deny (delete) Teacher cannot delete students under other teacher profiles.
-     * @principle Enforces document ownership for writes, restricts access to a user's own data tree.
+     * @allow (create) Teacher creates a student profile under their teacherId.
+     * @allow (get, list, update, delete) Teacher can access and manage students under their teacherId.
+     * @deny (create, get, list, update, delete) Other teachers or students attempt to access.
+     * @principle Restricts access to a teacher's own data tree.
      */
     match /teachers/{teacherId}/students/{studentId} {
-       function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(teacherId) {
-        return request.auth.uid == teacherId;
-      }
-
-      function isExistingOwner(teacherId) {
-        return isOwner(teacherId) && resource != null;
-      }
-
       allow get: if isOwner(teacherId);
       allow list: if isOwner(teacherId);
       allow create: if isOwner(teacherId) && request.resource.data.teacherId == teacherId;
-      allow update: if isExistingOwner(teacherId) && request.resource.data.teacherId == resource.data.teacherId;
-      allow delete: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
+      allow update: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
+      allow delete: if isExistingOwner(teacherId);
     }
 
     /**
-     * @description Allows teachers to manage training programs.
+     * @description Enforces teacher-only access to training programs under their control.
      * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}
-     * @allow (get) Teacher can read a training program if the teacherId matches.
-     * @allow (list) Teacher can list all training programs if the teacherId matches.
-     * @allow (create) Teacher can create a training program if the teacherId matches and the training program's teacherId field also matches.
-     * @allow (update) Teacher can update a training program if the teacherId matches and the existing training program's teacherId field also matches.
-     * @allow (delete) Teacher can delete a training program if the teacherId matches and the existing training program's teacherId field also matches.
-     * @deny (get) Teacher cannot read training programs under other teacher profiles.
-     * @deny (list) Teacher cannot list training programs under other teacher profiles.
-     * @deny (create) Teacher cannot create a training program with a mismatched teacherId.
-     * @deny (update) Teacher cannot update training programs under other teacher profiles.
-     * @deny (delete) Teacher cannot delete training programs under other teacher profiles.
-     * @principle Enforces document ownership for writes, restricts access to a user's own data tree.
+     * @allow (create) Teacher creates a training program under their teacherId.
+     * @allow (get, list, update, delete) Teacher can access and manage training programs under their teacherId.
+     * @deny (create, get, list, update, delete) Other teachers or students attempt to access.
+     * @principle Restricts access to a teacher's own data tree.
      */
     match /teachers/{teacherId}/trainingPrograms/{trainingProgramId} {
-       function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(teacherId) {
-        return request.auth.uid == teacherId;
-      }
-
-      function isExistingOwner(teacherId) {
-        return isOwner(teacherId) && resource != null;
-      }
-
       allow get: if isOwner(teacherId);
       allow list: if isOwner(teacherId);
       allow create: if isOwner(teacherId) && request.resource.data.teacherId == teacherId;
-      allow update: if isExistingOwner(teacherId) && request.resource.data.teacherId == resource.data.teacherId;
-      allow delete: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
+      allow update: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
+      allow delete: if isExistingOwner(teacherId);
     }
 
     /**
-     * @description Allows teachers to manage simulations within their training programs.
+     * @description Enforces teacher-only access to simulations under their training programs.
      * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}
-     * @allow (get) Teacher can read a simulation if the teacherId matches.
-     * @allow (list) Teacher can list all simulations if the teacherId matches.
-     * @allow (create) Teacher can create a simulation if the teacherId matches.
-     * @allow (update) Teacher can update a simulation if the teacherId matches.
-     * @allow (delete) Teacher can delete a simulation if the teacherId matches.
-     * @deny (get) Teacher cannot read simulations under other teacher profiles.
-     * @deny (list) Teacher cannot list simulations under other teacher profiles.
-     * @deny (create) Teacher cannot create a simulation under other teacher profiles.
-     * @deny (update) Teacher cannot update simulations under other teacher profiles.
-     * @deny (delete) Teacher cannot delete simulations under other teacher profiles.
-     * @principle Enforces document ownership for writes, restricts access to a user's own data tree.
+     * @allow (create) Teacher creates a simulation under their training program.
+     * @allow (get, list, update, delete) Teacher can access and manage simulations under their training program.
+     * @deny (create, get, list, update, delete) Other teachers or students attempt to access.
+     * @principle Restricts access to a teacher's own data tree.
      */
     match /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId} {
-       function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(teacherId) {
-        return request.auth.uid == teacherId;
-      }
-
-      function isExistingOwner(teacherId) {
-        return isOwner(teacherId) && resource != null;
-      }
-
       allow get: if isOwner(teacherId);
       allow list: if isOwner(teacherId);
       allow create: if isOwner(teacherId);
@@ -165,86 +117,34 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows students to manage their progress data.
+     * @description Enforces student-only access to their own progress records.
      * @path /students/{studentId}/studentProgress/{studentProgressId}
-     * @allow (get) Student can read their own progress data if the studentId matches.
-     * @allow (list) Student can list their own progress data if the studentId matches.
-     * @allow (create) Student can create progress data if the studentId matches.
-     * @allow (update) Student can update their own progress data if the studentId matches.
-     * @allow (delete) Student can delete their own progress data if the studentId matches.
-     * @deny (get) Student cannot read progress data under other student profiles.
-     * @deny (list) Student cannot list progress data under other student profiles.
-     * @deny (create) Student cannot create progress data under other student profiles.
-     * @deny (update) Student cannot update progress data under other student profiles.
-     * @deny (delete) Student cannot delete progress data under other student profiles.
-     * @principle Enforces document ownership for writes, restricts access to a user's own data tree.
+     * @allow (create) Student can create their progress records under their studentId.
+     * @allow (get, list, update, delete) Student can access and manage their own progress records.
+     * @deny (create, get, list, update, delete) Other students or teachers attempt to access.
+     * @principle Restricts access to a student's own data tree.
      */
     match /students/{studentId}/studentProgress/{studentProgressId} {
-       function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(studentId) {
-        return request.auth.uid == studentId;
-      }
-
-      function isExistingOwner(studentId) {
-        return isOwner(studentId) && resource != null;
-      }
-
       allow get: if isOwner(studentId);
       allow list: if isOwner(studentId);
-      allow create: if isOwner(studentId);
-      allow update: if isExistingOwner(studentId);
+      allow create: if isOwner(studentId) && request.resource.data.studentId == studentId;
+      allow update: if isExistingOwner(studentId) && resource.data.studentId == studentId;
       allow delete: if isExistingOwner(studentId);
     }
 
-    /**
-     * @description Allows students to manage their stored evaluation data.
+        /**
+     * @description Enforces student-only access to their own stored evaluations.
      * @path /students/{studentId}/storedEvals/{tpId}
+     * @allow (create) Student can create their stored evals under their studentId.
+     * @allow (get, list, update, delete) Student can access and manage their own stored evals.
+     * @deny (create, get, list, update, delete) Other students or teachers attempt to access.
      */
     match /students/{studentId}/storedEvals/{tpId} {
-       function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(studentId) {
-        return request.auth.uid == studentId;
-      }
-
-      function isExistingOwner(studentId) {
-        return isOwner(studentId) && resource != null;
-      }
-
       allow get: if isOwner(studentId);
       allow list: if isOwner(studentId);
       allow create: if isOwner(studentId);
       allow update: if isExistingOwner(studentId);
       allow delete: if isExistingOwner(studentId);
-    }
-
-    /**
-     * @description Allows students to list their assigned TPs.
-     * @path /assignedTps/{studentId}
-     */
-    match /assignedTps/{studentId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(studentId) {
-        return request.auth.uid == studentId;
-      }
-
-      function isExistingOwner(studentId) {
-        return isOwner(studentId) && resource != null;
-      }
-
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
     }
   }
 }
