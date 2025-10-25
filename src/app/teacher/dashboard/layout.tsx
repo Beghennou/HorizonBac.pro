@@ -84,6 +84,12 @@ function DashboardLayoutContent({
         }
         needsRedirect = true;
       }
+      
+      if (pathname === '/teacher/dashboard/students') {
+        const redirectPath = `/teacher/dashboard?${newSearchParams.toString()}`;
+        router.replace(redirectPath);
+        return;
+      }
 
       if (needsRedirect) {
           router.replace(`${pathname}?${newSearchParams.toString()}`);
@@ -112,7 +118,7 @@ function DashboardLayoutContent({
       newSearchParams.set('class', firstClassForLevel);
     }
     
-    router.push(`/teacher/dashboard/students?${newSearchParams.toString()}`);
+    router.push(`/teacher/dashboard?${newSearchParams.toString()}`);
   };
 
   const handleClassChange = (className: string) => {

@@ -13,7 +13,6 @@ export function DashboardNav() {
   const studentName = searchParams.get('student');
   
   const navItems = [
-    { href: '/teacher/dashboard/students', label: 'Suivi des Classes', icon: Users, base: '/teacher/dashboard/students' },
     { href: `/teacher/dashboard/student/${studentName}`, label: 'Dossier Élève', icon: FileText, base: '/teacher/dashboard/student', requiredParam: 'student'},
     { href: '/teacher/dashboard/analytics', label: 'Analyses', icon: BarChart3, base: '/teacher/dashboard/analytics' },
     { href: '/teacher/dashboard', label: 'Fiches TP', icon: Book, base: '/teacher/dashboard', exact: true },
