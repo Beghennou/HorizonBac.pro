@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
@@ -311,7 +312,7 @@ export default function StudentDetailPage() {
     
     useEffect(() => {
         const hasTpInUrl = searchParams.has('tp');
-        if (!isAssignedTpsLoading && studentAssignedTps && studentAssignedTps.length > 0 && !hasTpInUrl) {
+        if (!isAssignedTpsLoading && studentAssignedTps.length > 0 && !hasTpInUrl) {
             const firstTpId = studentAssignedTps[0].id;
             const newSearchParams = new URLSearchParams(searchParams.toString());
             newSearchParams.set('tp', firstTpId.toString());
@@ -566,5 +567,7 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+
+    
 
     
