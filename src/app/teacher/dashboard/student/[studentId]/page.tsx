@@ -310,7 +310,8 @@ export default function StudentDetailPage() {
     }, [studentName, studentLatestEvals]);
     
     useEffect(() => {
-        if (!isAssignedTpsLoading && studentAssignedTps.length > 0 && !searchParams.has('tp')) {
+        const hasTpInUrl = searchParams.has('tp');
+        if (!isAssignedTpsLoading && studentAssignedTps && studentAssignedTps.length > 0 && !hasTpInUrl) {
             const firstTpId = studentAssignedTps[0].id;
             const newSearchParams = new URLSearchParams(searchParams.toString());
             newSearchParams.set('tp', firstTpId.toString());
@@ -565,3 +566,5 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+
+    
