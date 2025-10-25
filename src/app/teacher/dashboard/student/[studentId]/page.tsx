@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
@@ -313,6 +312,7 @@ export default function StudentDetailPage() {
     }, [studentName, studentLatestEvals]);
     
     useEffect(() => {
+        // Only run this if the data is loaded and there is no TP in the URL
         const hasTpInUrl = searchParams.has('tp');
         if (!isAssignedTpsLoading && studentAssignedTps.length > 0 && !hasTpInUrl) {
             const firstTpId = studentAssignedTps[0].id;
@@ -573,5 +573,7 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+
+    
 
     
