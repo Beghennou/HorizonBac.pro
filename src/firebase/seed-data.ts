@@ -51,7 +51,7 @@ export const seedInitialData = async (firestore: Firestore) => {
 
 
 export const checkAndSeedData = async (firestore: Firestore) => {
-    const seedDocRef = doc(firestore, 'config', 'initial_seed_v2');
+    const seedDocRef = doc(firestore, 'config', 'initial_seed_v3');
     try {
         const seedDoc = await getDoc(seedDocRef);
         if (!seedDoc.exists()) {
