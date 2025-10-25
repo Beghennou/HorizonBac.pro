@@ -225,8 +225,10 @@ export default function StudentDetailPage() {
         user
     } = useFirebase();
 
-    const selectedTpIdParam = searchParams.get('tp');
-    const selectedTpId = selectedTpIdParam ? parseInt(selectedTpIdParam, 10) : null;
+    const selectedTpId = useMemo(() => {
+        const tpIdParam = searchParams.get('tp');
+        return tpIdParam ? parseInt(tpIdParam, 10) : null;
+    }, [searchParams]);
 
     // Data fetching hooks specific to this component
     const assignedTpsDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `assignedTps/${studentName}`) : null, [firestore, studentName]);
@@ -295,14 +297,15 @@ export default function StudentDetailPage() {
     const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
     useEffect(() => {
-        const currentTpId = selectedTpIdParam ? parseInt(selectedTpIdParam) : studentAssignedTps.length > 0 ? studentAssignedTps[0].id : null;
-        
-        if (!selectedTpIdParam && currentTpId) {
-             const newSearchParams = new URLSearchParams(searchParams.toString());
-             newSearchParams.set('tp', currentTpId.toString());
-             router.replace(`${pathname}?${newSearchParams.toString()}`);
+        // Automatically select the first TP if none is selected in the URL
+        if (studentAssignedTps.length > 0 && !selectedTpId) {
+            const firstTpId = studentAssignedTps[0].id;
+            const newSearchParams = new URLSearchParams(searchParams.toString());
+            newSearchParams.set('tp', firstTpId.toString());
+            router.replace(`${pathname}?${newSearchParams.toString()}`);
         }
-
+        
+        // Update evaluations when student data is loaded
         if (studentName && studentLatestEvals) {
             const latestEvals: Record<string, EvaluationStatus> = {};
             for (const competenceId in studentLatestEvals) {
@@ -315,7 +318,8 @@ export default function StudentDetailPage() {
         } else {
             setCurrentEvaluations({});
         }
-    }, [studentName, studentLatestEvals, studentAssignedTps, selectedTpIdParam, pathname, router, searchParams]);
+    }, [studentName, studentLatestEvals, studentAssignedTps, selectedTpId, pathname, router, searchParams]);
+
 
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
         setCurrentEvaluations(prev => ({
@@ -325,9 +329,8 @@ export default function StudentDetailPage() {
     };
 
     const handleTpSelect = (tpId: string) => {
-        const newTpId = parseInt(tpId);
         const newSearchParams = new URLSearchParams(searchParams.toString());
-        newSearchParams.set('tp', newTpId.toString());
+        newSearchParams.set('tp', tpId);
         router.push(`${pathname}?${newSearchParams.toString()}`);
     }
 
@@ -335,6 +338,7 @@ export default function StudentDetailPage() {
         if (!newStudentName || newStudentName === studentName) return;
         const newPath = `/teacher/dashboard/student/${encodeURIComponent(newStudentName)}`;
         const newSearchParams = new URLSearchParams(searchParams.toString());
+        newSearchParams.delete('tp'); // Remove tp from search params to allow auto-selection for new student
         router.push(`${newPath}?${newSearchParams.toString()}`);
     };
 
