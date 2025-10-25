@@ -15,7 +15,7 @@ export function DashboardNav() {
   const navItems = [
     { href: `/teacher/dashboard/class-progress`, label: 'Suivi Classe', icon: CheckSquare, base: '/teacher/dashboard/class-progress'},
     { href: '/teacher/dashboard/students', label: 'Assigner des TPs', icon: Users, base: '/teacher/dashboard/students' },
-    { href: `/teacher/dashboard/student/${studentName}`, label: 'Dossier Élève', icon: FileText, base: '/teacher/dashboard/student', requiredParam: 'student'},
+    { href: `/teacher/dashboard/student/${studentName}`, label: 'Dossier Élève', icon: FileText, base: '/teacher/dashboard/student'},
     { href: '/teacher/dashboard/analytics', label: 'Analyses', icon: BarChart3, base: '/teacher/dashboard/analytics' },
     { href: '/teacher/dashboard', label: 'Fiches TP', icon: Book, base: '/teacher/dashboard', exact: true },
     { href: '/teacher/dashboard/tp-designer', label: 'Concepteur TP', icon: DraftingCompass, base: '/teacher/dashboard/tp-designer' },
@@ -37,12 +37,6 @@ export function DashboardNav() {
         const Icon = item.icon;
         const isActive = item.exact ? pathname === item.base : pathname.startsWith(item.base);
         
-        // A link is disabled only if it requires a param that is missing.
-        // For "Dossier Élève", we will navigate to a default page instead of disabling it.
-        const isDisabled = item.base === '/teacher/dashboard/student' ? false : (!!item.requiredParam && !searchParams.has(item.requiredParam));
-
-        // Build the URL. If the item is disabled, we can point it to the class progress page as a fallback.
-        // For "Dossier Élève", if no student is selected, link to the class progress page.
         const finalHref = item.base === '/teacher/dashboard/student' 
             ? studentName
                 ? `/teacher/dashboard/student/${encodeURIComponent(studentName)}?${searchParams.toString()}`
@@ -55,13 +49,11 @@ export function DashboardNav() {
             key={item.href}
             asChild
             variant={isActive ? 'default' : 'ghost'}
-            disabled={isDisabled}
             className={cn(
               'justify-start gap-3 text-base h-12 px-4',
               isActive
                 ? 'bg-gradient-to-r from-primary to-racing-orange text-white'
-                : 'hover:bg-primary/10 hover:text-accent',
-              isDisabled && "bg-muted/20 text-muted-foreground hover:bg-muted/30 cursor-not-allowed"
+                : 'hover:bg-primary/10 hover:text-accent'
             )}
           >
             <Link href={finalHref}>

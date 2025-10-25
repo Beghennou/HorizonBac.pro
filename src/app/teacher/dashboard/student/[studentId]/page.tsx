@@ -343,7 +343,7 @@ export default function StudentDetailPage() {
     const handleSave = async (prelimNote?: string, tpNote?: string, feedback?: string, isFinal?: boolean) => {
         if (!studentName || !selectedTpId || !firestore) return;
 
-        saveEvaluation(studentName, selectedTpId, currentEvaluations, prelimNote, tpNote, isFinal);
+        saveEvaluation(studentName, selectedTpId, currentEvaluations, evaluations, prelimNote, tpNote, isFinal);
 
         if (feedback) {
              const feedbackDocRef = doc(firestore, `students/${studentName}/feedbacks`, selectedTpId.toString());
@@ -566,9 +566,3 @@ export default function StudentDetailPage() {
         </div>
     );
 }
-
-    
-
-    
-
-
