@@ -327,7 +327,7 @@ export default function StudentDetailPage() {
 
     const handleTpSelect = (tpId: string) => {
         const newTpId = parseInt(tpId);
-        setSelectedTpId(newTpId);
+        setSelectedTpId(newTpId); // Update state directly
         const newSearchParams = new URLSearchParams(searchParams.toString());
         newSearchParams.set('tp', newTpId.toString());
         router.push(`${pathname}?${newSearchParams.toString()}`);
