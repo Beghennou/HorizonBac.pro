@@ -25,6 +25,7 @@ import {
     addCustomTp,
     resetAllStudentListsInClasses
 } from './firestore-actions';
+import { seedInitialData } from './seed-data';
 
 
 // Types definition
@@ -134,8 +135,29 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
 
   // Teacher-specific data, only loaded if a user is properly authenticated
-  const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(useMemoFirebase(() => (firestore && user && !user.isAnonymous) ? collection(firestore, 'assignedTps') : null, [firestore, user]));
-  const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(useMemoFirebase(() => (firestore && user && !user.isAnonymous) ? collection(firestore, 'evaluations') : null, [firestore, user]));
+  const assignedTpsQuery = useMemoFirebase(() => (firestore && user && !user.isAnonymous) ? collection(firestore, 'assignedTps') : null, [firestore, user]);
+  const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(assignedTpsQuery);
+
+  const evaluationsQuery = useMemoFirebase(() => (firestore && user && !user.isAnonymous) ? collection(firestore, 'evaluations') : null, [firestore, user]);
+  const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(evaluationsQuery);
+  
+  
+  useEffect(() => {
+    const checkAndSeedData = async () => {
+        if(firestore) {
+            const seedDocRef = doc(firestore, 'config', 'initial_seed_v2');
+            const seedDoc = await getDoc(seedDocRef);
+            if(!seedDoc.exists()) {
+                console.log("No initial data found. Seeding database...");
+                await seedInitialData(firestore);
+                await setDoc(seedDocRef, { seeded: true, date: new Date() });
+                console.log("Database seeded successfully.");
+            }
+        }
+    };
+    checkAndSeedData();
+  }, [firestore]);
+
 
   useEffect(() => {
     const fetchTps = async () => {
