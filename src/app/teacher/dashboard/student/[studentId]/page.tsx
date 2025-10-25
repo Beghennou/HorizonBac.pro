@@ -297,14 +297,6 @@ export default function StudentDetailPage() {
     const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
     useEffect(() => {
-        // Automatically select the first TP if none is selected in the URL
-        if (studentAssignedTps.length > 0 && !selectedTpId) {
-            const firstTpId = studentAssignedTps[0].id;
-            const newSearchParams = new URLSearchParams(searchParams.toString());
-            newSearchParams.set('tp', firstTpId.toString());
-            router.replace(`${pathname}?${newSearchParams.toString()}`);
-        }
-        
         // Update evaluations when student data is loaded
         if (studentName && studentLatestEvals) {
             const latestEvals: Record<string, EvaluationStatus> = {};
@@ -318,7 +310,17 @@ export default function StudentDetailPage() {
         } else {
             setCurrentEvaluations({});
         }
-    }, [studentName, studentLatestEvals, studentAssignedTps, selectedTpId, pathname, router, searchParams]);
+    }, [studentName, studentLatestEvals]);
+
+    // Automatically select the first TP if none is selected in the URL
+    useEffect(() => {
+        if (studentAssignedTps.length > 0 && !selectedTpId) {
+            const firstTpId = studentAssignedTps[0].id;
+            const newSearchParams = new URLSearchParams(searchParams.toString());
+            newSearchParams.set('tp', firstTpId.toString());
+            router.replace(`${pathname}?${newSearchParams.toString()}`);
+        }
+    }, [studentAssignedTps, selectedTpId, pathname, router, searchParams]);
 
 
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
