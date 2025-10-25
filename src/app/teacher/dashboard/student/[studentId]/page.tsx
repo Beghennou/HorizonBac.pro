@@ -314,13 +314,13 @@ export default function StudentDetailPage() {
 
     // Automatically select the first TP if none is selected in the URL
     useEffect(() => {
-        if (studentAssignedTps.length > 0 && !selectedTpId) {
+        if (studentAssignedTps.length > 0 && !searchParams.has('tp')) {
             const firstTpId = studentAssignedTps[0].id;
             const newSearchParams = new URLSearchParams(searchParams.toString());
             newSearchParams.set('tp', firstTpId.toString());
             router.replace(`${pathname}?${newSearchParams.toString()}`);
         }
-    }, [studentAssignedTps, selectedTpId, pathname, router, searchParams]);
+    }, [studentAssignedTps, searchParams, pathname, router]);
 
 
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
