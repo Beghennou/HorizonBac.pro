@@ -25,7 +25,7 @@ import {
     addCustomTp,
     resetAllStudentListsInClasses
 } from './firestore-actions';
-import { seedInitialData } from './seed-data';
+import { checkAndSeedData } from './seed-data';
 
 
 // Types definition
@@ -143,19 +143,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   
   
   useEffect(() => {
-    const checkAndSeedData = async () => {
-        if(firestore) {
-            const seedDocRef = doc(firestore, 'config', 'initial_seed_v2');
-            const seedDoc = await getDoc(seedDocRef);
-            if(!seedDoc.exists()) {
-                console.log("No initial data found. Seeding database...");
-                await seedInitialData(firestore);
-                await setDoc(seedDocRef, { seeded: true, date: new Date() });
-                console.log("Database seeded successfully.");
-            }
-        }
-    };
-    checkAndSeedData();
+    if (firestore) {
+        checkAndSeedData(firestore);
+    }
   }, [firestore]);
 
 

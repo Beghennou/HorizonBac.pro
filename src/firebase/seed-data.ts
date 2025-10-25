@@ -1,5 +1,5 @@
 
-import { Firestore, writeBatch, doc } from 'firebase/firestore';
+import { Firestore, writeBatch, doc, getDoc, setDoc } from 'firebase/firestore';
 import { initialTps } from '@/lib/data-manager';
 
 const initialClasses = [
@@ -46,5 +46,21 @@ export const seedInitialData = async (firestore: Firestore) => {
     } catch (error) {
         console.error("Error seeding data: ", error);
         // Here you might want to handle the error, e.g., by re-throwing or logging
+    }
+};
+
+
+export const checkAndSeedData = async (firestore: Firestore) => {
+    const seedDocRef = doc(firestore, 'config', 'initial_seed_v2');
+    try {
+        const seedDoc = await getDoc(seedDocRef);
+        if (!seedDoc.exists()) {
+            console.log("No initial data found. Seeding database...");
+            await seedInitialData(firestore);
+            await setDoc(seedDocRef, { seeded: true, date: new Date() });
+            console.log("Database seeded successfully.");
+        }
+    } catch (error) {
+        console.error("Error checking or seeding data:", error);
     }
 };
