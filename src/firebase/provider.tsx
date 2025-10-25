@@ -129,8 +129,20 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const [teacherName, setTeacherNameState] = useState<string>('');
   const { user } = userAuthState;
 
+  const tpsQuery = useMemoFirebase(() => {
+    if (firestore && user) {
+        // Query for public TPs OR TPs created by the current user
+        return query(collection(firestore, 'tps'), where('author', '==', user.uid));
+    }
+    // Fallback for anonymous/loading state to fetch only public TPs
+    if (firestore) {
+        return query(collection(firestore, 'tps'));
+    }
+    return null;
+  }, [firestore, user]);
 
-  const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
+
+  const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(tpsQuery);
   const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
   const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
