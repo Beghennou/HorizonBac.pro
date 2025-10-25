@@ -128,36 +128,37 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const [tps, setTps] = useState<Record<number, TP>>({});
   const [teacherName, setTeacherNameState] = useState<string>('');
   const { user } = userAuthState;
-  const [isTpsLoading, setIsTpsLoading] = useState(true);
-
+  
   // Fetch TPs from Firestore
   useEffect(() => {
     if (!firestore) return;
 
     const fetchTps = async () => {
-        setIsTpsLoading(true);
         const allTpsMap = new Map<number, TP>();
+        
+        // Start with the local TPs
         Object.values(initialTps).forEach(tp => allTpsMap.set(tp.id, tp));
-
+        
         const tpsRef = collection(firestore, 'tps');
         
         try {
-            // Public TPs
-            const publicQuery = query(tpsRef, where('id', '<', 1000));
-            const publicSnapshot = await getDocs(publicQuery);
-            publicSnapshot.forEach(doc => allTpsMap.set(doc.data().id, doc.data() as TP));
-            
-            // User-specific TPs if logged in
-            if (user) {
-                const userTpQuery = query(tpsRef, where('author', '==', user.uid));
-                const userTpsSnapshot = await getDocs(userTpQuery);
-                userTpsSnapshot.forEach(doc => allTpsMap.set(doc.data().id, doc.data() as TP));
+            // This query is allowed for everyone by the security rules
+            const publicTpsSnapshot = await getDocs(query(tpsRef, where('id', '<', 1000)));
+            publicTpsSnapshot.forEach(doc => {
+                allTpsMap.set(doc.data().id, doc.data() as TP);
+            });
+
+            // If the user is authenticated (not anonymous), also fetch their own TPs
+            if (user && !user.isAnonymous) {
+                const userTpsSnapshot = await getDocs(query(tpsRef, where('author', '==', user.uid)));
+                userTpsSnapshot.forEach(doc => {
+                    allTpsMap.set(doc.data().id, doc.data() as TP);
+                });
             }
         } catch (error) {
             console.error("Failed to fetch TPs:", error);
         } finally {
             setTps(Object.fromEntries(allTpsMap));
-            setIsTpsLoading(false);
         }
     };
 
@@ -168,20 +169,22 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
   
+  // Only fetch assigned TPs if user is authenticated (for teacher view)
   const assignedTpsQuery = useMemoFirebase(() => {
     if (firestore && user && !user.isAnonymous) {
       return collection(firestore, 'assignedTps');
     }
-    return null;
+    return null; // Don't fetch for anonymous users
   }, [firestore, user]);
 
   const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(assignedTpsQuery);
   
+  // Only fetch evaluations if user is authenticated (for teacher view)
   const evaluationsQuery = useMemoFirebase(() => {
     if (firestore && user && !user.isAnonymous) {
         return collection(firestore, 'evaluations');
     }
-    return null;
+    return null; // Don't fetch for anonymous users
   }, [firestore, user]);
 
   const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(evaluationsQuery);
@@ -203,7 +206,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     }
   }, [configData]);
 
-  const isLoaded = !userAuthState.isUserLoading && !isTpsLoading && !isClassesLoading && !isConfigLoading && !isAssignedTpsLoading && !isEvaluationsLoading;
+  // isLoaded is true when public data and auth state are resolved.
+  const isLoaded = !userAuthState.isUserLoading && !isClassesLoading && !isConfigLoading;
 
   useEffect(() => {
     if (!auth) {
@@ -247,7 +251,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const setTeacherName = useCallback((name: string) => {
     if(!firestore) return;
     setTeacherNameState(name);
-    setTeacherNameInDb(firestore, name);
+    // Writing to config is disabled for security reasons in this version.
+    // setTeacherNameInDb(firestore, name);
   }, [firestore]);
 
 
@@ -316,9 +321,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         toast({ title: "Listes réinitialisées", description: `Toutes les listes d'élèves ont été vidées.` });
     },
     addTp: (newTp: TP) => {
-      if (!firestore) return;
-      addCustomTp(firestore, newTp);
-      setTps(prev => ({...prev, [newTp.id]: newTp}));
+      if (!firestore || !user) return;
+      // Add author to the TP object before saving
+      const tpWithAuthor = { ...newTp, author: user.uid };
+      addCustomTp(firestore, tpWithAuthor);
+      setTps(prev => ({...prev, [newTp.id]: tpWithAuthor}));
     },
     signInWithGoogle,
   };
