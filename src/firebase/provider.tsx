@@ -136,22 +136,34 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
     const fetchTps = async () => {
         setIsTpsLoading(true);
+        const tpsRef = collection(firestore, 'tps');
+        const allTpsMap = new Map<number, TP>();
+
+        // 1. Load initial static TPs
+        Object.values(initialTps).forEach(tp => allTpsMap.set(tp.id, tp));
+
         try {
-            const publicTpsQuery = query(collection(firestore, 'tps'), where('id', '<', 1000));
+            // 2. Fetch public TPs (id < 1000)
+            const publicTpsQuery = query(tpsRef, where('id', '<', 1000));
             const publicTpsSnapshot = await getDocs(publicTpsQuery);
-            const publicTps = Object.fromEntries(publicTpsSnapshot.docs.map(doc => [doc.id, doc.data() as TP]));
-            
-            let userTps = {};
+            publicTpsSnapshot.forEach(doc => {
+                allTpsMap.set(doc.data().id, doc.data() as TP);
+            });
+
+            // 3. If user is authenticated, fetch their own TPs
             if (user) {
-                const userTpsQuery = query(collection(firestore, 'tps'), where('author', '==', user.uid));
-                const userTpsSnapshot = await getDocs(userTpsQuery);
-                userTps = Object.fromEntries(userTpsSnapshot.docs.map(doc => [doc.id, doc.data() as TP]));
+                const ownedTpsQuery = query(tpsRef, where('author', '==', user.uid));
+                const ownedTpsSnapshot = await getDocs(ownedTpsQuery);
+                ownedTpsSnapshot.forEach(doc => {
+                    allTpsMap.set(doc.data().id, doc.data() as TP);
+                });
             }
             
-            setTps({ ...initialTps, ...publicTps, ...userTps });
+            setTps(Object.fromEntries(allTpsMap));
 
         } catch (error) {
             console.error("Failed to fetch TPs:", error);
+            // We still have the initialTps, so the app can partially function
         } finally {
             setIsTpsLoading(false);
         }

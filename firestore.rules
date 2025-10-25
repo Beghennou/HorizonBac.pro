@@ -1,24 +1,25 @@
 /**
- * @fileOverview
- * This ruleset enforces a strict user-ownership model for the Formula Skills Garage application.
- * All data is nested under user-specific paths (/teachers/{teacherId} or /students/{studentId}) to ensure that only the authenticated user can access their own data.
+ * @file Firestore Security Rules for Formula Skills Garage.
  *
- * Data Structure:
- * - /teachers/{teacherId}: Stores teacher profiles, where teacherId MUST match the Firebase auth.uid.
- * - /teachers/{teacherId}/students/{studentId}: Stores student profiles managed by a teacher. Includes a redundant teacherId field for simplified authorization.
- * - /teachers/{teacherId}/trainingPrograms/{trainingProgramId}: Stores training programs created by teachers. Includes a redundant teacherId field for simplified authorization.
- * - /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}: Stores simulation data associated with training programs.
- * - /students/{studentId}/studentProgress/{studentProgressId}: Stores student progress data.
- * - /students/{studentId}/storedEvals/{tpId}: Stores final evaluation data for a student on a specific TP.
+ * @core_philosophy This ruleset enforces a strict user-ownership model,
+ * with teachers having full control over their own data and students' progress.
+ * Data is organized hierarchically to reflect teacher-student relationships.
  *
- * Key Security Decisions:
- * - Teachers can only manage data (students, training programs, simulations) associated with their own teacherId.
- * - Students can only manage their own progress data.
- * - All write operations require authentication.
- * - List operations are generally allowed within a user's data tree, but only for the user themselves.
+ * @data_structure
+ * - `/teachers/{teacherId}`: Teacher profiles, where `teacherId` is the Firebase auth UID.
+ * - `/teachers/{teacherId}/students/{studentId}`: Students belonging to a teacher.
+ * - `/teachers/{teacherId}/trainingPrograms/{trainingProgramId}`: Training programs created by a teacher.
+ * - `/teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}`: Simulations within a training program.
+ * - `/students/{studentId}/studentProgress/{studentProgressId}`: Student progress records.
+ * - `/students/{studentId}/storedEvals/{tpId}`: Stores the final evaluation data for a student on a specific TP.
  *
- * Denormalization for Authorization:
- * - The `teacherId` field is denormalized into the `Student` and `TrainingProgram` documents. This allows security rules to directly validate ownership without requiring additional `get()` calls.
+ * @key_security_decisions
+ * - Teachers can only manage data directly under their `teacherId`.
+ * - Students can only manage data directly under their `studentId`.
+ * - Listing operations are generally restricted to owners, preventing unauthorized data discovery.
+ *
+ * @denormalization_for_authorization Teacher ownership is denormalized into the `Student` and `TrainingProgram` documents
+ * to allow direct authorization checks without additional reads.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -27,9 +28,9 @@ service cloud.firestore {
     /**
      * @description Allows teachers to manage their own profiles.
      * @path /teachers/{teacherId}
-     * @allow (create, update, delete) if the teacherId matches the authenticated user's UID.
-     * @deny (create, update, delete) if the teacherId does not match the authenticated user's UID.
-     * @principle Enforces document ownership for writes.
+     * @allow (get, create, update, delete) if the user is signed in and the `teacherId` matches the authenticated user's UID.
+     * @deny (get, create, update, delete) if the user is not signed in or the `teacherId` does not match the authenticated user's UID.
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /teachers/{teacherId} {
       function isSignedIn() {
@@ -43,10 +44,8 @@ service cloud.firestore {
       function isExistingOwner(teacherId) {
         return isOwner(teacherId) && resource != null;
       }
-
       allow get: if isOwner(teacherId);
       allow list: if false;
-
       allow create: if isOwner(teacherId);
       allow update: if isExistingOwner(teacherId);
       allow delete: if isExistingOwner(teacherId);
@@ -55,10 +54,9 @@ service cloud.firestore {
     /**
      * @description Allows teachers to manage their students.
      * @path /teachers/{teacherId}/students/{studentId}
-     * @allow (create) if the teacherId matches the authenticated user's UID and request.resource.data.teacherId also matches.
-     * @allow (update, delete) if the teacherId matches the authenticated user's UID and the student document exists.
-     * @deny (create, update, delete) if the teacherId does not match the authenticated user's UID.
-     * @principle Enforces document ownership for writes and validates relational integrity.
+     * @allow (get, list, create, update, delete) if the user is signed in, the `teacherId` matches the authenticated user's UID, and `request.resource.data.teacherId` matches the `teacherId` in the path.
+     * @deny (get, list, create, update, delete) if the user is not signed in, the `teacherId` does not match the authenticated user's UID, or `request.resource.data.teacherId` does not match the `teacherId` in the path.
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /teachers/{teacherId}/students/{studentId} {
       function isSignedIn() {
@@ -68,26 +66,24 @@ service cloud.firestore {
       function isOwner(teacherId) {
         return isSignedIn() && request.auth.uid == teacherId;
       }
-
+      
       function isExistingOwner(teacherId) {
         return isOwner(teacherId) && resource != null;
       }
-        
+
       allow get: if isOwner(teacherId);
       allow list: if isOwner(teacherId);
-
       allow create: if isOwner(teacherId) && request.resource.data.teacherId == teacherId;
-      allow update: if isExistingOwner(teacherId);
+      allow update: if isExistingOwner(teacherId) && request.resource.data.teacherId == teacherId;
       allow delete: if isExistingOwner(teacherId);
     }
 
     /**
      * @description Allows teachers to manage their training programs.
      * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}
-     * @allow (create) if the teacherId matches the authenticated user's UID and request.resource.data.teacherId also matches.
-     * @allow (update, delete) if the teacherId matches the authenticated user's UID and the training program document exists.
-     * @deny (create, update, delete) if the teacherId does not match the authenticated user's UID.
-     * @principle Enforces document ownership for writes and validates relational integrity.
+     * @allow (get, list, create, update, delete) if the user is signed in, the `teacherId` matches the authenticated user's UID, and `request.resource.data.teacherId` matches the `teacherId` in the path.
+     * @deny (get, list, create, update, delete) if the user is not signed in, the `teacherId` does not match the authenticated user's UID, or `request.resource.data.teacherId` does not match the `teacherId` in the path.
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /teachers/{teacherId}/trainingPrograms/{trainingProgramId} {
       function isSignedIn() {
@@ -104,18 +100,17 @@ service cloud.firestore {
 
       allow get: if isOwner(teacherId);
       allow list: if isOwner(teacherId);
-
       allow create: if isOwner(teacherId) && request.resource.data.teacherId == teacherId;
-      allow update: if isExistingOwner(teacherId);
+      allow update: if isExistingOwner(teacherId) && request.resource.data.teacherId == teacherId;
       allow delete: if isExistingOwner(teacherId);
     }
 
     /**
      * @description Allows teachers to manage simulations within their training programs.
      * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}
-     * @allow (create, update, delete) if the teacherId matches the authenticated user's UID.
-     * @deny (create, update, delete) if the teacherId does not match the authenticated user's UID.
-     * @principle Enforces document ownership for writes.
+     * @allow (get, list, create, update, delete) if the user is signed in and the `teacherId` matches the authenticated user's UID.
+     * @deny (get, list, create, update, delete) if the user is not signed in or the `teacherId` does not match the authenticated user's UID.
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId} {
       function isSignedIn() {
@@ -125,25 +120,24 @@ service cloud.firestore {
       function isOwner(teacherId) {
         return isSignedIn() && request.auth.uid == teacherId;
       }
-
+      
       function isExistingOwner(teacherId) {
         return isOwner(teacherId) && resource != null;
       }
-        
+
       allow get: if isOwner(teacherId);
       allow list: if isOwner(teacherId);
-
       allow create: if isOwner(teacherId);
       allow update: if isExistingOwner(teacherId);
       allow delete: if isExistingOwner(teacherId);
     }
 
     /**
-     * @description Allows students to manage their own progress data.
+     * @description Allows students to manage their progress records.
      * @path /students/{studentId}/studentProgress/{studentProgressId}
-     * @allow (create, update, delete) if the studentId matches the authenticated user's UID.
-     * @deny (create, update, delete) if the studentId does not match the authenticated user's UID.
-     * @principle Enforces document ownership for writes.
+     * @allow (get, list, create, update, delete) if the user is signed in and the `studentId` matches the authenticated user's UID.
+     * @deny (get, list, create, update, delete) if the user is not signed in or the `studentId` does not match the authenticated user's UID.
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /students/{studentId}/studentProgress/{studentProgressId} {
       function isSignedIn() {
@@ -157,38 +151,35 @@ service cloud.firestore {
       function isExistingOwner(studentId) {
         return isOwner(studentId) && resource != null;
       }
-        
+
       allow get: if isOwner(studentId);
       allow list: if isOwner(studentId);
-
-      allow create: if isOwner(studentId);
-      allow update: if isExistingOwner(studentId);
+      allow create: if isOwner(studentId) && request.resource.data.studentId == studentId;
+      allow update: if isExistingOwner(studentId) && request.resource.data.studentId == studentId;
       allow delete: if isExistingOwner(studentId);
     }
-
     /**
-     * @description Allows students to manage their stored evaluation data.
+     * @description Allows students to manage their stored evaluations for training programs.
      * @path /students/{studentId}/storedEvals/{tpId}
      */
-    match /students/{studentId}/storedEvals/{tpId} {
-       function isSignedIn() {
-        return request.auth != null;
-      }
+     match /students/{studentId}/storedEvals/{tpId} {
+          function isSignedIn() {
+            return request.auth != null;
+          }
 
-      function isOwner(studentId) {
-        return isSignedIn() && request.auth.uid == studentId;
-      }
+          function isOwner(studentId) {
+            return isSignedIn() && request.auth.uid == studentId;
+          }
 
-      function isExistingOwner(studentId) {
-        return isOwner(studentId) && resource != null;
-      }
-        
-      allow get: if isOwner(studentId);
-      allow list: if isOwner(studentId);
+          function isExistingOwner(studentId) {
+            return isOwner(studentId) && resource != null;
+          }
 
-      allow create: if isOwner(studentId);
-      allow update: if isExistingOwner(studentId);
-      allow delete: if isExistingOwner(studentId);
-    }
+          allow get: if isOwner(studentId);
+          allow list: if isOwner(studentId);
+          allow create: if isOwner(studentId);
+          allow update: if isExistingOwner(studentId);
+          allow delete: if isExistingOwner(studentId);
+        }
   }
 }
