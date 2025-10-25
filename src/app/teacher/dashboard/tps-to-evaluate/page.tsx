@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import { useFirebase } from '@/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ClipboardCheck, User, Clock, AlertTriangle } from 'lucide-react';
+import { ClipboardCheck, User, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -86,14 +86,15 @@ export default function TpsToEvaluatePage() {
                                     <AccordionContent>
                                         <div className="space-y-2 pt-2 pl-4">
                                             {tps.map(({ tpId, titre, className }) => {
+                                                const params = new URLSearchParams(searchParams.toString());
                                                 return (
                                                     <div key={tpId} className="flex items-center justify-between p-3 rounded-md bg-background/50">
                                                         <div>
                                                             <p className="font-semibold text-primary">TP {tpId}</p>
                                                             <p>{titre}</p>
                                                         </div>
-                                                        <Button disabled>
-                                                            Évaluation (bientôt disponible)
+                                                        <Button asChild>
+                                                          <Link href={`/teacher/dashboard/evaluate/${encodeURIComponent(studentName)}/${tpId}?${params.toString()}`}>Évaluer ce TP</Link>
                                                         </Button>
                                                     </div>
                                                 );
