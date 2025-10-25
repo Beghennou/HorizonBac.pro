@@ -20,11 +20,16 @@ export default function TpsToEvaluatePage() {
 
         // Create a map of studentName to className
         const studentClassMap: Record<string, string> = {};
-        classes.forEach(c => {
-            (c.studentNames as string[]).forEach(studentName => {
-                studentClassMap[studentName] = c.id;
+        if (classes) {
+            classes.forEach(c => {
+                // Check if studentNames exists and is an array before iterating
+                if (Array.isArray(c.studentNames)) {
+                    (c.studentNames as string[]).forEach(studentName => {
+                        studentClassMap[studentName] = c.id;
+                    });
+                }
             });
-        });
+        }
 
         for (const studentName in assignedTps) {
             const studentTps = assignedTps[studentName];
@@ -83,8 +88,6 @@ export default function TpsToEvaluatePage() {
                                             {tps.map(({ tpId, titre, className }) => {
                                                 const params = new URLSearchParams(searchParams.toString());
                                                 params.set('class', className);
-                                                params.set('student', studentName);
-                                                params.set('tp', tpId.toString());
                                                 
                                                 const href = `/teacher/dashboard/student/${encodeURIComponent(studentName)}?${params.toString()}`;
 
