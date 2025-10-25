@@ -217,21 +217,18 @@ export default function StudentDetailPage() {
     const studentName = typeof params.studentId === 'string' ? decodeURIComponent(params.studentId) : '';
     const className = searchParams.get('class') || '';
 
-    const selectedTpId = useMemo(() => {
-        const tpIdParam = searchParams.get('tp');
-        return tpIdParam ? parseInt(tpIdParam, 10) : null;
-    }, [searchParams]);
+    const selectedTpIdParam = searchParams.get('tp');
 
     const { 
         firestore, 
         assignTp,
         saveEvaluation, 
         tps, 
-        user
+        user,
+        assignedTps: allAssignedTps
     } = useFirebase();
     
-    const assignedTpsDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `assignedTps/${studentName}`) : null, [firestore, studentName]);
-    const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useDoc<{ tps: any[] }>(assignedTpsDocRef);
+    const assignedTpsData = allAssignedTps[studentName] || [];
 
     const studentEvalsDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `evaluations/${studentName}`) : null, [firestore, studentName]);
     const { data: studentEvalsData } = useDoc(studentEvalsDocRef);
@@ -285,11 +282,26 @@ export default function StudentDetailPage() {
     }, [studentStoredEvals]);
     
     const studentAssignedTps = useMemo(() => {
-        return (assignedTpsData?.tps || []).map((assignedTp: any) => {
+        return (assignedTpsData || []).map((assignedTp: any) => {
             const tp = tps[assignedTp.id];
             return tp ? { ...tp, status: assignedTp.status } : null;
         }).filter((tp: any): tp is (TP & { status: string }) => tp !== null);
     }, [assignedTpsData, tps]);
+
+    const selectedTpId = useMemo(() => {
+        if (selectedTpIdParam) return parseInt(selectedTpIdParam, 10);
+        if (studentAssignedTps.length > 0) return studentAssignedTps[0].id;
+        return null;
+    }, [selectedTpIdParam, studentAssignedTps]);
+
+    useEffect(() => {
+        if (studentAssignedTps.length > 0 && !selectedTpIdParam) {
+            const firstTpId = studentAssignedTps[0].id;
+            const newSearchParams = new URLSearchParams(searchParams.toString());
+            newSearchParams.set('tp', firstTpId.toString());
+            router.replace(`${pathname}?${newSearchParams.toString()}`);
+        }
+    }, [studentAssignedTps, selectedTpIdParam, searchParams, pathname, router]);
 
     const studentLatestEvals = studentEvalsData?.competences || {};
 
@@ -310,15 +322,6 @@ export default function StudentDetailPage() {
         }
     }, [studentName, studentLatestEvals]);
     
-    useEffect(() => {
-        if (!isAssignedTpsLoading && studentAssignedTps.length > 0 && !selectedTpId) {
-            const firstTpId = studentAssignedTps[0].id;
-            const newSearchParams = new URLSearchParams(searchParams.toString());
-            newSearchParams.set('tp', firstTpId.toString());
-            router.replace(`${pathname}?${newSearchParams.toString()}`);
-        }
-    }, [isAssignedTpsLoading, studentAssignedTps, selectedTpId, searchParams, pathname, router]);
-
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
         setCurrentEvaluations(prev => ({
             ...prev,
@@ -361,24 +364,24 @@ export default function StudentDetailPage() {
     
     const evaluatedCompetenceIds = selectedTp?.objectif.match(/C\d\.\d/g) || [];
 
-    if (!isAssignedTpsLoading && !isStudentInClass && studentsInClass.length > 0) {
-        return (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
-                <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
-                <h1 className="font-headline text-3xl tracking-wide text-destructive">Accès non autorisé</h1>
-                <p className="text-muted-foreground text-lg mt-2 max-w-md">
-                    L'élève <strong>{studentName}</strong> ne fait pas partie de la classe <strong>{className}</strong> sélectionnée. Veuillez retourner au suivi des classes pour sélectionner un élève.
-                </p>
-            </div>
-        )
-    }
-
     if (!studentName) {
         return (
              <div className="flex flex-col items-center justify-center h-64 text-center">
                 <User className="w-16 h-16 text-muted-foreground mb-4" />
                 <h1 className="font-headline text-3xl tracking-wide">Élève non trouvé</h1>
                 <p className="text-muted-foreground text-lg mt-2">Veuillez retourner à la liste et sélectionner un élève.</p>
+            </div>
+        )
+    }
+
+    if (className && !isStudentInClass && studentsInClass.length > 0) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64 text-center">
+                <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
+                <h1 className="font-headline text-3xl tracking-wide text-destructive">Accès non autorisé</h1>
+                <p className="text-muted-foreground text-lg mt-2 max-w-md">
+                    L'élève <strong>{studentName}</strong> ne fait pas partie de la classe <strong>{className}</strong> sélectionnée.
+                </p>
             </div>
         )
     }
@@ -411,9 +414,7 @@ export default function StudentDetailPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {isAssignedTpsLoading ? (
-                        <Loader2 className="h-6 w-6 animate-spin" />
-                    ) : studentAssignedTps.length > 0 ? (
+                    {studentAssignedTps.length > 0 ? (
                         <div className="flex items-center gap-4">
                             <span className="font-semibold">Sélectionner un TP assigné :</span>
                             <Select onValueChange={handleTpSelect} value={selectedTpId?.toString() || ""}>
@@ -433,7 +434,7 @@ export default function StudentDetailPage() {
                             )}
                         </div>
                     ) : (
-                        <p className="text-muted-foreground">Aucun TP n'est assigné à cet élève. Veuillez lui en assigner depuis l'onglet "Élèves".</p>
+                        <p className="text-muted-foreground">Aucun TP n'est assigné à cet élève. Veuillez lui en assigner depuis l'onglet "Assigner des TP".</p>
                     )}
                 </CardContent>
             </Card>
