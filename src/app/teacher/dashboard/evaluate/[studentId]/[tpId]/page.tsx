@@ -73,10 +73,7 @@ export default function EvaluationPage() {
 
         saveEvaluation(studentName, tpId, competenceEvals, prelimNote, tpNote, isFinal);
         saveFeedback(studentName, tpId, teacherFeedback, 'teacher');
-        toast({
-            title: isFinal ? "Évaluation Finalisée" : "Brouillon Sauvegardé",
-            description: `L'évaluation pour ${studentName} sur le TP ${tpId} a été enregistrée.`,
-        });
+        
         router.push('/teacher/dashboard/tps-to-evaluate');
     };
 
@@ -187,3 +184,5 @@ export default function EvaluationPage() {
     );
 }
 
+
+    
