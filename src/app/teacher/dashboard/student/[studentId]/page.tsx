@@ -229,7 +229,6 @@ export default function StudentDetailPage() {
         user
     } = useFirebase();
     
-    // Data fetching hooks specific to this component
     const assignedTpsDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `assignedTps/${studentName}`) : null, [firestore, studentName]);
     const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useDoc<{ tps: any[] }>(assignedTpsDocRef);
 
@@ -296,7 +295,6 @@ export default function StudentDetailPage() {
     const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
     useEffect(() => {
-        // Update evaluations when student data is loaded
         if (studentName && studentLatestEvals) {
             const latestEvals: Record<string, EvaluationStatus> = {};
             for (const competenceId in studentLatestEvals) {
@@ -312,18 +310,13 @@ export default function StudentDetailPage() {
     }, [studentName, studentLatestEvals]);
     
     useEffect(() => {
-        // This effect runs only when the component loads or the student changes.
-        // It's responsible for setting the initial TP if none is in the URL.
-        const hasTpInUrl = searchParams.has('tp');
-        if (!isAssignedTpsLoading && studentAssignedTps.length > 0 && !hasTpInUrl) {
+        if (!isAssignedTpsLoading && studentAssignedTps.length > 0 && !searchParams.has('tp')) {
             const firstTpId = studentAssignedTps[0].id;
             const newSearchParams = new URLSearchParams(searchParams.toString());
             newSearchParams.set('tp', firstTpId.toString());
-            // Using replace to avoid adding a new entry to the browser history
             router.replace(`${pathname}?${newSearchParams.toString()}`);
         }
     }, [isAssignedTpsLoading, studentAssignedTps, searchParams, pathname, router]);
-
 
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
         setCurrentEvaluations(prev => ({
@@ -342,7 +335,7 @@ export default function StudentDetailPage() {
         if (!newStudentName || newStudentName === studentName) return;
         const newPath = `/teacher/dashboard/student/${encodeURIComponent(newStudentName)}`;
         const newSearchParams = new URLSearchParams(searchParams.toString());
-        newSearchParams.delete('tp'); // Remove tp from search params to allow auto-selection for new student
+        newSearchParams.delete('tp'); 
         router.push(`${newPath}?${newSearchParams.toString()}`);
     };
 
@@ -356,11 +349,6 @@ export default function StudentDetailPage() {
              try {
                 await setDoc(feedbackDocRef, { tps: { ...feedbacksForStudent[selectedTpId], teacher: feedback } }, { merge: true });
              } catch(error) {
-                 // errorEmitter.emit('permission-error', new FirestorePermissionError({
-                 //     path: feedbackDocRef.path,
-                 //     operation: 'update',
-                 //     requestResourceData: { tps: { ...feedbacksForStudent[selectedTpId], teacher: feedback } },
-                 // }));
              }
         }
     };
@@ -380,8 +368,7 @@ export default function StudentDetailPage() {
     
     const evaluatedCompetenceIds = selectedTp?.objectif.match(/C\d\.\d/g) || [];
 
-
-    if (!isStudentInClass && studentsInClass.length > 0) {
+    if (!isAssignedTpsLoading && !isStudentInClass && studentsInClass.length > 0) {
         return (
             <div className="flex flex-col items-center justify-center h-64 text-center">
                 <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
@@ -460,7 +447,9 @@ export default function StudentDetailPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {studentAssignedTps.length > 0 ? (
+                    {isAssignedTpsLoading ? (
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : studentAssignedTps.length > 0 ? (
                         <div className="flex items-center gap-4">
                             <span className="font-semibold">Sélectionner un TP assigné :</span>
                             <Select onValueChange={handleTpSelect} value={selectedTpId?.toString() || ""}>
@@ -576,5 +565,3 @@ export default function StudentDetailPage() {
         </div>
     );
 }
-
-    
