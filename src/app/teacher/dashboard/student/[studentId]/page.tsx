@@ -313,14 +313,14 @@ export default function StudentDetailPage() {
     
     useEffect(() => {
         // Only run this if the data is loaded and there is no TP in the URL
-        const hasTpInUrl = searchParams.has('tp');
-        if (!isAssignedTpsLoading && studentAssignedTps.length > 0 && !hasTpInUrl) {
+        if (!isAssignedTpsLoading && studentAssignedTps.length > 0 && !searchParams.has('tp')) {
             const firstTpId = studentAssignedTps[0].id;
             const newSearchParams = new URLSearchParams(searchParams.toString());
             newSearchParams.set('tp', firstTpId.toString());
             router.replace(`${pathname}?${newSearchParams.toString()}`);
         }
     }, [isAssignedTpsLoading, studentAssignedTps, searchParams, pathname, router]);
+
 
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
         setCurrentEvaluations(prev => ({
