@@ -20,7 +20,7 @@ import {
     saveStudentFeedback,
     setTeacherNameInDb,
     deleteStudent as deleteStudentFromDb,
-    deleteClass as deleteClassFromDb,
+    emptyClass as emptyClassInDb,
     updateClassWithStudents,
     addCustomTp,
     resetAllStudentListsInClasses
@@ -94,7 +94,7 @@ export interface FirebaseContextState {
   teacherName: string;
   setTeacherName: (name: string) => void;
   deleteStudent: (studentId: string, studentName: string) => void;
-  deleteClass: (className: string) => void;
+  emptyClass: (className: string) => void;
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
   resetAllStudentLists: () => void;
   addTp: (tp: TP) => void;
@@ -327,10 +327,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         deleteStudentFromDb(firestore, studentId, studentName);
         toast({ title: "Élève supprimé", description: `${studentName} et toutes ses données ont été supprimés.` });
     },
-    deleteClass: (className: string) => {
+    emptyClass: (className: string) => {
         if (!firestore) return;
-        deleteClassFromDb(firestore, className);
-        toast({ title: "Classe supprimée", description: `La classe ${className} a été vidée.` });
+        emptyClassInDb(firestore, className);
+        toast({ title: "Classe vidée", description: `La classe ${className} a été vidée de ses élèves.` });
     },
     updateClassWithCsv: (className: string, studentNames: string[]) => {
         if (!firestore) return;

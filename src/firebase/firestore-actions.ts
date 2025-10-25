@@ -1,6 +1,6 @@
 
 'use client';
-import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs } from 'firebase/firestore';
+import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { TP } from '@/lib/data-manager';
 import { FirestorePermissionError } from './errors';
@@ -149,19 +149,20 @@ export const deleteStudent = async (firestore: Firestore, studentId: string, stu
     });
 };
 
-export const deleteClass = async (firestore: Firestore, className: string) => {
+export const emptyClass = async (firestore: Firestore, className: string) => {
     const classDocRef = doc(firestore, 'classes', className);
-    await deleteDoc(classDocRef).catch(error => {
+    await updateDoc(classDocRef, { studentNames: [] }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: `classes/${className}`,
-            operation: 'delete',
+            operation: 'update',
+            requestResourceData: { studentNames: [] }
         }));
     });
 };
 
 export const updateClassWithStudents = async (firestore: Firestore, className: string, studentNames: string[]) => {
     const classDocRef = doc(firestore, 'classes', className);
-    await setDoc(classDocRef, { studentNames }).catch(error => {
+    await setDoc(classDocRef, { studentNames }, { merge: true }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: classDocRef.path,
             operation: 'write'

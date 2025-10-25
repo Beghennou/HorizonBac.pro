@@ -27,7 +27,7 @@ import { Student } from '@/lib/types';
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { firestore, classes, teacherName, setTeacherName, updateClassWithCsv, deleteStudent, deleteClass, resetAllStudentLists } = useFirebase();
+  const { firestore, classes, teacherName, setTeacherName, updateClassWithCsv, deleteStudent, emptyClass, resetAllStudentLists } = useFirebase();
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
@@ -44,7 +44,7 @@ export default function SettingsPage() {
 
   const [deleteStudentClass, setDeleteStudentClass] = useState('');
   const [studentToDelete, setStudentToDelete] = useState('');
-  const [classToDelete, setClassToDelete] = useState('');
+  const [classToEmpty, setClassToEmpty] = useState('');
   
   const [classStudents, setClassStudents] = useState<string[]>([]);
   const [secondeClassToUpdate, setSecondeClassToUpdate] = useState('');
@@ -157,12 +157,12 @@ export default function SettingsPage() {
     setStudentToDelete('');
   }
   
-  const handleDeleteClass = async () => {
-      if (!classToDelete) {
+  const handleEmptyClass = async () => {
+      if (!classToEmpty) {
           toast({variant: 'destructive', title: 'Sélection manquante', description: 'Veuillez sélectionner une classe à vider.'});
           return;
       }
-      deleteClass(classToDelete);
+      emptyClass(classToEmpty);
   }
 
   const handleLegacyCsvImport = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -347,9 +347,9 @@ export default function SettingsPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 <div className="space-y-2 md:col-span-2">
-                     <Label htmlFor="delete-class-select-2">Vider une classe de ses élèves</Label>
-                      <Select value={classToDelete} onValueChange={setClassToDelete}>
-                        <SelectTrigger id="delete-class-select-2">
+                     <Label htmlFor="empty-class-select">Vider une classe de ses élèves</Label>
+                      <Select value={classToEmpty} onValueChange={setClassToEmpty}>
+                        <SelectTrigger id="empty-class-select">
                             <SelectValue placeholder="Choisir une classe..."/>
                         </SelectTrigger>
                         <SelectContent>
@@ -359,7 +359,7 @@ export default function SettingsPage() {
                         </SelectContent>
                     </Select>
                 </div>
-                 <Button variant="destructive" onClick={handleDeleteClass}><FolderMinus className="mr-2" /> Vider cette classe</Button>
+                 <Button variant="destructive" onClick={handleEmptyClass}><FolderMinus className="mr-2" /> Vider cette classe</Button>
             </div>
         </CardContent>
       </Card>
