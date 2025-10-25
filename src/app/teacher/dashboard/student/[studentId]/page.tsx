@@ -218,6 +218,7 @@ export default function StudentDetailPage() {
     const className = searchParams.get('class') || '';
 
     const selectedTpIdParam = searchParams.get('tp');
+    const selectedTpId = selectedTpIdParam ? parseInt(selectedTpIdParam, 10) : null;
 
     const { 
         firestore, 
@@ -287,21 +288,6 @@ export default function StudentDetailPage() {
             return tp ? { ...tp, status: assignedTp.status } : null;
         }).filter((tp: any): tp is (TP & { status: string }) => tp !== null);
     }, [assignedTpsData, tps]);
-
-    const selectedTpId = useMemo(() => {
-        if (selectedTpIdParam) return parseInt(selectedTpIdParam, 10);
-        if (studentAssignedTps.length > 0) return studentAssignedTps[0].id;
-        return null;
-    }, [selectedTpIdParam, studentAssignedTps]);
-
-    useEffect(() => {
-        if (studentAssignedTps.length > 0 && !selectedTpIdParam) {
-            const firstTpId = studentAssignedTps[0].id;
-            const newSearchParams = new URLSearchParams(searchParams.toString());
-            newSearchParams.set('tp', firstTpId.toString());
-            router.replace(`${pathname}?${newSearchParams.toString()}`);
-        }
-    }, [studentAssignedTps, selectedTpIdParam, searchParams, pathname, router]);
 
     const studentLatestEvals = studentEvalsData?.competences || {};
 
@@ -438,6 +424,14 @@ export default function StudentDetailPage() {
                     )}
                 </CardContent>
             </Card>
+
+            {!selectedTp && (
+                <Card>
+                    <CardContent className="pt-6 text-center text-muted-foreground">
+                        <p>Veuillez sélectionner un TP dans le menu déroulant ci-dessus pour afficher les détails.</p>
+                    </CardContent>
+                </Card>
+            )}
 
             {selectedTp && (
                 <>
