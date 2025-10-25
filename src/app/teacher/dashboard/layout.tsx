@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
-import { classNames } from '@/lib/class-data';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { LyceeLogo } from '@/components/lycee-logo';
 import {
@@ -31,10 +30,12 @@ function DashboardLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { isLoaded: isFirebaseLoaded, tps: allTps } = useFirebase();
+  const { isLoaded: isFirebaseLoaded, tps: allTps, classes } = useFirebase();
 
   const [niveau, setNiveau] = useState<Niveau>('seconde');
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
+
+  const classNames = useMemo(() => classes.map(c => c.id), [classes]);
 
   const classesForLevel = useMemo(() => {
     return classNames.filter(c => {
@@ -44,7 +45,7 @@ function DashboardLayoutContent({
         if (niveau === 'terminale') return id.startsWith('t');
         return false;
     }).sort();
-  }, [niveau]);
+  }, [niveau, classNames]);
 
   useEffect(() => {
     const levelFromUrl = searchParams.get('level') as Niveau | null;
@@ -85,7 +86,7 @@ function DashboardLayoutContent({
       }
     }
 
-  }, [searchParams, router, pathname, isFirebaseLoaded]);
+  }, [searchParams, router, pathname, isFirebaseLoaded, classNames]);
   
   const isLoaded = isFirebaseLoaded;
 

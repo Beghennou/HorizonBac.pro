@@ -3,7 +3,6 @@
 import { useSearchParams } from 'next/navigation';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { allBlocs, Niveau } from '@/lib/data-manager';
-import { classNames as staticClassNames } from '@/lib/class-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { BarChart3, Users, Target, BookOpen } from 'lucide-react';
@@ -23,12 +22,12 @@ const MAX_SCORE = 3;
 
 export default function AnalyticsPage() {
     const searchParams = useSearchParams();
-    const { firestore, evaluations } = useFirebase();
+    const { firestore, evaluations: allEvaluations, classes: allClasses } = useFirebase();
 
     const [studentsInClass, setStudentsInClass] = useState<string[]>([]);
     
     const level = (searchParams.get('level') as Niveau) || 'seconde';
-    const currentClassName = searchParams.get('class') || (staticClassNames.find(c => c.startsWith('2')) || '');
+    const currentClassName = searchParams.get('class') || '';
     
     useEffect(() => {
         const fetchStudents = async () => {
@@ -60,7 +59,7 @@ export default function AnalyticsPage() {
     const studentNamesInClass = studentsInClass;
 
     studentNamesInClass.forEach((studentName: string) => {
-        const studentEvals = evaluations[studentName] || {};
+        const studentEvals = allEvaluations[studentName] || {};
         Object.entries(studentEvals).forEach(([competenceId, history]) => {
             const historyArray = (history as any)?.history || [];
             if (historyArray.length > 0) {
@@ -84,12 +83,12 @@ export default function AnalyticsPage() {
     const bottom5Competences = competenceMasteryData.slice(0, 5);
     
     // 3. Class Comparison
-    const classesForLevel = React.useMemo(() => staticClassNames.filter(c => {
-        if (level === 'seconde') return c.startsWith('2');
-        if (level === 'premiere') return c.startsWith('1');
-        if (level === 'terminale') return c.startsWith('T');
+    const classesForLevel = React.useMemo(() => (allClasses || []).map(c => c.id).filter(cName => {
+        if (level === 'seconde') return cName.startsWith('2');
+        if (level === 'premiere') return cName.startsWith('1');
+        if (level === 'terminale') return cName.startsWith('T');
         return false;
-    }).sort(), [level]);
+    }).sort(), [level, allClasses]);
 
 
     const classComparisonData = classesForLevel.map(className => {
