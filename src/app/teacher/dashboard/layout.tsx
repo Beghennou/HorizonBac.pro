@@ -48,54 +48,42 @@ function DashboardLayoutContent({
   }, [level, classNames]);
 
   useEffect(() => {
-    if (isFirebaseLoaded && pathname.startsWith('/teacher/dashboard')) {
+    if (isFirebaseLoaded) {
       const currentClass = searchParams.get('class');
       const currentLevel = searchParams.get('level') as Niveau;
 
-      // Determine the initial level if not present
-      const initialNiveau = currentLevel || 'seconde';
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      let needsRedirect = false;
 
-      // Get classes for the determined level
-      const classesForInitialNiveau = classNames.filter(c => {
+      // 1. Ensure level is set
+      let effectiveLevel = currentLevel;
+      if (!['seconde', 'premiere', 'terminale'].includes(effectiveLevel)) {
+          effectiveLevel = 'seconde';
+          newSearchParams.set('level', effectiveLevel);
+          needsRedirect = true;
+      }
+
+      // 2. Ensure a class is selected if available for the level
+      const classesForCurrentLevel = classNames.filter(c => {
           const id = c.toLowerCase();
-          if (initialNiveau === 'seconde') return id.startsWith('2');
-          if (initialNiveau === 'premiere') return id.startsWith('1');
-          if (initialNiveau === 'terminale') return id.startsWith('t');
+          if (effectiveLevel === 'seconde') return id.startsWith('2');
+          if (effectiveLevel === 'premiere') return id.startsWith('1');
+          if (effectiveLevel === 'terminale') return id.startsWith('t');
           return false;
       }).sort();
       
-      const initialClass = currentClass && classesForInitialNiveau.includes(currentClass) 
-          ? currentClass 
-          : classesForInitialNiveau[0] || null;
-
-      const newSearchParams = new URLSearchParams(searchParams.toString());
-      let needsRedirect = false;
-      
-      if (!currentLevel || currentLevel !== initialNiveau) {
-        newSearchParams.set('level', initialNiveau);
-        needsRedirect = true;
+      if (!currentClass && classesForCurrentLevel.length > 0) {
+          newSearchParams.set('class', classesForCurrentLevel[0]);
+          needsRedirect = true;
       }
 
-      if ((!currentClass && initialClass) || (currentClass && !initialClass)) {
-        if(initialClass) {
-          newSearchParams.set('class', initialClass);
-        } else {
-          newSearchParams.delete('class');
-        }
-        needsRedirect = true;
-      }
-      
-      if (pathname === '/teacher/dashboard/students') {
-        const redirectPath = `/teacher/dashboard?${newSearchParams.toString()}`;
-        router.replace(redirectPath);
-        return;
-      }
-
+      // 3. Perform redirect if necessary
       if (needsRedirect) {
-          router.replace(`${pathname}?${newSearchParams.toString()}`);
+          const targetPath = pathname === '/teacher/dashboard' ? '/teacher/dashboard/class-progress' : pathname;
+          router.replace(`${targetPath}?${newSearchParams.toString()}`);
       }
     }
-  }, [searchParams, router, pathname, isFirebaseLoaded, classNames, level, classesForLevel]);
+  }, [isFirebaseLoaded, classNames, searchParams, pathname, router]);
   
   const isLoaded = isFirebaseLoaded && selectedClass !== null;
 
@@ -118,7 +106,8 @@ function DashboardLayoutContent({
       newSearchParams.set('class', firstClassForLevel);
     }
     
-    router.push(`/teacher/dashboard?${newSearchParams.toString()}`);
+    const targetPath = pathname.startsWith('/teacher/dashboard/student') ? '/teacher/dashboard/class-progress' : pathname;
+    router.push(`${targetPath}?${newSearchParams.toString()}`);
   };
 
   const handleClassChange = (className: string) => {
@@ -126,7 +115,7 @@ function DashboardLayoutContent({
     newSearchParams.set('class', className);
     newSearchParams.delete('student');
     
-    const basePath = pathname.split('/').slice(0, 4).join('/');
+    const basePath = pathname.startsWith('/teacher/dashboard/student') ? '/teacher/dashboard/class-progress' : pathname;
     router.push(`${basePath}?${newSearchParams.toString()}`);
   };
   
