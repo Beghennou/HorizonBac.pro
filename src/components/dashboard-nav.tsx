@@ -36,14 +36,19 @@ export function DashboardNav() {
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = item.exact ? pathname === item.base : pathname.startsWith(item.base);
-        const isDisabled = !!item.requiredParam && !searchParams.has(item.requiredParam);
+        
+        // A link is disabled only if it requires a param that is missing.
+        // For "Dossier Élève", we will navigate to a default page instead of disabling it.
+        const isDisabled = item.base === '/teacher/dashboard/student' ? false : (!!item.requiredParam && !searchParams.has(item.requiredParam));
 
         // Build the URL. If the item is disabled, we can point it to the class progress page as a fallback.
-        const finalHref = isDisabled 
-            ? `/teacher/dashboard/class-progress?${searchParams.toString()}`
-            : item.requiredParam && studentName 
-                ? `/teacher/dashboard/student/${encodeURIComponent(studentName)}?${searchParams.toString()}` 
-                : createUrl(item.base);
+        // For "Dossier Élève", if no student is selected, link to the class progress page.
+        const finalHref = item.base === '/teacher/dashboard/student' 
+            ? studentName
+                ? `/teacher/dashboard/student/${encodeURIComponent(studentName)}?${searchParams.toString()}`
+                : `/teacher/dashboard/class-progress?${searchParams.toString()}`
+            : createUrl(item.base);
+
 
         return (
           <Button
