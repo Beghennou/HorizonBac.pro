@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation';
@@ -224,6 +225,9 @@ export default function StudentDetailPage() {
         user
     } = useFirebase();
 
+    const selectedTpIdParam = searchParams.get('tp');
+    const selectedTpId = selectedTpIdParam ? parseInt(selectedTpIdParam, 10) : null;
+
     // Data fetching hooks specific to this component
     const assignedTpsDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `assignedTps/${studentName}`) : null, [firestore, studentName]);
     const { data: assignedTpsData } = useDoc<{ tps: any[] }>(assignedTpsDocRef);
@@ -288,22 +292,17 @@ export default function StudentDetailPage() {
 
     const studentLatestEvals = studentEvalsData?.competences || {};
 
-    const [selectedTpId, setSelectedTpId] = useState<number | null>(null);
     const [currentEvaluations, setCurrentEvaluations] = useState<Record<string, EvaluationStatus>>({});
 
     useEffect(() => {
-        const tpIdFromUrl = searchParams.get('tp');
-        if (tpIdFromUrl) {
-            setSelectedTpId(parseInt(tpIdFromUrl, 10));
-        } else if (studentAssignedTps.length > 0) {
-            const firstTpId = studentAssignedTps[0].id;
-            setSelectedTpId(firstTpId);
-        } else {
-            setSelectedTpId(null);
+        const currentTpId = selectedTpIdParam ? parseInt(selectedTpIdParam) : studentAssignedTps.length > 0 ? studentAssignedTps[0].id : null;
+        
+        if (!selectedTpIdParam && currentTpId) {
+             const newSearchParams = new URLSearchParams(searchParams.toString());
+             newSearchParams.set('tp', currentTpId.toString());
+             router.replace(`${pathname}?${newSearchParams.toString()}`);
         }
-    }, [studentName, studentAssignedTps, searchParams]);
 
-    useEffect(() => {
         if (studentName && studentLatestEvals) {
             const latestEvals: Record<string, EvaluationStatus> = {};
             for (const competenceId in studentLatestEvals) {
@@ -316,7 +315,7 @@ export default function StudentDetailPage() {
         } else {
             setCurrentEvaluations({});
         }
-    }, [studentName, studentLatestEvals, selectedTpId]);
+    }, [studentName, studentLatestEvals, studentAssignedTps, selectedTpIdParam, pathname, router, searchParams]);
 
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
         setCurrentEvaluations(prev => ({
@@ -327,7 +326,6 @@ export default function StudentDetailPage() {
 
     const handleTpSelect = (tpId: string) => {
         const newTpId = parseInt(tpId);
-        setSelectedTpId(newTpId); // Update state directly
         const newSearchParams = new URLSearchParams(searchParams.toString());
         newSearchParams.set('tp', newTpId.toString());
         router.push(`${pathname}?${newSearchParams.toString()}`);
