@@ -11,7 +11,7 @@ import { TP, initialTps } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
-import { useCollection, useMemoFirebase } from '@/firebase';
+import { useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { 
     assignTpToStudents, 
     saveStudentEvaluation,
@@ -125,7 +125,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: null,
   });
 
-  const [tps, setTps] = useState<Record<number, TP>>(initialTps);
+  const [tps, setTps] = useState<Record<number, TP>>({});
   const [teacherName, setTeacherNameState] = useState<string>('');
   const { user } = userAuthState;
   const [isTpsLoading, setIsTpsLoading] = useState(true);
@@ -136,25 +136,27 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
     const fetchTps = async () => {
         setIsTpsLoading(true);
-        const tpsRef = collection(firestore, 'tps');
         const allTpsMap = new Map<number, TP>();
-
-        // 1. Load initial static TPs
         Object.values(initialTps).forEach(tp => allTpsMap.set(tp.id, tp));
 
+        const tpsRef = collection(firestore, 'tps');
+        
         try {
-            // 2. Fetch all TPs. Security rules will enforce access.
-            const tpsSnapshot = await getDocs(tpsRef);
-            tpsSnapshot.forEach(doc => {
-                 allTpsMap.set(doc.data().id, doc.data() as TP);
-            });
+            // Public TPs
+            const publicQuery = query(tpsRef, where('id', '<', 1000));
+            const publicSnapshot = await getDocs(publicQuery);
+            publicSnapshot.forEach(doc => allTpsMap.set(doc.data().id, doc.data() as TP));
             
-            setTps(Object.fromEntries(allTpsMap));
-
+            // User-specific TPs if logged in
+            if (user) {
+                const userTpQuery = query(tpsRef, where('author', '==', user.uid));
+                const userTpsSnapshot = await getDocs(userTpQuery);
+                userTpsSnapshot.forEach(doc => allTpsMap.set(doc.data().id, doc.data() as TP));
+            }
         } catch (error) {
             console.error("Failed to fetch TPs:", error);
-            // We still have the initialTps, so the app can partially function
         } finally {
+            setTps(Object.fromEntries(allTpsMap));
             setIsTpsLoading(false);
         }
     };
@@ -166,12 +168,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
   
-  // Conditionally fetch assignedTps only for authenticated (non-anonymous) users
   const assignedTpsQuery = useMemoFirebase(() => {
     if (firestore && user && !user.isAnonymous) {
       return collection(firestore, 'assignedTps');
     }
-    return null; // Don't fetch for anonymous users
+    return null;
   }, [firestore, user]);
 
   const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(assignedTpsQuery);
