@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDoc } from 'firebase/firestore';
+import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDoc, query, where } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
@@ -127,12 +127,22 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const [tps, setTps] = useState<Record<number, TP>>(initialTps);
   const [teacherName, setTeacherNameState] = useState<string>('');
+  const { user } = userAuthState;
+
 
   const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
   const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
   const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]));
-  const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'evaluations') : null, [firestore]));
+  
+  const evaluationsQuery = useMemoFirebase(() => {
+    if (firestore && user) {
+        return query(collection(firestore, 'evaluations'), where('studentId', '==', user.uid));
+    }
+    return null;
+  }, [firestore, user]);
+
+  const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(evaluationsQuery);
   
   const assignedTps = useMemo(() => {
     if (!assignedTpsData) return {};
