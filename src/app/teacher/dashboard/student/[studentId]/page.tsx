@@ -232,7 +232,7 @@ export default function StudentDetailPage() {
 
     // Data fetching hooks specific to this component
     const assignedTpsDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `assignedTps/${studentName}`) : null, [firestore, studentName]);
-    const { data: assignedTpsData } = useDoc<{ tps: any[] }>(assignedTpsDocRef);
+    const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useDoc<{ tps: any[] }>(assignedTpsDocRef);
 
     const studentEvalsDocRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `evaluations/${studentName}`) : null, [firestore, studentName]);
     const { data: studentEvalsData } = useDoc(studentEvalsDocRef);
@@ -312,15 +312,15 @@ export default function StudentDetailPage() {
         }
     }, [studentName, studentLatestEvals]);
 
-    // Automatically select the first TP if none is selected in the URL
     useEffect(() => {
-        if (studentAssignedTps.length > 0 && !searchParams.has('tp')) {
+        if (!isAssignedTpsLoading && studentAssignedTps.length > 0 && !searchParams.has('tp')) {
             const firstTpId = studentAssignedTps[0].id;
             const newSearchParams = new URLSearchParams(searchParams.toString());
             newSearchParams.set('tp', firstTpId.toString());
+            // Using replace to avoid adding to browser history for this default selection
             router.replace(`${pathname}?${newSearchParams.toString()}`);
         }
-    }, [studentAssignedTps, searchParams, pathname, router]);
+    }, [isAssignedTpsLoading, studentAssignedTps, searchParams, pathname, router]);
 
 
     const handleEvaluationChange = (competenceId: string, status: EvaluationStatus) => {
@@ -574,3 +574,5 @@ export default function StudentDetailPage() {
         </div>
     );
 }
+
+    
