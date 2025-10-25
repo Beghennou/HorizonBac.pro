@@ -1,206 +1,157 @@
 /**
- * @fileoverview Firestore Security Rules for the Formula Skills Garage application.
+ * @file Firestore Security Rules for Formula Skills Garage application.
  *
- * Core Philosophy:
- * This ruleset enforces a strict user-ownership model, primarily based on the `teacherId` and `studentId` fields, ensuring that users can only access and modify data they own or are explicitly associated with.
+ * @corePhilosophy:
+ *   This ruleset enforces a strict user-ownership model, where teachers can only
+ *   manage data related to their students and training programs. Students can
+ *   only access their own progress data.
  *
- * Data Structure:
- * - /teachers/{teacherId}: Stores teacher profiles. `teacherId` MUST match the authenticated user's UID.
- * - /teachers/{teacherId}/students/{studentId}: Stores student profiles associated with a teacher.
- * - /teachers/{teacherId}/trainingPrograms/{trainingProgramId}: Stores training programs created by teachers.
- * - /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}: Stores simulation data for training programs.
- * - /students/{studentId}/studentProgress/{studentProgressId}: Stores student progress data.
- * - /students/{studentId}/storedEvals/{tpId}: Stores the final evaluation data for a student on a specific TP
+ * @dataStructure:
+ *   Data is nested under `/teachers/{teacherId}` and `/students/{studentId}`
+ *   collections to establish clear ownership.
  *
- * Key Security Decisions:
- * - Teachers can only access/modify Students and TrainingPrograms they are responsible for (enforced via `teacherId`).
- * - Students can only access/modify their own progress data (enforced via `studentId`).
- * - Data consistency is enforced between document IDs and `teacherId`/`studentId` fields.
- * - Listing of collections is generally restricted to owners (e.g., teachers listing their students).
+ * @keySecurityDecisions:
+ *   - Teachers can only manage students and training programs associated with
+ *     their `teacherId`.
+ *   - Students can only access their own `studentProgress` data.
+ *   - Listing all users is disallowed for privacy.
+ *   - The `config` collection is not secured in this ruleset. If sensitive
+ *     configuration data is stored here in a production environment, it will
+ *     need to be secured with appropriate authorization checks.
  *
- * Denormalization for Authorization:
- * - The `teacherId` is denormalized into the Student and TrainingProgram documents to simplify authorization checks and avoid costly `get()` calls.
+ * @denormalizationForAuthorization:
+ *   The `teacherId` field is denormalized into the `Student` and
+ *   `TrainingProgram` collections to enable fast ownership checks without
+ *   requiring additional `get()` calls.
+ *
+ * @structuralSegregation:
+ *   No explicit segregation of public vs. private collections has been specified.
+ *   All data is considered private and requires authentication.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows read and write access to teacher profiles, but only if the teacherId matches the authenticated user's UID.
+     * @description Allows anyone to read the config collection.
+     * @path /databases/{database}/documents/config
+     * @allow (get, list) Any user, authenticated or not.
+     * @deny (create, update, delete) No user.
+     * @principle Allows public read access to the config collection.
+     */
+    match /config {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Enforces owner-only access for teacher profiles.
      * @path /teachers/{teacherId}
-     * @allow (create, update, delete) if request.auth.uid == teacherId
-     * @allow (get, list) if request.auth.uid == teacherId
-     * @deny (create, update, delete) if request.auth.uid != teacherId
-     * @deny (get, list) if request.auth.uid != teacherId
-     * @principle Enforces document ownership for all operations on teacher profiles.
+     * @allow (create) A user can create their own teacher profile if the teacherId matches their auth.uid.
+     * @allow (get, update, delete) A teacher can access, modify or delete their own profile.
+     * @deny (create) A user cannot create a teacher profile with a teacherId that does not match their auth.uid.
+     * @deny (get, update, delete) A teacher cannot access, modify or delete another teacher's profile.
+     * @principle Enforces document ownership for teacher profiles.
      */
     match /teachers/{teacherId} {
-      function isOwner(teacherId) {
-        return request.auth.uid == teacherId;
-      }
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      allow get: if isOwner(teacherId);
-      allow list: if false;
-
-      allow create: if isOwner(teacherId);
-      allow update: if isOwner(teacherId) && resource != null;
-      allow delete: if isOwner(teacherId) && resource != null;
+      allow get: if isSignedIn() && isOwner(teacherId);
+      allow list: if false; // Listing all teachers is not permitted.
+      allow create: if isSignedIn() && isOwner(teacherId) ;
+      allow update: if isSignedIn() && isExistingOwner(teacherId);
+      allow delete: if isSignedIn() && isExistingOwner(teacherId);
     }
 
     /**
-     * @description Allows a teacher to manage students associated with their profile.
+     * @description Enforces teacher-only access for student profiles under their teacher ID.
      * @path /teachers/{teacherId}/students/{studentId}
-     * @allow (create) if request.auth.uid == teacherId && request.resource.data.teacherId == teacherId
-     * @allow (get, list, update, delete) if request.auth.uid == teacherId && resource.data.teacherId == teacherId
-     * @deny (create) if request.auth.uid != teacherId || request.resource.data.teacherId != teacherId
-     * @deny (get, list, update, delete) if request.auth.uid != teacherId || resource.data.teacherId != teacherId
-     * @principle Enforces teacher ownership of student profiles.
+     * @allow (create) A teacher can create a student profile under their teacher ID.
+     * @allow (get, update, delete) A teacher can access, modify or delete student profiles under their teacher ID.
+     * @deny (create, get, update, delete) A teacher cannot create, access, modify or delete student profiles under another teacher ID.
+     * @principle Enforces teacher-ownership for student profiles.
      */
     match /teachers/{teacherId}/students/{studentId} {
-      function isOwner(teacherId) {
-        return request.auth.uid == teacherId;
-      }
-      function isExistingOwner(teacherId) {
-        return isOwner(teacherId) && resource != null;
-      }
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      allow get: if isOwner(teacherId);
-      allow list: if isOwner(teacherId);
-
-      allow create: if isOwner(teacherId) && request.resource.data.teacherId == teacherId;
-      allow update: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
-      allow delete: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
+      allow get: if isSignedIn() && isOwner(teacherId);
+      allow list: if isSignedIn() && isOwner(teacherId);
+      allow create: if isSignedIn() && isOwner(teacherId);
+      allow update: if isSignedIn() && isExistingOwner(teacherId);
+      allow delete: if isSignedIn() && isExistingOwner(teacherId);
     }
 
     /**
-     * @description Allows a teacher to manage training programs they created.
+     * @description Enforces teacher-only access for training programs under their teacher ID.
      * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}
-     * @allow (create) if request.auth.uid == teacherId && request.resource.data.teacherId == teacherId
-     * @allow (get, list, update, delete) if request.auth.uid == teacherId && resource.data.teacherId == teacherId
-     * @deny (create) if request.auth.uid != teacherId || request.resource.data.teacherId != teacherId
-     * @deny (get, list, update, delete) if request.auth.uid != teacherId || resource.data.teacherId != teacherId
-     * @principle Enforces teacher ownership of training programs.
+     * @allow (create) A teacher can create a training program under their teacher ID.
+     * @allow (get, update, delete) A teacher can access, modify or delete training programs under their teacher ID.
+     * @deny (create, get, update, delete) A teacher cannot create, access, modify or delete training programs under another teacher ID.
+     * @principle Enforces teacher-ownership for training programs.
      */
     match /teachers/{teacherId}/trainingPrograms/{trainingProgramId} {
-      function isOwner(teacherId) {
-        return request.auth.uid == teacherId;
-      }
-      function isExistingOwner(teacherId) {
-        return isOwner(teacherId) && resource != null;
-      }
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      allow get: if isOwner(teacherId);
-      allow list: if isOwner(teacherId);
-
-      allow create: if isOwner(teacherId) && request.resource.data.teacherId == teacherId;
-      allow update: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
-      allow delete: if isExistingOwner(teacherId) && resource.data.teacherId == teacherId;
+      allow get: if isSignedIn() && isOwner(teacherId);
+      allow list: if isSignedIn() && isOwner(teacherId);
+      allow create: if isSignedIn() && isOwner(teacherId);
+      allow update: if isSignedIn() && isExistingOwner(teacherId);
+      allow delete: if isSignedIn() && isExistingOwner(teacherId);
     }
 
     /**
-     * @description Allows a teacher to manage simulations within their training programs.
+     * @description Enforces teacher-only access for simulations under their training program and teacher ID.
      * @path /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId}
-     * @allow (create) if request.auth.uid == teacherId
-     * @allow (get, list, update, delete) if request.auth.uid == teacherId
-     * @deny (create, update, delete) if request.auth.uid != teacherId
-     * @deny (get, list) if request.auth.uid != teacherId
-     * @principle Enforces teacher ownership of simulations.
+     * @allow (create) A teacher can create a simulation under their training program and teacher ID.
+     * @allow (get, update, delete) A teacher can access, modify or delete simulations under their training program and teacher ID.
+     * @deny (create, get, update, delete) A teacher cannot create, access, modify or delete simulations under another teacher ID or training program.
+     * @principle Enforces teacher-ownership for simulations within training programs.
      */
     match /teachers/{teacherId}/trainingPrograms/{trainingProgramId}/simulations/{simulationId} {
-      function isOwner(teacherId) {
-        return request.auth.uid == teacherId;
-      }
-      function isExistingOwner(teacherId) {
-        return isOwner(teacherId) && resource != null;
-      }
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      allow get: if isOwner(teacherId);
-      allow list: if isOwner(teacherId);
-
-      allow create: if isOwner(teacherId);
-      allow update: if isExistingOwner(teacherId);
-      allow delete: if isExistingOwner(teacherId);
+      allow get: if isSignedIn() && isOwner(teacherId);
+      allow list: if isSignedIn() && isOwner(teacherId);
+      allow create: if isSignedIn() && isOwner(teacherId);
+      allow update: if isSignedIn() && isExistingOwner(teacherId);
+      allow delete: if isSignedIn() && isExistingOwner(teacherId);
     }
 
     /**
-     * @description Allows a student to manage their own progress data.
+     * @description Enforces student-only access for their own progress data.
      * @path /students/{studentId}/studentProgress/{studentProgressId}
-     * @allow (create) if request.auth.uid == studentId && request.resource.data.studentId == studentId
-     * @allow (get, list, update, delete) if request.auth.uid == studentId && resource.data.studentId == studentId
-     * @deny (create) if request.auth.uid != studentId || request.resource.data.studentId != studentId
-     * @deny (get, list, update, delete) if request.auth.uid != studentId || resource.data.studentId != studentId
-     * @principle Enforces student ownership of progress data.
+     * @allow (create) A student can create progress data for themselves.
+     * @allow (get, update, delete) A student can access, modify or delete their own progress data.
+     * @deny (create, get, update, delete) A student cannot create, access, modify or delete progress data for another student.
+     * @principle Enforces student-ownership for progress data.
      */
     match /students/{studentId}/studentProgress/{studentProgressId} {
-      function isOwner(studentId) {
-        return request.auth.uid == studentId;
-      }
-      function isExistingOwner(studentId) {
-        return isOwner(studentId) && resource != null;
-      }
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      allow get: if isOwner(studentId);
-      allow list: if isOwner(studentId);
-
-      allow create: if isOwner(studentId) && request.resource.data.studentId == studentId;
-      allow update: if isExistingOwner(studentId) && resource.data.studentId == studentId;
-      allow delete: if isExistingOwner(studentId) && resource.data.studentId == studentId;
+      allow get: if isSignedIn() && isOwner(studentId);
+      allow list: if isSignedIn() && isOwner(studentId);
+      allow create: if isSignedIn() && isOwner(studentId);
+      allow update: if isSignedIn() && isExistingOwner(studentId);
+      allow delete: if isSignedIn() && isExistingOwner(studentId);
     }
-    /**
-     * @description Allows a student to manage their own stored evaluations.
-     * @path /students/{studentId}/storedEvals/{tpId}
-     * @allow (create) if request.auth.uid == studentId
-     * @allow (get, list, update, delete) if request.auth.uid == studentId
-     * @deny (create, update, delete) if request.auth.uid != studentId
-     * @deny (get, list) if request.auth.uid != studentId
-     * @principle Enforces student ownership of stored evaluations.
-     */
-        match /students/{studentId}/storedEvals/{tpId} {
-          function isOwner(studentId) {
-            return request.auth.uid == studentId;
-          }
-          function isExistingOwner(studentId) {
-            return isOwner(studentId) && resource != null;
-          }
-          function isSignedIn() {
-            return request.auth != null;
-          }
 
-          allow get: if isOwner(studentId);
-          allow list: if isOwner(studentId);
-
-          allow create: if isOwner(studentId);
-          allow update: if isExistingOwner(studentId);
-          allow delete: if isExistingOwner(studentId);
+     /**
+      * @description Stores the final evaluation data for a student on a specific TP.
+      * @path /students/{studentId}/storedEvals/{tpId}
+      * @allow (create) A student can create progress data for themselves.
+      * @allow (get, update, delete) A student can access, modify or delete their own progress data.
+      * @deny (create, get, update, delete) A student cannot create, access, modify or delete progress data for another student.
+      * @principle Enforces student-ownership for evaluation data.
+      */
+    match /students/{studentId}/storedEvals/{tpId} {
+        allow get: if isSignedIn() && isOwner(studentId);
+        allow list: if isSignedIn() && isOwner(studentId);
+        allow create: if isSignedIn() && isOwner(studentId);
+        allow update: if isSignedIn() && isExistingOwner(studentId);
+        allow delete: if isSignedIn() && isExistingOwner(studentId);
     }
-    
-        /**
-         * @description  Denies all access to the /classes collection as per issue #1.
-         * @path /classes
-         * @allow NONE
-         * @principle Hard deny of the /classes collection.
-         */
-    match /classes {
-      allow get: if false;
-      allow list: if false;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
     }
   }
 }
