@@ -71,19 +71,14 @@ function DashboardLayoutContent({
       const newSearchParams = new URLSearchParams(searchParams.toString());
       let needsRedirect = false;
       
-      if (!currentLevel) {
+      if (!currentLevel || currentLevel !== initialNiveau) {
         newSearchParams.set('level', initialNiveau);
         needsRedirect = true;
       }
 
-      if (!currentClass && initialClass) {
-        newSearchParams.set('class', initialClass);
-        needsRedirect = true;
-      } else if (currentClass && !initialClass) {
-        // If the class in URL is invalid for the level, clear it and set a default
-        const defaultClass = classesForInitialNiveau[0] || null;
-        if(defaultClass) {
-          newSearchParams.set('class', defaultClass);
+      if ((!currentClass && initialClass) || (currentClass && !initialClass)) {
+        if(initialClass) {
+          newSearchParams.set('class', initialClass);
         } else {
           newSearchParams.delete('class');
         }
@@ -94,7 +89,7 @@ function DashboardLayoutContent({
           router.replace(`${pathname}?${newSearchParams.toString()}`);
       }
     }
-  }, [searchParams, router, pathname, isFirebaseLoaded, classNames]);
+  }, [searchParams, router, pathname, isFirebaseLoaded, classNames, level, classesForLevel]);
   
   const isLoaded = isFirebaseLoaded && selectedClass !== null;
 
