@@ -39,40 +39,10 @@ function DashboardLayoutContent({
   const { isLoaded: isFirebaseLoaded, classes } = useFirebase();
 
   const selectedClass = searchParams.get('class') || null;
-  const level = getLevelFromClassName(selectedClass);
 
   const classNames = useMemo(() => classes.map(c => c.id).sort((a,b) => a.localeCompare(b)), [classes]);
-
-  useEffect(() => {
-    if (isFirebaseLoaded) {
-      const newSearchParams = new URLSearchParams(searchParams.toString());
-      let needsRedirect = false;
-
-      // 1. Ensure a class is selected if available
-      if (!selectedClass && classNames.length > 0) {
-          const firstClass = classNames[0];
-          newSearchParams.set('class', firstClass);
-          newSearchParams.set('level', getLevelFromClassName(firstClass));
-          needsRedirect = true;
-      }
-      
-      // 2. Ensure level is in sync with class
-      const currentLevelInUrl = searchParams.get('level');
-      const derivedLevel = getLevelFromClassName(selectedClass);
-      if (currentLevelInUrl !== derivedLevel) {
-          newSearchParams.set('level', derivedLevel);
-          needsRedirect = true;
-      }
-
-      // 3. Perform redirect if necessary
-      if (needsRedirect) {
-          const targetPath = pathname === '/teacher/dashboard' ? '/teacher/dashboard/class-progress' : pathname;
-          router.replace(`${targetPath}?${newSearchParams.toString()}`);
-      }
-    }
-  }, [isFirebaseLoaded, classNames, selectedClass, searchParams, pathname, router]);
   
-  const isLoaded = isFirebaseLoaded && selectedClass !== null;
+  const isLoaded = isFirebaseLoaded;
 
   if (!isLoaded) {
     return <TachometerAnimation />;
@@ -84,8 +54,9 @@ function DashboardLayoutContent({
     newSearchParams.set('level', getLevelFromClassName(className));
     newSearchParams.delete('student');
     
-    const basePath = pathname.startsWith('/teacher/dashboard/student') ? '/teacher/dashboard/class-progress' : pathname;
-    router.push(`${basePath}?${newSearchParams.toString()}`);
+    // If we are on the base dashboard page, navigate to a default view
+    const targetPath = pathname === '/teacher/dashboard' ? '/teacher/dashboard/class-progress' : pathname;
+    router.push(`${targetPath}?${newSearchParams.toString()}`);
   };
 
   return (
@@ -135,7 +106,7 @@ function DashboardLayoutContent({
                             </SelectContent>
                             </Select>
                         ) : (
-                            <p className="text-sm text-muted-foreground">Aucune classe pour ce niveau.</p>
+                            <p className="text-sm text-muted-foreground">Aucune classe n'est configurée.</p>
                         )}
                       </div>
 
