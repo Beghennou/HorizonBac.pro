@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
                         competenceScores[competenceId] = { totalScore: 0, count: 0, description: allCompetencesForLevel[competenceId] || competenceId };
                     }
                     const latestStatus = historyArray[historyArray.length - 1];
-                    if (isEvaluationStatus(latestStatus)) {
+                     if (isEvaluationStatus(latestStatus)) {
                         competenceScores[competenceId].totalScore += statusToScore[latestStatus];
                         competenceScores[competenceId].count++;
                     }
@@ -103,6 +103,18 @@ export default function AnalyticsPage() {
                 <Loader2 className="w-12 h-12 animate-spin text-primary" />
             </div>
         );
+    }
+    
+    if (studentsInClass.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+                <Users className="w-16 h-16 text-muted-foreground mb-4" />
+                <h2 className="font-headline text-2xl tracking-wide">Aucun élève dans cette classe</h2>
+                <p className="text-muted-foreground text-lg mt-2 max-w-md">
+                    Ajoutez des élèves dans la page <span className="font-bold text-accent">Paramètres</span> pour voir les analyses.
+                </p>
+            </div>
+        )
     }
 
 
