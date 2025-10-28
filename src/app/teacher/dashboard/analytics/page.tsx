@@ -1,14 +1,14 @@
 
 'use client';
+import React, { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { allBlocs, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart3, Users, Target, BookOpen, Loader2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { doc } from 'firebase/firestore';
-import React, { useMemo } from 'react';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
@@ -23,7 +23,6 @@ const MAX_SCORE = 3;
 function isEvaluationStatus(status: any): status is EvaluationStatus {
     return ['NA', 'EC', 'A', 'M'].includes(status);
 }
-
 
 export default function AnalyticsPage() {
     const searchParams = useSearchParams();
@@ -44,7 +43,7 @@ export default function AnalyticsPage() {
     const averageProgress = 0; // This is a placeholder
 
     const competenceMasteryData = useMemo(() => {
-        if (!isFirebaseLoaded || !studentsInClass || studentsInClass.length === 0 || !allEvaluations) {
+        if (!isFirebaseLoaded || !studentsInClass || studentsInClass.length === 0 || !allEvaluations || Object.keys(allEvaluations).length === 0) {
             return [];
         }
 
@@ -55,20 +54,22 @@ export default function AnalyticsPage() {
         });
 
         studentsInClass.forEach((studentName: string) => {
-            const studentEvals = allEvaluations[studentName] || {};
-            Object.entries(studentEvals).forEach(([competenceId, historyData]) => {
-                const historyArray = (historyData as any)?.history || [];
-                if (historyArray.length > 0) {
-                    if (!competenceScores[competenceId]) {
-                        competenceScores[competenceId] = { totalScore: 0, count: 0, description: allCompetencesForLevel[competenceId] || competenceId };
+            const studentEvals = allEvaluations[studentName];
+            if (studentEvals) {
+                Object.entries(studentEvals).forEach(([competenceId, historyData]) => {
+                    const historyArray = (historyData as any)?.history || [];
+                    if (historyArray.length > 0) {
+                        if (!competenceScores[competenceId]) {
+                            competenceScores[competenceId] = { totalScore: 0, count: 0, description: allCompetencesForLevel[competenceId] || competenceId };
+                        }
+                        const latestStatus = historyArray[historyArray.length - 1];
+                         if (isEvaluationStatus(latestStatus)) {
+                            competenceScores[competenceId].totalScore += statusToScore[latestStatus];
+                            competenceScores[competenceId].count++;
+                        }
                     }
-                    const latestStatus = historyArray[historyArray.length - 1];
-                     if (isEvaluationStatus(latestStatus)) {
-                        competenceScores[competenceId].totalScore += statusToScore[latestStatus];
-                        competenceScores[competenceId].count++;
-                    }
-                }
-            });
+                });
+            }
         });
 
         return Object.entries(competenceScores).map(([id, data]) => ({
@@ -117,7 +118,6 @@ export default function AnalyticsPage() {
         )
     }
 
-
     return (
         <div className="space-y-8">
             <div>
@@ -133,7 +133,8 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className="lg:col-span-1">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Users />Progression Moyenne de la Classe</CardTitle>
+                        <CardTitle className="flex items-center gap-2"><Users />Progression Moyenne</CardTitle>
+                        <CardDescription>Moyenne de l'avancement global des élèves de la classe.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center gap-4">
                         <div className="relative w-48 h-48">
@@ -159,7 +160,7 @@ export default function AnalyticsPage() {
                                 <span className="text-5xl font-bold font-headline text-accent">{averageProgress}%</span>
                             </div>
                         </div>
-                         <p className="text-muted-foreground text-center">Moyenne de l'avancement global des élèves de la classe.</p>
+                         
                     </CardContent>
                 </Card>
 
