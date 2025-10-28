@@ -134,9 +134,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
 
-  // This query will be used for both anonymous and authenticated users.
-  // For anonymous users, it will fetch the necessary data for the student view.
-  // For teachers, it provides the full set of data they are allowed to see.
   const assignedTpsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]);
   const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(assignedTpsQuery);
 
@@ -152,58 +149,14 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
 
   useEffect(() => {
-    const fetchTps = async () => {
-        if (!firestore) return;
-        
-        // 1. Fetch public TPs (id < 1000)
-        const publicTpsQuery = query(collection(firestore, 'tps'), where('id', '<', 1000));
-        
-        // 2. Fetch user-owned TPs if user is authenticated
-        let userTpsQuery = null;
-        if (user && !user.isAnonymous) {
-            userTpsQuery = query(collection(firestore, 'tps'), where('author', '==', user.uid));
-        }
-
-        try {
-            const queryPromises = [getDocs(publicTpsQuery)];
-            if(userTpsQuery) {
-                queryPromises.push(getDocs(userTpsQuery));
-            }
-            
-            const [publicTpsSnapshot, userTpsSnapshot] = await Promise.all(queryPromises);
-
-            const allTpsMap = new Map<number, TP>();
-            
-            // Add initial static TPs
-            Object.values(initialTps).forEach(tp => allTpsMap.set(tp.id, tp));
-            
-            // Add public TPs from Firestore
-            publicTpsSnapshot.forEach(doc => {
-                allTpsMap.set(doc.data().id, doc.data() as TP);
-            });
-            
-            // Add user-owned TPs from Firestore
-            if(userTpsSnapshot) {
-                userTpsSnapshot.forEach(doc => {
-                    allTpsMap.set(doc.data().id, doc.data() as TP);
-                });
-            }
-            
-            setTps(Object.fromEntries(allTpsMap));
-        } catch (error: any) {
-            console.error("Erreur de récupération des TPs:", error);
-            if(error.code === 'permission-denied') {
-                 errorEmitter.emit('permission-error', new FirestorePermissionError({
-                    path: 'tps',
-                    operation: 'list',
-                }));
-            }
-        }
-    };
-
-    fetchTps();
-  }, [firestore, user]);
-
+    const allTpsMap: Record<number, TP> = { ...initialTps };
+    if (dynamicTps) {
+      dynamicTps.forEach(tpDoc => {
+        allTpsMap[tpDoc.id] = tpDoc as TP;
+      });
+    }
+    setTps(allTpsMap);
+  }, [dynamicTps]);
 
   
   const assignedTps = useMemo(() => {
@@ -223,7 +176,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     }
   }, [configData]);
 
-  const isLoaded = !userAuthState.isUserLoading && !isClassesLoading && !isConfigLoading;
+  const isLoaded = !userAuthState.isUserLoading && !isClassesLoading && !isConfigLoading && !isTpsLoading && !isAssignedTpsLoading && (!user || user.isAnonymous || !isEvaluationsLoading);
 
   useEffect(() => {
     if (!auth) {
@@ -389,5 +342,7 @@ export const useUser = () => {
     const { user, isUserLoading, userError } = useFirebase();
     return { user, isUserLoading, userError };
 }
+
+    
 
     

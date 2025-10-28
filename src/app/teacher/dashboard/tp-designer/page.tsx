@@ -40,11 +40,11 @@ const tpFormSchema = z.object({
     situation: z.string().min(10, "La situation doit faire au moins 10 caractères."),
     objectif: z.string().min(10, "L'objectif doit faire au moins 10 caractères."),
     competences: z.array(z.string()).min(1, "Au moins une compétence doit être sélectionnée."),
-    materiel: z.array(z.string().min(1, "Le nom du matériel est requis.")).min(1, "Au moins un matériel est requis."),
+    materiel: z.array(z.object({ value: z.string().min(1, "Le nom du matériel est requis.") })).min(1, "Au moins un matériel est requis."),
     etudePrelim: z.array(etudePrelimSchema),
     activitePratique: z.array(etapeSchema).min(1, "Au moins une étape pratique est requise."),
-    pointsCles: z.array(z.string().min(1, "Le point clé est requis.")).min(1, "Au moins un point clé est requis."),
-    securiteRangement: z.array(z.string().min(1, "La consigne de sécurité est requise.")).min(1, "Au moins une consigne de sécurité est requise."),
+    pointsCles: z.array(z.object({ value: z.string().min(1, "Le point clé est requis.") })).min(1, "Au moins un point clé est requis."),
+    securiteRangement: z.array(z.object({ value: z.string().min(1, "La consigne de sécurité est requise.") })).min(1, "Au moins une consigne de sécurité est requise."),
 });
 
 type TpFormValues = z.infer<typeof tpFormSchema>;
@@ -59,18 +59,18 @@ export default function TPDesignerPage() {
     const form = useForm<TpFormValues>({
         resolver: zodResolver(tpFormSchema),
         defaultValues: {
-            id: Math.floor(1000 + Math.random() * 9000), // Random temporary ID
+            id: Math.floor(1000 + Math.random() * 9000),
             titre: "",
             duree: "2h00",
             niveau: "seconde",
             situation: "",
             objectif: "",
             competences: [],
-            materiel: [""],
+            materiel: [{ value: "" }],
             etudePrelim: [],
             activitePratique: [{ titre: "", duree: "30 min", etapes: [""] }],
-            pointsCles: [""],
-            securiteRangement: [""],
+            pointsCles: [{ value: "" }],
+            securiteRangement: [{ value: "" }],
         },
     });
 
@@ -85,6 +85,9 @@ export default function TPDesignerPage() {
 
                 form.reset({
                     ...tpToEdit,
+                    materiel: tpToEdit.materiel.map(m => ({ value: m })),
+                    pointsCles: tpToEdit.pointsCles.map(pc => ({ value: pc })),
+                    securiteRangement: tpToEdit.securiteRangement.map(sr => ({ value: sr })),
                     objectif: objectifWithoutCompetences,
                     competences,
                 });
@@ -102,12 +105,16 @@ export default function TPDesignerPage() {
 
     const onSubmit = (data: TpFormValues) => {
         const fullObjectif = `${data.objectif} (Compétences ${data.competences.join(', ')})`;
-        const finalData = {
+        
+        const finalData: TP = {
           ...data,
           objectif: fullObjectif,
+          materiel: data.materiel.map(item => item.value),
+          pointsCles: data.pointsCles.map(item => item.value),
+          securiteRangement: data.securiteRangement.map(item => item.value),
           author: teacherName,
           creationDate: new Date().toISOString(),
-        } as TP;
+        };
         
         addTp(finalData);
 
@@ -118,8 +125,23 @@ export default function TPDesignerPage() {
 
         if (!isEditMode) {
           form.reset();
+           form.reset({
+            id: Math.floor(1000 + Math.random() * 9000),
+            titre: "",
+            duree: "2h00",
+            niveau: "seconde",
+            situation: "",
+            objectif: "",
+            competences: [],
+            materiel: [{ value: "" }],
+            etudePrelim: [],
+            activitePratique: [{ titre: "", duree: "30 min", etapes: [""] }],
+            pointsCles: [{ value: "" }],
+            securiteRangement: [{ value: "" }],
+        });
+        } else {
+            router.push('/teacher/dashboard/tp-designer');
         }
-        router.push('/teacher/dashboard/tp-designer');
     };
 
     return (
@@ -232,12 +254,12 @@ export default function TPDesignerPage() {
                     <CardHeader>
                         <CardTitle className="flex items-center justify-between">
                             <span>Matériel Requis</span>
-                            <Button type="button" variant="outline" size="sm" onClick={() => appendMateriel("")}><PlusCircle className="mr-2"/>Ajouter</Button>
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendMateriel({ value: "" })}><PlusCircle className="mr-2"/>Ajouter</Button>
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                         {materielFields.map((field, index) => (
-                             <FormField key={field.id} control={form.control} name={`materiel.${index}`} render={({ field }) => (
+                             <FormField key={field.id} control={form.control} name={`materiel.${index}.value`} render={({ field }) => (
                                 <FormItem>
                                     <div className="flex items-center gap-2">
                                         <FormControl><Input {...field} /></FormControl>
@@ -367,12 +389,12 @@ export default function TPDesignerPage() {
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
                                 <span>Points Clés</span>
-                                <Button type="button" variant="outline" size="sm" onClick={() => appendPointsCles("")}><PlusCircle className="mr-2"/>Ajouter</Button>
+                                <Button type="button" variant="outline" size="sm" onClick={() => appendPointsCles({ value: "" })}><PlusCircle className="mr-2"/>Ajouter</Button>
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
                             {pointsClesFields.map((field, index) => (
-                                <FormField key={field.id} control={form.control} name={`pointsCles.${index}`} render={({ field }) => (
+                                <FormField key={field.id} control={form.control} name={`pointsCles.${index}.value`} render={({ field }) => (
                                     <FormItem>
                                         <div className="flex items-center gap-2">
                                             <FormControl><Input {...field} /></FormControl>
@@ -388,12 +410,12 @@ export default function TPDesignerPage() {
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
                                 <span>Sécurité & Rangement</span>
-                                <Button type="button" variant="outline" size="sm" onClick={() => appendSecuriteRangement("")}><PlusCircle className="mr-2"/>Ajouter</Button>
+                                <Button type="button" variant="outline" size="sm" onClick={() => appendSecuriteRangement({ value: "" })}><PlusCircle className="mr-2"/>Ajouter</Button>
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
                             {securiteRangementFields.map((field, index) => (
-                                <FormField key={field.id} control={form.control} name={`securiteRangement.${index}`} render={({ field }) => (
+                                <FormField key={field.id} control={form.control} name={`securiteRangement.${index}.value`} render={({ field }) => (
                                     <FormItem>
                                         <div className="flex items-center gap-2">
                                             <FormControl><Input {...field} /></FormControl>
@@ -418,3 +440,5 @@ export default function TPDesignerPage() {
         </div>
     );
 }
+
+    
