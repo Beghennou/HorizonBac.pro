@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import Papa from 'papaparse';
 import { Student } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 
 export default function SettingsPage() {
@@ -374,7 +375,7 @@ export default function SettingsPage() {
                   <p>Vider les listes d'élèves de **toutes** les classes (en base de données).</p>
                    <AlertDialog>
                       <AlertDialogTrigger asChild>
-                          <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                          <Button variant="outline" className={cn("border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground")}>
                               <Eraser className="mr-2 h-4 w-4" />
                               Vider toutes les listes
                           </Button>

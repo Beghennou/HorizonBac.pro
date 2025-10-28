@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { BarChart3, Users, Target, BookOpen, Loader2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { collection, doc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import React, { useMemo } from 'react';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
@@ -41,7 +41,7 @@ export default function AnalyticsPage() {
 
     const studentsInClass = useMemo(() => classData?.studentNames || [], [classData]);
 
-    const averageProgress = 0;
+    const averageProgress = 0; // This is a placeholder
 
     const competenceMasteryData = useMemo(() => {
         if (!isFirebaseLoaded || !studentsInClass || studentsInClass.length === 0 || !allEvaluations) {
@@ -57,7 +57,7 @@ export default function AnalyticsPage() {
         studentsInClass.forEach((studentName: string) => {
             const studentEvals = allEvaluations[studentName] || {};
             Object.entries(studentEvals).forEach(([competenceId, historyData]) => {
-                const historyArray = (historyData as any)?.history || [];
+                const historyArray = (historyData as { history: EvaluationStatus[] })?.history || [];
                 if (historyArray.length > 0) {
                     if (!competenceScores[competenceId]) {
                         competenceScores[competenceId] = { totalScore: 0, count: 0, description: allCompetencesForLevel[competenceId] || competenceId };

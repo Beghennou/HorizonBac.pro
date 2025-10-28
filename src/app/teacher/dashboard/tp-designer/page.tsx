@@ -25,12 +25,19 @@ const etapeSchema = z.object({
     etapes: z.array(z.string().min(1, "La description de la sous-étape est requise.")).min(1, "Au moins une sous-étape est requise."),
 });
 
-const etudePrelimSchema = z.object({
-    type: z.enum(['text', 'qcm']),
+const etudePrelimSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("text"),
     q: z.string().min(1, "La question est requise."),
     r: z.string().min(1, "La réponse est requise."),
-    options: z.array(z.string()).optional(),
-});
+  }),
+  z.object({
+    type: z.literal("qcm"),
+    q: z.string().min(1, "La question est requise."),
+    r: z.string().min(1, "La réponse est requise."),
+    options: z.array(z.string().min(1, "L'option ne peut être vide.")).min(1, "Au moins une option est requise pour un QCM."),
+  }),
+]);
 
 const tpFormSchema = z.object({
     id: z.number().int().positive("L'ID doit être un nombre positif."),
@@ -85,6 +92,10 @@ export default function TPDesignerPage() {
 
                 form.reset({
                     ...tpToEdit,
+                    etudePrelim: tpToEdit.etudePrelim.map(e => ({
+                        ...e,
+                        options: e.type === 'qcm' ? e.options : undefined
+                    })),
                     materiel: tpToEdit.materiel.map(m => ({ value: m })),
                     pointsCles: tpToEdit.pointsCles.map(pc => ({ value: pc })),
                     securiteRangement: tpToEdit.securiteRangement.map(sr => ({ value: sr })),
@@ -112,6 +123,12 @@ export default function TPDesignerPage() {
           materiel: data.materiel.map(item => item.value),
           pointsCles: data.pointsCles.map(item => item.value),
           securiteRangement: data.securiteRangement.map(item => item.value),
+          etudePrelim: data.etudePrelim.map(e => {
+            if (e.type === 'qcm') {
+              return { type: 'qcm', q: e.q, r: e.r, options: e.options };
+            }
+            return { type: 'text', q: e.q, r: e.r };
+          }),
           author: teacherName,
           creationDate: new Date().toISOString(),
         };
