@@ -4,7 +4,7 @@ import { Suspense, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { TP } from '@/lib/data-manager';
+import { TP, TpStatus } from '@/lib/data-manager';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,7 @@ function StudentDashboard() {
     const tp = allTps[assignedTp.id];
     const isEvaluated = storedEvalsForStudent[tp?.id.toString()]?.isFinal;
     return tp ? { ...tp, status: assignedTp.status, isEvaluated } : null;
-  }).filter((tp): tp is TP & { status: string; isEvaluated: boolean } => tp !== null);
+  }).filter((tp): tp is TP & { status: TpStatus; isEvaluated: boolean } => tp !== null);
 
   const getTpCategory = (tpId: number): string => {
     if (tpId >= 1000) return "TP Personnalisé";
