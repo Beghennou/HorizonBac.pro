@@ -1,15 +1,15 @@
 
 'use client';
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau } from "@/lib/data-manager";
 import { useSearchParams, useRouter } from "next/navigation";
 import { User, Users, Printer, Bot } from "lucide-react";
 import { useFirebase } from '@/firebase';
-import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { Button } from '@/components/ui/button';
 
 const EtapeCard = ({ etape, index }: { etape: any, index: number }) => (
     <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
@@ -26,6 +26,10 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
     const className = searchParams.get('class');
     const { teacherName } = useFirebase();
 
+    const handlePrint = () => {
+        window.print();
+    };
+
     return (
         <div className="space-y-6" id="printable-tp">
             <div className="flex justify-between items-start">
@@ -34,6 +38,9 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                     <h1 className="font-headline text-4xl tracking-wide">{tp.titre}</h1>
                     <p className="text-muted-foreground mt-1 text-lg">{tp.objectif}</p>
                 </div>
+                <Button onClick={handlePrint} variant="outline" className="print-hidden">
+                    <Printer className="mr-2"/> Imprimer la fiche
+                </Button>
             </div>
             
             <div className="border-t border-b border-primary/20 py-2 mb-4">
@@ -140,17 +147,21 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
 function TpListPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { tps, classes } = useFirebase();
+  const { tps, classes, isLoaded } = useFirebase();
 
   const className = searchParams.get('class');
   
   let niveau: Niveau = 'seconde';
   if (className) {
-    if (className.startsWith('1') || className.toLowerCase().includes('app1')) niveau = 'premiere';
-    if (className.startsWith('T')) niveau = 'terminale';
+    const classData = classes.find(c => c.id === className);
+    if(classData) {
+        if (className.startsWith('1') || className.toLowerCase().includes('premiere')) niveau = 'premiere';
+        else if (className.startsWith('T') || className.toLowerCase().includes('terminale')) niveau = 'terminale';
+        else niveau = 'seconde';
+    }
   }
 
-  const tpsForLevel = getTpsByNiveau(niveau, tps);
+  const tpsForLevel = useMemo(() => getTpsByNiveau(niveau, tps), [niveau, tps]);
   
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
   const selectedTp = selectedTpId ? tps[selectedTpId] : null;
@@ -159,6 +170,14 @@ function TpListPageContent() {
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('tp', id.toString());
     router.push(`/student/tp-list?${newSearchParams.toString()}`);
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
@@ -214,3 +233,5 @@ export default function TpListPage() {
         </Suspense>
     )
 }
+
+    

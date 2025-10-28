@@ -25,9 +25,11 @@ function StudentDashboard() {
 
   const storedEvalsForStudent = useMemo(() => {
     const data: Record<string, any> = {};
-    studentStoredEvals?.forEach(doc => {
-      data[doc.id] = doc;
-    });
+    if (studentStoredEvals) {
+        studentStoredEvals.forEach(doc => {
+          data[doc.id] = doc;
+        });
+    }
     return data;
   }, [studentStoredEvals]);
 
