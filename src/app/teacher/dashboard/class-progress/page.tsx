@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function ClassProgressPage() {
     const searchParams = useSearchParams();
-    const { firestore, tps: allTps, assignedTps, assignTp, user } = useFirebase();
+    const { firestore, tps: allTps, assignedTps, assignTp, user, isLoaded: isFirebaseLoaded } = useFirebase();
 
     const currentClassName = searchParams.get('class');
     const level = (searchParams.get('level') as Niveau) || 'seconde';
@@ -72,7 +72,7 @@ export default function ClassProgressPage() {
     }, [studentsInClass, assignedTps]);
 
 
-    const isLoading = isClassLoading;
+    const isLoading = isClassLoading || !isFirebaseLoaded;
 
     if (!currentClassName) {
         return (

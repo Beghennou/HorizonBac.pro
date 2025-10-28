@@ -7,7 +7,7 @@ import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc
 import { Auth, User, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
-import { TP, initialTps, TpStatus } from '@/lib/data-manager';
+import { TP, initialTps } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
@@ -30,6 +30,7 @@ import { checkAndSeedData } from './seed-data';
 
 // Types definition
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
+export type TpStatus = 'non-commencé' | 'en-cours' | 'terminé';
 
 type AssignedTp = {
   id: number;

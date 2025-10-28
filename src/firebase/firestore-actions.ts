@@ -2,7 +2,8 @@
 'use client';
 import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { TP, TpStatus } from '@/lib/data-manager';
+import { TP } from '@/lib/data-manager';
+import type { TpStatus } from './provider';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
 
