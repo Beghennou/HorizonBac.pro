@@ -2,20 +2,8 @@
 'use client';
 
 import { Suspense } from 'react';
-import { useFirebase } from '@/firebase/provider';
 import StudentLayoutContent from './student-layout-content';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
-
-function LayoutWrapper({ children }: { children: React.ReactNode }) {
-  const { isLoaded } = useFirebase();
-
-  if (!isLoaded) {
-    return <TachometerAnimation />;
-  }
-
-  return <StudentLayoutContent>{children}</StudentLayoutContent>;
-}
-
 
 export default function StudentLayout({
   children,
@@ -24,7 +12,7 @@ export default function StudentLayout({
 }>) {
   return (
       <Suspense fallback={<TachometerAnimation />}>
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <StudentLayoutContent>{children}</StudentLayoutContent>
       </Suspense>
   );
 }

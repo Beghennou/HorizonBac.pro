@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { LyceeLogo } from '@/components/lycee-logo';
@@ -15,7 +16,8 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import StudentSelector from './student-selector';
-import { Card } from '@/components/ui/card';
+import { useFirebase } from '@/firebase';
+import { TachometerAnimation } from '@/components/TachometerAnimation';
 
 function StudentNav() {
   const pathname = usePathname();
@@ -62,26 +64,39 @@ function StudentNav() {
 }
 
 
+function LayoutWrapper({ children }: { children: React.ReactNode }) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const studentName = searchParams.get('student');
+    const { isLoaded } = useFirebase();
+
+    useEffect(() => {
+        if (isLoaded && !studentName && pathname !== '/student/select') {
+            router.replace('/student/select');
+        }
+    }, [studentName, pathname, router, isLoaded]);
+
+    if (!isLoaded) {
+        return <TachometerAnimation />;
+    }
+
+    return <>{children}</>;
+}
+
+
 export default function StudentLayoutContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
   const studentName = searchParams.get('student');
   const className = searchParams.get('class');
 
-  useEffect(() => {
-    // Redirect to select page if no student is selected, and we are not on the select page
-    if (!studentName && pathname !== '/student/select') {
-      router.replace('/student/select');
-    }
-  }, [studentName, pathname, router]);
-
   return (
      <SidebarProvider>
+      <LayoutWrapper>
         <div className="bg-background min-h-screen">
           <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl print-hidden">
             <div className="container flex h-20 items-center justify-between">
@@ -133,6 +148,7 @@ export default function StudentLayoutContent({
               </div>
           </SidebarInset>
         </div>
-      </SidebarProvider>
+      </LayoutWrapper>
+    </SidebarProvider>
   );
 }

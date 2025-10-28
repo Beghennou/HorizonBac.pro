@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useState, useMemo, useEffect, Suspense } from 'react';
+import { Suspense } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
+import { Niveau } from '@/lib/data-manager';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { LyceeLogo } from '@/components/lycee-logo';
 import {
@@ -36,13 +36,10 @@ function DashboardLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { isLoaded: isFirebaseLoaded, classes } = useFirebase();
+  const { isLoaded, classes } = useFirebase();
 
-  const selectedClass = searchParams.get('class') || null;
-
-  const classNames = useMemo(() => classes.map(c => c.id).sort((a,b) => a.localeCompare(b)), [classes]);
-  
-  const isLoaded = isFirebaseLoaded;
+  const selectedClass = searchParams.get('class') || '';
+  const classNames = (classes || []).map(c => c.id).sort((a, b) => a.localeCompare(b));
 
   if (!isLoaded) {
     return <TachometerAnimation />;
@@ -54,7 +51,6 @@ function DashboardLayoutContent({
     newSearchParams.set('level', getLevelFromClassName(className));
     newSearchParams.delete('student');
     
-    // If we are on the base dashboard page, navigate to a default view
     const targetPath = pathname === '/teacher/dashboard' ? '/teacher/dashboard/class-progress' : pathname;
     router.push(`${targetPath}?${newSearchParams.toString()}`);
   };
@@ -95,7 +91,7 @@ function DashboardLayoutContent({
                        <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
                         <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Sélection de la classe</h3>
                         {classNames.length > 0 ? (
-                            <Select value={selectedClass || ''} onValueChange={handleClassChange}>
+                            <Select value={selectedClass} onValueChange={handleClassChange}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Choisir une classe..." />
                             </SelectTrigger>
