@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { BarChart3, Users, Target, BookOpen, Loader2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { collection, doc, getDoc } from 'firebase/firestore';
-import React, { useEffect, useMemo, useState } from 'react';
+import { collection, doc } from 'firebase/firestore';
+import React, { useMemo } from 'react';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
@@ -20,7 +20,6 @@ const statusToScore: Record<EvaluationStatus, number> = {
 };
 const MAX_SCORE = 3;
 
-// Helper type guard
 function isEvaluationStatus(status: any): status is EvaluationStatus {
     return ['NA', 'EC', 'A', 'M'].includes(status);
 }
@@ -28,7 +27,7 @@ function isEvaluationStatus(status: any): status is EvaluationStatus {
 
 export default function AnalyticsPage() {
     const searchParams = useSearchParams();
-    const { firestore, evaluations: allEvaluations, classes: allClasses, isLoaded } = useFirebase();
+    const { firestore, evaluations: allEvaluations, classes: allClasses, isLoaded: isFirebaseLoaded } = useFirebase();
 
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const currentClassName = searchParams.get('class') || '';
@@ -45,7 +44,7 @@ export default function AnalyticsPage() {
     const averageProgress = 0;
 
     const competenceMasteryData = useMemo(() => {
-        if (!isLoaded || !studentsInClass || studentsInClass.length === 0 || !allEvaluations) {
+        if (!isFirebaseLoaded || !studentsInClass || studentsInClass.length === 0 || !allEvaluations) {
             return [];
         }
 
@@ -57,8 +56,8 @@ export default function AnalyticsPage() {
 
         studentsInClass.forEach((studentName: string) => {
             const studentEvals = allEvaluations[studentName] || {};
-            Object.entries(studentEvals).forEach(([competenceId, history]) => {
-                const historyArray = (history as { history: EvaluationStatus[] })?.history || [];
+            Object.entries(studentEvals).forEach(([competenceId, historyData]) => {
+                const historyArray = (historyData as any)?.history || [];
                 if (historyArray.length > 0) {
                     if (!competenceScores[competenceId]) {
                         competenceScores[competenceId] = { totalScore: 0, count: 0, description: allCompetencesForLevel[competenceId] || competenceId };
@@ -78,10 +77,10 @@ export default function AnalyticsPage() {
             mastery: Math.round((data.totalScore / (data.count * MAX_SCORE)) * 100),
         })).sort((a, b) => a.mastery - b.mastery);
 
-    }, [studentsInClass, allEvaluations, isLoaded]);
+    }, [studentsInClass, allEvaluations, isFirebaseLoaded]);
 
-    const top5Competences = useMemo(() => competenceMasteryData ? [...competenceMasteryData].sort((a,b) => b.mastery - a.mastery).slice(0, 5) : [], [competenceMasteryData]);
-    const bottom5Competences = useMemo(() => competenceMasteryData ? competenceMasteryData.slice(0, 5) : [], [competenceMasteryData]);
+    const top5Competences = useMemo(() => (competenceMasteryData ? [...competenceMasteryData].sort((a,b) => b.mastery - a.mastery).slice(0, 5) : []), [competenceMasteryData]);
+    const bottom5Competences = useMemo(() => (competenceMasteryData ? competenceMasteryData.slice(0, 5) : []), [competenceMasteryData]);
     
     const classesForLevel = React.useMemo(() => (allClasses || []).map(c => c.id).filter(cName => {
         if (level === 'seconde') return cName.startsWith('2');
@@ -98,7 +97,7 @@ export default function AnalyticsPage() {
         };
     });
     
-    if (!isLoaded || isClassLoading) {
+    if (!isFirebaseLoaded || isClassLoading) {
         return (
              <div className="flex justify-center items-center h-full">
                 <Loader2 className="w-12 h-12 animate-spin text-primary" />
@@ -222,4 +221,3 @@ export default function AnalyticsPage() {
         </div>
     );
 }
-
