@@ -20,6 +20,12 @@ const statusToScore: Record<EvaluationStatus, number> = {
 };
 const MAX_SCORE = 3;
 
+// Helper type guard
+function isEvaluationStatus(status: any): status is EvaluationStatus {
+    return ['NA', 'EC', 'A', 'M'].includes(status);
+}
+
+
 export default function AnalyticsPage() {
     const searchParams = useSearchParams();
     const { firestore, evaluations: allEvaluations, classes: allClasses, isLoaded } = useFirebase();
@@ -39,7 +45,9 @@ export default function AnalyticsPage() {
     const averageProgress = 0;
 
     const competenceMasteryData = useMemo(() => {
-        if (!studentsInClass || studentsInClass.length === 0 || !allEvaluations) return [];
+        if (!isLoaded || !studentsInClass || studentsInClass.length === 0 || !allEvaluations) {
+            return [];
+        }
 
         const competenceScores: Record<string, { totalScore: number; count: number, description: string }> = {};
         const allCompetencesForLevel: Record<string, string> = {};
@@ -50,14 +58,16 @@ export default function AnalyticsPage() {
         studentsInClass.forEach((studentName: string) => {
             const studentEvals = allEvaluations[studentName] || {};
             Object.entries(studentEvals).forEach(([competenceId, history]) => {
-                const historyArray = (history as any)?.history || [];
+                const historyArray = (history as { history: EvaluationStatus[] })?.history || [];
                 if (historyArray.length > 0) {
                     if (!competenceScores[competenceId]) {
                         competenceScores[competenceId] = { totalScore: 0, count: 0, description: allCompetencesForLevel[competenceId] || competenceId };
                     }
                     const latestStatus = historyArray[historyArray.length - 1];
-                    competenceScores[competenceId].totalScore += statusToScore[latestStatus];
-                    competenceScores[competenceId].count++;
+                    if (isEvaluationStatus(latestStatus)) {
+                        competenceScores[competenceId].totalScore += statusToScore[latestStatus];
+                        competenceScores[competenceId].count++;
+                    }
                 }
             });
         });
@@ -68,7 +78,7 @@ export default function AnalyticsPage() {
             mastery: Math.round((data.totalScore / (data.count * MAX_SCORE)) * 100),
         })).sort((a, b) => a.mastery - b.mastery);
 
-    }, [studentsInClass, allEvaluations]);
+    }, [studentsInClass, allEvaluations, isLoaded]);
 
     const top5Competences = useMemo(() => competenceMasteryData ? [...competenceMasteryData].sort((a,b) => b.mastery - a.mastery).slice(0, 5) : [], [competenceMasteryData]);
     const bottom5Competences = useMemo(() => competenceMasteryData ? competenceMasteryData.slice(0, 5) : [], [competenceMasteryData]);
@@ -88,8 +98,6 @@ export default function AnalyticsPage() {
         };
     });
     
-    const pageIsReady = isLoaded && !isClassLoading && competenceMasteryData;
-
     if (!isLoaded || isClassLoading) {
         return (
              <div className="flex justify-center items-center h-full">
@@ -174,7 +182,7 @@ export default function AnalyticsPage() {
                     <CardDescription>Visualisation du niveau de maîtrise moyen pour chaque compétence évaluée dans la classe.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                   {pageIsReady ? (
+                   {competenceMasteryData && competenceMasteryData.length > 0 ? (
                         <>
                             <div>
                                 <h3 className="font-bold text-lg text-green-400 mb-2">Top 5 des compétences les mieux maîtrisées</h3>
@@ -206,7 +214,7 @@ export default function AnalyticsPage() {
                             </div>
                         </>
                    ) : (
-                       <p className="text-muted-foreground text-center py-8">Aucune donnée de compétence disponible pour cette classe.</p>
+                       <p className="text-muted-foreground text-center py-8">Aucune donnée de compétence disponible pour cette classe. Veuillez évaluer quelques TPs pour commencer à voir des statistiques.</p>
                    )}
                 </CardContent>
             </Card>
@@ -214,3 +222,4 @@ export default function AnalyticsPage() {
         </div>
     );
 }
+
