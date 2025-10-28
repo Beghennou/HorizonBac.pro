@@ -23,6 +23,7 @@ export type TP = Omit<TPSeconde, 'etudePrelim'> & {
 };
 
 export type Niveau = 'seconde' | 'premiere' | 'terminale';
+export type TpStatus = 'non-commencé' | 'en-cours' | 'terminé';
 
 export type CompetenceBloc = {
   title: string;

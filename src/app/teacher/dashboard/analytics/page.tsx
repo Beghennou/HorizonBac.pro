@@ -36,13 +36,10 @@ export default function AnalyticsPage() {
 
     const studentsInClass = useMemo(() => classData?.studentNames || [], [classData]);
 
-    // 1. Average Class Progression - This is hard to calculate now without a global student list.
-    // We'll mock it for now.
     const averageProgress = 0;
 
-    // 2. Competence Mastery
     const competenceMasteryData = useMemo(() => {
-        if (!studentsInClass.length || !allEvaluations) return [];
+        if (!studentsInClass || studentsInClass.length === 0 || !allEvaluations) return [];
 
         const competenceScores: Record<string, { totalScore: number; count: number, description: string }> = {};
         const allCompetencesForLevel: Record<string, string> = {};
@@ -73,10 +70,9 @@ export default function AnalyticsPage() {
 
     }, [studentsInClass, allEvaluations]);
 
-    const top5Competences = useMemo(() => [...competenceMasteryData].sort((a,b) => b.mastery - a.mastery).slice(0, 5), [competenceMasteryData]);
-    const bottom5Competences = useMemo(() => competenceMasteryData.slice(0, 5), [competenceMasteryData]);
+    const top5Competences = useMemo(() => competenceMasteryData ? [...competenceMasteryData].sort((a,b) => b.mastery - a.mastery).slice(0, 5) : [], [competenceMasteryData]);
+    const bottom5Competences = useMemo(() => competenceMasteryData ? competenceMasteryData.slice(0, 5) : [], [competenceMasteryData]);
     
-    // 3. Class Comparison
     const classesForLevel = React.useMemo(() => (allClasses || []).map(c => c.id).filter(cName => {
         if (level === 'seconde') return cName.startsWith('2');
         if (level === 'premiere') return cName.startsWith('1');
@@ -86,12 +82,13 @@ export default function AnalyticsPage() {
 
 
     const classComparisonData = classesForLevel.map(className => {
-        // This is hard to calculate without all students. Mocked.
         return {
             name: className,
             "Progression Moyenne": 0,
         };
     });
+    
+    const pageIsReady = isLoaded && !isClassLoading && competenceMasteryData;
 
     if (!isLoaded || isClassLoading) {
         return (
@@ -177,7 +174,7 @@ export default function AnalyticsPage() {
                     <CardDescription>Visualisation du niveau de maîtrise moyen pour chaque compétence évaluée dans la classe.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                   {competenceMasteryData.length > 0 ? (
+                   {pageIsReady ? (
                         <>
                             <div>
                                 <h3 className="font-bold text-lg text-green-400 mb-2">Top 5 des compétences les mieux maîtrisées</h3>

@@ -2,12 +2,11 @@
 'use client';
 import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { TP } from '@/lib/data-manager';
+import { TP, TpStatus } from '@/lib/data-manager';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
-type TpStatus = 'non-commencé' | 'en-cours' | 'terminé';
 type PrelimAnswer = string | string[];
 
 type AssignedTp = {
