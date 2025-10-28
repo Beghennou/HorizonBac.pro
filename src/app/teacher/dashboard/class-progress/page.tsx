@@ -2,21 +2,20 @@
 'use client';
 import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
-import { TP, getTpsByNiveau, Niveau } from '@/lib/data-manager';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
+import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Check, Clock, X, CheckSquare, Loader2, AlertTriangle, BookOpen } from 'lucide-react';
+import { Check, Clock, X, CheckSquare, Loader2, AlertTriangle, BookOpen, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function ClassProgressPage() {
     const searchParams = useSearchParams();
-    const { firestore, tps: allTps, assignedTps, assignTp, user, isLoaded: isFirebaseLoaded } = useFirebase();
+    const { firestore, tps: allTps, assignedTps, assignTp, isLoaded: isFirebaseLoaded } = useFirebase();
 
     const currentClassName = searchParams.get('class');
     const level = (searchParams.get('level') as Niveau) || 'seconde';
@@ -46,8 +45,8 @@ export default function ClassProgressPage() {
         }
     }
 
-
     const studentProgressData = useMemo(() => {
+        if (!studentsInClass || !assignedTps) return {};
         const progressMap: Record<string, Record<string, { status: string; date?: string }>> = {};
 
         studentsInClass.forEach(studentName => {
@@ -114,7 +113,7 @@ export default function ClassProgressPage() {
                 className = 'bg-red-500/20';
                 break;
             default:
-                icon = null;
+                icon = <span className="text-muted-foreground text-xs">N/A</span>;
                 tooltipText = 'Non assigné';
                 className = 'bg-muted/10';
         }
@@ -160,7 +159,7 @@ export default function ClassProgressPage() {
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <Button onClick={handleAssignTpToClass} disabled={!selectedTpId}>
+                            <Button onClick={handleAssignTpToClass} disabled={!selectedTpId || studentsInClass.length === 0}>
                                 <BookOpen className="mr-2"/>
                                 Assigner
                             </Button>
@@ -168,47 +167,57 @@ export default function ClassProgressPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                   <div className="overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="sticky left-0 bg-card z-10 font-bold min-w-[200px]">Élève</TableHead>
-                                    {allAssignedTpIdsInClass.map(tpId => {
-                                        const tp = allTps[tpId];
-                                        return (
-                                            <TableHead key={tpId} className="text-center min-w-[100px]">
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger>TP {tpId}</TooltipTrigger>
-                                                        <TooltipContent>
-                                                            <p>{tp?.titre || 'Titre non trouvé'}</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                            </TableHead>
-                                        )
-                                    })}
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {studentsInClass.map(studentName => (
-                                    <TableRow key={studentName}>
-                                        <TableCell className="sticky left-0 bg-card z-10 font-bold text-accent">
-                                            {studentName}
-                                        </TableCell>
+                   {studentsInClass.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-primary/30 rounded-lg">
+                            <Users className="w-16 h-16 text-muted-foreground mb-4" />
+                            <h2 className="font-headline text-2xl tracking-wide">Aucun élève dans cette classe</h2>
+                            <p className="text-muted-foreground text-lg mt-2 max-w-md">
+                                Vous pouvez ajouter des élèves depuis la page <span className="font-bold text-accent">Paramètres</span>.
+                            </p>
+                        </div>
+                   ) : (
+                       <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="sticky left-0 bg-card z-10 font-bold min-w-[200px]">Élève</TableHead>
                                         {allAssignedTpIdsInClass.map(tpId => {
-                                            const progress = studentProgressData[studentName]?.[tpId.toString()];
+                                            const tp = allTps[tpId];
                                             return (
-                                                <TableCell key={tpId} className="p-1 h-12">
-                                                    <StatusIcon status={progress?.status || 'non-assigné'} date={progress?.date} />
-                                                </TableCell>
+                                                <TableHead key={tpId} className="text-center min-w-[100px]">
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger>TP {tpId}</TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>{tp?.titre || 'Titre non trouvé'}</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                </TableHead>
                                             )
                                         })}
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                   </div>
+                                </TableHeader>
+                                <TableBody>
+                                    {studentsInClass.map(studentName => (
+                                        <TableRow key={studentName}>
+                                            <TableCell className="sticky left-0 bg-card z-10 font-bold text-accent">
+                                                {studentName}
+                                            </TableCell>
+                                            {allAssignedTpIdsInClass.map(tpId => {
+                                                const progress = studentProgressData[studentName]?.[tpId.toString()];
+                                                return (
+                                                    <TableCell key={tpId} className="p-1 h-12">
+                                                        <StatusIcon status={progress?.status || 'non-assigné'} date={progress?.date} />
+                                                    </TableCell>
+                                                )
+                                            })}
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                       </div>
+                   )}
                 </CardContent>
             </Card>
         </div>

@@ -84,7 +84,7 @@ export default function StudentSelector() {
               <SelectValue placeholder={!selectedClass ? "Choisis d'abord une classe" : "Choisir ton nom..."} />
             </SelectTrigger>
             <SelectContent>
-              {studentsInClass.map(studentName => (
+              {studentsInClass.map((studentName: string) => (
                 <SelectItem key={studentName} value={studentName}>
                   {studentName}
                 </SelectItem>
