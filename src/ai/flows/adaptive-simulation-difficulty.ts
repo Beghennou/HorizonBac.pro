@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -28,17 +29,12 @@ const AdaptSimulationDifficultyOutputSchema = z.object({
   newDifficultyLevel: z
     .string()
     .describe(
-      'The new difficulty level for the racing simulation (e.g., Beginner, Intermediate, Advanced).' ||
-        'Beginner' ||
-        'Intermediate' ||
-        'Advanced'
+      'The new difficulty level for the racing simulation (e.g., Beginner, Intermediate, Advanced). Possible values: Beginner, Intermediate, Advanced.'
     ),
   suggestedAdjustments: z
     .string()
     .describe(
-      'Specific adjustments to the simulation parameters (e.g., increased AI difficulty, reduced traction control).' ||
-        'Increased AI difficulty' ||
-        'Reduced traction control'
+      'Specific adjustments to the simulation parameters (e.g., increased AI difficulty, reduced traction control). Possible values: Increased AI difficulty, Reduced traction control.'
     ),
 });
 export type AdaptSimulationDifficultyOutput = z.infer<typeof AdaptSimulationDifficultyOutputSchema>;

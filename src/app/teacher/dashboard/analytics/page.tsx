@@ -1,14 +1,14 @@
 
 'use client';
 import { useSearchParams } from 'next/navigation';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { allBlocs, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { BarChart3, Users, Target, BookOpen } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart3, Users, Target, BookOpen, Loader2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { collection, doc, getDoc } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
@@ -22,65 +22,59 @@ const MAX_SCORE = 3;
 
 export default function AnalyticsPage() {
     const searchParams = useSearchParams();
-    const { firestore, evaluations: allEvaluations, classes: allClasses } = useFirebase();
+    const { firestore, evaluations: allEvaluations, classes: allClasses, isLoaded } = useFirebase();
 
-    const [studentsInClass, setStudentsInClass] = useState<string[]>([]);
-    
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const currentClassName = searchParams.get('class') || '';
     
-    useEffect(() => {
-        const fetchStudents = async () => {
-            if (currentClassName && firestore) {
-                const classDocRef = doc(firestore, 'classes', currentClassName);
-                const classDocSnap = await getDoc(classDocRef);
-                if(classDocSnap.exists()) {
-                    setStudentsInClass(classDocSnap.data().studentNames || []);
-                } else {
-                    setStudentsInClass([]);
-                }
-            }
-        }
-        fetchStudents();
-    }, [currentClassName, firestore]);
+    const { data: classData, isLoading: isClassLoading } = useDoc(useMemoFirebase(() => {
+      if (currentClassName && firestore) {
+        return doc(firestore, 'classes', currentClassName);
+      }
+      return null;
+    }, [currentClassName, firestore]));
 
+    const studentsInClass = useMemo(() => classData?.studentNames || [], [classData]);
 
     // 1. Average Class Progression - This is hard to calculate now without a global student list.
     // We'll mock it for now.
     const averageProgress = 0;
 
     // 2. Competence Mastery
-    const competenceScores: Record<string, { totalScore: number; count: number, description: string }> = {};
-    const allCompetencesForLevel: Record<string, string> = {};
-    Object.values(allBlocs).forEach(bloc => {
-         Object.assign(allCompetencesForLevel, bloc.items);
-    });
+    const competenceMasteryData = useMemo(() => {
+        if (!studentsInClass.length || !allEvaluations) return [];
 
-    const studentNamesInClass = studentsInClass;
-
-    studentNamesInClass.forEach((studentName: string) => {
-        const studentEvals = allEvaluations[studentName] || {};
-        Object.entries(studentEvals).forEach(([competenceId, history]) => {
-            const historyArray = (history as any)?.history || [];
-            if (historyArray.length > 0) {
-                if (!competenceScores[competenceId]) {
-                    competenceScores[competenceId] = { totalScore: 0, count: 0, description: allCompetencesForLevel[competenceId] || competenceId };
-                }
-                const latestStatus = historyArray[historyArray.length - 1];
-                competenceScores[competenceId].totalScore += statusToScore[latestStatus];
-                competenceScores[competenceId].count++;
-            }
+        const competenceScores: Record<string, { totalScore: number; count: number, description: string }> = {};
+        const allCompetencesForLevel: Record<string, string> = {};
+        Object.values(allBlocs).forEach(bloc => {
+            Object.assign(allCompetencesForLevel, bloc.items);
         });
-    });
 
-    const competenceMasteryData = Object.entries(competenceScores).map(([id, data]) => ({
-        id,
-        name: data.description,
-        mastery: Math.round((data.totalScore / (data.count * MAX_SCORE)) * 100),
-    })).sort((a, b) => a.mastery - b.mastery);
+        studentsInClass.forEach((studentName: string) => {
+            const studentEvals = allEvaluations[studentName] || {};
+            Object.entries(studentEvals).forEach(([competenceId, history]) => {
+                const historyArray = (history as any)?.history || [];
+                if (historyArray.length > 0) {
+                    if (!competenceScores[competenceId]) {
+                        competenceScores[competenceId] = { totalScore: 0, count: 0, description: allCompetencesForLevel[competenceId] || competenceId };
+                    }
+                    const latestStatus = historyArray[historyArray.length - 1];
+                    competenceScores[competenceId].totalScore += statusToScore[latestStatus];
+                    competenceScores[competenceId].count++;
+                }
+            });
+        });
 
-    const top5Competences = [...competenceMasteryData].sort((a,b) => b.mastery - a.mastery).slice(0, 5);
-    const bottom5Competences = competenceMasteryData.slice(0, 5);
+        return Object.entries(competenceScores).map(([id, data]) => ({
+            id,
+            name: data.description,
+            mastery: Math.round((data.totalScore / (data.count * MAX_SCORE)) * 100),
+        })).sort((a, b) => a.mastery - b.mastery);
+
+    }, [studentsInClass, allEvaluations]);
+
+    const top5Competences = useMemo(() => [...competenceMasteryData].sort((a,b) => b.mastery - a.mastery).slice(0, 5), [competenceMasteryData]);
+    const bottom5Competences = useMemo(() => competenceMasteryData.slice(0, 5), [competenceMasteryData]);
     
     // 3. Class Comparison
     const classesForLevel = React.useMemo(() => (allClasses || []).map(c => c.id).filter(cName => {
@@ -98,6 +92,14 @@ export default function AnalyticsPage() {
             "Progression Moyenne": 0,
         };
     });
+
+    if (!isLoaded || isClassLoading) {
+        return (
+             <div className="flex justify-center items-center h-full">
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            </div>
+        );
+    }
 
 
     return (
@@ -175,34 +177,40 @@ export default function AnalyticsPage() {
                     <CardDescription>Visualisation du niveau de maîtrise moyen pour chaque compétence évaluée dans la classe.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div>
-                        <h3 className="font-bold text-lg text-green-400 mb-2">Top 5 des compétences les mieux maîtrisées</h3>
-                        <div className="space-y-2">
-                        {top5Competences.map(comp => (
-                            <div key={comp.id}>
-                                <div className="flex justify-between items-center mb-1">
-                                    <span className="text-sm">{comp.id} - {comp.name}</span>
-                                    <span className="text-sm font-bold text-green-400">{comp.mastery}%</span>
+                   {competenceMasteryData.length > 0 ? (
+                        <>
+                            <div>
+                                <h3 className="font-bold text-lg text-green-400 mb-2">Top 5 des compétences les mieux maîtrisées</h3>
+                                <div className="space-y-2">
+                                {top5Competences.map(comp => (
+                                    <div key={comp.id}>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-sm">{comp.id} - {comp.name}</span>
+                                            <span className="text-sm font-bold text-green-400">{comp.mastery}%</span>
+                                        </div>
+                                        <Progress value={comp.mastery} indicatorClassName="bg-green-500"/>
+                                    </div>
+                                ))}
                                 </div>
-                                <Progress value={comp.mastery} indicatorClassName="bg-green-500"/>
                             </div>
-                        ))}
-                        </div>
-                    </div>
-                     <div>
-                        <h3 className="font-bold text-lg text-destructive mb-2">Top 5 des compétences les moins bien maîtrisées</h3>
-                         <div className="space-y-2">
-                        {bottom5Competences.map(comp => (
-                            <div key={comp.id}>
-                                 <div className="flex justify-between items-center mb-1">
-                                    <span className="text-sm">{comp.id} - {comp.name}</span>
-                                    <span className="text-sm font-bold text-destructive">{comp.mastery}%</span>
+                            <div>
+                                <h3 className="font-bold text-lg text-destructive mb-2">Top 5 des compétences les moins bien maîtrisées</h3>
+                                <div className="space-y-2">
+                                {bottom5Competences.map(comp => (
+                                    <div key={comp.id}>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-sm">{comp.id} - {comp.name}</span>
+                                            <span className="text-sm font-bold text-destructive">{comp.mastery}%</span>
+                                        </div>
+                                        <Progress value={comp.mastery} indicatorClassName="bg-destructive"/>
+                                    </div>
+                                ))}
                                 </div>
-                                <Progress value={comp.mastery} indicatorClassName="bg-destructive"/>
                             </div>
-                        ))}
-                         </div>
-                    </div>
+                        </>
+                   ) : (
+                       <p className="text-muted-foreground text-center py-8">Aucune donnée de compétence disponible pour cette classe.</p>
+                   )}
                 </CardContent>
             </Card>
 
