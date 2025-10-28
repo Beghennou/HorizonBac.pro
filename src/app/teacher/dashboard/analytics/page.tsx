@@ -57,7 +57,7 @@ export default function AnalyticsPage() {
         studentsInClass.forEach((studentName: string) => {
             const studentEvals = allEvaluations[studentName] || {};
             Object.entries(studentEvals).forEach(([competenceId, historyData]) => {
-                const historyArray = (historyData as { history: EvaluationStatus[] })?.history || [];
+                const historyArray = (historyData as any)?.history || [];
                 if (historyArray.length > 0) {
                     if (!competenceScores[competenceId]) {
                         competenceScores[competenceId] = { totalScore: 0, count: 0, description: allCompetencesForLevel[competenceId] || competenceId };
@@ -105,7 +105,7 @@ export default function AnalyticsPage() {
         );
     }
     
-    if (studentsInClass.length === 0) {
+    if (!studentsInClass || studentsInClass.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-center">
                 <Users className="w-16 h-16 text-muted-foreground mb-4" />

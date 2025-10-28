@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
-import { FirebaseClientProvider } from "@/firebase/client-provider";
+import dynamic from 'next/dynamic';
 import "./globals.css";
+
+const FirebaseClientProvider = dynamic(
+  () => import('@/firebase/client-provider.dynamic').then(mod => mod.FirebaseClientProvider),
+  { ssr: false }
+);
+
 
 export const metadata: Metadata = {
   title: "Horizon Bacpro • Suivi des compétences",
