@@ -114,8 +114,8 @@ export default function EvaluationPage() {
                                 </p>
                             </div>
                         ))}
-                         <div className="w-1/4">
-                            <Label htmlFor="prelim-note">Note / 10</Label>
+                         <div className="w-1/4 p-4 border rounded-lg bg-background/50">
+                            <Label htmlFor="prelim-note">Note Étude Préliminaire / 10</Label>
                             <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} />
                         </div>
                     </CardContent>
@@ -170,7 +170,7 @@ export default function EvaluationPage() {
                 <CardHeader>
                     <CardTitle>Note Globale du TP</CardTitle>
                 </CardHeader>
-                <CardContent className="w-1/4">
+                <CardContent className="w-1/4 p-4 border rounded-lg bg-background/50">
                     <Label htmlFor="tp-note">Note / 20</Label>
                     <Input id="tp-note" type="number" max="20" min="0" value={tpNote} onChange={e => setTpNote(e.target.value)} />
                 </CardContent>
