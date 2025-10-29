@@ -1,22 +1,22 @@
-import { Firestore, writeBatch, doc, getDoc, setDoc } from 'firebase/firestore';
+import { Firestore, writeBatch, doc, getDoc, setDoc, collection } from 'firebase/firestore';
 import { initialTps } from '@/lib/data-manager';
 
 const initialClasses = [
     {
         id: "2MV1 - Pierre Lartigue",
-        studentNames: ["Martin Dubois", "Léa Petit", "Thomas Robert", "Chloé Durand", "Hugo Bernard", "Manon Girard", "Lucas Moreau", "Camille Lefevre", "Enzo Roux", "Clara Fournier", "Pierre Lartigue", "AKROUCHI Yanis"],
+        studentNames: ["Martin Dubois", "Léa Petit", "Thomas Robert", "Chloé Durand", "Hugo Bernard", "Manon Girard", "Lucas Moreau", "Camille Lefevre", "Enzo Roux", "Clara Fournier", "Pierre Lartigue", "AKROUCHI Yanis", "Élève TEST"],
     },
     {
         id: "2MV2",
-        studentNames: ["Alice Martin", "Paul Garcia", "Jade Dubois", "Louis Laurent", "Emma Simon", "Gabriel Michel"],
+        studentNames: ["Alice Martin", "Paul Garcia", "Jade Dubois", "Louis Laurent", "Emma Simon", "Gabriel Michel", "Élève TEST"],
     },
     {
         id: "1MV1",
-        studentNames: ["Jules Royer", "Rose Gauthier", "Adam Lemaire", "Louise Lambert", "Raphaël Picard", "Juliette Leclerc"],
+        studentNames: ["Jules Royer", "Rose Gauthier", "Adam Lemaire", "Louise Lambert", "Raphaël Picard", "Juliette Leclerc", "Élève TEST"],
     },
     {
         id: "TMV1",
-        studentNames: ["Arthur Caron", "Lina Mercier", "Noah Philippe", "Eva Chevalier", "Léo Andre", "Romy Bonnet"],
+        studentNames: ["Arthur Caron", "Lina Mercier", "Noah Philippe", "Eva Chevalier", "Léo Andre", "Romy Bonnet", "Élève TEST"],
     }
 ];
 
@@ -32,7 +32,7 @@ export const seedInitialData = async (firestore: Firestore) => {
     // Seed classes
     initialClasses.forEach(classData => {
         const classRef = doc(firestore, 'classes', classData.id);
-        batch.set(classRef, { studentNames: classData.studentNames });
+        batch.set(classRef, { studentNames: classData.studentNames.sort((a,b) => a.localeCompare(b)) });
     });
 
     // Seed teachers
@@ -57,7 +57,7 @@ export const seedInitialData = async (firestore: Firestore) => {
 
 
 export const checkAndSeedData = async (firestore: Firestore) => {
-    const seedDocRef = doc(firestore, 'config', 'initial_seed_v4'); // Incremented version
+    const seedDocRef = doc(firestore, 'config', 'initial_seed_v5'); // Incremented version for new seed
     try {
         const seedDoc = await getDoc(seedDocRef);
         if (!seedDoc.exists()) {

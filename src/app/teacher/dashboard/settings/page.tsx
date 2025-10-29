@@ -24,6 +24,7 @@ import {
 import Papa from 'papaparse';
 import { Student } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 export default function SettingsPage() {
@@ -176,7 +177,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (deleteStudentClass) {
         const classData = classes.find(c => c.id === deleteStudentClass);
-        setClassStudents(classData?.studentNames || []);
+        setClassStudents(classData?.studentNames.sort((a:string,b:string) => a.localeCompare(b)) || []);
     } else {
         setClassStudents([]);
     }
@@ -187,108 +188,11 @@ export default function SettingsPage() {
       <div>
         <h1 className="font-headline text-4xl lg:text-5xl tracking-wide">Paramètres &amp; Configuration</h1>
         <p className="text-muted-foreground mt-2">
-          Gérez les paramètres de l'application, ajoutez de nouveaux élèves et mettez à jour les classes pour la nouvelle année.
+          Gérez les paramètres de l'application, les élèves et les classes pour la nouvelle année.
         </p>
       </div>
 
        <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><ChevronsRight /> Mise à Jour Annuelle des Classes</CardTitle>
-          <CardDescription>
-            Importez les listes d'élèves pour chaque niveau pour la nouvelle année scolaire.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                <Select value={secondeClassToUpdate} onValueChange={setSecondeClassToUpdate}>
-                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Seconde..."/></SelectTrigger>
-                    <SelectContent>
-                        {secondeClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                <Button asChild variant="outline">
-                    <label className="cursor-pointer w-full">
-                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Seconde
-                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, secondeClassToUpdate)} />
-                    </label>
-                </Button>
-            </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                <Select value={premiereClassToUpdate} onValueChange={setPremiereClassToUpdate}>
-                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Première..."/></SelectTrigger>
-                    <SelectContent>
-                        {premiereClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                 <Button asChild variant="outline">
-                    <label className="cursor-pointer w-full">
-                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Première
-                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, premiereClassToUpdate)} />
-                    </label>
-                </Button>
-            </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                <Select value={terminaleClassToUpdate} onValueChange={setTerminaleClassToUpdate}>
-                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Terminale..."/></SelectTrigger>
-                    <SelectContent>
-                        {terminaleClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                 <Button asChild variant="outline">
-                    <label className="cursor-pointer w-full">
-                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Terminale
-                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, terminaleClassToUpdate)} />
-                    </label>
-                </Button>
-            </div>
-        </CardContent>
-      </Card>
-
-       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><UserPlus /> Ajouter un nouvel élève</CardTitle>
-          <CardDescription>Ajoutez manuellement un élève à une classe existante ou créez une nouvelle classe.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="first-name">Prénom de l'élève</Label>
-                    <Input id="first-name" placeholder="ex: Adam" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="last-name">Nom de l'élève</Label>
-                    <Input id="last-name" placeholder="ex: BAKHTAR" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div className="space-y-2">
-                    <Label htmlFor="select-class">Assigner à une classe existante</Label>
-                    <Select onValueChange={setSelectedClass} value={selectedClass} >
-                        <SelectTrigger id="select-class">
-                            <SelectValue placeholder="Choisir une classe..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {classNames.map(c => (
-                                <SelectItem key={c} value={c}>{c}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="new-class">Ou créer une nouvelle classe</Label>
-                    <Input id="new-class" placeholder="ex: 2MV6" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} />
-                </div>
-            </div>
-             <div className="flex justify-end">
-                <Button onClick={handleAddStudent}>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Ajouter l'élève
-                </Button>
-            </div>
-        </CardContent>
-      </Card>
-
-      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Settings2 /> Paramètres généraux</CardTitle>
           <CardDescription>Préférences de l'application.</CardDescription>
@@ -310,60 +214,172 @@ export default function SettingsPage() {
             </div>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><UserPlus /> Gestion des Élèves</CardTitle>
+          <CardDescription>Ajoutez ou supprimez des élèves manuellement.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="add">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="add"><UserPlus className="mr-2"/>Ajouter un élève</TabsTrigger>
+              <TabsTrigger value="delete"><UserMinus className="mr-2"/>Supprimer un élève</TabsTrigger>
+            </TabsList>
+            <TabsContent value="add" className="pt-4">
+              <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                          <Label htmlFor="first-name">Prénom de l'élève</Label>
+                          <Input id="first-name" placeholder="ex: Adam" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor="last-name">Nom de l'élève</Label>
+                          <Input id="last-name" placeholder="ex: BAKHTAR" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                      </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                          <Label htmlFor="select-class">Assigner à une classe existante</Label>
+                          <Select onValueChange={setSelectedClass} value={selectedClass} >
+                              <SelectTrigger id="select-class">
+                                  <SelectValue placeholder="Choisir une classe..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                  {classNames.map(c => (
+                                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                                  ))}
+                              </SelectContent>
+                          </Select>
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor="new-class">Ou créer une nouvelle classe</Label>
+                          <Input id="new-class" placeholder="ex: 2MV6" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} />
+                      </div>
+                  </div>
+                  <div className="flex justify-end">
+                      <Button onClick={handleAddStudent}>
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          Ajouter l'élève
+                      </Button>
+                  </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="delete" className="pt-4">
+              <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                      <div className="space-y-2">
+                          <Label htmlFor="delete-class-select">Classe</Label>
+                          <Select value={deleteStudentClass} onValueChange={setDeleteStudentClass}>
+                              <SelectTrigger id="delete-class-select">
+                                  <SelectValue placeholder="Choisir une classe..."/>
+                              </SelectTrigger>
+                              <SelectContent>
+                                  {classNames.map(c => (
+                                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                                  ))}
+                              </SelectContent>
+                          </Select>
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor="delete-student-select">Élève à supprimer</Label>
+                          <Select value={studentToDelete} onValueChange={setStudentToDelete} disabled={!deleteStudentClass}>
+                              <SelectTrigger id="delete-student-select">
+                                  <SelectValue placeholder="Choisir un élève..."/>
+                              </SelectTrigger>
+                              <SelectContent>
+                                  {classStudents.map((s: string) => (
+                                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                                  ))}
+                              </SelectContent>
+                          </Select>
+                      </div>
+                  </div>
+                   <div className="flex justify-end">
+                      <Button variant="destructive" onClick={handleDeleteStudent}><UserMinus className="mr-2" /> Supprimer cet élève</Button>
+                   </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
       
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><UserMinus /> Gestion des données</CardTitle>
-          <CardDescription>Supprimez un élève ou videz une classe entière.</CardDescription>
+          <CardTitle className="flex items-center gap-2"><ChevronsRight /> Gestion des Classes</CardTitle>
+          <CardDescription>
+            Importez les listes d'élèves pour la nouvelle année scolaire ou videz une classe.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div className="space-y-2">
-                    <Label htmlFor="delete-class-select">Classe</Label>
-                    <Select value={deleteStudentClass} onValueChange={setDeleteStudentClass}>
-                        <SelectTrigger id="delete-class-select">
-                            <SelectValue placeholder="Choisir une classe..."/>
-                        </SelectTrigger>
-                        <SelectContent>
-                            {classNames.map(c => (
-                                <SelectItem key={c} value={c}>{c}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+            <div>
+                <Label className="font-bold">Mise à Jour Annuelle des Classes</Label>
+                <div className="space-y-3 mt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                        <Select value={secondeClassToUpdate} onValueChange={setSecondeClassToUpdate}>
+                            <SelectTrigger><SelectValue placeholder="Choisir une classe de Seconde..."/></SelectTrigger>
+                            <SelectContent>
+                                {secondeClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <Button asChild variant="outline">
+                            <label className="cursor-pointer w-full">
+                                <Upload className="mr-2 h-4 w-4" /> Importer CSV Seconde
+                                <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, secondeClassToUpdate)} />
+                            </label>
+                        </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                        <Select value={premiereClassToUpdate} onValueChange={setPremiereClassToUpdate}>
+                            <SelectTrigger><SelectValue placeholder="Choisir une classe de Première..."/></SelectTrigger>
+                            <SelectContent>
+                                {premiereClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <Button asChild variant="outline">
+                            <label className="cursor-pointer w-full">
+                                <Upload className="mr-2 h-4 w-4" /> Importer CSV Première
+                                <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, premiereClassToUpdate)} />
+                            </label>
+                        </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                        <Select value={terminaleClassToUpdate} onValueChange={setTerminaleClassToUpdate}>
+                            <SelectTrigger><SelectValue placeholder="Choisir une classe de Terminale..."/></SelectTrigger>
+                            <SelectContent>
+                                {terminaleClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <Button asChild variant="outline">
+                            <label className="cursor-pointer w-full">
+                                <Upload className="mr-2 h-4 w-4" /> Importer CSV Terminale
+                                <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, terminaleClassToUpdate)} />
+                            </label>
+                        </Button>
+                    </div>
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="delete-student-select">Élève à supprimer</Label>
-                    <Select value={studentToDelete} onValueChange={setStudentToDelete} disabled={!deleteStudentClass}>
-                        <SelectTrigger id="delete-student-select">
-                            <SelectValue placeholder="Choisir un élève..."/>
-                        </SelectTrigger>
-                        <SelectContent>
-                            {classStudents.map((s: string) => (
-                                <SelectItem key={s} value={s}>{s}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <Button variant="destructive" onClick={handleDeleteStudent}><UserMinus className="mr-2" /> Supprimer cet élève</Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div className="space-y-2 md:col-span-2">
-                     <Label htmlFor="empty-class-select">Vider une classe de ses élèves</Label>
-                      <Select value={classToEmpty} onValueChange={setClassToEmpty}>
-                        <SelectTrigger id="empty-class-select">
-                            <SelectValue placeholder="Choisir une classe..."/>
-                        </SelectTrigger>
-                        <SelectContent>
-                            {classNames.map(c => (
-                                <SelectItem key={c} value={c}>{c}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+            <div>
+                <Label className="font-bold">Vider une classe</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mt-2">
+                    <div className="space-y-2 md:col-span-2">
+                        <Select value={classToEmpty} onValueChange={setClassToEmpty}>
+                            <SelectTrigger id="empty-class-select">
+                                <SelectValue placeholder="Choisir une classe à vider..."/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {classNames.map(c => (
+                                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <Button variant="destructive" onClick={handleEmptyClass}><FolderMinus className="mr-2" /> Vider cette classe</Button>
                 </div>
-                 <Button variant="destructive" onClick={handleEmptyClass}><FolderMinus className="mr-2" /> Vider cette classe</Button>
             </div>
         </CardContent>
       </Card>
+
 
       <Card className="border-destructive">
           <CardHeader>
@@ -372,7 +388,10 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
                <div className="flex justify-between items-center p-4 border border-destructive/50 rounded-lg">
-                  <p>Vider les listes d'élèves de **toutes** les classes (en base de données).</p>
+                  <div>
+                    <p className="font-medium">Vider les listes d'élèves de **toutes** les classes</p>
+                    <p className="text-sm text-muted-foreground">Utilisez cette fonction en fin d'année pour préparer la prochaine rentrée.</p>
+                  </div>
                    <AlertDialog>
                       <AlertDialogTrigger asChild>
                           <Button variant="outline" className={cn("border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground")}>
@@ -411,7 +430,10 @@ export default function SettingsPage() {
                   </AlertDialog>
               </div>
               <div className="flex justify-between items-center p-4 border border-destructive/50 rounded-lg">
-                  <p>Réinitialiser toutes les données des élèves (évaluations, TPs assignés, etc.) mais conserver les classes et les élèves.</p>
+                 <div>
+                    <p className="font-medium">Réinitialiser les données des élèves</p>
+                    <p className="text-sm text-muted-foreground">Supprime les évaluations et TPs assignés, mais conserve les listes de classes et d'élèves.</p>
+                 </div>
                    <AlertDialog>
                       <AlertDialogTrigger asChild>
                           <Button variant="destructive" disabled>
