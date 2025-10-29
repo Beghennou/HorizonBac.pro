@@ -41,31 +41,31 @@ export default function DashboardPage() {
   }, [classData]);
 
   const stats = useMemo(() => {
-    if (!isLoaded || !assignedTps || !studentsInClass) {
+    if (!isLoaded || !studentsInClass || !assignedTps) {
       return { studentCount: 0, tpsToEvaluate: 0, overallProgress: 0 };
     }
-  
+
     let tpsToEvaluate = 0;
     let totalAssignedTps = 0;
     let totalCompletedTps = 0;
-  
+
     studentsInClass.forEach(studentName => {
       const studentTps = assignedTps[studentName];
-      if (studentTps && Array.isArray(studentTps)) { // Garde de sécurité
+      if (studentTps && Array.isArray(studentTps)) {
         totalAssignedTps += studentTps.length;
         studentTps.forEach(tp => {
           if (tp.status === 'terminé') {
             totalCompletedTps++;
-            // Cette logique doit être affinée pour vérifier si le TP a déjà été évalué.
-            // Pour l'instant, nous comptons tous les TP terminés.
+            // This logic should be refined to check if the TP has already been evaluated.
+            // For now, we count all completed TPs.
             tpsToEvaluate++;
           }
         });
       }
     });
-  
+
     const overallProgress = totalAssignedTps > 0 ? Math.round((totalCompletedTps / totalAssignedTps) * 100) : 0;
-  
+
     return {
       studentCount: studentsInClass.length,
       tpsToEvaluate,
@@ -74,7 +74,7 @@ export default function DashboardPage() {
   }, [studentsInClass, assignedTps, isLoaded]);
   
   const studentProgressList = useMemo(() => {
-    if (!isLoaded || !assignedTps || !studentsInClass) return [];
+     if (!isLoaded || !studentsInClass || !assignedTps) return [];
     
     return studentsInClass.map(studentName => {
         const studentTps = assignedTps[studentName] || [];
@@ -94,7 +94,7 @@ export default function DashboardPage() {
     return <Loading />;
   }
 
-  // Si les classes sont chargées et qu'il n'y a pas de classe sélectionnée, afficher un message.
+  // If classes are loaded and there's no selected class, show a message.
   if (classes && classes.length > 0 && !currentClassName) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">
@@ -108,7 +108,7 @@ export default function DashboardPage() {
     );
   }
 
-  // S'il n'y a pas de classes du tout, guider l'utilisateur vers la page des paramètres.
+  // If there are no classes at all, guide the user to the settings page.
   if (classes && classes.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-center">
@@ -202,7 +202,7 @@ export default function DashboardPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {studentProgressList && studentProgressList.map(student => (
+                                {studentProgressList.map(student => (
                                     <TableRow key={student.name}>
                                         <TableCell className="font-medium">{student.name}</TableCell>
                                         <TableCell className="text-right">
