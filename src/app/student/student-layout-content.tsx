@@ -19,6 +19,7 @@ import StudentSelector from './student-selector';
 import { useFirebase } from '@/firebase';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
 import { LogoutButton } from '@/components/logout-button';
+import { Card } from '@/components/ui/card';
 
 
 function StudentNav() {
@@ -101,7 +102,7 @@ export default function StudentLayoutContent({
      <SidebarProvider>
       <LayoutWrapper>
         <div className="bg-background min-h-screen">
-          <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl print-hidden">
+          <header className="sticky top-0 z-40 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl print-hidden">
             <div className="container flex h-20 items-center justify-between">
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="md:hidden"/>
@@ -109,14 +110,9 @@ export default function StudentLayoutContent({
                   <div className="flex items-center justify-center w-12 h-12 rounded-md bg-gradient-to-br from-primary to-racing-orange border-2 border-accent">
                     <LyceeLogo className="w-9 h-9 text-white" />
                   </div>
-                  <div>
-                    <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
-                      Horizon Bacpro
-                    </h1>
-                     <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                      {studentName ? `Élève • ${className} • ${teacherName}` : 'Rénovation 2025 • Espace élève'}
-                    </p>
-                  </div>
+                  <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
+                    Horizon Bacpro
+                  </h1>
                 </Link>
               </div>
               <div className="flex items-center gap-4">
@@ -146,9 +142,27 @@ export default function StudentLayoutContent({
                       )}
                     </SidebarContent>
                   </Sidebar>
-                  <main className="flex-1 bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6 ml-8">
-                    {children}
-                  </main>
+                  <main className="flex-1 md:ml-8 flex flex-col gap-6">
+                    <Card className="bg-card border-2 border-primary/30 shadow-2xl">
+                       <div className="p-4 flex justify-between items-center">
+                           <div>
+                               <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                                   Élève • {teacherName}
+                               </p>
+                               <h2 className="font-headline text-2xl font-bold text-accent">{studentName}</h2>
+                           </div>
+                           <div className="text-right">
+                                <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                                   Classe
+                               </p>
+                               <h2 className="font-headline text-2xl font-bold text-accent">{className}</h2>
+                           </div>
+                       </div>
+                    </Card>
+                    <div className="flex-1 bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6">
+                       {children}
+                   </div>
+                 </main>
               </div>
           </SidebarInset>
         </div>

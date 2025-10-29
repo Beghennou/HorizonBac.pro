@@ -36,7 +36,7 @@ function StudentDashboard() {
 
   if (!studentName) {
     return (
-      <div className="text-center">
+      <div className="flex flex-col items-center justify-center h-full text-center">
         <h1 className="font-headline text-3xl text-accent">Veuillez vous identifier</h1>
         <p className="text-muted-foreground mt-2">Retournez à la page de sélection pour choisir votre classe et votre nom.</p>
         <Button asChild className="mt-4">
@@ -69,17 +69,19 @@ function StudentDashboard() {
   };
 
   return (
-    <div className="space-y-12">
-      <section>
-        <h1 className="font-headline text-5xl tracking-wide mb-2 text-accent">Mon Atelier - {studentName}</h1>
-        <p className="text-muted-foreground">Votre parcours pour devenir un pro de la mécanique commence ici. Réalisez des TP et des évaluations pour monter en compétences.</p>
-      </section>
+    <div className="space-y-8">
+      <div>
+          <h1 className="font-headline text-4xl lg:text-5xl tracking-wide">Mon Atelier</h1>
+          <p className="text-muted-foreground mt-2">
+              Votre parcours pour devenir un pro de la mécanique. Réalisez les TP et les évaluations pour monter en compétences.
+          </p>
+      </div>
 
       {tpModules.length > 0 ? (
         <section>
-          <h2 className="font-headline text-4xl tracking-wide flex items-center gap-3 mb-6">
+          <h2 className="font-headline text-3xl tracking-wide flex items-center gap-3 mb-6">
               <RacingHelmet className="w-8 h-8 text-primary"/>
-              Mes Travaux Pratiques (TP)
+              Mes Travaux Pratiques Assignés
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tpModules.map((module) => {
