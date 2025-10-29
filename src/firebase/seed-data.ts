@@ -23,6 +23,9 @@ const initialClasses = [
 const initialTeachers = [
     { name: 'M. Dubois' },
     { name: 'Mme. Martin' },
+    { name: 'M. Thomas' },
+    { name: 'Mme. Lecompte' },
+    { name: 'M. Benseghir' },
 ];
 
 
