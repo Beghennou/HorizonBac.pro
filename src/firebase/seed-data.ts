@@ -3,7 +3,7 @@ import { initialTps } from '@/lib/data-manager';
 
 const initialClasses = [
     {
-        id: "2MV1 - Pierre Lartigue",
+        id: "2MV1",
         studentNames: ["Martin Dubois", "Léa Petit", "Thomas Robert", "Chloé Durand", "Hugo Bernard", "Manon Girard", "Lucas Moreau", "Camille Lefevre", "Enzo Roux", "Clara Fournier", "Pierre Lartigue", "AKROUCHI Yanis", "Élève TEST"],
     },
     {
@@ -11,7 +11,7 @@ const initialClasses = [
         studentNames: ["Alice Martin", "Paul Garcia", "Jade Dubois", "Louis Laurent", "Emma Simon", "Gabriel Michel", "Élève TEST"],
     },
     {
-        id: "1MV1",
+        id: "1APP1",
         studentNames: ["Jules Royer", "Rose Gauthier", "Adam Lemaire", "Louise Lambert", "Raphaël Picard", "Juliette Leclerc", "Élève TEST"],
     },
     {
@@ -24,7 +24,7 @@ const initialTeachers = [
     { name: 'M. Dubois' },
     { name: 'Mme. Martin' },
     { name: 'M. Thomas' },
-    { name: 'Mme. Lecompte' },
+    { name: 'M. Lecompte' },
     { name: 'M. Benseghir' },
 ];
 
@@ -60,7 +60,7 @@ export const seedInitialData = async (firestore: Firestore) => {
 
 
 export const checkAndSeedData = async (firestore: Firestore) => {
-    const seedDocRef = doc(firestore, 'config', 'initial_seed_v5'); // Incremented version for new seed
+    const seedDocRef = doc(firestore, 'config', 'initial_seed_v6'); // Incremented version for new seed
     try {
         const seedDoc = await getDoc(seedDocRef);
         if (!seedDoc.exists()) {
