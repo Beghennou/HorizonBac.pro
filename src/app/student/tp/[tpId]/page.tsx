@@ -1,21 +1,33 @@
 
 
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import { TP, Etape, EtudePrelimQCM, EtudePrelimText } from '@/lib/data-manager';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { TP, Etape } from '@/lib/data-manager';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Send, Loader2, Play, CheckCircle, MessageSquare, Award, Book, Video, FileText } from 'lucide-react';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { Bot, Play, CheckCircle, MessageSquare, Award, Book, Video, FileText, Lock, KeyRound } from 'lucide-react';
+import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { CheckeredFlag } from '@/components/icons';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { collection } from 'firebase/firestore';
+import { collection, doc } from 'firebase/firestore';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 const AssistantTP = dynamic(() => import('@/components/assistant-tp').then(mod => mod.AssistantTP), {
     ssr: false,
@@ -27,7 +39,7 @@ const AssistantTP = dynamic(() => import('@/components/assistant-tp').then(mod =
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-center h-80">
-                <Loader2 className="h-8 w-8 animate-spin text-accent" />
+                <p>Chargement...</p>
             </CardContent>
         </Card>
     )
@@ -47,13 +59,65 @@ const EtapeCard = ({ etape, index }: { etape: Etape; index: number }) => (
   </div>
 );
 
+const TeacherValidationDialog = ({ onUnlock }: { onUnlock: () => void }) => {
+    const [password, setPassword] = useState('');
+    const { toast } = useToast();
+
+    const handleUnlock = () => {
+        if (password === 'Mongy') {
+            onUnlock();
+            toast({ title: 'Étape débloquée !', description: 'L\'élève peut maintenant continuer.' });
+        } else {
+            toast({ variant: 'destructive', title: 'Mot de passe incorrect.' });
+        }
+    };
+
+    return (
+         <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Validation Enseignant Requise</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Veuillez entrer le mot de passe enseignant pour permettre à l'élève de passer à l'étape suivante.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-2">
+                <Label htmlFor="teacher-password">Mot de Passe</Label>
+                <Input
+                    id="teacher-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                />
+            </div>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setPassword('')}>Annuler</AlertDialogCancel>
+                <AlertDialogAction onClick={handleUnlock}>Débloquer</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    )
+}
+
 export default function TPPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
   const tpId = typeof params.tpId === 'string' ? parseInt(params.tpId, 10) : null;
 
-  const { firestore, assignedTps, updateTpStatus, savePrelimAnswer, saveFeedback, tps } = useFirebase();
+  const { firestore, assignedTps, updateTpStatus, savePrelimAnswer, saveFeedback, tps, updateStudentData } = useFirebase();
+
+  const [unlockedStep, setUnlockedStep] = useState(0);
+
+  const studentDataRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `students/${studentName}`) : null, [firestore, studentName]);
+  const { data: studentData } = useDoc(studentDataRef);
+  
+  useEffect(() => {
+    if (studentData && tpId) {
+      const progress = studentData.tpProgress?.[tpId]?.unlockedStep;
+      setUnlockedStep(progress || 0);
+    }
+  }, [studentData, tpId]);
+
 
   const { data: studentPrelimAnswers } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName, tpId]));
   const { data: studentFeedbacks } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName, tpId]));
@@ -86,6 +150,18 @@ export default function TPPage() {
       saveFeedback(studentName, tpId, e.target.value, 'student');
     }
   }
+  
+  const unlockNextStep = (stepIndex: number) => {
+    if (studentName && tpId) {
+      const newUnlockedStep = stepIndex + 1;
+      setUnlockedStep(newUnlockedStep);
+      const dataToUpdate = {
+        [`tpProgress.${tpId}.unlockedStep`]: newUnlockedStep
+      };
+      updateStudentData(studentName, dataToUpdate);
+    }
+  };
+
 
   if (!tp) {
     return (
@@ -149,7 +225,7 @@ export default function TPPage() {
                 {assignedTp.status === 'non-commencé' && (
                     <Button onClick={handleStart} size="lg"><Play className="mr-2"/>Commencer le TP</Button>
                 )}
-                {assignedTp.status === 'en-cours' && (
+                {assignedTp.status === 'en-cours' && unlockedStep === tp.activitePratique.length && (
                     <Button onClick={handleFinish} variant="outline" size="lg" className="border-accent text-accent hover:bg-accent hover:text-black">
                         <CheckeredFlag className="mr-2"/>Terminer le TP
                     </Button>
@@ -256,7 +332,7 @@ export default function TPPage() {
                                     onValueChange={(value) => handleAnswerChange(i, value)}
                                     disabled={assignedTp.status === 'terminé'}
                                 >
-                                    {(item as EtudePrelimQCM).options.map((option, optIndex) => (
+                                    {(item as any).options.map((option: string, optIndex: number) => (
                                         <div key={optIndex} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
                                             <RadioGroupItem value={option} id={`q${i}-opt${optIndex}`} />
                                             <Label htmlFor={`q${i}-opt${optIndex}`} className="flex-1 cursor-pointer">{option}</Label>
@@ -270,67 +346,111 @@ export default function TPPage() {
             </Card>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Activité Pratique</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {tp.activitePratique.map((etape, i) => (
-              <EtapeCard key={i} etape={etape} index={i} />
-            ))}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare /> Commentaire sur le TP
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea 
-              placeholder="Tes impressions, difficultés ou points à discuter avec ton enseignant..."
-              value={studentFeedback}
-              onChange={handleStudentFeedbackChange}
-              disabled={assignedTp.status === 'terminé'}
-              rows={4}
-            />
-          </CardContent>
-        </Card>
-
-        {assignedTp.status === 'terminé' && teacherFeedback && (
-          <Card className="border-accent">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-accent">
-                <MessageSquare /> Feedback de l'Enseignant
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="p-4 bg-background/50 rounded-md whitespace-pre-wrap">{teacherFeedback}</p>
-            </CardContent>
-          </Card>
+        {unlockedStep >= 0 && tp.validationRequise && assignedTp.status !== 'terminé' && (
+          <AlertDialog>
+              <Card className="border-dashed border-accent">
+                <CardHeader>
+                  <CardTitle className="text-accent flex items-center gap-2"><KeyRound/>Appel Professeur</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-muted-foreground mb-4">Veuillez faire valider cette étape par votre enseignant avant de continuer.</p>
+                  <AlertDialogTrigger asChild>
+                    <Button><Lock className="mr-2"/>Débloquer l'étape suivante</Button>
+                  </AlertDialogTrigger>
+                </CardContent>
+              </Card>
+              <TeacherValidationDialog onUnlock={() => unlockNextStep(unlockedStep)} />
+          </AlertDialog>
         )}
 
-
-        <Card>
+        {unlockedStep >= 1 && (
+            <Card>
             <CardHeader>
-                <CardTitle>Points Clés &amp; Sécurité</CardTitle>
+                <CardTitle>Activité Pratique</CardTitle>
             </CardHeader>
-            <CardContent className="grid md:grid-cols-2 gap-6">
-                <div>
-                    <h4 className="font-bold text-accent mb-2">Points Clés</h4>
-                    <ul className="list-disc pl-5 space-y-1">
-                        {tp.pointsCles.map((pt, i) => <li key={i}>{pt}</li>)}
-                    </ul>
-                </div>
-                 <div>
-                    <h4 className="font-bold text-destructive mb-2">Sécurité</h4>
-                    <ul className="list-disc pl-5 space-y-1">
-                        {tp.securiteRangement.map((sec, i) => <li key={i}>{sec}</li>)}
-                    </ul>
-                </div>
+            <CardContent>
+                {tp.activitePratique.map((etape, i) => {
+                  const isLocked = tp.validationRequise && i >= unlockedStep && assignedTp.status !== 'terminé';
+                  const isCurrent = i === unlockedStep;
+                  
+                  if (i >= unlockedStep && tp.validationRequise && assignedTp.status !== 'terminé') return null;
+
+                  return (
+                    <div key={i}>
+                       <EtapeCard etape={etape} index={i} />
+                        {tp.validationRequise && i < tp.activitePratique.length - 1 && i === unlockedStep -1 && assignedTp.status !== 'terminé' && (
+                            <AlertDialog>
+                                <Card className="border-dashed border-accent mt-4">
+                                    <CardHeader><CardTitle className="text-accent flex items-center gap-2"><KeyRound/>Validation de l'Étape {i+1}</CardTitle></CardHeader>
+                                    <CardContent className="text-center">
+                                        <p className="text-muted-foreground mb-4">Faites valider cette étape avant de continuer.</p>
+                                        <AlertDialogTrigger asChild><Button><Lock className="mr-2"/>Débloquer l'étape {i+2}</Button></AlertDialogTrigger>
+                                    </CardContent>
+                                </Card>
+                                <TeacherValidationDialog onUnlock={() => unlockNextStep(i + 1)} />
+                            </AlertDialog>
+                        )}
+                    </div>
+                  )
+                })}
             </CardContent>
-        </Card>
+            </Card>
+        )}
+        
+        {unlockedStep >= tp.activitePratique.length && (
+            <>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                        <MessageSquare /> Commentaire sur le TP
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Textarea 
+                        placeholder="Tes impressions, difficultés ou points à discuter avec ton enseignant..."
+                        value={studentFeedback}
+                        onChange={handleStudentFeedbackChange}
+                        disabled={assignedTp.status === 'terminé'}
+                        rows={4}
+                        />
+                    </CardContent>
+                </Card>
+
+                {assignedTp.status === 'terminé' && teacherFeedback && (
+                <Card className="border-accent">
+                    <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-accent">
+                        <MessageSquare /> Feedback de l'Enseignant
+                    </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                    <p className="p-4 bg-background/50 rounded-md whitespace-pre-wrap">{teacherFeedback}</p>
+                    </CardContent>
+                </Card>
+                )}
+
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Points Clés &amp; Sécurité</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 className="font-bold text-accent mb-2">Points Clés</h4>
+                            <ul className="list-disc pl-5 space-y-1">
+                                {tp.pointsCles.map((pt, i) => <li key={i}>{pt}</li>)}
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-destructive mb-2">Sécurité</h4>
+                            <ul className="list-disc pl-5 space-y-1">
+                                {tp.securiteRangement.map((sec, i) => <li key={i}>{sec}</li>)}
+                            </ul>
+                        </div>
+                    </CardContent>
+                </Card>
+            </>
+        )}
       </div>
       <div className="md:col-span-1">
         <AssistantTP tp={tp} />

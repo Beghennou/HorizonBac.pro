@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -52,6 +53,7 @@ const tpFormSchema = z.object({
     activitePratique: z.array(etapeSchema).min(1, "Au moins une étape pratique est requise."),
     pointsCles: z.array(z.object({ value: z.string().min(1, "Le point clé est requis.") })).min(1, "Au moins un point clé est requis."),
     securiteRangement: z.array(z.object({ value: z.string().min(1, "La consigne de sécurité est requise.") })).min(1, "Au moins une consigne de sécurité est requise."),
+    validationRequise: z.boolean().default(false),
 });
 
 type TpFormValues = z.infer<typeof tpFormSchema>;
@@ -78,6 +80,7 @@ export default function TPDesignerPage() {
             activitePratique: [{ titre: "", duree: "30 min", etapes: [""] }],
             pointsCles: [{ value: "" }],
             securiteRangement: [{ value: "" }],
+            validationRequise: false,
         },
     });
 
@@ -101,6 +104,7 @@ export default function TPDesignerPage() {
                     securiteRangement: tpToEdit.securiteRangement.map(sr => ({ value: sr })),
                     objectif: objectifWithoutCompetences,
                     competences,
+                    validationRequise: tpToEdit.validationRequise || false,
                 });
             }
         }
@@ -155,6 +159,7 @@ export default function TPDesignerPage() {
             activitePratique: [{ titre: "", duree: "30 min", etapes: [""] }],
             pointsCles: [{ value: "" }],
             securiteRangement: [{ value: "" }],
+            validationRequise: false,
         });
         } else {
             router.push('/teacher/dashboard/tp-designer');
@@ -199,7 +204,7 @@ export default function TPDesignerPage() {
                                 </FormItem>
                            )} />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                             <FormField control={form.control} name="duree" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Durée estimée</FormLabel>
@@ -221,6 +226,17 @@ export default function TPDesignerPage() {
                                     <FormMessage />
                                 </FormItem>
                            )} />
+                            <FormField control={form.control} name="validationRequise" render={({ field }) => (
+                                <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                                    <FormControl>
+                                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                                    </FormControl>
+                                    <div className="space-y-1 leading-none">
+                                        <FormLabel>Validation Enseignant</FormLabel>
+                                        <FormMessage />
+                                    </div>
+                                </FormItem>
+                            )} />
                         </div>
                         <FormField control={form.control} name="situation" render={({ field }) => (
                             <FormItem>

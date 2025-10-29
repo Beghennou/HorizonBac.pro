@@ -28,6 +28,7 @@ import {
     deleteClassFromDb,
     addTeacherInDb,
     deleteTeacherFromDb,
+    updateStudentData,
 } from './firestore-actions';
 import { checkAndSeedData } from './seed-data';
 
@@ -109,6 +110,7 @@ export interface FirebaseContextState {
   createClass: (className: string) => void;
   deleteClass: (className: string) => void;
   signInWithGoogle: () => Promise<void>;
+  updateStudentData: (studentName: string, data: DocumentData) => void;
   isLoaded: boolean;
   
   classes: DocumentData[];
@@ -341,6 +343,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       toast({ variant: 'destructive', title: 'Classe Supprimée', description: `La classe "${className}" a été supprimée.` });
     },
     signInWithGoogle,
+    updateStudentData: (studentName: string, data: DocumentData) => {
+      if (!firestore) return;
+      updateStudentData(firestore, studentName, data);
+    }
   };
 
   return (

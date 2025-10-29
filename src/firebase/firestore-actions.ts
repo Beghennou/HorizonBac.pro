@@ -123,6 +123,17 @@ export const saveStudentFeedback = (firestore: Firestore, studentName: string, t
     });
 };
 
+export const updateStudentData = (firestore: Firestore, studentName: string, data: DocumentData) => {
+    const studentDocRef = doc(firestore, 'students', studentName);
+    updateDoc(studentDocRef, data).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: studentDocRef.path,
+            operation: 'update',
+            requestResourceData: data,
+        }))
+    });
+}
+
 export const setTeacherNameInDb = async (firestore: Firestore, teacherId: string, name: string) => {
     const teacherDocRef = doc(firestore, 'teachers', teacherId);
     await setDoc(teacherDocRef, { name }, { merge: true }).catch(error => {
