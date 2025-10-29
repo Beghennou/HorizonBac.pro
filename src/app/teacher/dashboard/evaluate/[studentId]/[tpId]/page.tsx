@@ -62,19 +62,28 @@ export default function EvaluationPage() {
     };
 
     const handleSave = (isFinal: boolean) => {
-        if (Object.keys(competenceEvals).length !== evaluatedCompetenceIds.length) {
+        // Sauvegarde immédiate du feedback, qu'il s'agisse d'un brouillon ou non.
+        saveFeedback(studentName, tpId, teacherFeedback, 'teacher');
+        
+        if (isFinal && Object.keys(competenceEvals).length !== evaluatedCompetenceIds.length) {
             toast({
                 variant: 'destructive',
                 title: 'Évaluation incomplète',
-                description: 'Veuillez évaluer toutes les compétences avant de sauvegarder.',
+                description: 'Veuillez évaluer toutes les compétences avant de finaliser.',
             });
             return;
         }
 
         saveEvaluation(studentName, tpId, competenceEvals, prelimNote, tpNote, isFinal);
-        saveFeedback(studentName, tpId, teacherFeedback, 'teacher');
         
-        router.push('/teacher/dashboard/tps-to-evaluate');
+        toast({
+            title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
+            description: `Le feedback et les notes pour le TP ${tpId} ont été enregistrés.`,
+        });
+
+        if (isFinal) {
+            router.push('/teacher/dashboard/tps-to-evaluate');
+        }
     };
 
     if (!tp) {
@@ -183,6 +192,3 @@ export default function EvaluationPage() {
         </div>
     );
 }
-
-
-    
