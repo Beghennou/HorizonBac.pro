@@ -49,10 +49,15 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
-       <div className="mt-12 text-center">
+       <div className="mt-12 text-center flex gap-4">
             <Button asChild variant="link" className="text-accent">
                 <Link href="/tutorial">
                     Comment ça marche ? (Tutoriel)
+                </Link>
+            </Button>
+            <Button asChild variant="link" className="text-muted-foreground">
+                <Link href="/privacy">
+                    Politique de Confidentialité
                 </Link>
             </Button>
         </div>
