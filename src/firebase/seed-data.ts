@@ -30,8 +30,16 @@ const initialTeachers: { name: string }[] = [
 export const seedInitialData = async (firestore: Firestore) => {
     const batch = writeBatch(firestore);
     
+    // --> DEBUT DE LA CORRECTION : Suppression des enseignants existants
     const teachersQuery = query(collection(firestore, "teachers"));
     const teachersSnapshot = await getDocs(teachersQuery);
+    if (!teachersSnapshot.empty) {
+        console.log("Deleting existing teachers to prevent duplicates...");
+        teachersSnapshot.forEach(teacherDoc => {
+            batch.delete(teacherDoc.ref);
+        });
+    }
+    // <-- FIN DE LA CORRECTION
 
     // Seed teachers only if the collection is empty and the initial list is not.
     if (teachersSnapshot.empty && initialTeachers.length > 0) {
@@ -64,7 +72,7 @@ export const seedInitialData = async (firestore: Firestore) => {
 
 
 export const checkAndSeedData = async (firestore: Firestore) => {
-    const seedDocRef = doc(firestore, 'config', 'initial_seed_v7'); // Version incrémentée pour garantir la cohérence
+    const seedDocRef = doc(firestore, 'config', 'initial_seed_v8'); // Version incrémentée pour garantir la cohérence
     try {
         const seedDoc = await getDoc(seedDocRef);
         if (!seedDoc.exists()) {
