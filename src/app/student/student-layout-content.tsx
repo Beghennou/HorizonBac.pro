@@ -147,15 +147,17 @@ export default function StudentLayoutContent({
                        <div className="p-4 flex justify-between items-center">
                            <div>
                                <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                                   Élève • {teacherName}
+                                   Élève
                                </p>
                                <h2 className="font-headline text-2xl font-bold text-accent">{studentName}</h2>
                            </div>
                            <div className="text-right">
-                                <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                                   Classe
-                               </p>
+                               <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Classe</p>
                                <h2 className="font-headline text-2xl font-bold text-accent">{className}</h2>
+                           </div>
+                           <div className="text-right">
+                               <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Enseignant</p>
+                               <h2 className="font-headline text-2xl font-bold text-accent">{teacherName}</h2>
                            </div>
                        </div>
                     </Card>
