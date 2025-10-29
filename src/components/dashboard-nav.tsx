@@ -6,6 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { Book, Cog, Users, FileText, BarChart3, DraftingCompass, CheckSquare, ClipboardCheck, LayoutDashboard } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from './ui/sidebar';
 
 export function DashboardNav() {
   const pathname = usePathname();
@@ -28,44 +29,30 @@ export function DashboardNav() {
   }
 
   return (
-    <nav className="flex flex-col gap-2">
+    <SidebarMenu>
       {navItems.map((item) => {
         const Icon = item.icon;
         
         let isActive = false;
         if (item.exact) {
             isActive = pathname === item.base;
-        } else if (item.base === '/teacher/dashboard/class-progress') {
-            // "Progression" is active for class-progress, students, and student detail pages
-            isActive = pathname.startsWith('/teacher/dashboard/class-progress') || 
-                       pathname.startsWith('/teacher/dashboard/students') || 
-                       pathname.startsWith('/teacher/dashboard/evaluate');
-        }
-        else {
+        } else {
             isActive = pathname.startsWith(item.base);
         }
 
-        const finalHref = createUrl(item.base);
+        const finalHref = createUrl(item.href);
 
         return (
-          <Button
-            key={item.href}
-            asChild
-            variant={isActive ? 'default' : 'ghost'}
-            className={cn(
-              'justify-start gap-3 text-base h-12 px-4',
-              isActive
-                ? 'bg-gradient-to-r from-primary to-racing-orange text-white'
-                : 'hover:bg-primary/10 hover:text-accent'
-            )}
-          >
-            <Link href={finalHref}>
-              <Icon className="h-5 w-5" />
-              <span className="font-headline tracking-wider">{item.label}</span>
-            </Link>
-          </Button>
+          <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton asChild isActive={isActive}>
+              <Link href={finalHref}>
+                <Icon/>
+                <span>{item.label}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         );
       })}
-    </nav>
+    </SidebarMenu>
   );
 }

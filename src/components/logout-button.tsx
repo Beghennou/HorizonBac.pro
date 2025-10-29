@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useFirebase } from '@/firebase';
@@ -15,9 +16,9 @@ export function LogoutButton() {
   };
 
   return (
-    <Button onClick={handleLogout} variant="ghost" className="text-muted-foreground hover:bg-primary/20 hover:text-accent">
-      <LogOut className="mr-2"/>
-      Déconnexion
+    <Button onClick={handleLogout} variant="destructive" className="w-full justify-start text-base h-12 px-4">
+      <LogOut />
+      <span>Déconnexion</span>
     </Button>
   );
 }

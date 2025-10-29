@@ -14,13 +14,14 @@ import {
   SidebarContent,
   SidebarTrigger,
   SidebarInset,
+  SidebarHeader,
+  SidebarFooter,
 } from '@/components/ui/sidebar';
 import { useFirebase } from '@/firebase';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
-import { Home } from 'lucide-react';
+import { Home, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LogoutButton } from '@/components/logout-button';
-import { Card } from '@/components/ui/card';
 
 function getLevelFromClassName(className: string | null): Niveau {
     if (!className) return 'seconde';
@@ -80,55 +81,47 @@ function DashboardLayoutContent({
                     </h1>
                     </Link>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-4">
                     <Button variant="ghost" asChild className="text-muted-foreground hover:bg-primary/20 hover:text-accent">
                         <Link href="/">
                         <Home className="mr-2"/>
                         Accueil
                         </Link>
                     </Button>
-                    <LogoutButton />
                 </div>
                 </div>
             </header>
           <SidebarInset>
               <div className="container flex flex-1 py-8">
                   <Sidebar>
-                    <SidebarContent className="flex flex-col gap-4 p-0">
-                       <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl flex-1">
-                        <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Navigation</h3>
-                        <DashboardNav />
-                      </div>
+                    <SidebarHeader>
+                        <h3 className="font-headline text-sm text-accent uppercase tracking-wider mb-1">Sélection classe :</h3>
+                        {classNames.length > 0 ? (
+                            <Select value={selectedClass} onValueChange={handleClassChange}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Choisir une classe..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {classNames.map(className => (
+                                    <SelectItem key={className} value={className}>{className}</SelectItem>
+                                ))}
+                            </SelectContent>
+                            </Select>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Aucune classe n'est configurée.</p>
+                        )}
+                    </SidebarHeader>
+                    <SidebarContent>
+                       <DashboardNav />
                     </SidebarContent>
+                    <SidebarFooter className="p-4 flex-col gap-4">
+                        <Button variant="secondary" className="w-full justify-start text-base h-12 px-4">
+                           <User /> <span>{teacherName}</span>
+                        </Button>
+                        <LogoutButton />
+                    </SidebarFooter>
                   </Sidebar>
                   <main className="flex-1 md:ml-8 flex flex-col gap-6">
-                     <Card className="bg-card border-2 border-primary/30 shadow-2xl">
-                        <div className="p-4 flex justify-between items-center">
-                            <div>
-                                <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                                    Enseignant
-                                </p>
-                                <h2 className="font-headline text-2xl font-bold text-accent">{teacherName}</h2>
-                            </div>
-                            <div className="w-1/3">
-                                <h3 className="font-headline text-sm text-accent uppercase tracking-wider mb-1">Sélection classe :</h3>
-                                {classNames.length > 0 ? (
-                                    <Select value={selectedClass} onValueChange={handleClassChange}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Choisir une classe..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {classNames.map(className => (
-                                            <SelectItem key={className} value={className}>{className}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                    </Select>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground">Aucune classe n'est configurée.</p>
-                                )}
-                            </div>
-                        </div>
-                     </Card>
                      <div className="flex-1 bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6">
                         {children}
                     </div>
