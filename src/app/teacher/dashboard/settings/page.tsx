@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight, Eraser, PlusCircle, FolderPlus, FolderClosed } from "lucide-react";
+import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight, Eraser, PlusCircle, FolderPlus, FolderClosed, UserCog } from "lucide-react";
 import { useFirebase } from '@/firebase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -29,7 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { firestore, classes, teacherName, setTeacherName, updateClassWithCsv, deleteStudent, emptyClass, resetAllStudentLists, createClass, deleteClass } = useFirebase();
+  const { firestore, classes, teacherName, setTeacherName, updateClassWithCsv, deleteStudent, emptyClass, resetAllStudentLists, createClass, deleteClass, addTeacher, deleteTeacher, teachers } = useFirebase();
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
@@ -56,8 +56,12 @@ export default function SettingsPage() {
   const [secondeClassToUpdate, setSecondeClassToUpdate] = useState('');
   const [premiereClassToUpdate, setPremiereClassToUpdate] = useState('');
   const [terminaleClassToUpdate, setTerminaleClassToUpdate] = useState('');
+  
+  const [newTeacherName, setNewTeacherName] = useState('');
+  const [teacherToDelete, setTeacherToDelete] = useState('');
 
   const classNames = useMemo(() => classes.map(c => c.id).sort(), [classes]);
+  const teacherList = useMemo(() => teachers.sort((a,b) => a.name.localeCompare(b.name)), [teachers]);
 
   const secondeClasses = useMemo(() => classNames.filter(name => name.startsWith('2')), [classNames]);
   const premiereClasses = useMemo(() => classNames.filter(name => name.startsWith('1')), [classNames]);
@@ -200,6 +204,24 @@ export default function SettingsPage() {
       setNewImportClassName('');
   };
   
+  const handleAddTeacher = () => {
+      if (!newTeacherName.trim()) {
+          toast({ variant: 'destructive', title: 'Le nom ne peut pas être vide.' });
+          return;
+      }
+      addTeacher(newTeacherName.trim());
+      setNewTeacherName('');
+  };
+  
+  const handleDeleteTeacher = () => {
+      if (!teacherToDelete) {
+          toast({ variant: 'destructive', title: 'Aucun enseignant sélectionné.' });
+          return;
+      }
+      deleteTeacher(teacherToDelete);
+      setTeacherToDelete('');
+  }
+  
   useEffect(() => {
     if (deleteStudentClass) {
         const classData = classes.find(c => c.id === deleteStudentClass);
@@ -238,6 +260,64 @@ export default function SettingsPage() {
                     Sauvegarder les paramètres
                 </Button>
             </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><UserCog /> Gestion des Enseignants</CardTitle>
+          <CardDescription>Ajoutez ou supprimez des profils d'enseignants.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="add">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="add"><UserPlus className="mr-2"/>Ajouter un enseignant</TabsTrigger>
+              <TabsTrigger value="delete"><UserMinus className="mr-2"/>Supprimer un enseignant</TabsTrigger>
+            </TabsList>
+            <TabsContent value="add" className="pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-teacher-name">Nom du nouvel enseignant</Label>
+                <div className="flex items-center gap-2">
+                    <Input id="new-teacher-name" placeholder="ex: Mme. Leroy" value={newTeacherName} onChange={e => setNewTeacherName(e.target.value)} />
+                    <Button onClick={handleAddTeacher}><PlusCircle className="mr-2" /> Ajouter</Button>
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="delete" className="pt-4">
+               <div className="space-y-2">
+                <Label htmlFor="delete-teacher-select">Enseignant à supprimer</Label>
+                <div className="flex items-center gap-2">
+                    <Select value={teacherToDelete} onValueChange={setTeacherToDelete}>
+                        <SelectTrigger id="delete-teacher-select">
+                            <SelectValue placeholder="Choisir un enseignant..."/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {teacherList.map(t => (
+                                <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" disabled={!teacherToDelete}><Trash2 className="mr-2" /> Supprimer</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Voulez-vous vraiment supprimer cet enseignant ?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Cette action est irréversible et supprimera le profil de l'enseignant de la base de données.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteTeacher} className="bg-destructive hover:bg-destructive/90">Confirmer</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -541,3 +621,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    

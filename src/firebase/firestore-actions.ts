@@ -134,12 +134,22 @@ export const setTeacherNameInDb = async (firestore: Firestore, teacherId: string
     });
 };
 
-export const addTeacherToDb = async (firestore: Firestore, name: string) => {
+export const addTeacherInDb = async (firestore: Firestore, name: string) => {
     await addDoc(collection(firestore, 'teachers'), { name }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: 'teachers',
             operation: 'create',
             requestResourceData: { name },
+        }));
+    });
+};
+
+export const deleteTeacherFromDb = async (firestore: Firestore, teacherId: string) => {
+    const teacherDocRef = doc(firestore, 'teachers', teacherId);
+    await deleteDoc(teacherDocRef).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: teacherDocRef.path,
+            operation: 'delete'
         }));
     });
 };
@@ -226,3 +236,5 @@ export const deleteClassFromDb = async (firestore: Firestore, className: string)
         }));
     });
 }
+
+    

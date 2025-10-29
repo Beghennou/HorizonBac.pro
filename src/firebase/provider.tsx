@@ -25,7 +25,9 @@ import {
     addCustomTp,
     resetAllStudentListsInClasses,
     createClassInDb,
-    deleteClassFromDb
+    deleteClassFromDb,
+    addTeacherInDb,
+    deleteTeacherFromDb,
 } from './firestore-actions';
 import { checkAndSeedData } from './seed-data';
 
@@ -96,7 +98,8 @@ export interface FirebaseContextState {
   teacherName: string;
   setTeacherName: (name: string) => void;
   teachers: DocumentData[];
-  addTeacher: (name: string) => Promise<void>;
+  addTeacher: (name: string) => void;
+  deleteTeacher: (teacherId: string) => void;
   customSignOut: () => void;
   deleteStudent: (studentId: string, studentName: string) => void;
   emptyClass: (className: string) => void;
@@ -234,8 +237,15 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const addTeacher = useCallback(async (name: string) => {
     if (!firestore) return;
-    await addDoc(collection(firestore, "teachers"), { name });
-  }, [firestore]);
+    await addTeacherInDb(firestore, name);
+    toast({ title: 'Enseignant ajouté', description: `${name} a été ajouté à la liste.` });
+  }, [firestore, toast]);
+  
+  const deleteTeacher = useCallback(async (teacherId: string) => {
+    if (!firestore) return;
+    await deleteTeacherFromDb(firestore, teacherId);
+    toast({ variant: 'destructive', title: 'Enseignant supprimé', description: `Le profil a été supprimé.` });
+  }, [firestore, toast]);
   
   const customSignOut = useCallback(() => {
     sessionStorage.removeItem('teacherName');
@@ -258,6 +268,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     setTeacherName,
     teachers: teachers || [],
     addTeacher,
+    deleteTeacher,
     customSignOut,
     classes: classes || [],
     tps,
@@ -371,3 +382,5 @@ export const useUser = () => {
     const { user, isUserLoading, userError } = useFirebase();
     return { user, isUserLoading, userError };
 }
+
+    
