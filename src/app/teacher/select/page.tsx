@@ -47,9 +47,13 @@ export default function SelectTeacherPage() {
             toast({ variant: 'destructive', title: 'Le nom ne peut pas être vide.' });
             return;
         }
-        await addTeacher(newTeacherName);
-        toast({ title: 'Enseignant ajouté', description: `${newTeacherName} a été ajouté à la liste.` });
-        setTeacherName(newTeacherName); // Automatically select and log in the new teacher
+        if (teachers.some(t => t.name === newTeacherName.trim())) {
+            toast({ variant: 'destructive', title: 'Ce nom existe déjà', description: 'Veuillez choisir un autre nom ou sélectionner ce profil dans la liste.' });
+            return;
+        }
+        await addTeacher(newTeacherName.trim());
+        setTeacherName(newTeacherName.trim()); // Automatically select and log in the new teacher
+        toast({ title: 'Profil créé et connecté', description: `Bienvenue, ${newTeacherName.trim()}.` });
         router.push('/teacher/dashboard');
     };
 
