@@ -68,7 +68,7 @@ function DashboardLayoutContent({
   return (
       <SidebarProvider>
         <div className="bg-background min-h-screen">
-            <header className="sticky top-0 z-40 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl">
+            <header className="sticky top-0 z-30 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl">
                 <div className="container flex h-20 items-center justify-between">
                 <div className="flex items-center gap-4">
                     <SidebarTrigger className="md:hidden"/>
