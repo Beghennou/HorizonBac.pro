@@ -65,6 +65,18 @@
       "description": "A famous corner on the Spa-Francorchamps circuit",
       "imageUrl": "https://images.unsplash.com/photo-1561444490-aa8f9fb571bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyYWNlJTIwdHJhY2t8ZW58MHx8fHwxNzYwOTg1MTk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "race track"
+    },
+    {
+      "id": "tp-air-conditioning",
+      "description": "A car air conditioning system with visible pipes",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1556438758-872c68902f60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhaXIlMjBjb25kaXRpb25pbmd8ZW58MHx8fHwxNzYxNzI4MDk4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "air conditioning"
+    },
+    {
+      "id": "tp-electrical",
+      "description": "A car's electrical wiring and fuse box",
+      "imageUrl": "https://images.unsplash.com/photo-1620891498795-a92bda5822b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y2FyJTIwZWxlY3RyaWNhbHxlbnwwfHx8fDE3NjE3NjI5NDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "car electrical"
     }
   ]
 }

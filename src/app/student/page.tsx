@@ -68,8 +68,17 @@ function StudentDashboard() {
     if (lowerCaseTitre.includes('frein') || lowerCaseTitre.includes('disques') || lowerCaseTitre.includes('plaquettes')) {
       return PlaceHolderImages.find(p => p.id === 'tp-suspension');
     }
-    if (lowerCaseTitre.includes('pneu') || lowerCaseTitre.includes('roue')) {
+    if (lowerCaseTitre.includes('pneu') || lowerCaseTitre.includes('roue') || lowerCaseTitre.includes('géométrie')) {
       return PlaceHolderImages.find(p => p.id === 'tp-aero');
+    }
+    if (lowerCaseTitre.includes('climatisation')) {
+        return PlaceHolderImages.find(p => p.id === 'tp-air-conditioning');
+    }
+    if (lowerCaseTitre.includes('distribution') || lowerCaseTitre.includes('moteur') || lowerCaseTitre.includes('injection') || lowerCaseTitre.includes('vidange') || lowerCaseTitre.includes('huile')) {
+      return PlaceHolderImages.find(p => p.id === 'tp-engine');
+    }
+    if (lowerCaseTitre.includes('électrique') || lowerCaseTitre.includes('batterie') || lowerCaseTitre.includes('câblage') || lowerCaseTitre.includes('ampoules') || lowerCaseTitre.includes('essuie-glace') || lowerCaseTitre.includes('phares')) {
+        return PlaceHolderImages.find(p => p.id === 'tp-electrical');
     }
     return PlaceHolderImages.find(p => p.id === 'tp-engine');
   };
