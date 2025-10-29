@@ -63,10 +63,12 @@ export default function ClassProgressPage() {
 
     const allAssignedTpIdsInClass = useMemo(() => {
         const tpIdSet = new Set<number>();
-        studentsInClass.forEach(studentName => {
-            const studentTps = assignedTps[studentName] || [];
-            studentTps.forEach(tp => tpIdSet.add(tp.id));
-        });
+        if(studentsInClass && assignedTps) {
+            studentsInClass.forEach(studentName => {
+                const studentTps = assignedTps[studentName] || [];
+                studentTps.forEach(tp => tpIdSet.add(tp.id));
+            });
+        }
         return Array.from(tpIdSet).sort((a, b) => a - b);
     }, [studentsInClass, assignedTps]);
 
@@ -173,6 +175,14 @@ export default function ClassProgressPage() {
                             <h2 className="font-headline text-2xl tracking-wide">Aucun élève dans cette classe</h2>
                             <p className="text-muted-foreground text-lg mt-2 max-w-md">
                                 Vous pouvez ajouter des élèves depuis la page <span className="font-bold text-accent">Paramètres</span>.
+                            </p>
+                        </div>
+                   ) : allAssignedTpIdsInClass.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-primary/30 rounded-lg">
+                            <BookOpen className="w-16 h-16 text-muted-foreground mb-4" />
+                            <h2 className="font-headline text-2xl tracking-wide">Aucun TP assigné</h2>
+                            <p className="text-muted-foreground text-lg mt-2 max-w-md">
+                                Utilisez le menu ci-dessus pour assigner le premier TP à cette classe.
                             </p>
                         </div>
                    ) : (
