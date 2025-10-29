@@ -776,7 +776,7 @@ export const tpSeconde: Record<number, TP> = {
             { type: 'text', q: 'Quelles sont les trois informations essentielles à vérifier sur un pneu neuf pour s\'assurer qu\'il est compatible avec la jante et le véhicule ?', r: '1. Les dimensions (ex: 205/55 R16). 2. L\'indice de charge (ex: 91). 3. L\'indice de vitesse (ex: V). Ces informations doivent être égales ou supérieures aux préconisations constructeur.' },
             { type: 'text', q: 'Pourquoi doit-on systématiquement remplacer la valve (ou son mécanisme interne pour les valves électroniques) lors d\'un changement de pneu ?', r: 'La valve assure l\'étanchéité. Elle vieillit et se craquelle avec le temps et les contraintes. La remplacer est une sécurité peu coûteuse pour éviter les fuites lentes.' },
             { type: 'qcm', q: 'Qu\'est-ce que l\'équilibrage et pourquoi est-il indispensable ?', options: ['C\'est pour rendre le pneu plus rond', 'C\'est pour compenser les défauts de parallélisme', 'C\'est pour répartir uniformément la masse de la roue et éviter les vibrations à haute vitesse'], r: 'C\'est pour répartir uniformément la masse de la roue et éviter les vibrations à haute vitesse' },
-            { type: 'text', q: 'Certains pneus ont un sens de rotation ou un côté extérieur ("Outside"). Quelle est la conséquence si l\'on ne respecte pas ces indications au montage ?', r: 'Le pneu ne pourra pas évacuer l\'eau correctement (risque d\'aquaplaning) et ses performances en termes d\'adhérence et de bruit seront dégradées. Le montage sera non conforme et dangereux.' },
+            { type: 'text', q: 'Certains pneus ont un sens de rotation ou un côté extérieur ("Outside"). Quelle est la consequence si l\'on ne respecte pas ces indications au montage ?', r: 'Le pneu ne pourra pas évacuer l\'eau correctement (risque d\'aquaplaning) et ses performances en termes d\'adhérence et de bruit seront dégradées. Le montage sera non conforme et dangereux.' },
             { type: 'text', q: 'Quelle est la pression de "claquage" généralement utilisée pour coller les talons du pneu sur les rebords de la jante, et quelle précaution prendre ?', r: 'Environ 3 à 3.5 bars. Il faut se tenir à distance de la roue pendant cette opération et ne jamais dépasser cette pression pour éviter un éclatement.' }
         ],
         activitePratique: [
@@ -822,3 +822,5 @@ export const tpSeconde: Record<number, TP> = {
 
 
     
+
+
