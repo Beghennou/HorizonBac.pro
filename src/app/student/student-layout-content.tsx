@@ -82,6 +82,11 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
         return <TachometerAnimation />;
     }
 
+    // Si on est sur la page de sélection, on n'affiche pas le layout complet
+    if (pathname === '/student/select') {
+        return <div className="flex items-center justify-center min-h-screen bg-background">{children}</div>;
+    }
+
     return <>{children}</>;
 }
 
@@ -93,6 +98,7 @@ export default function StudentLayoutContent({
 }) {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
+  const className = searchParams.get('class');
 
   return (
      <SidebarProvider>
@@ -124,18 +130,14 @@ export default function StudentLayoutContent({
           <SidebarInset>
               <div className="container flex flex-1 py-8">
                   <Sidebar>
-                    <SidebarHeader>
-                        <StudentSelector />
+                    <SidebarHeader className="p-4">
+                        <h2 className="font-headline text-lg tracking-wider text-accent">{studentName}</h2>
+                        <p className="text-sm text-muted-foreground">{className}</p>
                     </SidebarHeader>
                     <SidebarContent>
                       {studentName && <StudentNav />}
                     </SidebarContent>
                     <SidebarFooter className="p-4 flex-col gap-4">
-                        {studentName && (
-                             <Button variant="secondary" className="w-full justify-start text-base h-12 px-4">
-                                <User/> <span>{studentName}</span>
-                            </Button>
-                        )}
                         <LogoutButton />
                     </SidebarFooter>
                   </Sidebar>
