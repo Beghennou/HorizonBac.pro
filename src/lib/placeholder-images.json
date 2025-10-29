@@ -38,9 +38,9 @@
     },
     {
       "id": "tp-default",
-      "description": "Female mechanic working on a car in a workshop",
-      "imageUrl": "https://images.unsplash.com/photo-1579566379960-9115c8c50534?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmZW1hbGUlMjBtZWNoYW5pY3xlbnwwfHx8fDE3NjE3NjM1MDh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mechanic workshop"
+      "description": "Illustration du service de réparation automobile",
+      "imageUrl": "https://media.istockphoto.com/id/1367188741/fr/vectoriel/service-de-r%C3%A9paration-automobile-et-garage-de-m%C3%A9canique-automobile-ensemble-daffiches.jpg?s=1024x1024&w=is&k=20&c=cIYhpm2kaAJwBofwlg41RrHfWUT61niBC285Lue_9CU=",
+      "imageHint": "auto repair"
     }
   ]
 }
