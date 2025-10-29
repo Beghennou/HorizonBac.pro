@@ -1,4 +1,5 @@
 
+
 'use client';
 import { Suspense, useMemo } from 'react';
 import Image from 'next/image';
@@ -6,7 +7,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { TP } from '@/lib/data-manager';
 import type { TpStatus } from '@/firebase/provider';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { PlaceHolderImages, ImagePlaceholder } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, Clock } from 'lucide-react';
@@ -61,6 +62,17 @@ function StudentDashboard() {
     if (tpId >= 101) return 'Seconde / Entretien Périodique';
     return 'Général';
   };
+  
+  const getTpImage = (tpTitre: string): ImagePlaceholder | undefined => {
+    const lowerCaseTitre = tpTitre.toLowerCase();
+    if (lowerCaseTitre.includes('frein') || lowerCaseTitre.includes('disques') || lowerCaseTitre.includes('plaquettes')) {
+      return PlaceHolderImages.find(p => p.id === 'tp-suspension');
+    }
+    if (lowerCaseTitre.includes('pneu') || lowerCaseTitre.includes('roue')) {
+      return PlaceHolderImages.find(p => p.id === 'tp-aero');
+    }
+    return PlaceHolderImages.find(p => p.id === 'tp-engine');
+  };
 
   const statusInfo = {
     'non-commencé': { text: 'Non commencé', icon: <ArrowRight className="ml-2"/>, buttonText: 'Commencer le TP', variant: 'default' as const, className: 'bg-gradient-to-r from-primary to-racing-orange hover:brightness-110'},
@@ -85,7 +97,7 @@ function StudentDashboard() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tpModules.map((module) => {
-              const image = PlaceHolderImages.find(p => p.id === 'tp-engine');
+              const image = getTpImage(module.titre);
               const currentStatusInfo = statusInfo[module.status as keyof typeof statusInfo] || statusInfo['non-commencé'];
               return (
                 <Card key={module.id} className="flex flex-col overflow-hidden bg-card border-primary/30 hover:border-accent/50 transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-accent/20">
