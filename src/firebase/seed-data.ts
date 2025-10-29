@@ -1,4 +1,3 @@
-
 import { Firestore, writeBatch, doc, getDoc, setDoc } from 'firebase/firestore';
 import { initialTps } from '@/lib/data-manager';
 
@@ -21,6 +20,11 @@ const initialClasses = [
     }
 ];
 
+const initialTeachers = [
+    { name: 'M. Dubois' },
+    { name: 'Mme. Martin' },
+];
+
 
 export const seedInitialData = async (firestore: Firestore) => {
     const batch = writeBatch(firestore);
@@ -31,15 +35,17 @@ export const seedInitialData = async (firestore: Firestore) => {
         batch.set(classRef, { studentNames: classData.studentNames });
     });
 
+    // Seed teachers
+    initialTeachers.forEach(teacherData => {
+        const teacherRef = doc(collection(firestore, 'teachers'));
+        batch.set(teacherRef, teacherData);
+    });
+
     // Seed TPs
     Object.values(initialTps).forEach(tp => {
         const tpRef = doc(firestore, 'tps', tp.id.toString());
         batch.set(tpRef, tp);
     });
-
-    // Seed default config
-    const teacherConfigRef = doc(firestore, 'config', 'teacher');
-    batch.set(teacherConfigRef, { name: "M. Dubois" });
 
     try {
         await batch.commit();
@@ -51,7 +57,7 @@ export const seedInitialData = async (firestore: Firestore) => {
 
 
 export const checkAndSeedData = async (firestore: Firestore) => {
-    const seedDocRef = doc(firestore, 'config', 'initial_seed_v3');
+    const seedDocRef = doc(firestore, 'config', 'initial_seed_v4'); // Incremented version
     try {
         const seedDoc = await getDoc(seedDocRef);
         if (!seedDoc.exists()) {

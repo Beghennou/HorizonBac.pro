@@ -3,16 +3,15 @@
 import { useFirebase } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
-import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 export function LogoutButton() {
-  const { auth } = useFirebase();
+  const { customSignOut } = useFirebase();
+  const router = useRouter();
 
   const handleLogout = async () => {
-    if (auth) {
-      await signOut(auth);
-      // The onAuthStateChanged listener in FirebaseProvider will handle the redirect.
-    }
+    await customSignOut();
+    router.push('/');
   };
 
   return (

@@ -1,6 +1,5 @@
-
 'use client';
-import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs, updateDoc } from 'firebase/firestore';
+import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs, updateDoc, addDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { TP } from '@/lib/data-manager';
 import type { TpStatus } from './provider';
@@ -123,16 +122,27 @@ export const saveStudentFeedback = (firestore: Firestore, studentName: string, t
     });
 };
 
-export const setTeacherNameInDb = (firestore: Firestore, name: string) => {
-    const configDoc = doc(firestore, 'config', 'teacher');
-    setDoc(configDoc, { name }, { merge: true }).catch(error => {
+export const setTeacherNameInDb = async (firestore: Firestore, teacherId: string, name: string) => {
+    const teacherDocRef = doc(firestore, 'teachers', teacherId);
+    await setDoc(teacherDocRef, { name }, { merge: true }).catch(error => {
          errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: configDoc.path,
+              path: teacherDocRef.path,
               operation: 'write',
               requestResourceData: { name },
           }));
     });
 };
+
+export const addTeacherToDb = async (firestore: Firestore, name: string) => {
+    await addDoc(collection(firestore, 'teachers'), { name }).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: 'teachers',
+            operation: 'create',
+            requestResourceData: { name },
+        }));
+    });
+};
+
 
 export const deleteStudent = async (firestore: Firestore, studentId: string, studentName: string) => {
     const batch = writeBatch(firestore);

@@ -29,7 +29,7 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <Button asChild size="lg" className="w-full font-headline uppercase tracking-wider text-base border-2 border-accent bg-gradient-to-br from-primary to-racing-orange hover:brightness-110">
-              <Link href="/teacher/dashboard/students">Accéder au tableau de bord</Link>
+              <Link href="/teacher/login">Accéder à l'espace enseignant</Link>
             </Button>
           </CardContent>
         </Card>

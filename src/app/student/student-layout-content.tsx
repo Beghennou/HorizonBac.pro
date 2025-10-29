@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, Suspense } from 'react';
@@ -18,6 +17,8 @@ import {
 import StudentSelector from './student-selector';
 import { useFirebase } from '@/firebase';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
+import { LogoutButton } from '@/components/logout-button';
+
 
 function StudentNav() {
   const pathname = usePathname();
@@ -123,6 +124,7 @@ export default function StudentLayoutContent({
                       Accueil
                     </Link>
                 </Button>
+                <LogoutButton />
               </div>
             </div>
           </header>

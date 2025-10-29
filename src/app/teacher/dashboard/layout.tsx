@@ -1,7 +1,6 @@
-
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -19,6 +18,7 @@ import { useFirebase } from '@/firebase';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
 import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { LogoutButton } from '@/components/logout-button';
 
 function getLevelFromClassName(className: string | null): Niveau {
     if (!className) return 'seconde';
@@ -36,12 +36,19 @@ function DashboardLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { isLoaded, classes } = useFirebase();
+  const { isLoaded, classes, teacherName } = useFirebase();
 
   const selectedClass = searchParams.get('class') || '';
   const classNames = (classes || []).map(c => c.id).sort((a, b) => a.localeCompare(b));
 
-  if (!isLoaded) {
+  useEffect(() => {
+    if (isLoaded && !teacherName) {
+      router.replace('/teacher/login');
+    }
+  }, [isLoaded, teacherName, router]);
+
+
+  if (!isLoaded || !teacherName) {
     return <TachometerAnimation />;
   }
 
@@ -70,7 +77,9 @@ function DashboardLayoutContent({
                     <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
                       Horizon Bacpro
                     </h1>
-                    <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Espace Enseignant • Lycée des métiers</p>
+                     <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                      Enseignant • {teacherName}
+                    </p>
                   </div>
                 </Link>
               </div>
@@ -81,6 +90,7 @@ function DashboardLayoutContent({
                       Accueil
                     </Link>
                 </Button>
+                <LogoutButton />
               </div>
             </div>
           </header>

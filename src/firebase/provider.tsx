@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDoc, query, where, getDocs } from 'firebase/firestore';
+import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDoc, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
@@ -18,7 +17,7 @@ import {
     updateStudentTpStatus,
     saveStudentPrelimAnswer,
     saveStudentFeedback,
-    setTeacherNameInDb,
+    setTeacherNameInDb as setTeacherNameInDbAction,
     deleteStudent as deleteStudentFromDb,
     emptyClass as emptyClassInDb,
     updateClassWithStudents,
@@ -93,6 +92,9 @@ export interface FirebaseContextState {
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
   teacherName: string;
   setTeacherName: (name: string) => void;
+  teachers: DocumentData[];
+  addTeacher: (name: string) => Promise<void>;
+  customSignOut: () => void;
   deleteStudent: (studentId: string, studentName: string) => void;
   emptyClass: (className: string) => void;
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
@@ -132,8 +134,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   
   const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
   const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
-  const { data: configData, isLoading: isConfigLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'config') : null, [firestore]));
-
+  const { data: teachers, isLoading: isTeachersLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'teachers') : null, [firestore]));
+  
   const assignedTpsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]);
   const { data: assignedTpsData, isLoading: isAssignedTpsLoading } = useCollection(assignedTpsQuery);
 
@@ -170,13 +172,15 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   }, [evaluationsData]);
 
   useEffect(() => {
-    if (configData) {
-        const teacherConfig = configData.find(d => d.id === 'teacher');
-        setTeacherNameState(teacherConfig?.name || 'M. Dubois');
+    // This logic is now handled by the select teacher page
+    // The teacherName is set via setTeacherName from that page
+    const storedTeacher = sessionStorage.getItem('teacherName');
+    if (storedTeacher) {
+      setTeacherNameState(storedTeacher);
     }
-  }, [configData]);
+  }, []);
 
-  const isLoaded = !userAuthState.isUserLoading && !isClassesLoading && !isConfigLoading && !isTpsLoading && !isAssignedTpsLoading && (!user || user.isAnonymous || !isEvaluationsLoading);
+  const isLoaded = !userAuthState.isUserLoading && !isClassesLoading && !isTeachersLoading && !isTpsLoading && !isAssignedTpsLoading && (!user || user.isAnonymous || !isEvaluationsLoading);
 
   useEffect(() => {
     if (!auth) {
@@ -189,9 +193,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         if (firebaseUser) {
           setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
         } else {
-            signInAnonymously(auth).catch((error) => {
-                 setUserAuthState({ user: null, isUserLoading: false, userError: error });
-            });
+            // For this app, we don't auto-sign-in anonymously at the provider level
+            // Login will be handled by dedicated pages.
+            setUserAuthState({ user: null, isUserLoading: false, userError: null });
         }
       },
       (error) => {
@@ -218,17 +222,23 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   }, [auth, toast]);
   
   const setTeacherName = useCallback((name: string) => {
-    if(!firestore || !user || user.isAnonymous) {
-        toast({
-            variant: "destructive",
-            title: "Action non autorisée",
-            description: "Vous devez être connecté pour modifier ce paramètre.",
-        });
-        return;
-    }
+    if(!firestore) return;
     setTeacherNameState(name);
-    setTeacherNameInDb(firestore, name);
-  }, [firestore, user, toast]);
+    sessionStorage.setItem('teacherName', name);
+  }, [firestore]);
+
+  const addTeacher = useCallback(async (name: string) => {
+    if (!firestore) return;
+    await addDoc(collection(firestore, "teachers"), { name });
+  }, [firestore]);
+  
+  const customSignOut = useCallback(() => {
+    sessionStorage.removeItem('teacherName');
+    setTeacherNameState('');
+    if(auth) {
+      auth.signOut();
+    }
+  }, [auth]);
 
 
   const contextValue = {
@@ -240,6 +250,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: userAuthState.userError,
     isLoaded,
     teacherName,
+    setTeacherName,
+    teachers: teachers || [],
+    addTeacher,
+    customSignOut,
     classes: classes || [],
     tps,
     assignedTps,
@@ -274,7 +288,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       const allFeedbacks = {}; // This is a simplification. In a real app this would be fetched.
       saveStudentFeedback(firestore, studentName, tpId, feedback, author, allFeedbacks);
     },
-    setTeacherName,
     deleteStudent: (studentId: string, studentName: string) => {
         if (!firestore) return;
         deleteStudentFromDb(firestore, studentId, studentName);
@@ -297,7 +310,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     },
     addTp: (newTp: TP) => {
       if (!firestore || !user) return;
-      const tpWithAuthor = { ...newTp, author: user.uid };
+      // Storing the teacher's name instead of UID for simplicity
+      const tpWithAuthor = { ...newTp, author: teacherName };
       addCustomTp(firestore, tpWithAuthor);
       setTps(prev => ({...prev, [newTp.id]: tpWithAuthor}));
     },
@@ -342,7 +356,3 @@ export const useUser = () => {
     const { user, isUserLoading, userError } = useFirebase();
     return { user, isUserLoading, userError };
 }
-
-    
-
-    
