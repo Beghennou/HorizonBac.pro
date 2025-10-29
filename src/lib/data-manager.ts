@@ -20,6 +20,7 @@ export type TP = Omit<TPSeconde, 'etudePrelim'> & {
     author?: string;
     creationDate?: string;
     niveau?: Niveau;
+    ressources?: string[];
 };
 
 export type Niveau = 'seconde' | 'premiere' | 'terminale';

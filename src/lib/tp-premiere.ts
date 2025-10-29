@@ -33,6 +33,7 @@ export type TP = {
   activitePratique: Etape[];
   securiteRangement: string[];
   pointsCles: string[];
+  ressources?: string[];
 };
 
 function etape(titre: string, duree: string, etapes: string[]): Etape {
@@ -285,13 +286,6 @@ export const tpPremiere: Record<number, TP> = {
         {type: 'text', q:"Réflexion : Quel est le rôle du 'post-chauffage' (maintien des bougies allumées après le démarrage) sur la pollution et le bruit du moteur à froid ?",r:'Il aide à stabiliser la combustion lorsque le moteur est froid, ce qui réduit les émissions de polluants (imbrûlés) et les claquements caractéristiques du diesel à froid.'}
     ], 
     activitePratique:[ etape('Contrôle du Circuit Global', '35 min', ['Vérifier l\'allumage du voyant au tableau de bord et son temps.','Mesurer la tension sur la barre d\'alimentation des bougies.','Mesurer l\'intensité totale consommée par le circuit.']),etape('Contrôle des Bougies', '45 min', ['Mesurer la résistance de chaque bougie.','Mesurer l\'intensité individuelle de chaque bougie.','Inspecter visuellement l\'extrémité des bougies.']),etape('Contrôle du Boîtier de Préchauffage', '20 min', ['Vérifier l\'activation et la commande du relais.','Contrôler le maintien de la tension en post-chauffage.']) ], securiteRangement:['Débrancher la batterie avant dépose','Respecter les couples de serrage','Tracer les mesures'], pointsCles:['Homogénéité des bougies','Commande fonctionnelle','Temporisation conforme'] },
-  37:{ id: 37, duree:'2h00', titre:'MP 201 • Analyser les gaz d\'échappement essence et diesel', situation:'Dans le cadre d\'un diagnostic pollution, vous devez utiliser l\'analyseur de gaz et l\'opacimètre pour évaluer les émissions d\'un véhicule.', objectif:'Comparer aux normes, cibler l’organe défaillant et effectuer un contrôle qualité. (Compétence C2.4)', materiel:['Analyseur 4/5 gaz','Opacimètre','Thermomètre infrarouge','Documentation technique (RTA)'], 
-    etudePrelim:[
-        {type: 'text', q:"Analyse de données (essence) : CO > 3%, HC élevés, Lambda < 1. Le mélange est-il riche ou pauvre ? Citez deux causes possibles.",r:'Le mélange est riche. Causes possibles : sonde lambda défectueuse, injecteur qui fuit, pression de carburant trop élevée.'},
-        {type: 'qcm', q:"Analyse de données (diesel) : L'opacité est très élevée. Quelle est la cause la plus probable ?", options: ["L'huile est trop vieille", "L'injection est défectueuse (injecteur, pompe) ou l'admission d'air est obstruée (filtre à air, EGR bloquée ouverte)", "Les pneus sont sous-gonflés"], r:"L'injection est défectueuse (injecteur, pompe) ou l'admission d'air est obstruée (filtre à air, EGR bloquée ouverte)"},
-        {type: 'text', q:"Réflexion critique : Pourquoi un catalyseur ne peut-il pas fonctionner correctement si la régulation lambda est défaillante en amont ?",r:'Le catalyseur a besoin d\'un mélange stœchiométrique (lambda=1) pour fonctionner. Si le mélange est trop riche ou trop pauvre, les réactions chimiques de traitement des gaz ne peuvent pas se faire efficacement.'}
-    ], 
-    activitePratique:[ etape('Analyse sur Moteur Essence', '50 min', ['Faire chauffer le moteur et le catalyseur.','Effectuer les mesures au ralenti, puis au ralenti accéléré (2500 tr/min).','Analyser les valeurs de CO, HC, O2, CO2 et lambda.']),etape('Analyse sur Moteur Diesel', '50 min', ['Utiliser l\'opacimètre pour mesurer l\'opacité des fumées (test en 3 accélérations).','Analyser la valeur K (m-1) ou le pourcentage d\'opacité.','Interpréter les graphiques d\'accélération.']) ], securiteRangement:['Assurer une bonne ventilation de l\'atelier','Nettoyer les sondes des appareils après usage','Archiver les tickets de résultats'], pointsCles:['Valeurs CO/HC/Lambda','Opacité des fumées','Identification de l\'organe ciblé'] },
   38:{ id: 38, duree:'1h30', titre:'MP 202 • Contrôle des sondes lambda', situation:'Le témoin moteur est allumé et le diagnostic pointe vers un défaut sur les sondes lambda. Vous devez les contrôler pour valider le diagnostic.', objectif:'Vérifier oscillations, temps de réponse et effectuer les réglages. (Compétences C2.2, C2.3)', materiel:['Valise de diagnostic','Oscilloscope','Multimètre','Clé à sonde lambda'], 
     etudePrelim:[
         {type: 'text', q:"Analyse de signal : À l'oscilloscope, le signal de la sonde amont varie lentement, prenant plus d'une seconde pour passer de 0.2V à 0.8V. Quel est le diagnostic pour cette sonde ?",r:'La sonde est \'vieillissante\' ou \'paresseuse\'. Elle ne réagit plus assez vite aux changements de richesse, ce qui nuit à la régulation et à la consommation.'},
@@ -307,4 +301,5 @@ export const tpPremiere: Record<number, TP> = {
 
 
     
+
 

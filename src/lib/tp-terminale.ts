@@ -32,6 +32,7 @@ export type TP = {
   activitePratique: Etape[];
   securiteRangement: string[];
   pointsCles: string[];
+  ressources?: string[];
 };
 
 function etape(titre: string, duree: string, etapes: string[]): Etape {
@@ -636,4 +637,5 @@ export const tpTerminale: Record<number, TP> = {
 
 
     
+
 

@@ -4,11 +4,12 @@
 import { useState, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { TP, Etape, EtudePrelimQCM, EtudePrelimText } from '@/lib/data-manager';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Send, Loader2, Play, CheckCircle, MessageSquare, Award } from 'lucide-react';
+import { Bot, Send, Loader2, Play, CheckCircle, MessageSquare, Award, Book, Video, FileText } from 'lucide-react';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { CheckeredFlag } from '@/components/icons';
@@ -122,6 +123,17 @@ export default function TPPage() {
   
   const studentTpAnswers = prelimAnswersForTp || {};
   const evaluatedCompetenceIds = tp.objectif.match(/C\d\.\d/g) || [];
+  
+  const getRessourceIcon = (ressource: string) => {
+    if (ressource.toLowerCase().includes('vidéo')) return <Video className="w-5 h-5 text-primary mr-3 flex-shrink-0" />;
+    if (ressource.toLowerCase().includes('pdf')) return <FileText className="w-5 h-5 text-primary mr-3 flex-shrink-0" />;
+    return <Book className="w-5 h-5 text-primary mr-3 flex-shrink-0" />;
+  };
+  
+  const extractLink = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.match(urlRegex)?.[0];
+  }
 
 
   return (
@@ -174,16 +186,48 @@ export default function TPPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-              <CardTitle>Matériel Requis</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-              {tp.materiel.map((item, i) => (
-                  <span key={i} className="bg-muted text-muted-foreground text-sm font-medium px-3 py-1 rounded-full">{item}</span>
-              ))}
-          </CardContent>
-        </Card>
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+                <CardTitle>Matériel Requis</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+                {tp.materiel.map((item, i) => (
+                    <span key={i} className="bg-muted text-muted-foreground text-sm font-medium px-3 py-1 rounded-full">{item}</span>
+                ))}
+            </CardContent>
+          </Card>
+          
+          {tp.ressources && tp.ressources.length > 0 && (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Ressources Documentaires</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    {tp.ressources.map((ressource, i) => {
+                      const link = extractLink(ressource);
+                      const text = ressource.replace(/\[.*?\]\s/g, '').replace(link || '', '').trim();
+                      
+                      if (link) {
+                        return (
+                          <a key={i} href={link} target="_blank" rel="noopener noreferrer" className="flex items-center p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors">
+                              {getRessourceIcon(ressource)}
+                              <span className="text-sm font-medium text-accent hover:underline">{text}</span>
+                          </a>
+                        )
+                      }
+                      
+                      return (
+                        <div key={i} className="flex items-center p-2">
+                          {getRessourceIcon(ressource)}
+                          <span className="text-sm">{text}</span>
+                        </div>
+                      )
+                    })}
+                </CardContent>
+            </Card>
+          )}
+        </div>
         
         {tp.etudePrelim.length > 0 && (
              <Card>

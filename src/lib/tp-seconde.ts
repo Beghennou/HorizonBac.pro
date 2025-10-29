@@ -1,4 +1,5 @@
 
+
 export type Etape = {
   titre: string;
   duree: string;
@@ -32,6 +33,7 @@ export type TP = {
   activitePratique: Etape[];
   securiteRangement: string[];
   pointsCles: string[];
+  ressources?: string[];
 };
 
 function etape(titre: string, duree: string, etapes: string[]): Etape {
@@ -656,6 +658,11 @@ export const tpSeconde: Record<number, TP> = {
             'Contrôle des colonnettes de l\'étrier pour un mouvement libre.',
             'Ne pas oublier de pomper sur la pédale de frein avant de rendre le véhicule.',
             'Informer le client de la nécessité de la période de rodage.'
+        ],
+        ressources: [
+            '[VIDÉO] Tutoriel complet : Remplacer disques et plaquettes - https://www.youtube.com/watch?v=example1',
+            '[PDF] Schéma éclaté d\'un étrier de frein flottant - /docs/etrier-flottant.pdf',
+            '[TEXTE] Procédure de rodage des freins neufs - /docs/rodage-freins.txt'
         ]
     },
     114: {
@@ -822,5 +829,6 @@ export const tpSeconde: Record<number, TP> = {
 
 
     
+
 
 
