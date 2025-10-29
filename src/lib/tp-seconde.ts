@@ -604,6 +604,217 @@ export const tpSeconde: Record<number, TP> = {
             'Ordre de connexion : Positif en premier',
             'Serrage ferme des cosses et de la fixation'
         ]
+    },
+    113: {
+        id: 113,
+        duree: '2h00',
+        titre: 'Remplacement Plaquettes et Disques de Frein Avant',
+        situation: 'Un client se plaint d\'un bruit strident et de vibrations au volant lors du freinage. Après contrôle, vous constatez que les plaquettes et les disques avant sont usés au-delà de la cote minimale et doivent être remplacés.',
+        objectif: 'Effectuer le remplacement des plaquettes et disques de frein avant en respectant les procédures de sécurité et de nettoyage, et réaliser le rodage. (Compétences C1.2, C1.3, C1.4)',
+        materiel: ['Jeu de plaquettes neuves', 'Jeu de disques neufs', 'Repousse-piston', 'Nettoyant frein', 'Graisse au cuivre', 'Clé dynamométrique', 'Pied à coulisse'],
+        etudePrelim: [
+            { type: 'qcm', q: 'Quelle est la première action à réaliser avant de repousser le piston de l\'étrier ?', options: ['Ouvrir le bocal de liquide de frein', 'Frapper sur l\'étrier', 'Purger le circuit'], r: 'Ouvrir le bocal de liquide de frein' },
+            { type: 'text', q: 'Pourquoi est-il crucial de nettoyer parfaitement la surface du moyeu avant de monter un disque de frein neuf ?', r: 'Pour assurer que le disque soit parfaitement plan. La moindre saleté ou rouille peut induire un faux voile qui provoquera des vibrations au freinage.' },
+            { type: 'qcm', q: 'À quoi sert le témoin d\'usure des plaquettes ?', options: ['À faire un bruit strident par contact métallique', 'À allumer un voyant au tableau de bord', 'Les deux sont possibles selon le système'], r: 'Les deux sont possibles selon le système' },
+            { type: 'text', q: 'Expliquez pourquoi il est impératif de ne jamais réutiliser les vis de fixation de l\'étrier après leur démontage sur certains modèles.', r: 'Car ce sont souvent des vis pré-enduites de frein-filet ou des vis conçues pour un serrage angulaire qui se déforment et ne garantissent plus le couple de serrage requis si elles sont réutilisées.' },
+            { type: 'text', q: 'Quelle est la consigne principale à donner au client après un remplacement des freins ?', r: 'Effectuer un rodage sur environ 200 km, en évitant les freinages brusques et prolongés, pour permettre aux plaquettes de s\'adapter à la surface du disque et garantir une efficacité maximale.' }
+        ],
+        activitePratique: [
+            etape('Préparation et Dépose', '40 min', [
+                'Lever et sécuriser le véhicule, puis déposer la roue.',
+                'Nettoyer la zone de travail avec du nettoyant frein.',
+                'Ouvrir le bocal de liquide de frein.',
+                'Déposer l\'étrier de frein et le suspendre pour ne pas abîmer le flexible.',
+                'Retirer les anciennes plaquettes et le disque de frein.'
+            ]),
+            etape('Contrôle et Nettoyage', '30 min', [
+                'Nettoyer et inspecter le moyeu de roue, éliminer toute trace de rouille ou d\'impureté.',
+                'Nettoyer et contrôler l\'étrier, notamment l\'état du soufflet de piston et des colonnettes.',
+                'Repousser doucement le piston d\'étrier à l\'aide de l\'outil adéquat.'
+            ]),
+            etape('Remontage des Éléments Neufs', '30 min', [
+                'Dégraisser le disque neuf et l\'installer sur le moyeu.',
+                'Lubrifier légèrement les points de contact des nouvelles plaquettes (pas la garniture !).',
+                'Installer les plaquettes neuves dans l\'étrier.',
+                'Remonter l\'étrier et serrer les vis de fixation au couple préconisé.'
+            ]),
+            etape('Finalisation et Validation', '20 min', [
+                'Remonter la roue et la serrer au couple.',
+                'Pomper plusieurs fois sur la pédale de frein pour rapprocher les plaquettes du disque.',
+                'Vérifier le niveau de liquide de frein et le compléter si besoin.',
+                'Effectuer un court essai routier pour valider l\'absence de bruit anormal.'
+            ])
+        ],
+        securiteRangement: [
+            'Toujours suspendre l\'étrier, ne jamais le laisser pendre par son flexible.',
+            'Utiliser des gants et des lunettes de protection (poussière de frein et nettoyant).',
+            'Respecter impérativement les couples de serrage pour les roues et les étriers.',
+            'Manipuler le liquide de frein avec précaution (corrosif).'
+        ],
+        pointsCles: [
+            'Propreté absolue du moyeu avant montage du disque neuf.',
+            'Contrôle des colonnettes de l\'étrier pour un mouvement libre.',
+            'Ne pas oublier de pomper sur la pédale de frein avant de rendre le véhicule.',
+            'Informer le client de la nécessité de la période de rodage.'
+        ]
+    },
+    114: {
+        id: 114,
+        duree: '2h00',
+        titre: 'Remplacement Plaquettes et Disques de Frein Arrière',
+        situation: 'Lors d\'une visite d\'entretien, vous constatez que les freins arrière à disques sont usés. Le frein de stationnement est un modèle électrique intégré à l\'étrier. Le client valide le remplacement.',
+        objectif: 'Remplacer les plaquettes et disques arrière en utilisant l\'outil de diagnostic pour gérer le frein de stationnement électrique (EPB). (Compétences C1.2, C1.3, C1.1)',
+        materiel: ['Valise de diagnostic', 'Repousse-piston (pneumatique ou manuel)', 'Jeu de plaquettes et disques neufs', 'Nettoyant frein', 'Clé dynamométrique'],
+        etudePrelim: [
+            { type: 'text', q: 'Quelle est l\'étape indispensable à réaliser avec l\'outil de diagnostic avant toute intervention sur un étrier avec frein de stationnement électrique (EPB) ?', r: 'Mettre le système en "mode maintenance" ou "mode atelier". Cela rétracte complètement le moteur électrique et le piston pour permettre le remplacement.' },
+            { type: 'text', q: 'Pourquoi ne faut-il jamais essayer de repousser manuellement le piston d\'un étrier EPB sans passer par le mode maintenance ?', r: 'Forcer le piston endommagerait irréversiblement le mécanisme interne du moteur électrique, ce qui obligerait à remplacer l\'étrier complet.' },
+            { type: 'qcm', q: 'Après le remontage, quelle est la dernière étape à réaliser avec la valise de diagnostic ?', options: ['Effacer tous les codes défauts du véhicule', 'Sortir du mode maintenance et ré-initialiser le système', 'Vérifier la pression des pneus'], r: 'Sortir du mode maintenance et ré-initialiser le système' },
+            { type: 'text', q: 'Le repousse-piston pour un étrier arrière a souvent une fonction rotative en plus de la poussée. Pourquoi ?', r: 'Sur de nombreux systèmes, le piston doit être tourné en même temps qu\'il est repoussé pour suivre le filetage du mécanisme de rattrapage de jeu du frein à main (même pour les systèmes non électriques).' },
+            { type: 'text', q: 'Un disque de frein arrière intègre souvent la piste pour le roulement de roue. Quelle précaution supplémentaire cela impose-t-il lors du remplacement ?', r: 'Il faut s\'assurer de transférer le roulement ou d\'en installer un neuf avec précaution, en respectant le couple de serrage de l\'écrou central, qui est crucial pour la sécurité.' }
+        ],
+        activitePratique: [
+            etape('Mise en Mode Maintenance', '20 min', [
+                'Brancher la valise de diagnostic et identifier le véhicule.',
+                'Naviguer dans le calculateur de freinage pour trouver la fonction "Mode Maintenance EPB".',
+                'Activer le mode maintenance et attendre la confirmation de la rétraction des pistons.',
+                'Mettre le véhicule sur pont et déposer les roues arrière.'
+            ]),
+            etape('Dépose et Nettoyage', '40 min', [
+                'Déposer l\'étrier de frein (sans débrancher le connecteur électrique si possible) et le suspendre.',
+                'Retirer les plaquettes et le disque usés.',
+                'Nettoyer et inspecter le moyeu et le support d\'étrier.',
+                'Vérifier l\'état des colonnettes et du soufflet de piston.'
+            ]),
+            etape('Remontage et Serrage', '40 min', [
+                'Installer le disque neuf.',
+                'Installer les nouvelles plaquettes.',
+                'Remonter l\'étrier et serrer les vis de fixation au couple préconisé.',
+                'Remonter les roues et les serrer au couple.'
+            ]),
+            etape('Sortie du Mode Maintenance et Validation', '20 min', [
+                'Redescendre le véhicule.',
+                'Avec la valise de diagnostic, sortir du mode maintenance et lancer la procédure de calibrage.',
+                'Actionner plusieurs fois le frein de service et le frein de stationnement.',
+                'Vérifier l\'absence de code défaut et effectuer un essai routier.'
+            ])
+        ],
+        securiteRangement: [
+            'Ne jamais intervenir sur un système EPB sans l\'outil de diagnostic adapté.',
+            'Suivre scrupuleusement la procédure constructeur pour le mode maintenance.',
+            'Porter des EPI (gants, lunettes).',
+            'Respecter les couples de serrage.'
+        ],
+        pointsCles: [
+            'Utilisation impérative de l\'outil de diagnostic pour l\'EPB.',
+            'Procédure en 3 temps : Entrée en maintenance / Remplacement / Sortie de maintenance.',
+            'Propreté du moyeu et inspection des colonnettes.',
+            'Serrage au couple et essai fonctionnel indispensables.'
+        ]
+    },
+    115: {
+        id: 115,
+        duree: '2h30',
+        titre: 'Entretien des Freins Arrière à Tambours',
+        situation: 'Un client amène sa citadine pour un entretien. Le carnet préconise un contrôle et un nettoyage des freins à tambour arrière. Le client se plaint également d\'une faible efficacité du frein à main.',
+        objectif: 'Déposer, contrôler, nettoyer et régler un système de freinage à tambours, y compris le mécanisme de rattrapage de jeu automatique. (Compétences C1.2, C1.3)',
+        materiel: ['Kit de freins arrière neuf (si nécessaire)', 'Nettoyant frein', 'Graisse haute température', 'Pince à ressorts de frein', 'Clé dynamométrique'],
+        etudePrelim: [
+            { type: 'text', q: 'Quelle est la précaution essentielle à prendre lors du nettoyage de l\'intérieur d\'un tambour de frein et pourquoi ?', r: 'Porter un masque de protection respiratoire. Les poussières de frein sont très nocives et ne doivent pas être inhalées. Utiliser un nettoyant frein pour humidifier la poussière et éviter sa dispersion.' },
+            { type: 'text', q: 'À quoi sert le mécanisme de rattrapage de jeu automatique ? Comment fonctionne-t-il brièvement ?', r: 'Il sert à maintenir une distance constante entre les mâchoires et le tambour à mesure que les garnitures s\'usent. Il est souvent activé par l\'action du frein à main, via une molette crantée.' },
+            { type: 'qcm', q: 'Un cylindre de roue fuit. Quelle est la conséquence directe sur le freinage ?', options: ['Le freinage sera plus efficace', 'Le liquide de frein va contaminer les garnitures, rendant le freinage inefficace', 'Aucune conséquence immédiate'], r: 'Le liquide de frein va contaminer les garnitures, rendant le freinage inefficace' },
+            { type: 'text', q: 'Pourquoi est-il conseillé de remplacer le kit de frein (mâchoires et cylindres) en entier plutôt qu\'une seule mâchoire ?', r: 'Pour garantir un freinage équilibré entre la gauche et la droite. Remplacer les deux côtés assure une usure et une efficacité symétriques, ce qui est crucial pour la sécurité.' },
+            { type: 'text', q: 'Comment s\'appelle l\'effet qui fait qu\'une mâchoire "s\'auto-serre" contre le tambour en rotation, et laquelle des deux mâchoires en bénéficie ?', r: 'C\'est l\'effet "servo" ou auto-énergisant. C\'est la mâchoire primaire (celle qui est "attaquée" par la rotation du tambour) qui en bénéficie.' }
+        ],
+        activitePratique: [
+            etape('Préparation et Dépose du Tambour', '30 min', [
+                'Lever et sécuriser le véhicule, déposer la roue.',
+                'S\'assurer que le frein à main est complètement desserré.',
+                'Déposer la vis de fixation du tambour (si présente).',
+                'Extraire le tambour. S\'il est bloqué, utiliser les trous taraudés pour l\'extraire ou détendre le rattrapage de jeu par l\'arrière.'
+            ]),
+            etape('Nettoyage et Contrôle des Composants', '50 min', [
+                'Dépoussiérer l\'ensemble avec du nettoyant frein (porter un masque).',
+                'Inspecter l\'épaisseur des garnitures des mâchoires.',
+                'Vérifier l\'absence de fuite au niveau du cylindre de roue en soulevant les caches-poussière.',
+                'Contrôler l\'état des ressorts de rappel et du mécanisme de rattrapage de jeu.',
+                'Mesurer le diamètre interne du tambour pour vérifier s\'il est dans la cote d\'usure maximale.'
+            ]),
+            etape('Remplacement du Kit de Frein (si nécessaire)', '45 min', [
+                'À l\'aide des pinces spécifiques, déposer les ressorts et les mâchoires usées.',
+                'Déconnecter et remplacer le cylindre de roue.',
+                'Monter le nouveau kit en respectant la position de chaque mâchoire (primaire/secondaire).',
+                'Pré-régler le mécanisme de rattrapage de jeu.'
+            ]),
+            etape('Remontage, Réglage et Validation', '25 min', [
+                'Remonter le tambour. Il doit lécher légèrement les garnitures ("léchage").',
+                'Actionner plusieurs fois la pédale de frein et le frein à main pour activer le rattrapage automatique.',
+                'Régler la tension du câble de frein à main.',
+                'Remonter la roue et valider l\'absence de frottement excessif.'
+            ])
+        ],
+        securiteRangement: [
+            'Porter un masque FFP3 lors du dépoussiérage des tambours.',
+            'Utiliser les outils spécifiques pour les ressorts afin d\'éviter les blessures.',
+            'Purger le circuit de freinage si les cylindres de roue ont été remplacés.',
+            'Recycler les anciennes garnitures et le liquide de frein usagé.'
+        ],
+        pointsCles: [
+            'Dépoussiérage humide pour éviter l\'inhalation.',
+            'Contrôle des fuites sur les cylindres de roue.',
+            'Fonctionnement et réglage du rattrapage de jeu automatique.',
+            'Le "léchage" correct au remontage du tambour.'
+        ]
+    },
+    116: {
+        id: 116,
+        duree: '1h30',
+        titre: 'Remplacement d\'un Pneumatique sur Jante',
+        situation: 'Suite à une crevaison non réparable, vous devez déposer un pneu usagé de sa jante, monter un pneu neuf, l\'équilibrer et le remonter sur le véhicule du client.',
+        objectif: 'Maîtriser la chaîne complète du remplacement d\'un pneumatique : démontage, montage, équilibrage et remontage sur véhicule. (Compétences C1.3, C1.1)',
+        materiel: ['Démonte-pneu', 'Équilibreuse', 'Masses d\'équilibrage', 'Valve neuve', 'Graisse à pneu', 'Clé dynamométrique'],
+        etudePrelim: [
+            { type: 'text', q: 'Quelles sont les trois informations essentielles à vérifier sur un pneu neuf pour s\'assurer qu\'il est compatible avec la jante et le véhicule ?', r: '1. Les dimensions (ex: 205/55 R16). 2. L\'indice de charge (ex: 91). 3. L\'indice de vitesse (ex: V). Ces informations doivent être égales ou supérieures aux préconisations constructeur.' },
+            { type: 'text', q: 'Pourquoi doit-on systématiquement remplacer la valve (ou son mécanisme interne pour les valves électroniques) lors d\'un changement de pneu ?', r: 'La valve assure l\'étanchéité. Elle vieillit et se craquelle avec le temps et les contraintes. La remplacer est une sécurité peu coûteuse pour éviter les fuites lentes.' },
+            { type: 'qcm', q: 'Qu\'est-ce que l\'équilibrage et pourquoi est-il indispensable ?', options: ['C\'est pour rendre le pneu plus rond', 'C\'est pour compenser les défauts de parallélisme', 'C\'est pour répartir uniformément la masse de la roue et éviter les vibrations à haute vitesse'], r: 'C\'est pour répartir uniformément la masse de la roue et éviter les vibrations à haute vitesse' },
+            { type: 'text', q: 'Certains pneus ont un sens de rotation ou un côté extérieur ("Outside"). Quelle est la conséquence si l\'on ne respecte pas ces indications au montage ?', r: 'Le pneu ne pourra pas évacuer l\'eau correctement (risque d\'aquaplaning) et ses performances en termes d\'adhérence et de bruit seront dégradées. Le montage sera non conforme et dangereux.' },
+            { type: 'text', q: 'Quelle est la pression de "claquage" généralement utilisée pour coller les talons du pneu sur les rebords de la jante, et quelle précaution prendre ?', r: 'Environ 3 à 3.5 bars. Il faut se tenir à distance de la roue pendant cette opération et ne jamais dépasser cette pression pour éviter un éclatement.' }
+        ],
+        activitePratique: [
+            etape('Préparation et Démontage', '25 min', [
+                'Déposer la roue du véhicule et la dégonfler complètement en retirant l\'obus de valve.',
+                'Placer la roue sur le démonte-pneu et décoller les deux talons du pneu de la jante.',
+                'À l\'aide du levier et de la tête de démontage, extraire le pneu de la jante en protégeant celle-ci.'
+            ]),
+            etape('Nettoyage et Montage', '30 min', [
+                'Nettoyer les portées de la jante où le pneu vient faire l\'étanchéité.',
+                'Installer une valve neuve.',
+                'Lubrifier les talons du pneu neuf avec de la graisse à pneu.',
+                'Monter le pneu sur la jante en respectant le sens de rotation ou le côté "Outside" si applicable.'
+            ]),
+            etape('Gonflage et Équilibrage', '25 min', [
+                'Gonfler le pneu jusqu\'au "claquage" des talons (environ 3.5 bars) puis ajuster à la pression d\'utilisation.',
+                'Monter la roue sur l\'équilibreuse, entrer les paramètres de la jante.',
+                'Lancer la mesure et poser les masses d\'équilibrage aux endroits indiqués par la machine.',
+                'Relancer une mesure de contrôle qui doit indiquer "0" ou "OK".'
+            ]),
+            etape('Remontage et Contrôle Final', '10 min', [
+                'Remonter la roue sur le véhicule.',
+                'Serrer les écrous en étoile et au couple préconisé avec la clé dynamométrique.',
+                'Vérifier la pression une dernière fois.'
+            ])
+        ],
+        securiteRangement: [
+            'Porter des lunettes de protection pendant toutes les opérations.',
+            'Ne jamais placer ses mains entre le pneu et la jante lors de l\'utilisation de la machine.',
+            'Rester à distance de la roue pendant le gonflage de "claquage".',
+            'Recycler l\'ancien pneu et les masses d\'équilibrage usagées.'
+        ],
+        pointsCles: [
+            'Respect du sens de montage du pneu.',
+            'Remplacement systématique de la valve.',
+            'Équilibrage précis jusqu\'à obtenir un résultat nul.',
+            'Serrage final de la roue au couple dynamométrique.'
+        ]
     }
 };
 
