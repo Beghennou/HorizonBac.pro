@@ -21,12 +21,9 @@ const initialClasses = [
     }
 ];
 
-const initialTeachers = [
-    { name: 'M. Dubois' },
-    { name: 'Mme. Martin' },
-    { name: 'M. Thomas' },
-    { name: 'M. Lecompte' },
-    { name: 'M. Benseghir' },
+const initialTeachers: { name: string }[] = [
+    // La liste est vide pour empêcher la création de doublons.
+    // Les enseignants doivent être ajoutés manuellement via la page Paramètres.
 ];
 
 
@@ -36,8 +33,8 @@ export const seedInitialData = async (firestore: Firestore) => {
     const teachersQuery = query(collection(firestore, "teachers"));
     const teachersSnapshot = await getDocs(teachersQuery);
 
-    // Seed teachers only if the collection is empty
-    if (teachersSnapshot.empty) {
+    // Seed teachers only if the collection is empty and the initial list is not.
+    if (teachersSnapshot.empty && initialTeachers.length > 0) {
         console.log("Seeding initial teachers...");
         initialTeachers.forEach(teacherData => {
             const teacherRef = doc(collection(firestore, 'teachers'));
@@ -67,7 +64,7 @@ export const seedInitialData = async (firestore: Firestore) => {
 
 
 export const checkAndSeedData = async (firestore: Firestore) => {
-    const seedDocRef = doc(firestore, 'config', 'initial_seed_v7'); // Incremented version to allow re-seeding if structure changes
+    const seedDocRef = doc(firestore, 'config', 'initial_seed_v7'); // Version incrémentée pour garantir la cohérence
     try {
         const seedDoc = await getDoc(seedDocRef);
         if (!seedDoc.exists()) {
