@@ -10,10 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export default function StudentSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { classes: allClassData, isLoaded } = useFirebase();
+  const { classes: allClassData, teachers: allTeachers, isLoaded } = useFirebase();
 
+  const [selectedTeacher, setSelectedTeacher] = useState<string>('');
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
+  
+  const teacherNames = useMemo(() => {
+      if (!allTeachers) return [];
+      return allTeachers.map(t => t.name).sort();
+  }, [allTeachers]);
   
   const classNames = useMemo(() => {
     if (!allClassData) return [];
@@ -28,16 +34,22 @@ export default function StudentSelector() {
 
   useEffect(() => {
     if (isLoaded) {
+      const teacherFromUrl = searchParams.get('teacher') || '';
       const classFromUrl = searchParams.get('class') || '';
       const studentFromUrl = searchParams.get('student') || '';
-      if(classFromUrl) {
-          setSelectedClass(classFromUrl);
-          if (studentFromUrl) {
-            setSelectedStudent(studentFromUrl);
-          }
-      }
+
+      if (teacherFromUrl) setSelectedTeacher(teacherFromUrl);
+      if(classFromUrl) setSelectedClass(classFromUrl);
+      if (studentFromUrl) setSelectedStudent(studentFromUrl);
     }
   }, [searchParams, isLoaded]);
+
+  const handleTeacherChange = (newTeacher: string) => {
+    setSelectedTeacher(newTeacher);
+    // Potentially reset class and student if teacher changes
+    setSelectedClass('');
+    setSelectedStudent('');
+  };
 
   const handleClassChange = (newClass: string) => {
     setSelectedClass(newClass);
@@ -49,8 +61,9 @@ export default function StudentSelector() {
   };
 
   const handleSubmit = () => {
-    if (selectedStudent && selectedClass) {
+    if (selectedStudent && selectedClass && selectedTeacher) {
       const params = new URLSearchParams();
+      params.set('teacher', selectedTeacher);
       params.set('class', selectedClass);
       params.set('student', selectedStudent);
       router.push(`/student?${params.toString()}`);
@@ -64,8 +77,22 @@ export default function StudentSelector() {
   return (
     <div className="flex flex-col space-y-4">
         <div className="space-y-2">
+            <Label htmlFor="teacher-select" className="font-bold">Enseignant</Label>
+            <Select onValueChange={handleTeacherChange} value={selectedTeacher}>
+                <SelectTrigger id="teacher-select">
+                    <SelectValue placeholder="Choisir un enseignant..." />
+                </SelectTrigger>
+                <SelectContent>
+                    {teacherNames.map(teacherName => (
+                        <SelectItem key={teacherName} value={teacherName}>{teacherName}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="class-select" className="font-bold">Classe</Label>
-          <Select onValueChange={handleClassChange} value={selectedClass}>
+          <Select onValueChange={handleClassChange} value={selectedClass} disabled={!selectedTeacher}>
             <SelectTrigger id="class-select">
               <SelectValue placeholder="Choisir une classe..." />
             </SelectTrigger>
@@ -95,7 +122,7 @@ export default function StudentSelector() {
 
         <Button 
           onClick={handleSubmit} 
-          disabled={!selectedStudent || !selectedClass}
+          disabled={!selectedStudent || !selectedClass || !selectedTeacher}
           className="w-full font-bold"
         >
           Valider

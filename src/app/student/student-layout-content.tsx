@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, Suspense } from 'react';
@@ -94,6 +95,7 @@ export default function StudentLayoutContent({
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
   const className = searchParams.get('class');
+  const teacherName = searchParams.get('teacher');
 
   return (
      <SidebarProvider>
@@ -112,7 +114,7 @@ export default function StudentLayoutContent({
                       Horizon Bacpro
                     </h1>
                      <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                      {studentName ? `Élève • ${className}` : 'Rénovation 2025 • Espace élève'}
+                      {studentName ? `Élève • ${className} • ${teacherName}` : 'Rénovation 2025 • Espace élève'}
                     </p>
                   </div>
                 </Link>

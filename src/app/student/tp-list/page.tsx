@@ -24,7 +24,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
     const searchParams = useSearchParams();
     const studentName = searchParams.get('student');
     const className = searchParams.get('class');
-    const { teacherName } = useFirebase();
+    const teacherName = searchParams.get('teacher');
 
     const handlePrint = () => {
         window.print();
@@ -152,7 +152,7 @@ function TpListPageContent() {
   const className = searchParams.get('class');
   
   let niveau: Niveau = 'seconde';
-  if (className) {
+  if (className && classes) {
     const classData = classes.find(c => c.id === className);
     if(classData) {
         if (className.startsWith('1') || className.toLowerCase().includes('premiere')) niveau = 'premiere';
@@ -164,7 +164,7 @@ function TpListPageContent() {
   const tpsForLevel = useMemo(() => getTpsByNiveau(niveau, tps), [niveau, tps]);
   
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
-  const selectedTp = selectedTpId ? tps[selectedTpId] : null;
+  const selectedTp = selectedTpId && tps ? tps[selectedTpId] : null;
 
   const handleTpSelect = (id: number) => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
@@ -233,5 +233,3 @@ export default function TpListPage() {
         </Suspense>
     )
 }
-
-    
