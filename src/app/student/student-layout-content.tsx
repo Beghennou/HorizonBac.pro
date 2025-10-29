@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { LyceeLogo } from '@/components/lycee-logo';
-import { Home, BookOpen, Book, User } from 'lucide-react';
+import { Home, BookOpen, Book, User, LogOut } from 'lucide-react';
 import { Award } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import {
@@ -97,8 +97,15 @@ export default function StudentLayoutContent({
   children: React.ReactNode;
 }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { customSignOut } = useFirebase();
   const studentName = searchParams.get('student');
   const className = searchParams.get('class');
+
+  const handleLogout = useCallback(async () => {
+    await customSignOut();
+    router.push('/');
+  }, [customSignOut, router]);
 
   return (
      <SidebarProvider>
@@ -124,6 +131,10 @@ export default function StudentLayoutContent({
                       Accueil
                     </Link>
                 </Button>
+                <Button variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:bg-primary/20 hover:text-accent">
+                    <LogOut className="mr-2"/>
+                    Déconnexion
+                </Button>
               </div>
             </div>
           </header>
@@ -134,7 +145,7 @@ export default function StudentLayoutContent({
                         <h2 className="font-headline text-lg tracking-wider text-accent">{studentName}</h2>
                         <p className="text-sm text-muted-foreground">{className}</p>
                     </SidebarHeader>
-                    <SidebarContent>
+                    <SidebarContent className="justify-end">
                       {studentName && <StudentNav />}
                     </SidebarContent>
                     <SidebarFooter className="p-4 flex-col gap-4">

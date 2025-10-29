@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,12 +14,11 @@ import {
   SidebarContent,
   SidebarTrigger,
   SidebarInset,
-  SidebarHeader,
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { useFirebase } from '@/firebase';
 import { TachometerAnimation } from '@/components/TachometerAnimation';
-import { Home, User } from 'lucide-react';
+import { Home, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LogoutButton } from '@/components/logout-button';
 
@@ -39,7 +38,7 @@ function DashboardLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { isLoaded, classes, teacherName } = useFirebase();
+  const { isLoaded, classes, teacherName, customSignOut } = useFirebase();
 
   const selectedClass = searchParams.get('class') || '';
   const classNames = (classes || []).map(c => c.id).sort((a, b) => a.localeCompare(b));
@@ -50,6 +49,10 @@ function DashboardLayoutContent({
     }
   }, [isLoaded, teacherName, router]);
 
+  const handleLogout = useCallback(async () => {
+    await customSignOut();
+    router.push('/');
+  }, [customSignOut, router]);
 
   if (!isLoaded || !teacherName) {
     return <TachometerAnimation />;
@@ -88,31 +91,39 @@ function DashboardLayoutContent({
                         Accueil
                         </Link>
                     </Button>
+                    <Button variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:bg-primary/20 hover:text-accent">
+                        <LogOut className="mr-2"/>
+                        Déconnexion
+                    </Button>
                 </div>
                 </div>
             </header>
           <SidebarInset>
               <div className="flex flex-1">
                   <Sidebar>
-                    <SidebarContent className="p-2">
-                        <div className="p-2">
-                            <h3 className="font-headline text-sm text-accent uppercase tracking-wider mb-1">Sélection classe :</h3>
-                            {classNames.length > 0 ? (
-                                <Select value={selectedClass} onValueChange={handleClassChange}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Choisir une classe..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {classNames.map(className => (
-                                        <SelectItem key={className} value={className}>{className}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                                </Select>
-                            ) : (
-                                <p className="text-sm text-muted-foreground">Aucune classe n'est configurée.</p>
-                            )}
+                    <SidebarContent className="p-2 justify-end">
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="font-headline text-sm text-accent uppercase tracking-wider mb-1 px-2">Sélection classe :</h3>
+                                {classNames.length > 0 ? (
+                                    <div className="px-2">
+                                        <Select value={selectedClass} onValueChange={handleClassChange}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Choisir une classe..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {classNames.map(className => (
+                                                <SelectItem key={className} value={className}>{className}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                        </Select>
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground px-2">Aucune classe n'est configurée.</p>
+                                )}
+                            </div>
+                            <DashboardNav />
                         </div>
-                        <DashboardNav />
                     </SidebarContent>
                     <SidebarFooter className="p-4 flex-col gap-4">
                         <Button variant="secondary" className="w-full justify-start text-base h-12 px-4">
