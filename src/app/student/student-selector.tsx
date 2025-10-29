@@ -16,9 +16,14 @@ export default function StudentSelector() {
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
   
-  const teacherNames = useMemo(() => {
+  const teachers = useMemo(() => {
       if (!allTeachers) return [];
-      return allTeachers.map(t => t.name).sort();
+      // Use an object to ensure names are unique if they are the same
+      const uniqueTeachers = allTeachers.filter(
+        (teacher, index, self) =>
+          index === self.findIndex(t => t.id === teacher.id)
+      );
+      return uniqueTeachers.sort((a, b) => a.name.localeCompare(b.name));
   }, [allTeachers]);
   
   const classNames = useMemo(() => {
@@ -83,8 +88,8 @@ export default function StudentSelector() {
                     <SelectValue placeholder="Choisir un enseignant..." />
                 </SelectTrigger>
                 <SelectContent>
-                    {teacherNames.map(teacherName => (
-                        <SelectItem key={teacherName} value={teacherName}>{teacherName}</SelectItem>
+                    {teachers.map(teacher => (
+                        <SelectItem key={teacher.id} value={teacher.name}>{teacher.name}</SelectItem>
                     ))}
                 </SelectContent>
             </Select>
