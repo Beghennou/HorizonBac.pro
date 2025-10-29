@@ -92,39 +92,41 @@ function DashboardLayoutContent({
                 </div>
             </header>
           <SidebarInset>
-              <Sidebar>
-                <SidebarHeader>
-                    <h3 className="font-headline text-sm text-accent uppercase tracking-wider mb-1">Sélection classe :</h3>
-                    {classNames.length > 0 ? (
-                        <Select value={selectedClass} onValueChange={handleClassChange}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Choisir une classe..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {classNames.map(className => (
-                                <SelectItem key={className} value={className}>{className}</SelectItem>
-                            ))}
-                        </SelectContent>
-                        </Select>
-                    ) : (
-                        <p className="text-sm text-muted-foreground">Aucune classe n'est configurée.</p>
-                    )}
-                </SidebarHeader>
-                <SidebarContent>
-                    <DashboardNav />
-                </SidebarContent>
-                <SidebarFooter className="p-4 flex-col gap-4">
-                    <Button variant="secondary" className="w-full justify-start text-base h-12 px-4">
-                        <User /> <span>{teacherName}</span>
-                    </Button>
-                    <LogoutButton />
-                </SidebarFooter>
-              </Sidebar>
-              <main className="flex-1 md:ml-8 flex flex-col gap-6 py-8">
-                    <div className="flex-1 bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6 container">
-                    {children}
-                </div>
-              </main>
+              <div className="container flex flex-1 py-8">
+                  <Sidebar>
+                    <SidebarHeader>
+                        <h3 className="font-headline text-sm text-accent uppercase tracking-wider mb-1">Sélection classe :</h3>
+                        {classNames.length > 0 ? (
+                            <Select value={selectedClass} onValueChange={handleClassChange}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Choisir une classe..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {classNames.map(className => (
+                                    <SelectItem key={className} value={className}>{className}</SelectItem>
+                                ))}
+                            </SelectContent>
+                            </Select>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Aucune classe n'est configurée.</p>
+                        )}
+                    </SidebarHeader>
+                    <SidebarContent>
+                        <DashboardNav />
+                    </SidebarContent>
+                    <SidebarFooter className="p-4 flex-col gap-4">
+                        <Button variant="secondary" className="w-full justify-start text-base h-12 px-4">
+                            <User /> <span>{teacherName}</span>
+                        </Button>
+                        <LogoutButton />
+                    </SidebarFooter>
+                  </Sidebar>
+                  <main className="flex-1 md:ml-8 flex flex-col gap-6">
+                        <div className="flex-1 bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6">
+                        {children}
+                    </div>
+                  </main>
+              </div>
           </SidebarInset>
         </div>
       </SidebarProvider>
