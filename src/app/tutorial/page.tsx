@@ -1,6 +1,7 @@
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass, ClipboardCheck } from 'lucide-react';
+import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass, ClipboardCheck, LayoutDashboard, CheckSquare } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -47,26 +48,38 @@ export default function TutorialPage() {
                                         <p className="mb-4">La page <Settings className="inline h-5 w-5"/> <strong>Paramètres</strong> est le centre névralgique pour préparer votre année :</p>
                                         <ul className="list-disc pl-6 space-y-2">
                                             <li><strong>Gérer les Enseignants :</strong> Ajoutez votre profil ou celui de vos collègues. Vous pouvez également en supprimer.</li>
-                                            <li><strong>Gérer les Classes :</strong> Créez ou supprimez des classes.</li>
+                                            <li><strong>Gérer les Classes :</strong> Créez ou supprimez des classes. Vous pouvez vider une classe de ses élèves pour la préparer pour une nouvelle année.</li>
                                             <li><strong>Gérer les Élèves :</strong> Vous pouvez ajouter ou supprimer des élèves manuellement, ou utiliser la fonction la plus puissante : **l'importation CSV par niveau**. Pour la rentrée, il suffit de sélectionner une classe et d'importer la liste de vos nouveaux élèves. L'application mettra à jour la classe automatiquement.</li>
                                             <li><strong>Zone de danger :</strong> Des outils sont disponibles pour vider toutes les listes d'élèves en fin d'année, afin de préparer la rentrée suivante en un clic.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
                                  <AccordionItem value="item-2">
-                                    <AccordionTrigger className="text-xl font-headline">2. Assigner des Travaux Pratiques (TP)</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">2. Tableau de Bord et Progression</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <Users className="inline h-5 w-5"/> <strong>Assigner des TP</strong> :</p>
+                                        <p className="mb-4">Après avoir sélectionné une classe, vous arrivez sur le <LayoutDashboard className="inline h-5 w-5"/> <strong>Tableau de Bord</strong>. Il vous offre une vue d'ensemble avec :</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li>Sélectionnez la classe concernée dans le menu de gauche.</li>
-                                            <li>Cochez les cases des élèves que vous souhaitez concerner (ou "Tout sélectionner").</li>
-                                            <li>Utilisez le menu déroulant en bas pour choisir le TP à leur affecter.</li>
-                                             <li>Cliquez sur "Assigner". Le TP apparaît instantanément sur le tableau de bord de chaque élève sélectionné.</li>
+                                            <li>Des statistiques clés : nombre d'élèves, TP à évaluer, et progression moyenne de la classe.</li>
+                                            <li>Des accès rapides pour assigner des TP ou évaluer les élèves.</li>
+                                            <li>Un aperçu de la progression de chaque élève.</li>
+                                            <li>Pour une vue détaillée, allez dans l'onglet <CheckSquare className="inline h-5 w-5"/> <strong>Progression</strong>, qui vous montre une grille complète de l'avancement de chaque élève sur chaque TP assigné.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-3">
-                                    <AccordionTrigger className="text-xl font-headline">3. Évaluer les TP Terminés</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">3. Assigner des Travaux Pratiques (TP)</AccordionTrigger>
+                                    <AccordionContent className="text-base text-muted-foreground p-4">
+                                        <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <Users className="inline h-5 w-5"/> <strong>Assigner des TP</strong> :</p>
+                                        <ul className="list-disc pl-6 space-y-2">
+                                            <li>Sélectionnez la classe concernée dans le menu en haut.</li>
+                                            <li>Cochez les cases des élèves que vous souhaitez concerner (ou "Tout sélectionner").</li>
+                                            <li>Utilisez le menu déroulant pour choisir le TP à leur affecter.</li>
+                                             <li>Cliquez sur "Assigner". Le TP apparaît instantanément sur le tableau de bord de chaque élève sélectionné.</li>
+                                        </ul>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="item-4">
+                                    <AccordionTrigger className="text-xl font-headline">4. Évaluer les TP Terminés</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">Quand un élève termine un TP, il apparaît dans l'onglet <ClipboardCheck className="inline h-5 w-5"/> <strong>TP à Évaluer</strong>.</p>
                                         <ul className="list-disc pl-6 space-y-2">
@@ -79,8 +92,8 @@ export default function TutorialPage() {
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
-                                 <AccordionItem value="item-7">
-                                    <AccordionTrigger className="text-xl font-headline">4. Créer ses Propres TP</AccordionTrigger>
+                                 <AccordionItem value="item-5">
+                                    <AccordionTrigger className="text-xl font-headline">5. Créer ses Propres TP</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">L'onglet <DraftingCompass className="inline h-5 w-5 text-accent"/> <strong>Concepteur TP</strong> vous donne une autonomie totale pour créer des travaux pratiques sur mesure.</p>
                                         <ul className="list-disc pl-6 space-y-2">
@@ -92,11 +105,11 @@ export default function TutorialPage() {
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-6">
-                                    <AccordionTrigger className="text-xl font-headline">5. Analyser la Progression</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">6. Analyser la Progression</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                        <p className="mb-4">L'onglet <BarChart3 className="inline h-5 w-5"/> <strong>Analyses</strong> vous offre une vue d'ensemble de la performance de vos classes :</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li>**Progression Moyenne :** Visualisez rapidement le niveau d'avancement global de la classe sélectionnée (bientôt disponible).</li>
+                                            <li>**Progression Moyenne :** Visualisez rapidement le niveau d'avancement global de la classe sélectionnée.</li>
                                             <li>**Maîtrise des Compétences :** Identifiez en un coup d'œil les 5 compétences les mieux et les moins bien maîtrisées par le groupe, idéal pour adapter votre pédagogie.</li>
                                             <li>**Comparaison des Classes :** Comparez la progression moyenne entre les différentes classes d'un même niveau (bientôt disponible).</li>
                                         </ul>
@@ -172,3 +185,5 @@ export default function TutorialPage() {
     </div>
   );
 }
+
+    
