@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, Suspense, useCallback } from 'react';
+import { useEffect, Suspense, useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { LyceeLogo } from '@/components/lycee-logo';
@@ -71,6 +71,15 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const searchParams = useSearchParams();
     const studentName = searchParams.get('student');
     const { isLoaded } = useFirebase();
+    const [isAnimationTimeElapsed, setIsAnimationTimeElapsed] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+        setIsAnimationTimeElapsed(true);
+        }, 3000); 
+
+        return () => clearTimeout(timer);
+    }, []);
 
     useEffect(() => {
         if (isLoaded && !studentName && pathname !== '/student/select') {
@@ -78,7 +87,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
         }
     }, [studentName, pathname, router, isLoaded]);
 
-    if (!isLoaded) {
+    if (!isLoaded || !isAnimationTimeElapsed) {
         return <TachometerAnimation />;
     }
 

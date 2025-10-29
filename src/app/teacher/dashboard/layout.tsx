@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Suspense, useEffect, useCallback } from 'react';
+import { Suspense, useEffect, useCallback, useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -40,6 +40,16 @@ function DashboardLayoutContent({
   const searchParams = useSearchParams();
   const { isLoaded, classes, teacherName, customSignOut } = useFirebase();
 
+  const [isAnimationTimeElapsed, setIsAnimationTimeElapsed] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsAnimationTimeElapsed(true);
+    }, 3000); 
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const selectedClass = searchParams.get('class') || '';
   const classNames = (classes || []).map(c => c.id).sort((a, b) => a.localeCompare(b));
 
@@ -54,7 +64,7 @@ function DashboardLayoutContent({
     router.push('/');
   }, [customSignOut, router]);
 
-  if (!isLoaded || !teacherName) {
+  if (!isLoaded || !isAnimationTimeElapsed) {
     return <TachometerAnimation />;
   }
 
@@ -99,7 +109,7 @@ function DashboardLayoutContent({
                 </div>
             </header>
           <SidebarInset>
-              <div className="flex flex-1">
+              <div className="container flex flex-1 py-8">
                   <Sidebar>
                     <SidebarContent className="p-2 justify-end">
                         <div className="space-y-4">
@@ -132,7 +142,7 @@ function DashboardLayoutContent({
                         <LogoutButton />
                     </SidebarFooter>
                   </Sidebar>
-                  <main className="flex-1 md:ml-8 flex flex-col gap-6 py-8">
+                  <main className="flex-1 md:ml-8 flex flex-col gap-6">
                         <div className="flex-1 bg-card rounded-lg border-2 border-primary/30 shadow-2xl p-6">
                         {children}
                     </div>
