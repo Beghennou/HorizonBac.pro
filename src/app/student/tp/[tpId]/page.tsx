@@ -211,6 +211,7 @@ export default function TPPage() {
     return text.match(urlRegex)?.[0];
   }
 
+  const isPracticActivityVisible = !tp.validationRequise || unlockedStep > 0;
 
   return (
     <div className="grid md:grid-cols-3 gap-8 items-start">
@@ -225,7 +226,7 @@ export default function TPPage() {
                 {assignedTp.status === 'non-commencé' && (
                     <Button onClick={handleStart} size="lg"><Play className="mr-2"/>Commencer le TP</Button>
                 )}
-                {assignedTp.status === 'en-cours' && unlockedStep === tp.activitePratique.length && (
+                {assignedTp.status === 'en-cours' && unlockedStep >= tp.activitePratique.length && (
                     <Button onClick={handleFinish} variant="outline" size="lg" className="border-accent text-accent hover:bg-accent hover:text-black">
                         <CheckeredFlag className="mr-2"/>Terminer le TP
                     </Button>
@@ -360,14 +361,14 @@ export default function TPPage() {
         )}
 
 
-        {unlockedStep >= 1 && (
+        {isPracticActivityVisible && (
             <Card>
                 <CardHeader>
                     <CardTitle>Activité Pratique</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {tp.activitePratique.map((etape, i) => {
-                      if (tp.validationRequise && i >= unlockedStep && assignedTp.status !== 'terminé') return null;
+                      if (tp.validationRequise && i >= unlockedStep) return null;
 
                       return (
                         <div key={i}>
