@@ -41,6 +41,10 @@ export default function DashboardPage() {
   }, [classData]);
 
   const stats = useMemo(() => {
+    if (!isLoaded || !assignedTps) { // Added check for assignedTps
+        return { studentCount: 0, tpsToEvaluate: 0, overallProgress: 0 };
+    }
+
     let tpsToEvaluate = 0;
     let totalAssignedTps = 0;
     let totalCompletedTps = 0;
@@ -64,9 +68,10 @@ export default function DashboardPage() {
         tpsToEvaluate,
         overallProgress,
     }
-  }, [studentsInClass, assignedTps]);
+  }, [studentsInClass, assignedTps, isLoaded]); // Added isLoaded to dependencies
   
   const studentProgressList = useMemo(() => {
+    if (!isLoaded || !assignedTps) return []; // Added check for assignedTps
     return studentsInClass.map(studentName => {
         const studentTps = assignedTps[studentName] || [];
         const completedCount = studentTps.filter(tp => tp.status === 'terminé').length;
@@ -78,7 +83,7 @@ export default function DashboardPage() {
             completedCount,
         }
     })
-  }, [studentsInClass, assignedTps]);
+  }, [studentsInClass, assignedTps, isLoaded]); // Added isLoaded to dependencies
 
 
   if (!isLoaded || (currentClassName && isClassLoading)) {

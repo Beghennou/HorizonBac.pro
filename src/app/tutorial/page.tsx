@@ -1,6 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass } from 'lucide-react';
+import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -42,82 +42,63 @@ export default function TutorialPage() {
                         <CardContent>
                              <Accordion type="single" collapsible className="w-full">
                                 <AccordionItem value="item-1">
-                                    <AccordionTrigger className="text-xl font-headline">1. Configuration de l'environnement</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">1. Configuration & Gestion Annuelle</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Avant de commencer, allez dans la page <strong>Paramètres</strong> :</p>
+                                        <p className="mb-4">La page <Settings className="inline h-5 w-5"/> <strong>Paramètres</strong> est le centre névralgique pour préparer votre année :</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li><strong>Ajoutez vos classes et élèves :</strong> Vous pouvez ajouter des élèves manuellement ou utiliser la fonction d'importation CSV pour peupler rapidement vos classes.</li>
-                                            <li><strong>Personnalisez votre nom :</strong> Mettez à jour votre nom d'enseignant pour qu'il apparaisse sur les fiches TP.</li>
+                                            <li><strong>Gérer les Enseignants :</strong> Ajoutez votre profil ou celui de vos collègues. Vous pouvez également en supprimer.</li>
+                                            <li><strong>Gérer les Classes :</strong> Créez ou supprimez des classes.</li>
+                                            <li><strong>Gérer les Élèves :</strong> Vous pouvez ajouter ou supprimer des élèves manuellement, ou utiliser la fonction la plus puissante : **l'importation CSV par niveau**. Pour la rentrée, il suffit de sélectionner une classe et d'importer la liste de vos nouveaux élèves. L'application mettra à jour la classe automatiquement.</li>
+                                            <li><strong>Zone de danger :</strong> Des outils sont disponibles pour vider toutes les listes d'élèves en fin d'année, afin de préparer la rentrée suivante en un clic.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
-                                 <AccordionItem value="item-5">
-                                    <AccordionTrigger className="text-xl font-headline">2. Mise à Jour Annuelle des Classes</AccordionTrigger>
+                                 <AccordionItem value="item-2">
+                                    <AccordionTrigger className="text-xl font-headline">2. Assigner des Travaux Pratiques (TP)</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Pour préparer la rentrée, la page <strong>Paramètres</strong> contient une section "Mise à Jour Annuelle des Classes" :</p>
+                                        <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <Users className="inline h-5 w-5"/> <strong>Assigner des TP</strong> :</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li><strong>Importez vos listes :</strong> Pour chaque niveau (Seconde, Première, Terminale), importez votre nouvelle liste de classe au format CSV.</li>
-                                            <li><strong>Conservation des données :</strong> Si un élève importé existe déjà, il est simplement déplacé dans sa nouvelle classe. Toutes ses évaluations et sa progression sont conservées.</li>
-                                            <li><strong>Création automatique :</strong> Un nouvel élève dans votre fichier CSV sera automatiquement créé dans l'application.</li>
-                                        </ul>
-                                    </AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="item-2">
-                                    <AccordionTrigger className="text-xl font-headline">3. Assignation des Travaux Pratiques (TP)</AccordionTrigger>
-                                    <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <strong>Suivi des Classes</strong> :</p>
-                                        <ul className="list-disc pl-6 space-y-2">
-                                            <li>Sélectionnez la bonne classe et le bon niveau (Seconde, Première, Terminale).</li>
-                                            <li>Cochez la case sur la carte des élèves concernés.</li>
-                                            <li>Utilisez le menu déroulant "Assigner un TP" pour choisir le travail à affecter. Le TP est maintenant lié à l'élève.</li>
+                                            <li>Sélectionnez la classe concernée dans le menu de gauche.</li>
+                                            <li>Cochez les cases des élèves que vous souhaitez concerner (ou "Tout sélectionner").</li>
+                                            <li>Utilisez le menu déroulant en bas pour choisir le TP à leur affecter.</li>
+                                             <li>Cliquez sur "Assigner". Le TP apparaît instantanément sur le tableau de bord de chaque élève sélectionné.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-3">
-                                    <AccordionTrigger className="text-xl font-headline">4. Évaluation et Suivi</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">3. Évaluer les TP Terminés</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Le cœur du suivi se fait dans le <strong>dossier de l'élève</strong>, accessible en cliquant sur sa carte depuis la page "Suivi des classes".</p>
+                                        <p className="mb-4">Quand un élève termine un TP, il apparaît dans l'onglet <ClipboardCheck className="inline h-5 w-5"/> <strong>TP à Évaluer</strong>.</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li><strong>Sélectionnez un TP :</strong> Choisissez un TP assigné pour afficher la grille d'évaluation et les réponses de l'élève.</li>
-                                            <li><strong>Corrigez l'Étude Préliminaire :</strong> Si le TP en contient une, vous verrez les réponses de l'élève. Cliquez sur "Auto-correction" pour obtenir une note automatique. Vous pouvez ensuite **modifier cette note** si vous le souhaitez.</li>
-                                            <li><strong>Laissez un feedback :</strong> Vous verrez le commentaire de l'élève sur le TP et vous pourrez lui répondre dans le champ "Feedback de l'enseignant". Ce retour sera visible par l'élève.</li>
-                                            <li><strong>Évaluez les compétences :</strong> Remplissez la grille d'évaluation pour les compétences (NA, EC, A, M). L'expérience (XP) de l'élève se mettra à jour.</li>
-                                            <li><strong>Enregistrez :</strong> Cliquez sur "Enregistrer l'évaluation" pour sauvegarder la note, les feedbacks et les compétences. Le badge "Évalué" apparaîtra alors chez l'élève.</li>
+                                            <li>Cliquez sur le nom d'un élève pour voir la liste des TP qu'il a soumis.</li>
+                                            <li>Choisissez un TP pour accéder à la page d'évaluation.</li>
+                                            <li><strong>Corrigez l'Étude Préliminaire :</strong> Consultez les réponses de l'élève et la correction. Attribuez une note sur 10.</li>
+                                            <li><strong>Évaluez les compétences :</strong> Remplissez la grille d'évaluation pour les compétences ciblées (NA, EC, A, M).</li>
+                                            <li><strong>Laissez un feedback :</strong> Laissez une appréciation qui sera visible par l'élève.</li>
+                                            <li><strong>Note globale et sauvegarde :</strong> Donnez une note finale sur 20. Vous pouvez "Enregistrer le brouillon" ou "Finaliser et Rendre l'évaluation" pour que le statut "Évalué" apparaisse chez l'élève.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
-                                 <AccordionItem value="item-4">
-                                    <AccordionTrigger className="text-xl font-headline">5. Visualisation des Fiches TP</AccordionTrigger>
-                                    <AccordionContent className="text-base text-muted-foreground p-4">
-                                       <p className="mb-4">Pour consulter, imprimer ou envoyer une fiche TP vierge :</p>
-                                        <ul className="list-disc pl-6 space-y-2">
-                                            <li>Allez sur la page principale du tableau de bord (via l'onglet "Fiches TP").</li>
-                                            <li>Sélectionnez un TP dans la liste de gauche pour l'afficher.</li>
-                                            <li>Pour le contextualiser, sélectionnez une classe et un élève via les menus. Le nom de l'élève et de l'enseignant apparaîtront sur la fiche.</li>
-                                            <li>Utilisez les boutons pour envoyer la fiche par e-mail ou l'imprimer.</li>
-                                        </ul>
-                                    </AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="item-7">
-                                    <AccordionTrigger className="text-xl font-headline">6. Créer ses Propres TP (Concepteur TP)</AccordionTrigger>
+                                 <AccordionItem value="item-7">
+                                    <AccordionTrigger className="text-xl font-headline">4. Créer ses Propres TP</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">L'onglet <DraftingCompass className="inline h-5 w-5 text-accent"/> <strong>Concepteur TP</strong> vous donne une autonomie totale pour créer des travaux pratiques sur mesure.</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li><strong>Informations Générales :</strong> Définissez le titre, la durée, le niveau, la situation professionnelle et l'objectif pédagogique.</li>
+                                            <li><strong>Informations Générales :</strong> Donnez un ID unique (>1000), un titre, une durée, et assignez un niveau (Seconde, Première, Terminale).</li>
                                             <li><strong>Compétences :</strong> Associez votre TP à une ou plusieurs compétences du référentiel en cochant les cases correspondantes.</li>
                                             <li><strong>Sections dynamiques :</strong> Utilisez les boutons "Ajouter" pour créer autant de champs que nécessaire pour le matériel, l'étude préliminaire (questions texte ou QCM), les étapes pratiques, les points clés et les consignes de sécurité.</li>
-                                            <li><strong>Sauvegarde :</strong> Une fois le formulaire rempli, cliquez sur "Créer le Travail Pratique". Votre nouveau TP sera automatiquement ajouté à la liste des TP disponibles pour le niveau que vous avez sélectionné et pourra être assigné aux élèves.</li>
+                                            <li><strong>Sauvegarde :</strong> Une fois le formulaire rempli, cliquez sur "Créer le Travail Pratique". Votre nouveau TP sera automatiquement disponible dans la liste d'assignation pour le niveau que vous avez sélectionné.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-6">
-                                    <AccordionTrigger className="text-xl font-headline">7. Analyser la Progression</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">5. Analyser la Progression</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                       <p className="mb-4">L'onglet <strong>Analyses</strong> vous offre une vue d'ensemble de la performance de vos classes :</p>
+                                       <p className="mb-4">L'onglet <BarChart3 className="inline h-5 w-5"/> <strong>Analyses</strong> vous offre une vue d'ensemble de la performance de vos classes :</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li><strong>Progression Moyenne :</strong> Visualisez rapidement le niveau d'avancement global de la classe sélectionnée.</li>
-                                            <li><strong>Maîtrise des Compétences :</strong> Identifiez en un coup d'œil les 5 compétences les mieux et les moins bien maîtrisées par le groupe, idéal pour adapter votre pédagogie.</li>
-                                            <li><strong>Comparaison des Classes :</strong> Comparez la progression moyenne entre les différentes classes d'un même niveau (Seconde, Première, etc.).</li>
+                                            <li>**Progression Moyenne :** Visualisez rapidement le niveau d'avancement global de la classe sélectionnée (bientôt disponible).</li>
+                                            <li>**Maîtrise des Compétences :** Identifiez en un coup d'œil les 5 compétences les mieux et les moins bien maîtrisées par le groupe, idéal pour adapter votre pédagogie.</li>
+                                            <li>**Comparaison des Classes :** Comparez la progression moyenne entre les différentes classes d'un même niveau (bientôt disponible).</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
@@ -140,16 +121,16 @@ export default function TutorialPage() {
                                         <p className="mb-4">Pour accéder à ton espace personnel :</p>
                                         <ul className="list-disc pl-6 space-y-2">
                                             <li>Depuis la page d'accueil, clique sur "Espace Élève".</li>
-                                            <li>Sur la page de sélection, choisis d'abord ta **classe** dans le premier menu déroulant.</li>
-                                            <li>Ensuite, sélectionne ton **nom** dans le second menu qui apparaît.</li>
-                                            <li>Clique sur "Accéder à mes TP" pour entrer dans ton tableau de bord.</li>
+                                            <li>Sur la page de sélection, choisis d'abord ton **enseignant**, puis ta **classe**.</li>
+                                            <li>Ensuite, sélectionne ton **nom** dans le dernier menu qui apparaît.</li>
+                                            <li>Clique sur "Valider" pour entrer dans ton tableau de bord.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-2">
                                     <AccordionTrigger className="text-xl font-headline">2. Réaliser un TP</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Ton tableau de bord te montre tous les TP que ton enseignant t'a assignés.</p>
+                                        <p className="mb-4">Ton tableau de bord ("Mes TP") te montre tous les TP que ton enseignant t'a assignés.</p>
                                         <ul className="list-disc pl-6 space-y-2">
                                             <li>Chaque TP a un statut : "Non commencé", "En cours" ou "Terminé". Le badge **"Évalué"** apparaîtra une fois que ton professeur aura corrigé ton travail.</li>
                                             <li>Clique sur "Commencer le TP". Le statut passe à "En cours".</li>
@@ -170,24 +151,15 @@ export default function TutorialPage() {
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
-                                <AccordionItem value="item-4">
-                                    <AccordionTrigger className="text-xl font-headline">4. Consulter son Feedback</AccordionTrigger>
+                                 <AccordionItem value="item-5">
+                                    <AccordionTrigger className="text-xl font-headline">4. Consulter son Portfolio et ses Badges</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Une fois que ton enseignant a évalué ton TP :</p>
+                                        <p className="mb-4">L'onglet <Award className="inline h-5 w-5"/> <strong>Mon Portfolio</strong> est ton carnet de réussites personnel. C'est un document que tu peux imprimer ou enregistrer en PDF pour le montrer lors de tes recherches de stage ou d'emploi.</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li>Le badge **"Évalué"** apparaîtra sur la carte du TP.</li>
-                                            <li>Retourne sur la page du TP pour lire le **feedback personnalisé** que ton enseignant t'a laissé. C'est un excellent moyen de progresser !</li>
-                                        </ul>
-                                    </AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="item-5">
-                                    <AccordionTrigger className="text-xl font-headline">5. Gagner des Badges et des Récompenses</AccordionTrigger>
-                                    <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Ta progression est récompensée ! En terminant des TP et en acquérant des compétences, tu débloqueras des badges pour valoriser tes réussites.</p>
-                                        <ul className="list-disc pl-6 space-y-2">
-                                            <li><strong>Comment ça marche ?</strong> Chaque badge a des critères précis. Par exemple, terminer ton premier TP, maîtriser tous les TP de sécurité, ou devenir un expert du diagnostic.</li>
-                                            <li><strong>Quelques exemples de badges :</strong> "Premier Pas", "Expert Sécurité", "Expert du Diagnostic", "Maître de la Distribution", et bien d'autres.</li>
-                                            <li><strong>Où les voir ?</strong> Tous les badges que tu as gagnés sont affichés dans ton <Link href="/student/portfolio" className="text-accent underline">Portfolio</Link>, dans la section <Award className="inline h-4 w-4"/> "Badges et Récompenses". C'est un excellent moyen de voir tes accomplissements !</li>
+                                            <li><strong>Badges et Récompenses :</strong> En terminant des TP et en acquérant des compétences, tu débloqueras des badges ("Premier Pas", "Expert Sécurité", etc.) qui valorisent tes accomplissements.</li>
+                                            <li><strong>Synthèse des Évaluations :</strong> Retrouve ici toutes les notes et appréciations que ton enseignant t'a laissées pour chaque TP évalué.</li>
+                                            <li><strong>Compétences Acquises :</strong> Visualise toutes les compétences que tu as validées ("Acquis" ou "Maîtrisé"), classées par grands blocs professionnels.</li>
+                                            <li><strong>TP Validés :</strong> La liste de tous les travaux pratiques que tu as terminés avec succès.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
