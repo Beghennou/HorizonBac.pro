@@ -98,7 +98,7 @@ export interface FirebaseContextState {
   teacherName: string;
   setTeacherName: (name: string) => void;
   teachers: DocumentData[];
-  addTeacher: (name: string) => void;
+  addTeacher: (name: string) => Promise<void>;
   deleteTeacher: (teacherId: string) => void;
   customSignOut: () => void;
   deleteStudent: (studentId: string, studentName: string) => void;
@@ -238,8 +238,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const addTeacher = useCallback(async (name: string) => {
     if (!firestore) return;
     await addTeacherInDb(firestore, name);
-    toast({ title: 'Enseignant ajouté', description: `${name} a été ajouté à la liste.` });
-  }, [firestore, toast]);
+  }, [firestore]);
   
   const deleteTeacher = useCallback(async (teacherId: string) => {
     if (!firestore) return;

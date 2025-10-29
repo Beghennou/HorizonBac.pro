@@ -22,8 +22,15 @@ export default function SelectTeacherPage() {
         const isAuth = sessionStorage.getItem('teacher_auth');
         if (isAuth !== 'true') {
             router.replace('/teacher/login');
+            return;
         }
-    }, [router]);
+
+        const pendingTeacher = sessionStorage.getItem('pendingTeacherName');
+        if (pendingTeacher && teachers.some(t => t.name === pendingTeacher)) {
+            setSelectedTeacher(pendingTeacher);
+            sessionStorage.removeItem('pendingTeacherName');
+        }
+    }, [router, teachers]);
 
     if (!isLoaded) {
         return (
@@ -43,18 +50,27 @@ export default function SelectTeacherPage() {
     };
     
     const handleAddTeacher = async () => {
-        if (!newTeacherName.trim()) {
+        const teacherNameToAdd = newTeacherName.trim();
+        if (!teacherNameToAdd) {
             toast({ variant: 'destructive', title: 'Le nom ne peut pas être vide.' });
             return;
         }
-        if (teachers.some(t => t.name === newTeacherName.trim())) {
+        if (teachers.some(t => t.name === teacherNameToAdd)) {
             toast({ variant: 'destructive', title: 'Ce nom existe déjà', description: 'Veuillez choisir un autre nom ou sélectionner ce profil dans la liste.' });
             return;
         }
-        await addTeacher(newTeacherName.trim());
-        setTeacherName(newTeacherName.trim()); // Automatically select and log in the new teacher
-        toast({ title: 'Profil créé et connecté', description: `Bienvenue, ${newTeacherName.trim()}.` });
-        router.push('/teacher/dashboard');
+
+        try {
+            await addTeacher(teacherNameToAdd);
+            toast({ title: 'Profil créé', description: `Veuillez sélectionner ${teacherNameToAdd} dans la liste pour vous connecter.` });
+            sessionStorage.setItem('pendingTeacherName', teacherNameToAdd);
+            // We don't redirect here. We let the useEffect handle the selection on reload.
+            // The data refresh will be handled by Firebase's realtime listener.
+            setNewTeacherName('');
+        } catch (error) {
+            console.error("Failed to add teacher", error);
+            toast({ variant: 'destructive', title: 'Erreur', description: "La création du profil a échoué." });
+        }
     };
 
     return (
@@ -73,7 +89,7 @@ export default function SelectTeacherPage() {
                                     <SelectValue placeholder="Choisir un profil..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {teachers.map(teacher => (
+                                    {teachers.sort((a,b) => a.name.localeCompare(b.name)).map(teacher => (
                                         <SelectItem key={teacher.id} value={teacher.name}>{teacher.name}</SelectItem>
                                     ))}
                                 </SelectContent>
@@ -100,7 +116,7 @@ export default function SelectTeacherPage() {
                             />
                         </div>
                         <Button onClick={handleAddTeacher} variant="outline" className="w-full" disabled={!newTeacherName.trim()}>
-                            <UserPlus className="mr-2" /> Créer et Accéder
+                            <UserPlus className="mr-2" /> Créer le profil
                         </Button>
                     </CardContent>
                 </Card>
