@@ -16,7 +16,10 @@ export function LogoutButton() {
   };
 
   return (
-    <Button onClick={handleLogout} variant="destructive" className="w-full justify-start text-base h-12 px-4">
+    <Button 
+      onClick={handleLogout} 
+      className="w-full justify-start text-base h-12 px-4 bg-gradient-to-br from-primary to-racing-orange text-white hover:brightness-110 font-headline uppercase tracking-wider"
+    >
       <LogOut />
       <span>Déconnexion</span>
     </Button>
