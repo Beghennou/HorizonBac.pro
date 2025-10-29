@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Suspense, useEffect } from 'react';
@@ -98,8 +99,8 @@ function DashboardLayoutContent({
               <div className="container flex flex-1 py-8">
                   <Sidebar>
                     <SidebarContent className="flex flex-col gap-4 p-0">
-                       <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl">
-                        <h3 className="font-headline text-lg text-accent uppercase tracking-wider border-b-2 border-primary/30 pb-2 mb-4">Sélection de la classe</h3>
+                       <div className="p-4 rounded-lg bg-card border-2 border-primary/30 shadow-2xl space-y-2">
+                        <h3 className="font-headline text-lg text-accent uppercase tracking-wider">Sélection classe :</h3>
                         {classNames.length > 0 ? (
                             <Select value={selectedClass} onValueChange={handleClassChange}>
                             <SelectTrigger>
