@@ -1,3 +1,4 @@
+
 'use client';
 import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs, updateDoc, addDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
@@ -204,3 +205,24 @@ export const addCustomTp = (firestore: Firestore, newTp: TP) => {
         }));
     });
 };
+
+export const createClassInDb = async (firestore: Firestore, className: string) => {
+    const classDocRef = doc(firestore, 'classes', className);
+    await setDoc(classDocRef, { studentNames: [] }).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: classDocRef.path,
+            operation: 'create',
+            requestResourceData: { studentNames: [] }
+        }));
+    });
+}
+
+export const deleteClassFromDb = async (firestore: Firestore, className: string) => {
+    const classDocRef = doc(firestore, 'classes', className);
+    await deleteDoc(classDocRef).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: classDocRef.path,
+            operation: 'delete'
+        }));
+    });
+}

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
@@ -22,7 +23,9 @@ import {
     emptyClass as emptyClassInDb,
     updateClassWithStudents,
     addCustomTp,
-    resetAllStudentListsInClasses
+    resetAllStudentListsInClasses,
+    createClassInDb,
+    deleteClassFromDb
 } from './firestore-actions';
 import { checkAndSeedData } from './seed-data';
 
@@ -100,6 +103,8 @@ export interface FirebaseContextState {
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
   resetAllStudentLists: () => void;
   addTp: (tp: TP) => void;
+  createClass: (className: string) => void;
+  deleteClass: (className: string) => void;
   signInWithGoogle: () => Promise<void>;
   isLoaded: boolean;
   
@@ -314,6 +319,16 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       const tpWithAuthor = { ...newTp, author: teacherName };
       addCustomTp(firestore, tpWithAuthor);
       setTps(prev => ({...prev, [newTp.id]: tpWithAuthor}));
+    },
+    createClass: (className: string) => {
+      if (!firestore) return;
+      createClassInDb(firestore, className);
+      toast({ title: 'Classe Créée', description: `La classe "${className}" a été créée avec succès.` });
+    },
+    deleteClass: (className: string) => {
+      if (!firestore) return;
+      deleteClassFromDb(firestore, className);
+      toast({ variant: 'destructive', title: 'Classe Supprimée', description: `La classe "${className}" a été supprimée.` });
     },
     signInWithGoogle,
   };

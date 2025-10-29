@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight, Eraser } from "lucide-react";
+import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight, Eraser, PlusCircle, FolderPlus, FolderClosed } from "lucide-react";
 import { useFirebase } from '@/firebase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -23,21 +23,25 @@ import {
 } from "@/components/ui/alert-dialog";
 import Papa from 'papaparse';
 import { Student } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { firestore, classes, teacherName, setTeacherName, updateClassWithCsv, deleteStudent, emptyClass, resetAllStudentLists } = useFirebase();
+  const { firestore, classes, teacherName, setTeacherName, updateClassWithCsv, deleteStudent, emptyClass, resetAllStudentLists, createClass, deleteClass } = useFirebase();
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
   
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [newClassNameForStudent, setNewClassNameForStudent] = useState('');
+  const [selectedClassForStudent, setSelectedClassForStudent] = useState('');
+  
   const [newClassName, setNewClassName] = useState('');
-  const [selectedClass, setSelectedClass] = useState('');
+  const [classToDelete, setClassToDelete] = useState('');
+
   const [resetDataPassword, setResetDataPassword] = useState('');
   const [resetListsPassword, setResetListsPassword] = useState('');
   
@@ -108,7 +112,7 @@ export default function SettingsPage() {
   
   const handleAddStudent = async () => {
       const studentName = `${firstName.trim()} ${lastName.trim().toUpperCase()}`;
-      const targetClass = newClassName.trim() || selectedClass;
+      const targetClass = newClassNameForStudent.trim() || selectedClassForStudent;
 
       if (!firstName || !lastName || !targetClass) {
         toast({ variant: 'destructive', title: 'Champs manquants', description: 'Veuillez remplir tous les champs pour ajouter un élève.' });
@@ -124,7 +128,29 @@ export default function SettingsPage() {
       toast({ title: 'Élève ajouté', description: `${studentName} a été ajouté à la classe ${targetClass}.` });
       setFirstName('');
       setLastName('');
-      setNewClassName('');
+      setNewClassNameForStudent('');
+  };
+  
+  const handleCreateClass = () => {
+    if (!newClassName.trim()) {
+        toast({ variant: 'destructive', title: 'Nom de classe vide', description: 'Veuillez entrer un nom pour la nouvelle classe.' });
+        return;
+    }
+    if (classNames.includes(newClassName.trim())) {
+        toast({ variant: 'destructive', title: 'Classe existante', description: 'Une classe avec ce nom existe déjà.' });
+        return;
+    }
+    createClass(newClassName.trim());
+    setNewClassName('');
+  };
+
+  const handleDeleteClass = () => {
+    if (!classToDelete) {
+        toast({ variant: 'destructive', title: 'Aucune classe sélectionnée', description: 'Veuillez sélectionner une classe à supprimer.' });
+        return;
+    }
+    deleteClass(classToDelete);
+    setClassToDelete('');
   };
 
   const handleSaveSettings = () => {
@@ -240,9 +266,9 @@ export default function SettingsPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                          <Label htmlFor="select-class">Assigner à une classe existante</Label>
-                          <Select onValueChange={setSelectedClass} value={selectedClass} >
-                              <SelectTrigger id="select-class">
+                          <Label htmlFor="select-class-student">Assigner à une classe existante</Label>
+                          <Select onValueChange={setSelectedClassForStudent} value={selectedClassForStudent} >
+                              <SelectTrigger id="select-class-student">
                                   <SelectValue placeholder="Choisir une classe..." />
                               </SelectTrigger>
                               <SelectContent>
@@ -253,8 +279,8 @@ export default function SettingsPage() {
                           </Select>
                       </div>
                       <div className="space-y-2">
-                          <Label htmlFor="new-class">Ou créer une nouvelle classe</Label>
-                          <Input id="new-class" placeholder="ex: 2MV6" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} />
+                          <Label htmlFor="new-class-student">Ou créer une nouvelle classe pour l'élève</Label>
+                          <Input id="new-class-student" placeholder="ex: 2MV6" value={newClassNameForStudent} onChange={(e) => setNewClassNameForStudent(e.target.value)} />
                       </div>
                   </div>
                   <div className="flex justify-end">
@@ -308,12 +334,19 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><ChevronsRight /> Gestion des Classes</CardTitle>
           <CardDescription>
-            Importez les listes d'élèves pour la nouvelle année scolaire ou videz une classe.
+            Créez, supprimez, importez les listes d'élèves pour la nouvelle année scolaire ou videz une classe.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-            <div>
-                <Label className="font-bold">Mise à Jour Annuelle des Classes</Label>
+            <div className="space-y-2 p-4 border rounded-lg">
+                <Label className="font-bold">Créer une nouvelle classe</Label>
+                <div className="flex items-center gap-2">
+                    <Input placeholder="Nom de la nouvelle classe, ex: 1MV3" value={newClassName} onChange={e => setNewClassName(e.target.value)} />
+                    <Button onClick={handleCreateClass}><PlusCircle className="mr-2" /> Créer</Button>
+                </div>
+            </div>
+             <div className="space-y-2 p-4 border rounded-lg">
+                <Label className="font-bold">Importer des listes d'élèves par niveau</Label>
                 <div className="space-y-3 mt-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                         <Select value={secondeClassToUpdate} onValueChange={setSecondeClassToUpdate}>
@@ -359,13 +392,13 @@ export default function SettingsPage() {
                     </div>
                 </div>
             </div>
-            <div>
-                <Label className="font-bold">Vider une classe</Label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mt-2">
-                    <div className="space-y-2 md:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2 p-4 border rounded-lg">
+                    <Label className="font-bold">Vider une classe</Label>
+                    <div className="flex items-center gap-2">
                         <Select value={classToEmpty} onValueChange={setClassToEmpty}>
                             <SelectTrigger id="empty-class-select">
-                                <SelectValue placeholder="Choisir une classe à vider..."/>
+                                <SelectValue placeholder="Choisir une classe..."/>
                             </SelectTrigger>
                             <SelectContent>
                                 {classNames.map(c => (
@@ -373,8 +406,40 @@ export default function SettingsPage() {
                                 ))}
                             </SelectContent>
                         </Select>
+                        <Button variant="destructive" onClick={handleEmptyClass} disabled={!classToEmpty}><FolderMinus className="mr-2" /> Vider</Button>
                     </div>
-                    <Button variant="destructive" onClick={handleEmptyClass}><FolderMinus className="mr-2" /> Vider cette classe</Button>
+                </div>
+                <div className="space-y-2 p-4 border rounded-lg">
+                    <Label className="font-bold text-destructive">Supprimer une classe</Label>
+                    <div className="flex items-center gap-2">
+                         <Select value={classToDelete} onValueChange={setClassToDelete}>
+                            <SelectTrigger id="delete-class-select-main">
+                                <SelectValue placeholder="Choisir une classe..."/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {classNames.map(c => (
+                                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" disabled={!classToDelete}><Trash2 className="mr-2" /> Supprimer</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Voulez-vous vraiment supprimer la classe "{classToDelete}" ?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Cette action est irréversible. Tous les élèves seront dissociés mais leurs données ne seront pas supprimées.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDeleteClass} className="bg-destructive hover:bg-destructive/90">Confirmer</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                 </div>
             </div>
         </CardContent>
