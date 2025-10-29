@@ -150,12 +150,14 @@ export default function StudentLayoutContent({
           <SidebarInset>
               <div className="container flex flex-1 py-8">
                   <Sidebar>
-                    <SidebarHeader className="p-4">
-                        <h2 className="font-headline text-lg tracking-wider text-accent">{studentName}</h2>
-                        <p className="text-sm text-muted-foreground">{className}</p>
-                    </SidebarHeader>
-                    <SidebarContent className="justify-end">
-                      {studentName && <StudentNav />}
+                    <SidebarContent className="p-2 justify-end">
+                       <div className="space-y-4">
+                            <div className="px-2">
+                                <h2 className="font-headline text-lg tracking-wider text-accent">{studentName}</h2>
+                                <p className="text-sm text-muted-foreground">{className}</p>
+                            </div>
+                            {studentName && <StudentNav />}
+                        </div>
                     </SidebarContent>
                     <SidebarFooter className="p-4 flex-col gap-4">
                         <LogoutButton />
