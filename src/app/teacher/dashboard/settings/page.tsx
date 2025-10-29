@@ -432,7 +432,7 @@ export default function SettingsPage() {
               <div className="flex justify-between items-center p-4 border border-destructive/50 rounded-lg">
                  <div>
                     <p className="font-medium">Réinitialiser les données des élèves</p>
-                    <p className="text-sm text-muted-foreground">Supprime les évaluations et TPs assignés, mais conserve les listes de classes et d'élèves.</p>
+                    <p className="text-sm text-muted-foreground">Supprime les évaluations et TP assignés, mais conserve les listes de classes et d'élèves.</p>
                  </div>
                    <AlertDialog>
                       <AlertDialogTrigger asChild>
