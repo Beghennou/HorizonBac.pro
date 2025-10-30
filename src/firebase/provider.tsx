@@ -63,7 +63,6 @@ type StoredEvaluation = {
   tpNote?: string;
   competences: Record<string, EvaluationStatus>;
   isFinal?: boolean;
-  validatedSteps?: Record<string, boolean>;
 }
 
 
@@ -94,7 +93,7 @@ export interface FirebaseContextState {
   userError: Error | null;
   
   assignTp: (studentNames: string[], tpId: number) => void;
-  saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean, validatedSteps: Record<string, boolean>) => void;
+  saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean) => void;
   updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => void;
   savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => void;
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
@@ -269,7 +268,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     deleteTeacher: (teacherId: string) => { console.log('deleteTeacher not implemented yet')},
     customSignOut,
     classes: classes || [],
-    tps,
+tps,
     assignedTps,
     evaluations,
     assignTp: (studentNames: string[], tpId: number) => {
@@ -280,9 +279,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
           description: `Le TP #${tpId} a été assigné à ${studentNames.length} élève(s).`,
       });
     },
-    saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean, validatedSteps: Record<string, boolean>) => {
+    saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean) => {
       if (!firestore) return;
-      saveStudentEvaluation(firestore, studentName, tpId, currentEvals, evaluations, prelimNote, tpNote, isFinal, validatedSteps);
+      saveStudentEvaluation(firestore, studentName, tpId, currentEvals, evaluations, prelimNote, tpNote, isFinal);
       toast({
           title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
           description: `L'évaluation pour le TP ${tpId} a été enregistrée.`,

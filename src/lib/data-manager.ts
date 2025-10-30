@@ -21,7 +21,6 @@ export type TP = Omit<TPSeconde, 'etudePrelim'> & {
     creationDate?: string;
     niveau?: Niveau;
     ressources?: string[];
-    validationRequise?: boolean;
 };
 
 export type Niveau = 'seconde' | 'premiere' | 'terminale';

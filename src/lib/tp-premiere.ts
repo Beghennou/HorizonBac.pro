@@ -34,7 +34,6 @@ export type TP = {
   securiteRangement: string[];
   pointsCles: string[];
   ressources?: string[];
-  validationRequise?: boolean;
 };
 
 function etape(titre: string, duree: string, etapes: string[]): Etape {
@@ -43,7 +42,6 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 
 export const tpPremiere: Record<number, TP> = {
   1:{ id: 1, duree:'2h00', titre:'AS 207 • Accueillir le client et restituer le véhicule', situation:'Un client se présente à l\'atelier sans rendez-vous. Son véhicule est immobilisé. Vous êtes chargé de l\'accueillir, de prendre en charge le véhicule en créant un Ordre de Réparation (OR) complet et de lui expliquer la procédure à suivre.', objectif:'Réaliser un accueil et une restitution professionnels, avec OR et traçabilité. (Compétence C2.1)', materiel:['OR','Grille d’état','Tablette atelier','Documents garantie'], 
-    validationRequise: true,
     etudePrelim:[
         {type: 'text', q:"Analyse de scénario : Un client arrive, sa voiture ne démarre plus. Il n'a pas de rendez-vous et semble pressé. Quelle est votre première action pour le rassurer tout en respectant la procédure de l'atelier ?",r:'Écouter activement, montrer de l\'empathie, puis expliquer les étapes à venir (prise en charge, diagnostic initial).'},
         {type: 'text', q:"L'OR est un contrat. Citez les 3 informations les plus critiques à y faire figurer pour protéger à la fois le client et l'atelier. Justifiez vos choix.",r:'1. Identité client/véhicule (immat, km). 2. Demande claire du client (symptôme). 3. Date et signature pour accord. Cela évite les litiges.'},
@@ -65,7 +63,6 @@ export const tpPremiere: Record<number, TP> = {
     ], 
     activitePratique:[ etape('Contrôles Préliminaires','25 min',['Vérifier la tension de la batterie (>12,4 V).','Inspecter le serrage et l\'oxydation des cosses.','Contrôler la continuité des masses moteur et châssis.']), etape('Mesures Électriques','45 min',['Mesurer la tension en sortie du contacteur à clé (position Démarrage).','Vérifier la présence de 12V sur la borne 50 du démarreur.','Mesurer les chutes de tension sur le câble positif et la masse.','Mesurer l\'intensité au démarrage (doit être entre 150A et 300A).']), etape('Conclusion et Diagnostic','25 min',['Déterminer si la panne vient de la batterie, du câblage, du relais ou du démarreur.','Préconiser les actions correctives à mener.']) ], securiteRangement:['Prudence lors de la manipulation de la batterie','Ranger la pince ampèremétrique','Tracer toutes les mesures effectuées'], pointsCles:['Batterie OK en premier','Chutes de tension révélatrices','Intensité de démarrage élevée'] },
   4:{ id: 4, duree:'2h00', titre:'UE 207 • Contrôle du démarreur', situation:'Le diagnostic précédent a mis en cause le démarreur. Vous devez le déposer, le contrôler sur banc et le remplacer pour confirmer la panne et réparer le véhicule.', objectif:'Valider l’état du démarreur, le remplacer et effectuer un contrôle qualité. (Compétences C2.1, C2.2, C2.4)', materiel:['Banc de test démarreur','Multimètre','Jeu de clés','Pièces de rechange (solénoïde, balais)'], 
-    validationRequise: true,
     etudePrelim:[
         {type: 'qcm', q:"Vous entendez un 'clac' mais le démarreur ne tourne pas. Quel composant est probablement fonctionnel et lequel est défaillant ?", options: ["Le solénoïde est HS, le moteur électrique est OK.", "Le solénoïde fonctionne, le moteur électrique est HS.", "Les deux sont HS."], r:"Le solénoïde fonctionne, le moteur électrique est HS."},
         {type: 'text', q:"Analyse de risque : Vous testez un démarreur sur un banc. Quelle est la mesure de sécurité la plus importante à prendre concernant la fixation du démarreur ?",r:'Le fixer très solidement dans un étau ou sur le banc. Le couple de démarrage est très violent et peut projeter le démarreur s\'il est mal fixé.'},
@@ -304,6 +301,7 @@ export const tpPremiere: Record<number, TP> = {
 
 
     
+
 
 
 

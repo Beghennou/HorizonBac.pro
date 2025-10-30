@@ -10,13 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Loader2, Save, Send, User, Award, FileText, MessageSquare, Check, Clock, CheckSquare } from 'lucide-react';
+import { Loader2, Save, Send, User, Award, FileText, MessageSquare } from 'lucide-react';
 import { collection, doc } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
@@ -41,7 +40,6 @@ export default function EvaluationPage() {
     const [prelimNote, setPrelimNote] = useState('');
     const [tpNote, setTpNote] = useState('');
     const [teacherFeedback, setTeacherFeedback] = useState('');
-    const [validatedSteps, setValidatedSteps] = useState<Record<string, boolean>>({});
 
     const { data: studentPrelimAnswers, isLoading: prelimLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName, tpId]));
     const { data: studentFeedbacks, isLoading: feedbackLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName, tpId]));
@@ -61,7 +59,6 @@ export default function EvaluationPage() {
             setPrelimNote(storedEval.prelimNote || '');
             setTpNote(storedEval.tpNote || '');
             setCompetenceEvals(storedEval.competences || {});
-            setValidatedSteps(storedEval.validatedSteps || {});
         }
     }, [studentFeedbacks, storedEval, tpId]);
 
@@ -69,10 +66,6 @@ export default function EvaluationPage() {
 
     const handleCompetenceChange = (competenceId: string, value: EvaluationStatus) => {
         setCompetenceEvals(prev => ({ ...prev, [competenceId]: value }));
-    };
-
-    const handleValidationChange = (stepKey: string, checked: boolean) => {
-        setValidatedSteps(prev => ({ ...prev, [stepKey]: checked }));
     };
 
     const handleSave = (isFinal: boolean) => {
@@ -89,7 +82,7 @@ export default function EvaluationPage() {
             return;
         }
 
-        saveEvaluation(studentName, tpId, competenceEvals, prelimNote, tpNote, isFinal, validatedSteps);
+        saveEvaluation(studentName, tpId, competenceEvals, prelimNote, tpNote, isFinal);
         
         toast({
             title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
@@ -138,48 +131,13 @@ export default function EvaluationPage() {
                                 </p>
                             </div>
                         ))}
-                         <div className="flex items-center gap-6">
-                            <div className="w-1/4 p-4 border rounded-lg bg-background/50">
-                                <Label htmlFor="prelim-note">Note Étude Préliminaire / 10</Label>
-                                <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} />
-                            </div>
-                            {tp.validationRequise && (
-                                <div className="flex items-center space-x-2 p-4 border rounded-lg bg-background/50">
-                                    <Checkbox 
-                                        id="val-prelim" 
-                                        checked={validatedSteps['prelim'] || false}
-                                        onCheckedChange={(checked) => handleValidationChange('prelim', !!checked)}
-                                    />
-                                    <Label htmlFor="val-prelim" className="font-bold text-lg">Validation Enseignant</Label>
-                                </div>
-                            )}
+                        <div className="w-1/4 pt-4">
+                            <Label htmlFor="prelim-note">Note Étude Préliminaire / 10</Label>
+                            <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} />
                         </div>
                     </CardContent>
                 </Card>
             )}
-            
-             {tp.validationRequise && (
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><CheckSquare />Validation des Étapes Pratiques</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                        {tp.activitePratique.map((etape, index) => (
-                            <div key={`val-etape-${index}`} className="flex items-center space-x-3 p-3 bg-background/50 rounded-lg">
-                                <Checkbox
-                                    id={`val-etape-${index + 1}`}
-                                    checked={validatedSteps[`etape-${index + 1}`] || false}
-                                    onCheckedChange={(checked) => handleValidationChange(`etape-${index + 1}`, !!checked)}
-                                />
-                                <Label htmlFor={`val-etape-${index + 1}`} className="text-base">
-                                    Étape {index + 1}: {etape.titre}
-                                </Label>
-                            </div>
-                        ))}
-                    </CardContent>
-                 </Card>
-            )}
-
 
             <Card>
                 <CardHeader>
@@ -229,7 +187,7 @@ export default function EvaluationPage() {
                 <CardHeader>
                     <CardTitle>Note Globale du TP</CardTitle>
                 </CardHeader>
-                <CardContent className="w-1/4 p-4 border rounded-lg bg-background/50">
+                <CardContent className="w-1/4">
                     <Label htmlFor="tp-note">Note / 20</Label>
                     <Input id="tp-note" type="number" max="20" min="0" value={tpNote} onChange={e => setTpNote(e.target.value)} />
                 </CardContent>

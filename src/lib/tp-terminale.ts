@@ -33,7 +33,6 @@ export type TP = {
   securiteRangement: string[];
   pointsCles: string[];
   ressources?: string[];
-  validationRequise?: boolean;
 };
 
 function etape(titre: string, duree: string, etapes: string[]): Etape {
@@ -48,7 +47,6 @@ export const tpTerminale: Record<number, TP> = {
     situation: 'Un client se plaint que sa climatisation ne produit plus d\'air froid. Il demande un diagnostic complet et une intervention avant son départ en vacances. Vous devez prendre en charge le diagnostic du circuit de climatisation en respectant les normes environnementales.',
     objectif: 'Mesurer pressions HP/BP, diagnostiquer fuites, effectuer recharge et traçabilité fluide frigorigène. (Compétence C3.1)',
     materiel: ['Station clim agréée', 'Manomètres', 'Détecteur de fuites', 'Fluide R134a/R1234yf', 'EPIs', 'Fiches traçabilité'],
-    validationRequise: true,
     etudePrelim: [
       { type: 'qcm', q: 'Quelle est la principale différence environnementale entre les fluides R134a et R1234yf ?', options: ['Le R1234yf est plus performant', 'Le R1234yf a un potentiel de réchauffement global (PRG) beaucoup plus faible', 'Le R134a est inflammable', 'Ils sont identiques'], r: 'Le R1234yf a un potentiel de réchauffement global (PRG) beaucoup plus faible' },
       { type: 'qcm', q: 'A 20°C, moteur à l\'arrêt, que doivent indiquer les manomètres HP et BP sur un circuit en bon état ?', options: ['HP=10 bar, BP=1 bar', 'Les deux pressions sont égales et correspondent à la pression de saturation du gaz (environ 5-6 bars)', 'HP=0 bar, BP=0 bar'], r: 'Les deux pressions sont égales et correspondent à la pression de saturation du gaz (environ 5-6 bars)' },
@@ -81,7 +79,6 @@ export const tpTerminale: Record<number, TP> = {
     situation: 'Le témoin d\'airbag d\'un véhicule reste allumé en permanence. Le client s\'inquiète pour sa sécurité. Votre mission est de diagnostiquer le système de retenue programmée et de remplacer le composant défectueux en suivant un protocole de sécurité strict.',
     objectif: 'Appliquer procédures sécurité, déposer/reposer airbag, effacer défauts et valider. (Compétence C3.3)',
     materiel: ['Outil diag', 'Airbag neuf', 'Clé dynamométrique', 'EPIs'],
-    validationRequise: true,
     etudePrelim: [
         { type: 'text', q: 'Pourquoi faut-il impérativement débrancher la batterie et attendre au moins 5 minutes avant toute intervention sur un système d\'airbag ?', r: 'Pour permettre aux condensateurs du calculateur d\'airbag de se décharger complètement, afin d\'éviter tout risque de déclenchement accidentel.'},
         { type: 'qcm', q: 'Comment doit-on manipuler et stocker un module d\'airbag non déployé ?', options: ['Face vers le bas pour le protéger', 'Coussin gonflable vers le haut, pour que le projectile parte vers le ciel en cas de déclenchement', 'Sur le côté pour plus de stabilité'], r: 'Coussin gonflable vers le haut, pour que le projectile parte vers le ciel en cas de déclenchement'},
@@ -640,6 +637,7 @@ export const tpTerminale: Record<number, TP> = {
 
 
     
+
 
 
 
