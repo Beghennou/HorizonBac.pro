@@ -62,8 +62,11 @@ function DashboardLayoutContent({
   const classNames = (classes || [])
     .map(c => c.id)
     .filter(name => {
-        if (cursus === 'cap') return name.toLowerCase().includes('cap');
-        return !name.toLowerCase().includes('cap');
+        const lowerCaseName = name.toLowerCase();
+        if (cursus === 'cap') {
+            return lowerCaseName.includes('cap');
+        }
+        return lowerCaseName.includes('bac');
     })
     .sort((a, b) => a.localeCompare(b));
 

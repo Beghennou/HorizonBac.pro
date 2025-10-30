@@ -4,20 +4,24 @@ import { initialTps } from '@/lib/data-manager';
 
 const initialClasses = [
     {
-        id: "2VP1",
-        studentNames: ["Martin Dubois", "Léa Petit", "Thomas Robert", "Chloé Durand", "Hugo Bernard", "Manon Girard", "Lucas Moreau", "Camille Lefevre", "Enzo Roux", "Clara Fournier", "Pierre Lartigue", "AKROUCHI Yanis", "Élève TEST (2VP1)"],
+        id: "2BAC-A",
+        studentNames: ["Martin Dubois", "Léa Petit", "Thomas Robert", "Chloé Durand", "Hugo Bernard", "Manon Girard", "Lucas Moreau", "Camille Lefevre", "Enzo Roux", "Clara Fournier", "Pierre Lartigue", "AKROUCHI Yanis", "Élève TEST (2BAC)"].sort((a, b) => a.localeCompare(b)),
     },
     {
-        id: "2VP2",
-        studentNames: ["Alice Martin", "Paul Garcia", "Jade Dubois", "Louis Laurent", "Emma Simon", "Gabriel Michel", "Élève TEST (2VP2)"],
+        id: "1BAC-B",
+        studentNames: ["Jules Royer", "Rose Gauthier", "Adam Lemaire", "Louise Lambert", "Raphaël Picard", "Juliette Leclerc", "Élève TEST (1BAC)"].sort((a, b) => a.localeCompare(b)),
     },
     {
-        id: "1VP1",
-        studentNames: ["Jules Royer", "Rose Gauthier", "Adam Lemaire", "Louise Lambert", "Raphaël Picard", "Juliette Leclerc", "Élève TEST (1VP1)"],
+        id: "TBAC-C",
+        studentNames: ["Arthur Caron", "Lina Mercier", "Noah Philippe", "Eva Chevalier", "Léo Andre", "Romy Bonnet", "Élève TEST (TBAC)"].sort((a, b) => a.localeCompare(b)),
     },
     {
-        id: "TVP1",
-        studentNames: ["Arthur Caron", "Lina Mercier", "Noah Philippe", "Eva Chevalier", "Léo Andre", "Romy Bonnet", "Élève TEST (TVP1)"],
+        id: "1CAP-A",
+        studentNames: ["Tom Lefebvre", "Zoe Da Silva", "Élève TEST (1CAP)"].sort((a, b) => a.localeCompare(b)),
+    },
+    {
+        id: "2CAP-B",
+        studentNames: ["Maxime Petit", "Eva Leroy", "Élève TEST (2CAP)"].sort((a, b) => a.localeCompare(b)),
     }
 ];
 
@@ -53,7 +57,7 @@ export const seedInitialData = async (firestore: Firestore) => {
     // Seed classes - assuming we want to reset them on each version bump
     initialClasses.forEach(classData => {
         const classRef = doc(firestore, 'classes', classData.id);
-        batch.set(classRef, { studentNames: classData.studentNames.sort((a,b) => a.localeCompare(b)) });
+        batch.set(classRef, { studentNames: classData.studentNames });
     });
 
     // Seed TPs - assuming we want to reset them on each version bump
@@ -72,7 +76,7 @@ export const seedInitialData = async (firestore: Firestore) => {
 
 
 export const checkAndSeedData = async (firestore: Firestore) => {
-    const seedDocRef = doc(firestore, 'config', 'initial_seed_v8'); // Version incrémentée pour garantir la cohérence
+    const seedDocRef = doc(firestore, 'config', 'initial_seed_v9'); // Version incrémentée pour garantir la cohérence
     try {
         const seedDoc = await getDoc(seedDocRef);
         if (!seedDoc.exists()) {

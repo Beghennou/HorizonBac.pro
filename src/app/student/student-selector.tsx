@@ -34,8 +34,11 @@ export default function StudentSelector() {
     return allClassData
       .map(c => c.id)
       .filter(name => {
-          if (cursus === 'cap') return name.toLowerCase().includes('cap');
-          return !name.toLowerCase().includes('cap');
+          const lowerCaseName = name.toLowerCase();
+          if (cursus === 'cap') {
+              return lowerCaseName.includes('cap');
+          }
+          return lowerCaseName.includes('bac');
       })
       .sort();
   }, [allClassData, cursus]);
