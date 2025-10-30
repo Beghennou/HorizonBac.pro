@@ -57,6 +57,7 @@ export default function TpsToEvaluatePage() {
     }, [assignedTps, allTps, classes, selectedClassName, currentTeacherName]);
 
     const studentCount = Object.keys(tpsToEvaluateByStudent).length;
+    const totalTpsCount = Object.values(tpsToEvaluateByStudent).reduce((acc, tps) => acc + tps.length, 0);
 
     return (
         <div className="space-y-6">
@@ -64,7 +65,7 @@ export default function TpsToEvaluatePage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-3 font-headline text-4xl">
                         <ClipboardCheck className="w-10 h-10 text-primary" />
-                        Travaux Pratiques à Évaluer
+                        {totalTpsCount === 1 ? 'Travail Pratique à Évaluer' : 'Travaux Pratiques à Évaluer'}
                     </CardTitle>
                     <CardDescription>
                         {selectedClassName 
@@ -83,7 +84,7 @@ export default function TpsToEvaluatePage() {
                                             <div className="flex items-center gap-4">
                                                 <User className="w-6 h-6 text-accent" />
                                                 <span>{studentName}</span>
-                                                <Badge>{tps.length} TP(s) à évaluer</Badge>
+                                                <Badge>{tps.length} {tps.length === 1 ? 'TP à évaluer' : 'TPs à évaluer'}</Badge>
                                             </div>
                                         </AccordionTrigger>
                                         <AccordionContent>
