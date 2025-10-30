@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, ShieldCheck } from 'lucide-react';
 import { useFirebase } from '@/firebase/provider';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface ValidationTeacherButtonProps {
   studentName: string;
@@ -36,27 +37,29 @@ export function ValidationTeacherButton({
   validationId,
   validationData,
 }: ValidationTeacherButtonProps) {
-  const { teacherName, saveTpValidation } = useFirebase();
+  const { teachers, saveTpValidation } = useFirebase();
   const { toast } = useToast();
   const [password, setPassword] = useState('');
+  const [selectedTeacher, setSelectedTeacher] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
   const handleValidate = () => {
-    if (password === TEACHER_PASSWORD) {
-      if (!teacherName) {
+    if (!selectedTeacher) {
         toast({
-          variant: 'destructive',
-          title: 'Enseignant non identifié',
-          description: "Veuillez vous connecter en tant qu'enseignant pour valider.",
+            variant: 'destructive',
+            title: 'Enseignant non sélectionné',
+            description: "Veuillez sélectionner votre nom dans la liste.",
         });
         return;
-      }
-      saveTpValidation(studentName, tpId, validationId, teacherName);
+    }
+    if (password === TEACHER_PASSWORD) {
+      saveTpValidation(studentName, tpId, validationId, selectedTeacher);
       toast({
         title: 'Étape Validée',
-        description: `L'étape a été marquée comme validée par ${teacherName}.`,
+        description: `L'étape a été marquée comme validée par ${selectedTeacher}.`,
       });
       setPassword('');
+      setSelectedTeacher('');
       setIsOpen(false);
     } else {
       toast({
@@ -91,10 +94,23 @@ export function ValidationTeacherButton({
         <DialogHeader>
           <DialogTitle>Validation Enseignant</DialogTitle>
           <DialogDescription>
-            Cette action est réservée à l'enseignant. Veuillez entrer votre mot de passe pour confirmer la validation de cette étape.
+            Cette action est réservée à l'enseignant. Veuillez vous identifier et entrer le mot de passe pour confirmer la validation de cette étape.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="teacher-select" className="text-right">
+              Enseignant
+            </Label>
+            <Select onValueChange={setSelectedTeacher} value={selectedTeacher}>
+                <SelectTrigger id="teacher-select" className="col-span-3">
+                    <SelectValue placeholder="Choisir votre nom..." />
+                </SelectTrigger>
+                <SelectContent>
+                    {teachers?.map(t => <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>)}
+                </SelectContent>
+            </Select>
+          </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="password" className="text-right">
               Mot de passe
