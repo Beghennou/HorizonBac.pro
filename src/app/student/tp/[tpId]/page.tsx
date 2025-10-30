@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -46,10 +45,9 @@ const AssistantTP = dynamic(() => import('@/components/assistant-tp').then(mod =
     )
 });
 
-const EtapeCard = ({ etape, index, onValidate, isValidationRequired, teacherName, validationData }: { etape: Etape; index: number, onValidate: (step: string) => void; isValidationRequired: boolean; teacherName: string; validationData?: { teacher: string; date: string } }) => {
+const EtapeCard = ({ etape, index, onValidate, isValidationRequired, validationData }: { etape: Etape; index: number, onValidate: (step: string) => void; isValidationRequired: boolean; validationData?: { teacher: string; date: string } }) => {
     const validationId = `etape-${index + 1}`;
-    const validationInfo = validationData;
-
+    
     return (
         <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
             <h4 className="font-headline text-lg text-accent">
@@ -63,13 +61,13 @@ const EtapeCard = ({ etape, index, onValidate, isValidationRequired, teacherName
             </ul>
              {isValidationRequired && (
                  <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
-                    {validationInfo ? (
+                    {validationData?.[validationId] ? (
                          <div className="text-green-400 font-semibold flex items-center justify-center gap-2">
                             <CheckCircle className="w-5 h-5"/>
-                            Étape validée par {validationInfo.teacher} le {validationInfo.date}
+                            Étape validée par {validationData[validationId].teacher} le {validationData[validationId].date}
                         </div>
                     ) : (
-                        <TeacherValidationDialog onUnlock={() => onValidate(validationId)} teacherName={teacherName} />
+                        <TeacherValidationDialog onUnlock={() => onValidate(validationId)} />
                     )}
                 </div>
             )}
@@ -77,9 +75,10 @@ const EtapeCard = ({ etape, index, onValidate, isValidationRequired, teacherName
     );
 };
 
-const TeacherValidationDialog = ({ onUnlock, teacherName }: { onUnlock: () => void; teacherName: string; }) => {
+const TeacherValidationDialog = ({ onUnlock }: { onUnlock: () => void; }) => {
     const [password, setPassword] = useState('');
     const { toast } = useToast();
+    const { teacherName } = useFirebase();
 
     const handleUnlock = () => {
         if (password === 'Mongy') {
@@ -333,38 +332,40 @@ export default function TPPage() {
                 <CardHeader>
                     <CardTitle>Étude Préliminaire</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                    {tp.etudePrelim.map((item, i) => (
-                        <div key={i} className="p-4 border-l-2 border-accent/30 bg-background/50 rounded-r-lg">
-                            <p className="font-bold">Question {i+1}:</p>
-                            <p className="mb-4">{item.q}</p>
-                            
-                            {item.type === 'text' && (
-                                <Textarea 
-                                    placeholder="Votre réponse..." 
-                                    className="bg-card" 
-                                    value={(studentTpAnswers[i] as string) || ''}
-                                    onChange={(e) => handleAnswerChange(i, e.target.value)}
-                                    disabled={assignedTp.status === 'terminé'}
-                                />
-                            )}
+                <CardContent>
+                    <div className="space-y-6">
+                        {tp.etudePrelim.map((item, i) => (
+                            <div key={i} className="p-4 border-l-2 border-accent/30 bg-background/50 rounded-r-lg">
+                                <p className="font-bold">Question {i+1}:</p>
+                                <p className="mb-4">{item.q}</p>
+                                
+                                {item.type === 'text' && (
+                                    <Textarea 
+                                        placeholder="Votre réponse..." 
+                                        className="bg-card" 
+                                        value={(studentTpAnswers[i] as string) || ''}
+                                        onChange={(e) => handleAnswerChange(i, e.target.value)}
+                                        disabled={assignedTp.status === 'terminé'}
+                                    />
+                                )}
 
-                            {item.type === 'qcm' && (
-                                <RadioGroup 
-                                    value={(studentTpAnswers[i] as string) || ''} 
-                                    onValueChange={(value) => handleAnswerChange(i, value)}
-                                    disabled={assignedTp.status === 'terminé'}
-                                >
-                                    {(item as any).options.map((option: string, optIndex: number) => (
-                                        <div key={optIndex} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
-                                            <RadioGroupItem value={option} id={`q${i}-opt${optIndex}`} />
-                                            <Label htmlFor={`q${i}-opt${optIndex}`} className="flex-1 cursor-pointer">{option}</Label>
-                                        </div>
-                                    ))}
-                                </RadioGroup>
-                            )}
-                        </div>
-                    ))}
+                                {item.type === 'qcm' && (
+                                    <RadioGroup 
+                                        value={(studentTpAnswers[i] as string) || ''} 
+                                        onValueChange={(value) => handleAnswerChange(i, value)}
+                                        disabled={assignedTp.status === 'terminé'}
+                                    >
+                                        {(item as any).options.map((option: string, optIndex: number) => (
+                                            <div key={optIndex} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
+                                                <RadioGroupItem value={option} id={`q${i}-opt${optIndex}`} />
+                                                <Label htmlFor={`q${i}-opt${optIndex}`} className="flex-1 cursor-pointer">{option}</Label>
+                                            </div>
+                                        ))}
+                                    </RadioGroup>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                     {tp.validationRequise && (
                         <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
                             {isPrelimValidated ? (
@@ -373,7 +374,7 @@ export default function TPPage() {
                                     Étude préliminaire validée par {validationData['prelim'].teacher} le {validationData['prelim'].date}
                                 </div>
                             ) : (
-                                <TeacherValidationDialog onUnlock={() => handleValidation('prelim')} teacherName={teacherName} />
+                                <TeacherValidationDialog onUnlock={() => handleValidation('prelim')} />
                             )}
                         </div>
                     )}
@@ -393,8 +394,7 @@ export default function TPPage() {
                         index={i} 
                         onValidate={handleValidation}
                         isValidationRequired={tp.validationRequise ?? false}
-                        teacherName={teacherName}
-                        validationData={validationData[`etape-${i + 1}`]}
+                        validationData={validationData}
                     />
                 ))}
             </CardContent>

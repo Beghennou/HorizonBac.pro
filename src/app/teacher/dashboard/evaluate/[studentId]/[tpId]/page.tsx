@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -73,6 +72,8 @@ export default function EvaluationPage() {
     };
 
     const handleSave = (isFinal: boolean) => {
+        if (!studentName || !tpId) return;
+
         // Sauvegarde immédiate du feedback, qu'il s'agisse d'un brouillon ou non.
         saveFeedback(studentName, tpId, teacherFeedback, 'teacher');
         
