@@ -124,6 +124,14 @@ export default function TPPage() {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.match(urlRegex)?.[0];
   }
+
+  const validatedStepsCount = useMemo(() => {
+    if (!studentValidations || !studentValidations.steps) return 0;
+    const practicalStepsKeys = tp.activitePratique.map((_, i) => `etape-${i}`);
+    return practicalStepsKeys.filter(key => studentValidations.steps[key]).length;
+  }, [studentValidations, tp.activitePratique]);
+
+  const totalPracticalSteps = tp.activitePratique.length;
   
   const TpStatusActions = () => {
     if (!assignedTp) return null;
@@ -280,7 +288,14 @@ export default function TPPage() {
 
         <Card>
             <CardHeader>
-                <CardTitle>Activité Pratique</CardTitle>
+                <div className="flex justify-between items-center">
+                    <CardTitle>Activité Pratique</CardTitle>
+                    {totalPracticalSteps > 0 && (
+                        <Badge variant={validatedStepsCount === totalPracticalSteps ? "default" : "secondary"} className="text-base">
+                           Validations : {validatedStepsCount} / {totalPracticalSteps}
+                        </Badge>
+                    )}
+                </div>
             </CardHeader>
             <CardContent>
                 {tp.activitePratique.map((etape, i) => (
@@ -378,3 +393,4 @@ export default function TPPage() {
 }
 
     
+
