@@ -30,7 +30,8 @@ import {
     updateStudentDataInDb,
     updateStudentNameInDb,
     addTeacherInDb,
-    AssignedTp
+    AssignedTp,
+    deleteTeacherFromDb
 } from './firestore-actions';
 import { checkAndSeedData } from './seed-data';
 
@@ -140,7 +141,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const [tps, setTps] = useState<Record<number, TP>>(initialTps);
   const [teacherName, setTeacherNameState] = useState<string>('');
-  const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
+  
   const { user } = userAuthState;
   
   const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
@@ -153,6 +154,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const evaluationsQuery = useMemoFirebase(() => (firestore && user && !user.isAnonymous) ? collection(firestore, 'evaluations') : null, [firestore, user]);
   const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(evaluationsQuery);
   
+  const assignedTps = useMemo(() => {
+    if (!assignedTpsData) return {};
+    return Object.fromEntries(assignedTpsData.map(doc => [doc.id, doc.tps || []]));
+  }, [assignedTpsData]);
   
   useEffect(() => {
     if (firestore) {
@@ -171,14 +176,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     setTps(allTpsMap);
   }, [dynamicTps]);
 
-  
-  useEffect(() => {
-    if (assignedTpsData) {
-      const newAssignedTps = Object.fromEntries(assignedTpsData.map(doc => [doc.id, doc.tps || []]));
-      setAssignedTps(newAssignedTps);
-    }
-  }, [assignedTpsData]);
-  
   const evaluations = useMemo(() => {
      if (!evaluationsData) return {};
      return Object.fromEntries(evaluationsData.map(doc => [doc.id, doc.competences]));
@@ -243,6 +240,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   
   const deleteTeacher = useCallback(async (teacherId: string) => {
     if (!firestore) return;
+    await deleteTeacherFromDb(firestore, teacherId);
     toast({ variant: 'destructive', title: 'Enseignant supprimé', description: `Le profil a été supprimé.` });
   }, [firestore, toast]);
   
@@ -275,7 +273,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const updateTpStatus = useCallback((studentName: string, tpId: number, status: TpStatus) => {
       if (!firestore) return;
       const studentAssignedTps = assignedTps[studentName] || [];
-      updateStudentTpStatusInDb(firestore, studentName, tpId, status, studentAssignedTps);
+      updateStudentTpStatusInDb(firestore, studentName, tpId, status, studentAssignedTps)
+        .then(() => {
+            if (status === 'en-cours') {
+                window.location.reload();
+            }
+        });
   }, [firestore, assignedTps]);
   
   const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
@@ -295,7 +298,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     setTeacherName,
     teachers: teachers || [],
     addTeacher,
-    deleteTeacher: (teacherId: string) => { console.log('deleteTeacher not implemented yet')},
+    deleteTeacher,
     customSignOut,
     classes: classes || [],
     tps,
@@ -312,10 +315,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean) => {
       if (!firestore) return;
       saveStudentEvaluation(firestore, studentName, tpId, currentEvals, evaluations, prelimNote, tpNote, isFinal);
-      toast({
-          title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
-          description: `L'évaluation pour le TP ${tpId} a été enregistrée.`,
-      });
     },
     updateTpStatus,
     savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
