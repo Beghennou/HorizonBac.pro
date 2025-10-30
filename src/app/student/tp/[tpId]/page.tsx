@@ -45,37 +45,7 @@ const AssistantTP = dynamic(() => import('@/components/assistant-tp').then(mod =
     )
 });
 
-const EtapeCard = ({ etape, index, onValidate, isValidationRequired, validationData }: { etape: Etape; index: number, onValidate: (step: string) => void; isValidationRequired: boolean; validationData?: { teacher: string; date: string } }) => {
-    const validationId = `etape-${index + 1}`;
-    
-    return (
-        <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
-            <h4 className="font-headline text-lg text-accent">
-            Étape {index + 1}: {etape.titre}{' '}
-            <span className="text-sm text-muted-foreground font-body">({etape.duree})</span>
-            </h4>
-            <ul className="list-disc pl-5 mt-2 space-y-1 text-foreground/90">
-            {etape.etapes.map((e: string, i: number) => (
-                <li key={i}>{e}</li>
-            ))}
-            </ul>
-             {isValidationRequired && (
-                 <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
-                    {validationData?.[validationId] ? (
-                         <div className="text-green-400 font-semibold flex items-center justify-center gap-2">
-                            <CheckCircle className="w-5 h-5"/>
-                            Étape validée par {validationData[validationId].teacher} le {validationData[validationId].date}
-                        </div>
-                    ) : (
-                        <TeacherValidationDialog onUnlock={() => onValidate(validationId)} />
-                    )}
-                </div>
-            )}
-        </div>
-    );
-};
-
-const TeacherValidationDialog = ({ onUnlock }: { onUnlock: () => void; }) => {
+const TeacherValidationDialog = ({ onUnlock, isUnlocked, validationInfo }: { onUnlock: () => void; isUnlocked: boolean, validationInfo?: { teacher: string; date: string } }) => {
     const [password, setPassword] = useState('');
     const { toast } = useToast();
     const { teacherName } = useFirebase();
@@ -88,6 +58,15 @@ const TeacherValidationDialog = ({ onUnlock }: { onUnlock: () => void; }) => {
             toast({ variant: 'destructive', title: 'Mot de passe incorrect.' });
         }
     };
+    
+    if (isUnlocked && validationInfo) {
+        return (
+            <div className="text-green-400 font-semibold flex items-center justify-center gap-2">
+                <CheckCircle className="w-5 h-5"/>
+                Étape validée par {validationInfo.teacher} le {validationInfo.date}
+            </div>
+        )
+    }
 
     return (
         <AlertDialog>
@@ -231,8 +210,6 @@ export default function TPPage() {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.match(urlRegex)?.[0];
   }
-  
-  const isPrelimValidated = validationData && validationData['prelim'];
 
   return (
     <div className="grid md:grid-cols-3 gap-8 items-start">
@@ -368,14 +345,11 @@ export default function TPPage() {
                     </div>
                     {tp.validationRequise && (
                         <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
-                            {isPrelimValidated ? (
-                                <div className="text-green-400 font-semibold flex items-center justify-center gap-2">
-                                    <CheckCircle className="w-5 h-5"/>
-                                    Étude préliminaire validée par {validationData['prelim'].teacher} le {validationData['prelim'].date}
-                                </div>
-                            ) : (
-                                <TeacherValidationDialog onUnlock={() => handleValidation('prelim')} />
-                            )}
+                            <TeacherValidationDialog 
+                                onUnlock={() => handleValidation('prelim')}
+                                isUnlocked={!!validationData['prelim']}
+                                validationInfo={validationData['prelim']}
+                             />
                         </div>
                     )}
                 </CardContent>
@@ -388,14 +362,26 @@ export default function TPPage() {
             </CardHeader>
             <CardContent>
                 {tp.activitePratique.map((etape, i) => (
-                    <EtapeCard 
-                        key={i} 
-                        etape={etape} 
-                        index={i} 
-                        onValidate={handleValidation}
-                        isValidationRequired={tp.validationRequise ?? false}
-                        validationData={validationData}
-                    />
+                    <div key={i} className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
+                        <h4 className="font-headline text-lg text-accent">
+                        Étape {i + 1}: {etape.titre}{' '}
+                        <span className="text-sm text-muted-foreground font-body">({etape.duree})</span>
+                        </h4>
+                        <ul className="list-disc pl-5 mt-2 space-y-1 text-foreground/90">
+                        {etape.etapes.map((e: string, stepIndex: number) => (
+                            <li key={stepIndex}>{e}</li>
+                        ))}
+                        </ul>
+                         {tp.validationRequise && (
+                             <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
+                                <TeacherValidationDialog 
+                                    onUnlock={() => handleValidation(`etape-${i + 1}`)}
+                                    isUnlocked={!!validationData[`etape-${i + 1}`]}
+                                    validationInfo={validationData[`etape-${i + 1}`]}
+                                />
+                            </div>
+                        )}
+                    </div>
                 ))}
             </CardContent>
         </Card>
