@@ -84,7 +84,7 @@ function StudentDashboard() {
         <section>
           <h2 className="font-headline text-3xl tracking-wide flex items-center gap-3 mb-6">
               <RacingHelmet className="w-8 h-8 text-primary"/>
-              Mes Travaux Pratiques Assignés
+              Mes TP Assignés
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tpModules.map((module) => {

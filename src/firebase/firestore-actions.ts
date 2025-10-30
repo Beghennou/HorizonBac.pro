@@ -1,4 +1,5 @@
 
+
 'use client';
 import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs, updateDoc, addDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
@@ -247,5 +248,3 @@ export const deleteClassFromDb = async (firestore: Firestore, className: string)
         }));
     });
 }
-
-    

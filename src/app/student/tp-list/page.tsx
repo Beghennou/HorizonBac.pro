@@ -1,4 +1,5 @@
 
+
 'use client';
 import { Suspense, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -185,7 +186,7 @@ function TpListPageContent() {
         <div className="md:col-span-1">
             <Card className="h-full flex flex-col">
                 <CardHeader>
-                    <CardTitle>TPs de {niveau}</CardTitle>
+                    <CardTitle>TP de {niveau}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-grow p-2">
                     <ScrollArea className="h-[calc(100vh-20rem)]">

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
@@ -387,5 +388,3 @@ export const useUser = () => {
     const { user, isUserLoading, userError } = useFirebase();
     return { user, isUserLoading, userError };
 }
-
-    

@@ -1,4 +1,5 @@
 
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass, ClipboardCheck, LayoutDashboard, CheckSquare } from 'lucide-react';
@@ -67,7 +68,7 @@ export default function TutorialPage() {
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-3">
-                                    <AccordionTrigger className="text-xl font-headline">3. Assigner des Travaux Pratiques (TP)</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">3. Assigner des TP</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <Users className="inline h-5 w-5"/> <strong>Assigner des TP</strong> :</p>
                                         <ul className="list-disc pl-6 space-y-2">

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -65,12 +66,12 @@ export default function TpsToEvaluatePage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-3 font-headline text-4xl">
                         <ClipboardCheck className="w-10 h-10 text-primary" />
-                        {totalTpsCount === 1 ? 'Travail Pratique à Évaluer' : 'Travaux Pratiques à Évaluer'}
+                        TP à Évaluer
                     </CardTitle>
                     <CardDescription>
                         {selectedClassName 
-                            ? `Liste ${totalTpsCount === 1 ? 'du TP terminé' : 'des TPs terminés'} pour la classe ${selectedClassName}.`
-                            : `Veuillez sélectionner une classe pour voir les TPs à évaluer.`
+                            ? `Liste des TP terminés pour la classe ${selectedClassName}.`
+                            : `Veuillez sélectionner une classe pour voir les TP à évaluer.`
                         }
                     </CardDescription>
                 </CardHeader>
@@ -84,7 +85,7 @@ export default function TpsToEvaluatePage() {
                                             <div className="flex items-center gap-4">
                                                 <User className="w-6 h-6 text-accent" />
                                                 <span>{studentName}</span>
-                                                <Badge>{tps.length} {tps.length === 1 ? 'TP à évaluer' : 'TPs à évaluer'}</Badge>
+                                                <Badge>{tps.length} TP à évaluer</Badge>
                                             </div>
                                         </AccordionTrigger>
                                         <AccordionContent>
