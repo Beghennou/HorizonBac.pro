@@ -16,9 +16,9 @@ import { useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { 
     assignTpToStudents, 
     saveStudentEvaluation,
-    updateStudentTpStatus,
+    updateStudentTpStatus as updateStudentTpStatusInDb,
     saveStudentPrelimAnswer,
-    saveStudentFeedback,
+    saveStudentFeedback as saveStudentFeedbackInDb,
     setTeacherNameInDb as setTeacherNameInDbAction,
     deleteStudent as deleteStudentFromDb,
     emptyClass as emptyClassInDb,
@@ -272,6 +272,17 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     });
   }, [firestore]);
 
+  const updateTpStatus = useCallback((studentName: string, tpId: number, status: TpStatus) => {
+      if (!firestore) return;
+      const studentAssignedTps = assignedTps[studentName] || [];
+      updateStudentTpStatusInDb(firestore, studentName, tpId, status, studentAssignedTps);
+  }, [firestore, assignedTps]);
+  
+  const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
+      if (!firestore) return;
+      saveStudentFeedbackInDb(firestore, studentName, tpId, feedback, author);
+  }, [firestore]);
+
   const contextValue = {
     firebaseApp,
     firestore,
@@ -306,20 +317,12 @@ tps,
           description: `L'évaluation pour le TP ${tpId} a été enregistrée.`,
       });
     },
-    updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => {
-      if (!firestore) return;
-      const studentAssignedTps = assignedTps[studentName] || [];
-      updateStudentTpStatus(firestore, studentName, tpId, status, studentAssignedTps);
-    },
+    updateTpStatus,
     savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => {
       if (!firestore) return;
       saveStudentPrelimAnswer(firestore, studentName, tpId, questionIndex, answer);
     },
-    saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
-      if (!firestore) return;
-      const allFeedbacks = {}; // This is a simplification. In a real app this would be fetched.
-      saveStudentFeedback(firestore, studentName, tpId, feedback, author, allFeedbacks);
-    },
+    saveFeedback,
     saveTpValidation,
     deleteStudent: (studentId: string, studentName: string) => {
         if (!firestore) return;

@@ -111,15 +111,16 @@ export const saveStudentPrelimAnswer = (firestore: Firestore, studentName: strin
     });
 };
 
-export const saveStudentFeedback = (firestore: Firestore, studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher', currentFeedbacks: Record<string, any>) => {
+export const saveStudentFeedback = (firestore: Firestore, studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
     const feedbackDocRef = doc(firestore, `students/${studentName}/feedbacks`, tpId.toString());
-    const updatedFeedbacks = { ...currentFeedbacks, [author]: feedback };
-
-    setDoc(feedbackDocRef, { tps: updatedFeedbacks }, { merge: true }).catch(error => {
+    const feedbackData = {
+        [author]: feedback,
+    };
+    setDoc(feedbackDocRef, { tps: feedbackData }, { merge: true }).catch(error => {
          errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: feedbackDocRef.path,
             operation: 'update',
-            requestResourceData: { tps: updatedFeedbacks },
+            requestResourceData: { tps: feedbackData },
         }));
     });
 };
