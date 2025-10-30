@@ -97,6 +97,7 @@ export interface FirebaseContextState {
   updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => void;
   savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => void;
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
+  saveTpValidation: (studentName: string, tpId: number, validationId: string, teacherName: string) => void;
   teacherName: string;
   setTeacherName: (name: string) => void;
   teachers: DocumentData[];
@@ -253,6 +254,24 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     }
   }, [auth]);
 
+  const saveTpValidation = useCallback((studentName: string, tpId: number, validationId: string, teacherName: string) => {
+    if (!firestore) return;
+    const validationDocRef = doc(firestore, `students/${studentName}/validations`, tpId.toString());
+    const validationData = {
+        [validationId]: {
+            teacherName,
+            date: new Date().toLocaleString('fr-FR')
+        }
+    };
+    setDoc(validationDocRef, { steps: validationData }, { merge: true }).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: validationDocRef.path,
+            operation: 'write',
+            requestResourceData: { steps: validationData }
+        }));
+    });
+  }, [firestore]);
+
   const contextValue = {
     firebaseApp,
     firestore,
@@ -301,6 +320,7 @@ tps,
       const allFeedbacks = {}; // This is a simplification. In a real app this would be fetched.
       saveStudentFeedback(firestore, studentName, tpId, feedback, author, allFeedbacks);
     },
+    saveTpValidation,
     deleteStudent: (studentId: string, studentName: string) => {
         if (!firestore) return;
         deleteStudentFromDb(firestore, studentId, studentName);

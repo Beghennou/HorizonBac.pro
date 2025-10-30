@@ -294,6 +294,8 @@ export const updateStudentNameInDb = async (firestore: Firestore, oldName: strin
     await moveSubCollection(firestore, oldName, newName, 'prelimAnswers');
     await moveSubCollection(firestore, oldName, newName, 'feedbacks');
     await moveSubCollection(firestore, oldName, newName, 'storedEvals');
+    await moveSubCollection(firestore, oldName, newName, 'validations');
+
 
     // Update the name field inside the student document itself if it exists
     const studentDocRef = doc(firestore, 'students', newName); // Path is now the new name

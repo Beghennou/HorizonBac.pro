@@ -17,6 +17,7 @@ import { collection, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ValidationTeacherButton } from '@/components/ValidationTeacherButton';
 
 const AssistantTP = dynamic(() => import('@/components/assistant-tp').then(mod => mod.AssistantTP), {
     ssr: false,
@@ -45,6 +46,8 @@ export default function TPPage() {
   
   const { data: studentPrelimAnswers } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName, tpId]));
   const { data: studentFeedbacks } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName, tpId]));
+  const { data: studentValidations } = useDoc(useMemoFirebase(() => firestore && studentName && tpId ? doc(firestore, `students/${studentName}/validations`, tpId.toString()) : null, [firestore, studentName, tpId]));
+
 
   const prelimAnswersForTp = useMemo(() => {
     const doc = studentPrelimAnswers?.find(d => d.id === tpId?.toString());
@@ -254,8 +257,14 @@ export default function TPPage() {
                             </div>
                         ))}
                     </div>
-                    <div className="mt-6 text-center">
+                    <div className="mt-6 text-center border-t-2 border-dashed border-destructive/50 pt-4">
                         <p className="font-bold text-destructive text-lg">Appel professeur avant de commencer l'activité pratique</p>
+                        <ValidationTeacherButton 
+                            studentName={studentName}
+                            tpId={tp.id}
+                            validationId="prelim"
+                            validationData={studentValidations?.steps?.prelim}
+                        />
                     </div>
                 </CardContent>
             </Card>
@@ -283,6 +292,12 @@ export default function TPPage() {
                                 Appel Professeur
                             </AlertDescription>
                         </Alert>
+                         <ValidationTeacherButton 
+                            studentName={studentName}
+                            tpId={tp.id}
+                            validationId={`etape-${i}`}
+                            validationData={studentValidations?.steps?.[`etape-${i}`]}
+                        />
                     </div>
                 ))}
             </CardContent>

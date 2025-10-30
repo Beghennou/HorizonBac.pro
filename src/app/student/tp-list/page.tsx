@@ -12,8 +12,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ValidationTeacherButton } from '@/components/ValidationTeacherButton';
 
-const EtapeCard = ({ etape, index }: { etape: any, index: number }) => (
+const EtapeCard = ({ etape, index, studentName, tpId }: { etape: any, index: number, studentName: string | null, tpId: number }) => (
     <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
         <h4 className="font-headline text-lg text-accent">Étape {index + 1}: {etape.titre} <span className="text-sm text-muted-foreground font-body">({etape.duree})</span></h4>
         <ul className="list-disc pl-5 mt-2 space-y-1 text-foreground/90">
@@ -25,6 +26,14 @@ const EtapeCard = ({ etape, index }: { etape: any, index: number }) => (
                 Appel Professeur
             </AlertDescription>
         </Alert>
+        {studentName && (
+            <ValidationTeacherButton 
+                studentName={studentName}
+                tpId={tpId}
+                validationId={`etape-${index}`}
+                // validationData is not available in this view, so we pass undefined
+            />
+        )}
     </div>
 );
 
@@ -113,8 +122,16 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                               </div>
                           </div>
                       ))}
-                      <div className="mt-6 text-center">
+                      <div className="mt-6 text-center border-t-2 border-dashed border-destructive/50 pt-4">
                         <p className="font-bold text-destructive text-lg">Appel professeur avant de commencer l'activité pratique</p>
+                         {studentName && (
+                            <ValidationTeacherButton 
+                                studentName={studentName}
+                                tpId={tp.id}
+                                validationId="prelim"
+                                // validationData is not available in this view, so we pass undefined
+                            />
+                        )}
                       </div>
                   </CardContent>
               </Card>
@@ -126,7 +143,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                 </CardHeader>
                 <CardContent>
                     {tp.activitePratique.map((etape, i) => (
-                        <EtapeCard key={i} etape={etape} index={i} />
+                        <EtapeCard key={i} etape={etape} index={i} studentName={studentName} tpId={tp.id} />
                     ))}
                 </CardContent>
             </Card>
