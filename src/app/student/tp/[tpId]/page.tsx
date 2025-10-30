@@ -211,8 +211,6 @@ export default function TPPage() {
     return text.match(urlRegex)?.[0];
   }
 
-  const isPracticActivityVisible = !tp.validationRequise || unlockedStep > 0;
-
   return (
     <div className="grid md:grid-cols-3 gap-8 items-start">
       <div className="md:col-span-2 space-y-6">
@@ -343,10 +341,8 @@ export default function TPPage() {
                             )}
                         </div>
                     ))}
-                </CardContent>
-                {tp.validationRequise && unlockedStep === 0 && assignedTp.status !== 'terminé' && (
-                    <CardFooter className="p-4 border-t border-dashed border-accent">
-                        <div className="w-full text-center">
+                    {tp.validationRequise && unlockedStep === 0 && assignedTp.status !== 'terminé' && (
+                        <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
                             <p className="text-muted-foreground mb-4">Veuillez faire valider cette étude préliminaire par votre enseignant avant de continuer.</p>
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -355,39 +351,42 @@ export default function TPPage() {
                                 <TeacherValidationDialog onUnlock={() => unlockNextStep(0)} />
                             </AlertDialog>
                         </div>
-                    </CardFooter>
-                )}
-            </Card>
-        )}
-
-
-        {isPracticActivityVisible && (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Activité Pratique</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {tp.activitePratique.map((etape, i) => {
-                      if (tp.validationRequise && i >= unlockedStep) return null;
-
-                      return (
-                        <div key={i}>
-                           <EtapeCard etape={etape} index={i} />
-                            {tp.validationRequise && i < tp.activitePratique.length - 1 && i === unlockedStep - 1 && assignedTp.status !== 'terminé' && (
-                                <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
-                                    <p className="text-muted-foreground mb-4">Faites valider cette étape avant de continuer.</p>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild><Button><Lock className="mr-2"/>Débloquer l'étape {i+2}</Button></AlertDialogTrigger>
-                                        <TeacherValidationDialog onUnlock={() => unlockNextStep(i + 1)} />
-                                    </AlertDialog>
-                                </div>
-                            )}
-                        </div>
-                      )
-                    })}
+                    )}
                 </CardContent>
             </Card>
         )}
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Activité Pratique</CardTitle>
+            </CardHeader>
+            <CardContent>
+                {tp.validationRequise && unlockedStep === 0 ? (
+                    <div className="text-center p-6 bg-background/30 rounded-lg">
+                        <p className="text-muted-foreground">L'activité pratique est verrouillée. Veuillez faire valider l'étude préliminaire par votre enseignant.</p>
+                    </div>
+                ) : (
+                    tp.activitePratique.map((etape, i) => {
+                        if (tp.validationRequise && i >= unlockedStep) return null;
+
+                        return (
+                            <div key={i}>
+                                <EtapeCard etape={etape} index={i} />
+                                {tp.validationRequise && i < tp.activitePratique.length - 1 && i === unlockedStep - 1 && assignedTp.status !== 'terminé' && (
+                                    <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
+                                        <p className="text-muted-foreground mb-4">Faites valider cette étape avant de continuer.</p>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild><Button><Lock className="mr-2"/>Débloquer l'étape {i + 2}</Button></AlertDialogTrigger>
+                                            <TeacherValidationDialog onUnlock={() => unlockNextStep(i + 1)} />
+                                        </AlertDialog>
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    })
+                )}
+            </CardContent>
+        </Card>
         
         {unlockedStep >= tp.activitePratique.length && (
             <>
