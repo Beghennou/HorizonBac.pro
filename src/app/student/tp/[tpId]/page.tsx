@@ -124,6 +124,28 @@ export default function TPPage() {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.match(urlRegex)?.[0];
   }
+  
+  const TpStatusActions = () => {
+    if (!assignedTp) return null;
+
+    return (
+      <div className="flex flex-col items-end gap-2">
+        {assignedTp.status === 'non-commencé' && (
+            <Button onClick={handleStart} size="lg"><Play className="mr-2"/>Commencer le TP</Button>
+        )}
+        {assignedTp.status === 'en-cours' && (
+            <Button onClick={handleFinish} variant="outline" size="lg" className="border-accent text-accent hover:bg-accent hover:text-black">
+                <CheckeredFlag className="mr-2"/>Terminer le TP
+            </Button>
+        )}
+         {assignedTp.status === 'terminé' && (
+            <Badge className="bg-green-600 text-white text-base p-3">
+                <CheckCircle className="mr-2"/>TP Terminé
+            </Badge>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="grid md:grid-cols-3 gap-8 items-start">
@@ -134,21 +156,7 @@ export default function TPPage() {
               <h1 className="font-headline text-4xl tracking-wide">{tp.titre}</h1>
               <p className="text-muted-foreground mt-1 text-lg">{tp.objectif.split(' (Compétence')[0]}</p>
             </div>
-             <div className="flex flex-col items-end gap-2">
-                {assignedTp.status === 'non-commencé' && (
-                    <Button onClick={handleStart} size="lg"><Play className="mr-2"/>Commencer le TP</Button>
-                )}
-                {assignedTp.status === 'en-cours' && (
-                    <Button onClick={handleFinish} variant="outline" size="lg" className="border-accent text-accent hover:bg-accent hover:text-black">
-                        <CheckeredFlag className="mr-2"/>Terminer le TP
-                    </Button>
-                )}
-                 {assignedTp.status === 'terminé' && (
-                    <Badge className="bg-green-600 text-white text-base p-3">
-                        <CheckCircle className="mr-2"/>TP Terminé
-                    </Badge>
-                )}
-             </div>
+            <TpStatusActions />
         </div>
 
         {evaluatedCompetenceIds.length > 0 && (
@@ -356,6 +364,11 @@ export default function TPPage() {
                 </CardContent>
             </Card>
         </>
+        
+        <div className="flex justify-end pt-6">
+          <TpStatusActions />
+        </div>
+
       </div>
       <div className="md:col-span-1">
         <AssistantTP tp={tp} />
