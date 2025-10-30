@@ -131,10 +131,11 @@ export default function EvaluationPage() {
                                 </p>
                             </div>
                         ))}
-                        <div className="border border-destructive p-4 rounded-md mt-6">
-                            <div className="w-full md:w-1/4">
-                                <Label htmlFor="prelim-note" className="font-bold text-lg">Note Étude Préliminaire / 10</Label>
-                                <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} className="mt-2 text-lg h-12" />
+                        <div className="pt-4 mt-4 border-t">
+                            <Label htmlFor="prelim-note" className="font-bold text-lg">Note Étude Préliminaire / 10</Label>
+                             <div className="flex items-center gap-4 mt-2">
+                                <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} className="w-24 text-lg h-12" />
+                                <p className="text-destructive font-bold text-sm">Entrée la note ici</p>
                             </div>
                         </div>
                     </CardContent>
@@ -185,13 +186,16 @@ export default function EvaluationPage() {
                 </CardContent>
             </Card>
             
-            <Card className="border-2 border-destructive">
+            <Card>
                 <CardHeader>
-                    <CardTitle className="text-destructive">Note Globale du TP</CardTitle>
+                    <CardTitle>Note Globale du TP</CardTitle>
                 </CardHeader>
-                <CardContent className="w-full md:w-1/4">
+                 <CardContent>
                     <Label htmlFor="tp-note" className="font-bold text-lg">Note / 20</Label>
-                    <Input id="tp-note" type="number" max="20" min="0" value={tpNote} onChange={e => setTpNote(e.target.value)} className="mt-2 text-lg h-12" />
+                    <div className="flex items-center gap-4 mt-2">
+                        <Input id="tp-note" type="number" max="20" min="0" value={tpNote} onChange={e => setTpNote(e.target.value)} className="w-24 text-lg h-12" />
+                        <p className="text-destructive font-bold text-sm">Entrée la note ici</p>
+                    </div>
                 </CardContent>
             </Card>
 
