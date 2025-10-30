@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { DraftingCompass, PlusCircle, Save, Trash2, X, FilePenLine } from "lucide-react";
 import { useFieldArray, useForm, Controller } from "react-hook-form";
-import { allBlocs, competencesParNiveau, Niveau, TP } from "@/lib/data-manager";
+import { allBlocs, competencesParNiveau, Niveau, TP, Cursus } from "@/lib/data-manager";
 import { useFirebase } from '@/firebase/provider';
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,7 +65,7 @@ export default function TPDesignerPage() {
     const { addTp, teacherName, tps } = useFirebase(); 
     const [isEditMode, setIsEditMode] = useState(false);
     
-    const cursus = searchParams.get('cursus') || 'bacpro';
+    const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
     const defaultNiveau = cursus === 'cap' ? 'cap1' : 'seconde';
 
     const form = useForm<TpFormValues>({
@@ -174,6 +174,9 @@ export default function TPDesignerPage() {
         ? [{value: 'cap1', label: 'CAP 1ère Année'}, {value: 'cap2', label: 'CAP 2ème Année'}]
         : [{value: 'seconde', label: 'Seconde'}, {value: 'premiere', label: 'Première'}, {value: 'terminale', label: 'Terminale'}];
 
+    const competencesForSelectedNiveau = competencesParNiveau[selectedNiveau] || {};
+
+
     return (
         <div className="space-y-8">
             <div>
@@ -263,7 +266,7 @@ export default function TPDesignerPage() {
                          <FormField control={form.control} name="competences" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Compétences Associées</FormLabel>
-                                {Object.entries(competencesParNiveau[selectedNiveau] || {}).map(([blocKey, bloc]) => (
+                                {Object.entries(competencesForSelectedNiveau).map(([blocKey, bloc]) => (
                                     <div key={blocKey}>
                                         <h4 className="font-semibold mt-2">{bloc.title}</h4>
                                         {Object.entries(bloc.items).map(([competenceId, description]) => (

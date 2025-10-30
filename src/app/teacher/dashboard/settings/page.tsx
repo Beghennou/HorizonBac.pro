@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,10 +26,12 @@ import Papa from 'papaparse';
 import { Student } from '@/lib/types';
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Cursus } from '@/lib/data-manager';
 
 
 export default function SettingsPage() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
   const { firestore, classes, teacherName, setTeacherName, updateClassWithCsv, deleteStudent, emptyClass, resetAllStudentLists, createClass, deleteClass, addTeacher, deleteTeacher, teachers, updateStudentName } = useFirebase();
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
@@ -56,6 +59,8 @@ export default function SettingsPage() {
   const [secondeClassToUpdate, setSecondeClassToUpdate] = useState('');
   const [premiereClassToUpdate, setPremiereClassToUpdate] = useState('');
   const [terminaleClassToUpdate, setTerminaleClassToUpdate] = useState('');
+  const [cap1ClassToUpdate, setCap1ClassToUpdate] = useState('');
+  const [cap2ClassToUpdate, setCap2ClassToUpdate] = useState('');
   
   const [newTeacherName, setNewTeacherName] = useState('');
   const [teacherToDelete, setTeacherToDelete] = useState('');
@@ -65,12 +70,28 @@ export default function SettingsPage() {
   const [newStudentFirstName, setNewStudentFirstName] = useState('');
   const [newStudentLastName, setNewStudentLastName] = useState('');
 
-  const classNames = useMemo(() => classes.map(c => c.id).sort(), [classes]);
+  const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
+
+  const classNames = useMemo(() => classes
+    .map(c => c.id)
+    .filter(name => {
+        const lowerCaseName = name.toLowerCase();
+        if (cursus === 'cap') {
+            return lowerCaseName.includes('cap');
+        }
+        // Pour bacpro, on exclut les CAPs
+        return !lowerCaseName.includes('cap');
+    })
+    .sort(), [classes, cursus]);
+
   const teacherList = useMemo(() => teachers.sort((a,b) => a.name.localeCompare(b.name)), [teachers]);
 
-  const secondeClasses = useMemo(() => classNames.filter(name => name.startsWith('2')), [classNames]);
-  const premiereClasses = useMemo(() => classNames.filter(name => name.startsWith('1')), [classNames]);
-  const terminaleClasses = useMemo(() => classNames.filter(name => name.startsWith('T')), [classNames]);
+  const secondeClasses = useMemo(() => classNames.filter(name => name.startsWith('2BAC')), [classNames]);
+  const premiereClasses = useMemo(() => classNames.filter(name => name.startsWith('1BAC')), [classNames]);
+  const terminaleClasses = useMemo(() => classNames.filter(name => name.startsWith('TBAC')), [classNames]);
+  const cap1Classes = useMemo(() => classNames.filter(name => name.startsWith('1CAP')), [classNames]);
+  const cap2Classes = useMemo(() => classNames.filter(name => name.startsWith('2CAP')), [classNames]);
+
 
   useEffect(() => {
     setLocalTeacherName(teacherName);
@@ -145,7 +166,7 @@ export default function SettingsPage() {
         toast({ variant: 'destructive', title: 'Nom de classe vide', description: 'Veuillez entrer un nom pour la nouvelle classe.' });
         return;
     }
-    if (classNames.includes(newClassName.trim())) {
+    if (classes.map(c=>c.id).includes(newClassName.trim())) {
         toast({ variant: 'destructive', title: 'Classe existante', description: 'Une classe avec ce nom existe déjà.' });
         return;
     }
@@ -252,7 +273,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-headline text-4xl lg:text-5xl tracking-wide">Paramètres &amp; Configuration</h1>
+        <h1 className="font-headline text-4xl lg:text-5xl tracking-wide">Paramètres &amp; Configuration ({cursus.toUpperCase()})</h1>
         <p className="text-muted-foreground mt-2">
           Gérez les paramètres de l'application, les élèves et les classes pour la nouvelle année.
         </p>
@@ -284,7 +305,7 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><UserCog /> Gestion des Enseignants</CardTitle>
-          <CardDescription>Ajoutez ou supprimez des profils d'enseignants.</CardDescription>
+          <CardDescription>Ajoutez ou supprimez des profils d'enseignants. Cette section est commune à tous les cursus.</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="add">
@@ -341,7 +362,7 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><UserPlus /> Gestion des Élèves</CardTitle>
+          <CardTitle className="flex items-center gap-2"><UserPlus /> Gestion des Élèves ({cursus.toUpperCase()})</CardTitle>
           <CardDescription>Ajoutez, modifiez ou supprimez des élèves manuellement.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -475,65 +496,105 @@ export default function SettingsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><ChevronsRight /> Gestion des Classes</CardTitle>
+          <CardTitle className="flex items-center gap-2"><ChevronsRight /> Gestion des Classes ({cursus.toUpperCase()})</CardTitle>
           <CardDescription>
-            Créez, supprimez, importez les listes d'élèves pour la nouvelle année scolaire ou videz une classe.
+            Créez, supprimez, importez les listes d'élèves ou videz une classe pour le cursus sélectionné.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
             <div className="space-y-2 p-4 border rounded-lg">
                 <Label className="font-bold">Créer une nouvelle classe</Label>
                 <div className="flex items-center gap-2">
-                    <Input placeholder="Nom de la nouvelle classe, ex: 1MV3" value={newClassName} onChange={e => setNewClassName(e.target.value)} />
+                    <Input placeholder="Nom de la nouvelle classe, ex: 1CAP-A" value={newClassName} onChange={e => setNewClassName(e.target.value)} />
                     <Button onClick={handleCreateClass}><PlusCircle className="mr-2" /> Créer</Button>
                 </div>
             </div>
              <div className="space-y-2 p-4 border rounded-lg">
                 <Label className="font-bold">Importer des listes d'élèves par niveau</Label>
-                <div className="space-y-3 mt-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                        <Select value={secondeClassToUpdate} onValueChange={setSecondeClassToUpdate}>
-                            <SelectTrigger><SelectValue placeholder="Choisir une classe de Seconde..."/></SelectTrigger>
-                            <SelectContent>
-                                {secondeClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                        <Button asChild variant="outline">
-                            <label className="cursor-pointer w-full">
-                                <Upload className="mr-2 h-4 w-4" /> Importer CSV Seconde
-                                <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, secondeClassToUpdate)} />
-                            </label>
-                        </Button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                        <Select value={premiereClassToUpdate} onValueChange={setPremiereClassToUpdate}>
-                            <SelectTrigger><SelectValue placeholder="Choisir une classe de Première..."/></SelectTrigger>
-                            <SelectContent>
-                                {premiereClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                        <Button asChild variant="outline">
-                            <label className="cursor-pointer w-full">
-                                <Upload className="mr-2 h-4 w-4" /> Importer CSV Première
-                                <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, premiereClassToUpdate)} />
-                            </label>
-                        </Button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                        <Select value={terminaleClassToUpdate} onValueChange={setTerminaleClassToUpdate}>
-                            <SelectTrigger><SelectValue placeholder="Choisir une classe de Terminale..."/></SelectTrigger>
-                            <SelectContent>
-                                {terminaleClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                        <Button asChild variant="outline">
-                            <label className="cursor-pointer w-full">
-                                <Upload className="mr-2 h-4 w-4" /> Importer CSV Terminale
-                                <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, terminaleClassToUpdate)} />
-                            </label>
-                        </Button>
-                    </div>
-                </div>
+                <Tabs defaultValue={cursus}>
+                    <TabsList className="grid w-full grid-cols-2 mt-2">
+                        <TabsTrigger value="bacpro" disabled={cursus !== 'bacpro'}>BAC PRO</TabsTrigger>
+                        <TabsTrigger value="cap" disabled={cursus !== 'cap'}>CAP</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="bacpro" className="pt-4">
+                        <div className="space-y-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                <Select value={secondeClassToUpdate} onValueChange={setSecondeClassToUpdate}>
+                                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Seconde..."/></SelectTrigger>
+                                    <SelectContent>
+                                        {secondeClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <Button asChild variant="outline">
+                                    <label className="cursor-pointer w-full">
+                                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Seconde
+                                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, secondeClassToUpdate)} />
+                                    </label>
+                                </Button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                <Select value={premiereClassToUpdate} onValueChange={setPremiereClassToUpdate}>
+                                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Première..."/></SelectTrigger>
+                                    <SelectContent>
+                                        {premiereClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <Button asChild variant="outline">
+                                    <label className="cursor-pointer w-full">
+                                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Première
+                                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, premiereClassToUpdate)} />
+                                    </label>
+                                </Button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                <Select value={terminaleClassToUpdate} onValueChange={setTerminaleClassToUpdate}>
+                                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Terminale..."/></SelectTrigger>
+                                    <SelectContent>
+                                        {terminaleClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <Button asChild variant="outline">
+                                    <label className="cursor-pointer w-full">
+                                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Terminale
+                                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, terminaleClassToUpdate)} />
+                                    </label>
+                                </Button>
+                            </div>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="cap" className="pt-4">
+                        <div className="space-y-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                <Select value={cap1ClassToUpdate} onValueChange={setCap1ClassToUpdate}>
+                                    <SelectTrigger><SelectValue placeholder="Choisir une classe de 1ère année CAP..."/></SelectTrigger>
+                                    <SelectContent>
+                                        {cap1Classes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <Button asChild variant="outline">
+                                    <label className="cursor-pointer w-full">
+                                        <Upload className="mr-2 h-4 w-4" /> Importer CSV 1ère Année CAP
+                                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, cap1ClassToUpdate)} />
+                                    </label>
+                                </Button>
+                            </div>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                <Select value={cap2ClassToUpdate} onValueChange={setCap2ClassToUpdate}>
+                                    <SelectTrigger><SelectValue placeholder="Choisir une classe de 2ème année CAP..."/></SelectTrigger>
+                                    <SelectContent>
+                                        {cap2Classes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <Button asChild variant="outline">
+                                    <label className="cursor-pointer w-full">
+                                        <Upload className="mr-2 h-4 w-4" /> Importer CSV 2ème Année CAP
+                                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, cap2ClassToUpdate)} />
+                                    </label>
+                                </Button>
+                            </div>
+                        </div>
+                    </TabsContent>
+                </Tabs>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2 p-4 border rounded-lg">
@@ -598,7 +659,7 @@ export default function SettingsPage() {
                <div className="flex justify-between items-center p-4 border border-destructive/50 rounded-lg">
                   <div>
                     <p className="font-medium">Vider les listes d'élèves de **toutes** les classes</p>
-                    <p className="text-sm text-muted-foreground">Utilisez cette fonction en fin d'année pour préparer la prochaine rentrée.</p>
+                    <p className="text-sm text-muted-foreground">Utilisez cette fonction en fin d'année pour préparer la prochaine rentrée. Attention, ceci affecte TOUS les cursus.</p>
                   </div>
                    <AlertDialog>
                       <AlertDialogTrigger asChild>
@@ -684,3 +745,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
