@@ -82,7 +82,7 @@ export const saveStudentEvaluation = async (firestore: Firestore, studentName: s
     });
 };
 
-export const updateStudentTpStatus = async (firestore: Firestore, studentName: string, tpId: number, status: TpStatus, assignedTpsForStudent: AssignedTp[]) => {
+export const updateStudentTpStatusInDb = async (firestore: Firestore, studentName: string, tpId: number, status: TpStatus, assignedTpsForStudent: AssignedTp[]) => {
     const studentDocRef = doc(firestore, `assignedTps/${studentName}`);
     const tpIndex = assignedTpsForStudent.findIndex(tp => tp.id === tpId);
     

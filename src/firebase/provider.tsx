@@ -16,7 +16,7 @@ import { useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { 
     assignTpToStudents, 
     saveStudentEvaluation,
-    updateStudentTpStatus as updateStudentTpStatusInDb,
+    updateStudentTpStatusInDb,
     saveStudentPrelimAnswer,
     saveStudentFeedback as saveStudentFeedbackInDb,
     setTeacherNameInDb as setTeacherNameInDbAction,
@@ -275,25 +275,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const updateTpStatus = useCallback((studentName: string, tpId: number, status: TpStatus) => {
       if (!firestore) return;
       const studentAssignedTps = assignedTps[studentName] || [];
-      const tpIndex = studentAssignedTps.findIndex(tp => tp.id === tpId);
-      if (tpIndex > -1) {
-          const newTps = [...studentAssignedTps];
-          newTps[tpIndex] = { ...newTps[tpIndex], status };
-          
-          setAssignedTps(prev => ({
-              ...prev,
-              [studentName]: newTps,
-          }));
-
-          const studentDocRef = doc(firestore, `assignedTps/${studentName}`);
-          setDoc(studentDocRef, { tps: newTps }).catch(error => {
-              errorEmitter.emit('permission-error', new FirestorePermissionError({
-                  path: studentDocRef.path,
-                  operation: 'update',
-                  requestResourceData: { tps: newTps }
-              }));
-          });
-      }
+      updateStudentTpStatusInDb(firestore, studentName, tpId, status, studentAssignedTps);
   }, [firestore, assignedTps]);
   
   const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
