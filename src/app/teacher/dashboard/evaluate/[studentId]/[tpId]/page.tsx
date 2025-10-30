@@ -133,9 +133,8 @@ export default function EvaluationPage() {
                         ))}
                         <div className="pt-4 mt-4 border-t">
                             <Label htmlFor="prelim-note" className="font-bold text-lg">Note Étude Préliminaire / 10</Label>
-                             <div className="flex items-center gap-4 mt-2 p-3 border border-destructive rounded-lg">
-                                <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} className="w-24 text-lg h-12" />
-                                <p className="text-destructive font-bold text-sm">Entrée la note ici</p>
+                             <div className="flex items-center gap-4 mt-2">
+                                <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} className="w-24 text-lg h-12 border-destructive border-2" />
                             </div>
                         </div>
                     </CardContent>
@@ -192,9 +191,8 @@ export default function EvaluationPage() {
                 </CardHeader>
                  <CardContent>
                     <Label htmlFor="tp-note" className="font-bold text-lg">Note / 20</Label>
-                    <div className="flex items-center gap-4 mt-2 p-3 border border-destructive rounded-lg">
-                        <Input id="tp-note" type="number" max="20" min="0" value={tpNote} onChange={e => setTpNote(e.target.value)} className="w-24 text-lg h-12" />
-                        <p className="text-destructive font-bold text-sm">Entrée la note ici</p>
+                    <div className="flex items-center gap-4 mt-2">
+                        <Input id="tp-note" type="number" max="20" min="0" value={tpNote} onChange={e => setTpNote(e.target.value)} className="w-24 text-lg h-12 border-destructive border-2" />
                     </div>
                 </CardContent>
             </Card>
