@@ -136,7 +136,6 @@ function StudentDashboard() {
                         <Link href={linkHref}>
                           {currentStatusInfo.icon}
                           {currentStatusInfo.buttonText}
-                          {module.status === 'non-commencé' && <ArrowRight className="ml-2"/>}
                         </Link>
                       </Button>
                     )}
