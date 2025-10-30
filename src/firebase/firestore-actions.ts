@@ -1,7 +1,7 @@
 
 
 'use client';
-import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs, updateDoc, addDoc } from 'firebase/firestore';
+import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs, updateDoc, addDoc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { TP } from '@/lib/data-manager';
 import type { TpStatus } from './provider';
@@ -248,3 +248,64 @@ export const deleteClassFromDb = async (firestore: Firestore, className: string)
         }));
     });
 }
+
+async function moveDoc(firestore: Firestore, oldPath: string, newPath: string) {
+    const oldDocRef = doc(firestore, oldPath);
+    const newDocRef = doc(firestore, newPath);
+    const oldDocSnap = await getDoc(oldDocRef);
+    if (oldDocSnap.exists()) {
+        await setDoc(newDocRef, oldDocSnap.data());
+        await deleteDoc(oldDocRef);
+    }
+}
+
+async function moveSubCollection(firestore: Firestore, oldStudentName: string, newStudentName: string, subCollectionName: string) {
+    const oldSubCollectionRef = collection(firestore, 'students', oldStudentName, subCollectionName);
+    const oldSubCollectionSnapshot = await getDocs(oldSubCollectionRef);
+    
+    const batch = writeBatch(firestore);
+
+    oldSubCollectionSnapshot.forEach(docSnap => {
+        const newDocRef = doc(firestore, 'students', newStudentName, subCollectionName, docSnap.id);
+        batch.set(newDocRef, docSnap.data());
+        batch.delete(docSnap.ref);
+    });
+
+    await batch.commit();
+}
+
+export const updateStudentNameInDb = async (firestore: Firestore, oldName: string, newName: string, className: string) => {
+    const batch = writeBatch(firestore);
+
+    // 1. Update name in class's student list
+    const classDocRef = doc(firestore, 'classes', className);
+    const classDoc = await getDoc(classDocRef);
+    if (classDoc.exists()) {
+        const studentNames = (classDoc.data().studentNames as string[]).map(name => name === oldName ? newName : name);
+        batch.update(classDocRef, { studentNames });
+    }
+
+    // 2. Move documents where student name is the ID
+    await moveDoc(firestore, `assignedTps/${oldName}`, `assignedTps/${newName}`);
+    await moveDoc(firestore, `evaluations/${oldName}`, `evaluations/${newName}`);
+    await moveDoc(firestore, `students/${oldName}`, `students/${newName}`);
+
+    // 3. Move subcollections
+    await moveSubCollection(firestore, oldName, newName, 'prelimAnswers');
+    await moveSubCollection(firestore, oldName, newName, 'feedbacks');
+    await moveSubCollection(firestore, oldName, newName, 'storedEvals');
+
+    // Update the name field inside the student document itself if it exists
+    const studentDocRef = doc(firestore, 'students', newName); // Path is now the new name
+    const studentDoc = await getDoc(studentDocRef);
+    if(studentDoc.exists()) {
+        batch.update(studentDocRef, { name: newName });
+    }
+
+    await batch.commit().catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: `batch update for student name ${oldName} -> ${newName}`,
+            operation: 'write'
+        }));
+    });
+};

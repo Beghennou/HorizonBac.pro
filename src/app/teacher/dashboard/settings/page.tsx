@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight, Eraser, PlusCircle, FolderPlus, FolderClosed, UserCog } from "lucide-react";
+import { Settings2, UserPlus, Save, AlertTriangle, Trash2, Upload, UserMinus, FolderMinus, ChevronsRight, Eraser, PlusCircle, FolderPlus, FolderClosed, UserCog, Pencil } from "lucide-react";
 import { useFirebase } from '@/firebase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -29,7 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { firestore, classes, teacherName, setTeacherName, updateClassWithCsv, deleteStudent, emptyClass, resetAllStudentLists, createClass, deleteClass, addTeacher, deleteTeacher, teachers } = useFirebase();
+  const { firestore, classes, teacherName, setTeacherName, updateClassWithCsv, deleteStudent, emptyClass, resetAllStudentLists, createClass, deleteClass, addTeacher, deleteTeacher, teachers, updateStudentName } = useFirebase();
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
@@ -59,6 +59,11 @@ export default function SettingsPage() {
   
   const [newTeacherName, setNewTeacherName] = useState('');
   const [teacherToDelete, setTeacherToDelete] = useState('');
+  
+  const [editStudentClass, setEditStudentClass] = useState('');
+  const [studentToEdit, setStudentToEdit] = useState('');
+  const [newStudentFirstName, setNewStudentFirstName] = useState('');
+  const [newStudentLastName, setNewStudentLastName] = useState('');
 
   const classNames = useMemo(() => classes.map(c => c.id).sort(), [classes]);
   const teacherList = useMemo(() => teachers.sort((a,b) => a.name.localeCompare(b.name)), [teachers]);
@@ -223,13 +228,26 @@ export default function SettingsPage() {
   }
   
   useEffect(() => {
-    if (deleteStudentClass) {
-        const classData = classes.find(c => c.id === deleteStudentClass);
-        setClassStudents(classData?.studentNames.sort((a:string,b:string) => a.localeCompare(b)) || []);
-    } else {
-        setClassStudents([]);
-    }
+    const classData = classes.find(c => c.id === deleteStudentClass);
+    setClassStudents(classData?.studentNames.sort((a:string,b:string) => a.localeCompare(b)) || []);
   }, [deleteStudentClass, classes]);
+  
+  useEffect(() => {
+    const classData = classes.find(c => c.id === editStudentClass);
+    setClassStudents(classData?.studentNames.sort((a:string,b:string) => a.localeCompare(b)) || []);
+  }, [editStudentClass, classes]);
+  
+  const handleEditStudent = () => {
+      if (!editStudentClass || !studentToEdit || !newStudentFirstName || !newStudentLastName) {
+          toast({ variant: 'destructive', title: 'Champs manquants', description: "Veuillez sélectionner une classe, un élève et entrer le nouveau nom."});
+          return;
+      }
+      const newFullName = `${newStudentFirstName.trim()} ${newStudentLastName.trim().toUpperCase()}`;
+      updateStudentName(studentToEdit, newFullName, editStudentClass);
+      setStudentToEdit('');
+      setNewStudentFirstName('');
+      setNewStudentLastName('');
+  }
 
   return (
     <div className="space-y-8">
@@ -324,13 +342,14 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><UserPlus /> Gestion des Élèves</CardTitle>
-          <CardDescription>Ajoutez ou supprimez des élèves manuellement.</CardDescription>
+          <CardDescription>Ajoutez, modifiez ou supprimez des élèves manuellement.</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="add">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="add"><UserPlus className="mr-2"/>Ajouter un élève</TabsTrigger>
-              <TabsTrigger value="delete"><UserMinus className="mr-2"/>Supprimer un élève</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="add"><UserPlus className="mr-2"/>Ajouter</TabsTrigger>
+              <TabsTrigger value="edit"><Pencil className="mr-2"/>Modifier</TabsTrigger>
+              <TabsTrigger value="delete"><UserMinus className="mr-2"/>Supprimer</TabsTrigger>
             </TabsList>
             <TabsContent value="add" className="pt-4">
               <div className="space-y-4">
@@ -370,6 +389,50 @@ export default function SettingsPage() {
                       </Button>
                   </div>
               </div>
+            </TabsContent>
+            <TabsContent value="edit" className="pt-4">
+                <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-class-select">Classe</Label>
+                            <Select value={editStudentClass} onValueChange={setEditStudentClass}>
+                                <SelectTrigger id="edit-class-select">
+                                    <SelectValue placeholder="Choisir une classe..."/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {classNames.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-student-select">Élève à modifier</Label>
+                            <Select value={studentToEdit} onValueChange={setStudentToEdit} disabled={!editStudentClass}>
+                                <SelectTrigger id="edit-student-select">
+                                    <SelectValue placeholder="Choisir un élève..."/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {classStudents.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="new-first-name">Nouveau Prénom</Label>
+                            <Input id="new-first-name" value={newStudentFirstName} onChange={(e) => setNewStudentFirstName(e.target.value)} disabled={!studentToEdit} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="new-last-name">Nouveau Nom</Label>
+                            <Input id="new-last-name" value={newStudentLastName} onChange={(e) => setNewStudentLastName(e.target.value)} disabled={!studentToEdit} />
+                        </div>
+                    </div>
+                    <div className="flex justify-end">
+                        <Button onClick={handleEditStudent} disabled={!studentToEdit || !newStudentFirstName || !newStudentLastName}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Modifier le nom
+                        </Button>
+                    </div>
+                </div>
             </TabsContent>
             <TabsContent value="delete" className="pt-4">
               <div className="space-y-4">
@@ -621,5 +684,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-    

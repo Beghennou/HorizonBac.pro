@@ -27,9 +27,8 @@ import {
     resetAllStudentListsInClasses,
     createClassInDb,
     deleteClassFromDb,
-    addTeacherInDb,
-    deleteTeacherFromDb,
     updateStudentData,
+    updateStudentNameInDb,
 } from './firestore-actions';
 import { checkAndSeedData } from './seed-data';
 
@@ -112,6 +111,7 @@ export interface FirebaseContextState {
   deleteClass: (className: string) => void;
   signInWithGoogle: () => Promise<void>;
   updateStudentData: (studentName: string, data: DocumentData) => void;
+  updateStudentName: (oldName: string, newName: string, className: string) => void;
   isLoaded: boolean;
   
   classes: DocumentData[];
@@ -347,6 +347,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     updateStudentData: (studentName: string, data: DocumentData) => {
       if (!firestore) return;
       updateStudentData(firestore, studentName, data);
+    },
+    updateStudentName: (oldName: string, newName: string, className: string) => {
+        if (!firestore) return;
+        updateStudentNameInDb(firestore, oldName, newName, className);
+        toast({ title: "Nom d'élève mis à jour", description: `Le nom de ${oldName} a été changé en ${newName}.` });
     }
   };
 
