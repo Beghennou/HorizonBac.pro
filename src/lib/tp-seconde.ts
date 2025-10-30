@@ -34,6 +34,7 @@ export type TP = {
   securiteRangement: string[];
   pointsCles: string[];
   ressources?: string[];
+  validationRequise?: boolean;
 };
 
 function etape(titre: string, duree: string, etapes: string[]): Etape {
@@ -48,6 +49,7 @@ export const tpSeconde: Record<number, TP> = {
         situation: 'Un nouveau mécanicien intègre l\'équipe. Avant sa première intervention, le chef d\'atelier lui demande de préparer son poste et de réviser les règles de sécurité fondamentales.',
         objectif: 'Organiser son espace de travail de manière sûre et efficace, en identifiant les risques et en utilisant les Équipements de Protection Individuelle (EPI). (Compétences C1.1, C1.4)',
         materiel: ['Bleu de travail', 'Chaussures de sécurité', 'Lunettes de protection', 'Gants', 'Chariot à outils', 'Extincteur (localisation)', 'Zone de tri des déchets'],
+        validationRequise: true,
         etudePrelim: [
             { type: 'text', q: 'Quels sont les 3 EPI (Équipements de Protection Individuelle) obligatoires en permanence dans l\'atelier ?', r: 'Chaussures de sécurité, bleu de travail, lunettes de protection.' },
             { type: 'text', q: 'Décrivez la procédure à suivre en cas de déversement d\'huile sur le sol.', r: 'Signaler la zone, utiliser de l\'absorbant pour contenir et nettoyer, puis jeter l\'absorbant souillé dans le bac dédié.' }
@@ -671,6 +673,7 @@ export const tpSeconde: Record<number, TP> = {
         titre: 'Remplacement Plaquettes et Disques de Frein Arrière',
         situation: 'Lors d\'une visite d\'entretien, vous constatez que les freins arrière à disques sont usés. Le frein de stationnement est un modèle électrique intégré à l\'étrier. Le client valide le remplacement.',
         objectif: 'Remplacer les plaquettes et disques arrière en utilisant l\'outil de diagnostic pour gérer le frein de stationnement électrique (EPB). (Compétences C1.2, C1.3, C1.1)',
+        validationRequise: true,
         materiel: ['Valise de diagnostic', 'Repousse-piston (pneumatique ou manuel)', 'Jeu de plaquettes et disques neufs', 'Nettoyant frein', 'Clé dynamométrique'],
         etudePrelim: [
             { type: 'text', q: 'Quelle est l\'étape indispensable à réaliser avec l\'outil de diagnostic avant toute intervention sur un étrier avec frein de stationnement électrique (EPB) ?', r: 'Mettre le système en "mode maintenance" ou "mode atelier". Cela rétracte complètement le moteur électrique et le piston pour permettre le remplacement.' },
@@ -829,6 +832,7 @@ export const tpSeconde: Record<number, TP> = {
 
 
     
+
 
 
 
