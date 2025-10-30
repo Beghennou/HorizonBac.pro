@@ -14,18 +14,6 @@ import { CheckeredFlag } from '@/components/icons';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { collection, doc } from 'firebase/firestore';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -45,67 +33,6 @@ const AssistantTP = dynamic(() => import('@/components/assistant-tp').then(mod =
     )
 });
 
-const TeacherValidationDialog = ({ step, tpId, studentName }: { step: string; tpId: number; studentName: string; }) => {
-    const [password, setPassword] = useState('');
-    const { toast } = useToast();
-    const { firestore, teacherName, updateTpValidation } = useFirebase();
-
-    const validationRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `tpValidations/${studentName}`) : null, [firestore, studentName]);
-    const { data: validationData } = useDoc(validationRef);
-    
-    const isUnlocked = validationData?.[tpId]?.[step];
-    const validationInfo = isUnlocked ? validationData[tpId][step] : null;
-    
-    const handleUnlock = () => {
-        if (password === 'Mongy') {
-            updateTpValidation(studentName, tpId, step);
-            toast({ title: 'Étape validée !', description: `Validation enregistrée par ${teacherName}.` });
-        } else {
-            toast({ variant: 'destructive', title: 'Mot de passe incorrect.' });
-        }
-    };
-    
-    if (isUnlocked && validationInfo) {
-        return (
-            <div className="text-green-400 font-semibold flex items-center justify-center gap-2 p-4 border border-dashed border-green-500 rounded-lg">
-                <CheckCircle className="w-5 h-5"/>
-                Étape validée par {validationInfo.teacher} le {validationInfo.date}
-            </div>
-        )
-    }
-
-    return (
-        <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button><Lock className="mr-2"/>Valider l'étape</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Validation Enseignant Requise</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Veuillez entrer le mot de passe enseignant pour valider cette étape.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <div className="space-y-2">
-                        <Label htmlFor="teacher-password">Mot de Passe</Label>
-                        <Input
-                            id="teacher-password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                        />
-                    </div>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setPassword('')}>Annuler</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleUnlock}>Valider</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        </div>
-    )
-}
 
 export default function TPPage() {
   const params = useParams();
@@ -326,9 +253,6 @@ export default function TPPage() {
                             </div>
                         ))}
                     </div>
-                     {tp.validationRequise && studentName && tpId && (
-                       <TeacherValidationDialog step="prelim" tpId={tpId} studentName={studentName} />
-                    )}
                 </CardContent>
             </Card>
         )}
@@ -349,9 +273,6 @@ export default function TPPage() {
                             <li key={stepIndex}>{e}</li>
                         ))}
                         </ul>
-                         {tp.validationRequise && studentName && tpId && (
-                             <TeacherValidationDialog step={`etape-${i + 1}`} tpId={tpId} studentName={studentName} />
-                        )}
                     </div>
                 ))}
             </CardContent>

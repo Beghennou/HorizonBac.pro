@@ -63,6 +63,7 @@ type StoredEvaluation = {
   tpNote?: string;
   competences: Record<string, EvaluationStatus>;
   isFinal?: boolean;
+  validatedSteps?: Record<string, boolean>;
 }
 
 
@@ -93,7 +94,7 @@ export interface FirebaseContextState {
   userError: Error | null;
   
   assignTp: (studentNames: string[], tpId: number) => void;
-  saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean) => void;
+  saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean, validatedSteps: Record<string, boolean>) => void;
   updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => void;
   savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => void;
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
@@ -113,7 +114,6 @@ export interface FirebaseContextState {
   signInWithGoogle: () => Promise<void>;
   updateStudentData: (studentName: string, data: DocumentData) => void;
   updateStudentName: (oldName: string, newName: string, className: string) => void;
-  updateTpValidation: (studentName: string, tpId: number, step: string) => void;
   isLoaded: boolean;
   
   classes: DocumentData[];
@@ -185,8 +185,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   }, [evaluationsData]);
 
   useEffect(() => {
-    // This logic is now handled by the select teacher page
-    // The teacherName is set via setTeacherName from that page
     const storedTeacher = sessionStorage.getItem('teacherName');
     if (storedTeacher) {
       setTeacherNameState(storedTeacher);
@@ -206,8 +204,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         if (firebaseUser) {
           setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
         } else {
-            // For this app, we don't auto-sign-in anonymously at the provider level
-            // Login will be handled by dedicated pages.
             setUserAuthState({ user: null, isUserLoading: false, userError: null });
         }
       },
@@ -247,7 +243,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   
   const deleteTeacher = useCallback(async (teacherId: string) => {
     if (!firestore) return;
-    // await deleteTeacherFromDb(firestore, teacherId);
     toast({ variant: 'destructive', title: 'Enseignant supprimé', description: `Le profil a été supprimé.` });
   }, [firestore, toast]);
   
@@ -258,25 +253,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       auth.signOut();
     }
   }, [auth]);
-
-  const updateTpValidation = (studentName: string, tpId: number, step: string) => {
-      if (!firestore) return;
-      const validationRef = doc(firestore, `tpValidations/${studentName}`);
-      const dataToUpdate = {
-          [`${tpId}.${step}`]: {
-              teacher: teacherName,
-              date: new Date().toLocaleDateString('fr-FR'),
-          }
-      };
-      setDoc(validationRef, dataToUpdate, { merge: true }).catch(error => {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: validationRef.path,
-              operation: 'update',
-              requestResourceData: dataToUpdate,
-          }))
-      });
-  };
-
 
   const contextValue = {
     firebaseApp,
@@ -304,9 +280,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
           description: `Le TP #${tpId} a été assigné à ${studentNames.length} élève(s).`,
       });
     },
-    saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean) => {
+    saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean, validatedSteps: Record<string, boolean>) => {
       if (!firestore) return;
-      saveStudentEvaluation(firestore, studentName, tpId, currentEvals, evaluations, prelimNote, tpNote, isFinal);
+      saveStudentEvaluation(firestore, studentName, tpId, currentEvals, evaluations, prelimNote, tpNote, isFinal, validatedSteps);
       toast({
           title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
           description: `L'évaluation pour le TP ${tpId} a été enregistrée.`,
@@ -348,7 +324,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     },
     addTp: (newTp: TP) => {
       if (!firestore || !user) return;
-      // Storing the teacher's name instead of UID for simplicity
       const tpWithAuthor = { ...newTp, author: teacherName };
       addCustomTp(firestore, tpWithAuthor);
       setTps(prev => ({...prev, [newTp.id]: tpWithAuthor}));
@@ -373,7 +348,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         updateStudentNameInDb(firestore, oldName, newName, className);
         toast({ title: "Nom d'élève mis à jour", description: `Le nom de ${oldName} a été changé en ${newName}.` });
     },
-    updateTpValidation,
   };
 
   return (

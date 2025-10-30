@@ -10,12 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Loader2, Save, Send, User, Award, FileText, MessageSquare, Check, Clock } from 'lucide-react';
+import { Loader2, Save, Send, User, Award, FileText, MessageSquare, Check, Clock, CheckSquare } from 'lucide-react';
 import { collection, doc } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
@@ -40,18 +41,11 @@ export default function EvaluationPage() {
     const [prelimNote, setPrelimNote] = useState('');
     const [tpNote, setTpNote] = useState('');
     const [teacherFeedback, setTeacherFeedback] = useState('');
+    const [validatedSteps, setValidatedSteps] = useState<Record<string, boolean>>({});
 
     const { data: studentPrelimAnswers, isLoading: prelimLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName, tpId]));
     const { data: studentFeedbacks, isLoading: feedbackLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName, tpId]));
-    const { data: validationData, isLoading: validationLoading } = useDoc(useMemoFirebase(() => firestore && studentName ? doc(firestore, `tpValidations`, studentName) : null, [firestore, studentName]));
-
-    const tpValidationData = useMemo(() => {
-        if (validationData && tpId) {
-          return validationData[tpId] || {};
-        }
-        return {};
-    }, [validationData, tpId]);
-
+    const { data: storedEval, isLoading: storedEvalLoading } = useDoc(useMemoFirebase(() => firestore && studentName && tpId ? doc(firestore, `students/${studentName}/storedEvals`, tpId.toString()) : null, [firestore, studentName, tpId]));
 
     const prelimAnswersForTp = useMemo(() => {
         const doc = studentPrelimAnswers?.find(d => d.id === tpId?.toString());
@@ -59,11 +53,17 @@ export default function EvaluationPage() {
     }, [studentPrelimAnswers, tpId]);
 
     useEffect(() => {
-        const doc = studentFeedbacks?.find(d => d.id === tpId?.toString());
-        if (doc) {
-            setTeacherFeedback(doc.tps.teacher || '');
+        const feedbackDoc = studentFeedbacks?.find(d => d.id === tpId?.toString());
+        if (feedbackDoc) {
+            setTeacherFeedback(feedbackDoc.tps.teacher || '');
         }
-    }, [studentFeedbacks, tpId]);
+        if (storedEval) {
+            setPrelimNote(storedEval.prelimNote || '');
+            setTpNote(storedEval.tpNote || '');
+            setCompetenceEvals(storedEval.competences || {});
+            setValidatedSteps(storedEval.validatedSteps || {});
+        }
+    }, [studentFeedbacks, storedEval, tpId]);
 
     const evaluatedCompetenceIds = useMemo(() => tp.objectif.match(/C\d\.\d/g) || [], [tp]);
 
@@ -71,10 +71,13 @@ export default function EvaluationPage() {
         setCompetenceEvals(prev => ({ ...prev, [competenceId]: value }));
     };
 
+    const handleValidationChange = (stepKey: string, checked: boolean) => {
+        setValidatedSteps(prev => ({ ...prev, [stepKey]: checked }));
+    };
+
     const handleSave = (isFinal: boolean) => {
         if (!studentName || !tpId) return;
 
-        // Sauvegarde immédiate du feedback, qu'il s'agisse d'un brouillon ou non.
         saveFeedback(studentName, tpId, teacherFeedback, 'teacher');
         
         if (isFinal && Object.keys(competenceEvals).length !== evaluatedCompetenceIds.length) {
@@ -86,7 +89,7 @@ export default function EvaluationPage() {
             return;
         }
 
-        saveEvaluation(studentName, tpId, competenceEvals, prelimNote, tpNote, isFinal);
+        saveEvaluation(studentName, tpId, competenceEvals, prelimNote, tpNote, isFinal, validatedSteps);
         
         toast({
             title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
@@ -102,7 +105,7 @@ export default function EvaluationPage() {
         return <div className="text-center">TP non trouvé.</div>;
     }
     
-    const isLoading = prelimLoading || feedbackLoading || validationLoading;
+    const isLoading = prelimLoading || feedbackLoading || storedEvalLoading;
     if (isLoading) {
         return <div className="flex justify-center items-center h-full"><Loader2 className="w-12 h-12 animate-spin text-primary" /></div>;
     }
@@ -135,35 +138,44 @@ export default function EvaluationPage() {
                                 </p>
                             </div>
                         ))}
-                         <div className="w-1/4 p-4 border rounded-lg bg-background/50">
-                            <Label htmlFor="prelim-note">Note Étude Préliminaire / 10</Label>
-                            <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} />
+                         <div className="flex items-center gap-6">
+                            <div className="w-1/4 p-4 border rounded-lg bg-background/50">
+                                <Label htmlFor="prelim-note">Note Étude Préliminaire / 10</Label>
+                                <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} />
+                            </div>
+                            {tp.validationRequise && (
+                                <div className="flex items-center space-x-2 p-4 border rounded-lg bg-background/50">
+                                    <Checkbox 
+                                        id="val-prelim" 
+                                        checked={validatedSteps['prelim'] || false}
+                                        onCheckedChange={(checked) => handleValidationChange('prelim', !!checked)}
+                                    />
+                                    <Label htmlFor="val-prelim" className="font-bold text-lg">Validation Enseignant</Label>
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
             )}
             
-            {tp.validationRequise && (
+             {tp.validationRequise && (
                  <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Clock />Suivi des Validations</CardTitle>
+                        <CardTitle className="flex items-center gap-2"><CheckSquare />Validation des Étapes Pratiques</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                        {Object.keys(tpValidationData).length > 0 ? (
-                             Object.entries(tpValidationData).map(([stepKey, validation]) => {
-                                const v = validation as { teacher: string; date: string };
-                                return (
-                                <div key={stepKey} className="flex items-center gap-2 p-2 bg-background/50 rounded-md">
-                                    <Check className="text-green-500"/>
-                                    <p>
-                                        <span className="font-semibold capitalize">{stepKey.replace('-', ' ')}</span> validé(e) par <span className="font-semibold text-accent">{v.teacher}</span> le {v.date}.
-                                    </p>
-                                </div>
-                                )
-                            })
-                        ) : (
-                            <p className="text-muted-foreground italic">Aucune validation n'a été enregistrée pour ce TP.</p>
-                        )}
+                        {tp.activitePratique.map((etape, index) => (
+                            <div key={`val-etape-${index}`} className="flex items-center space-x-3 p-3 bg-background/50 rounded-lg">
+                                <Checkbox
+                                    id={`val-etape-${index + 1}`}
+                                    checked={validatedSteps[`etape-${index + 1}`] || false}
+                                    onCheckedChange={(checked) => handleValidationChange(`etape-${index + 1}`, !!checked)}
+                                />
+                                <Label htmlFor={`val-etape-${index + 1}`} className="text-base">
+                                    Étape {index + 1}: {etape.titre}
+                                </Label>
+                            </div>
+                        ))}
                     </CardContent>
                  </Card>
             )}

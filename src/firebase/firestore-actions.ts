@@ -22,6 +22,7 @@ type StoredEvaluation = {
   tpNote?: string;
   competences: Record<string, EvaluationStatus>;
   isFinal?: boolean;
+  validatedSteps?: Record<string, boolean>;
 }
 
 export const assignTpToStudents = async (firestore: Firestore, studentNames: string[], tpId: number, allAssignedTps: Record<string, AssignedTp[]>) => {
@@ -44,7 +45,7 @@ export const assignTpToStudents = async (firestore: Firestore, studentNames: str
     });
 };
 
-export const saveStudentEvaluation = async (firestore: Firestore, studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, evaluations: Record<string, any>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => {
+export const saveStudentEvaluation = async (firestore: Firestore, studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, evaluations: Record<string, any>, prelimNote?: string, tpNote?: string, isFinal?: boolean, validatedSteps?: Record<string, boolean>) => {
     const evalDate = new Date().toLocaleDateString('fr-FR');
     
     const newStoredEval: StoredEvaluation = {
@@ -52,7 +53,8 @@ export const saveStudentEvaluation = async (firestore: Firestore, studentName: s
         prelimNote,
         tpNote,
         competences: currentEvals,
-        isFinal
+        isFinal,
+        validatedSteps
     };
     
     const studentStoredEvalsDocRef = doc(firestore, `students/${studentName}/storedEvals`, tpId.toString());
