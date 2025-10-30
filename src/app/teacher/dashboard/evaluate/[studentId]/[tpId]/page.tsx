@@ -124,6 +124,8 @@ export default function EvaluationPage() {
         return <div className="flex justify-center items-center h-full"><Loader2 className="w-12 h-12 animate-spin text-primary" /></div>;
     }
 
+    const allStepsValidated = validatedStepsCount === totalPracticalSteps;
+
     return (
         <div className="space-y-6">
             <Card>
@@ -166,7 +168,13 @@ export default function EvaluationPage() {
                 <CardHeader className="flex flex-row justify-between items-center">
                     <CardTitle className="flex items-center gap-2"><Award />Évaluation des Compétences</CardTitle>
                     {totalPracticalSteps > 0 && (
-                        <Badge variant={validatedStepsCount === totalPracticalSteps ? "default" : "secondary"} className="text-base">
+                        <Badge 
+                            variant={allStepsValidated ? "default" : "destructive"} 
+                            className={cn(
+                                "text-base",
+                                allStepsValidated ? "bg-green-600" : "bg-destructive/80"
+                            )}
+                        >
                            Étapes validées : {validatedStepsCount} / {totalPracticalSteps}
                         </Badge>
                     )}
