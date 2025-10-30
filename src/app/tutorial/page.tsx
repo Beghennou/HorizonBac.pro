@@ -2,7 +2,7 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass, ClipboardCheck, LayoutDashboard, CheckSquare } from 'lucide-react';
+import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass, ClipboardCheck, LayoutDashboard, CheckSquare, CircuitBoard, ShieldCheck, Wrench, Search, Sparkles, CheckCircle, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -98,7 +98,7 @@ export default function TutorialPage() {
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">L'onglet <DraftingCompass className="inline h-5 w-5 text-accent"/> <strong>Concepteur TP</strong> vous donne une autonomie totale pour créer des travaux pratiques sur mesure.</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li><strong>Informations Générales :</strong> Donnez un ID unique (&gt;1000), un titre, une durée, et assignez un niveau (Seconde, Première, Terminale).</li>
+                                            <li><strong>Informations Générales :</strong> Donnez un ID unique (>1000), un titre, une durée, et assignez un niveau (Seconde, Première, Terminale).</li>
                                             <li><strong>Compétences :</strong> Associez votre TP à une ou plusieurs compétences du référentiel en cochant les cases correspondantes.</li>
                                             <li><strong>Sections dynamiques :</strong> Utilisez les boutons "Ajouter" pour créer autant de champs que nécessaire pour le matériel, l'étude préliminaire (questions texte ou QCM), les étapes pratiques, les points clés et les consignes de sécurité.</li>
                                             <li><strong>Sauvegarde :</strong> Une fois le formulaire rempli, cliquez sur "Créer le Travail Pratique". Votre nouveau TP sera automatiquement disponible dans la liste d'assignation pour le niveau que vous avez sélectionné.</li>
@@ -166,15 +166,79 @@ export default function TutorialPage() {
                                     </AccordionContent>
                                 </AccordionItem>
                                  <AccordionItem value="item-5">
-                                    <AccordionTrigger className="text-xl font-headline">4. Consulter son Portfolio et ses Badges</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">4. Consulter son Portfolio</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">L'onglet <Award className="inline h-5 w-5"/> <strong>Mon Portfolio</strong> est ton carnet de réussites personnel. C'est un document que tu peux imprimer ou enregistrer en PDF pour le montrer lors de tes recherches de stage ou d'emploi.</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li><strong>Badges et Récompenses :</strong> En terminant des TP et en acquérant des compétences, tu débloqueras des badges ("Premier Pas", "Expert Sécurité", etc.) qui valorisent tes accomplissements.</li>
+                                            <li><strong>Badges et Récompenses :</strong> En terminant des TP et en acquérant des compétences, tu débloqueras des badges qui valorisent tes accomplissements.</li>
                                             <li><strong>Synthèse des Évaluations :</strong> Retrouve ici toutes les notes et appréciations que ton enseignant t'a laissées pour chaque TP évalué.</li>
                                             <li><strong>Compétences Acquises :</strong> Visualise toutes les compétences que tu as validées ("Acquis" ou "Maîtrisé"), classées par grands blocs professionnels.</li>
                                             <li><strong>TP Validés :</strong> La liste de tous les travaux pratiques que tu as terminés avec succès.</li>
                                         </ul>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="item-6">
+                                    <AccordionTrigger className="text-xl font-headline">5. Les Badges et Récompenses</AccordionTrigger>
+                                    <AccordionContent className="text-base text-muted-foreground p-4">
+                                        <p className="mb-4">Terminer des TP te permet de débloquer des badges qui prouvent tes compétences et ta persévérance. Voici la liste des badges que tu peux obtenir :</p>
+                                        <div className="space-y-4">
+                                            <div className="flex items-start gap-4">
+                                                <CircuitBoard className="w-8 h-8 text-accent mt-1 flex-shrink-0"/>
+                                                <div>
+                                                    <h4 className="font-bold text-foreground">Premier Pas</h4>
+                                                    <p className="text-sm">Terminer son tout premier Travail Pratique.</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-4">
+                                                <ShieldCheck className="w-8 h-8 text-accent mt-1 flex-shrink-0"/>
+                                                <div>
+                                                    <h4 className="font-bold text-foreground">Expert Sécurité</h4>
+                                                    <p className="text-sm">Terminer les TP sur le levage et la sécurité (TP 101, 102, 103).</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-4">
+                                                <Wrench className="w-8 h-8 text-accent mt-1 flex-shrink-0"/>
+                                                <div>
+                                                    <h4 className="font-bold text-foreground">Initié de l'Entretien</h4>
+                                                    <p className="text-sm">Terminer 5 TP du bloc "Entretien périodique" (niveau Seconde).</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-4">
+                                                <Search className="w-8 h-8 text-accent mt-1 flex-shrink-0"/>
+                                                <div>
+                                                    <h4 className="font-bold text-foreground">Expert du Diagnostic</h4>
+                                                    <p className="text-sm">Terminer 5 TP du bloc "Diagnostic" (niveau Première).</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-4">
+                                                <Settings className="w-8 h-8 text-accent mt-1 flex-shrink-0"/>
+                                                <div>
+                                                    <h4 className="font-bold text-foreground">Maître de la Réparation</h4>
+                                                    <p className="text-sm">Terminer 5 TP du bloc "Réparation" (niveau Terminale).</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-4">
+                                                <Sparkles className="w-8 h-8 text-accent mt-1 flex-shrink-0"/>
+                                                <div>
+                                                    <h4 className="font-bold text-foreground">Maître de la Distribution</h4>
+                                                    <p className="text-sm">Réussir le TP sur le remplacement de la distribution (TP 14).</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-4">
+                                                <CheckCircle className="w-8 h-8 text-accent mt-1 flex-shrink-0"/>
+                                                <div>
+                                                    <h4 className="font-bold text-foreground">Zéro Faute</h4>
+                                                    <p className="text-sm">Réussir le TP sur le pré-contrôle technique (TP 16).</p>
+                                                </div>
+                                            </div>
+                                             <div className="flex items-start gap-4">
+                                                <Trophy className="w-8 h-8 text-accent mt-1 flex-shrink-0"/>
+                                                <div>
+                                                    <h4 className="font-bold text-foreground">Grand Chelem</h4>
+                                                    <p className="text-sm">Terminer tous les TP disponibles pour ton niveau.</p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </AccordionContent>
                                 </AccordionItem>
                             </Accordion>
