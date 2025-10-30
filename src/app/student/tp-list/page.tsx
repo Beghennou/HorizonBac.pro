@@ -3,9 +3,9 @@
 'use client';
 import { Suspense, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau } from "@/lib/data-manager";
+import { TP, EtudePrelimQCM } from "@/lib/data-manager";
 import { useSearchParams, useRouter } from "next/navigation";
-import { User, Users, Printer, Bot } from "lucide-react";
+import { User, Users, Printer } from "lucide-react";
 import { useFirebase } from '@/firebase';
 import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -148,22 +148,17 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
 function TpListPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { tps, classes, isLoaded } = useFirebase();
-
-  const className = searchParams.get('class');
+  const { tps, assignedTps, isLoaded } = useFirebase();
+  const studentName = searchParams.get('student');
   
-  let niveau: Niveau = 'seconde';
-  if (className && classes) {
-    const classData = classes.find(c => c.id === className);
-    if(classData) {
-        if (className.startsWith('1') || className.toLowerCase().includes('premiere')) niveau = 'premiere';
-        else if (className.startsWith('T') || className.toLowerCase().includes('terminale')) niveau = 'terminale';
-        else niveau = 'seconde';
-    }
-  }
+  const studentAssignedTps = useMemo(() => {
+      if (!studentName || !assignedTps) return [];
+      return (assignedTps[studentName] || [])
+              .map(assigned => tps[assigned.id])
+              .filter((tp): tp is TP => !!tp)
+              .sort((a,b) => a.id - b.id);
+  }, [studentName, assignedTps, tps]);
 
-  const tpsForLevel = useMemo(() => getTpsByNiveau(niveau, tps), [niveau, tps]);
-  
   const selectedTpId = searchParams.get('tp') ? parseInt(searchParams.get('tp')!, 10) : null;
   const selectedTp = selectedTpId && tps ? tps[selectedTpId] : null;
 
@@ -191,7 +186,7 @@ function TpListPageContent() {
                 <CardContent className="flex-grow p-2">
                     <ScrollArea className="h-[calc(100vh-20rem)]">
                         <div className="space-y-2 pr-4">
-                            {tpsForLevel.map(tp => (
+                            {studentAssignedTps.map(tp => (
                                 <div 
                                     key={tp.id} 
                                     onClick={() => handleTpSelect(tp.id)}
