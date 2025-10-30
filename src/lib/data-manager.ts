@@ -103,3 +103,4 @@ export const allBlocs: Record<string, CompetenceBloc> = {
     ...competencesParNiveau.terminale,
 };
 
+
