@@ -36,7 +36,7 @@ import { checkAndSeedData } from './seed-data';
 
 // Types definition
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
-export type TpStatus = 'non-commencé' | 'en-cours' | 'terminé';
+export type TpStatus = 'non-commencé' | 'en-cours' | 'terminé' | 'à-refaire';
 
 type AssignedTp = {
   id: number;

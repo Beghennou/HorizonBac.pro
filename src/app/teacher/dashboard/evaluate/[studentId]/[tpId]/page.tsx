@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Loader2, Save, Send, User, Award, FileText, MessageSquare } from 'lucide-react';
+import { Loader2, Save, Send, User, Award, FileText, MessageSquare, RefreshCw } from 'lucide-react';
 import { collection, doc } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -31,7 +31,7 @@ export default function EvaluationPage() {
     const params = useParams();
     const router = useRouter();
     const { toast } = useToast();
-    const { firestore, tps, saveEvaluation, saveFeedback } = useFirebase();
+    const { firestore, tps, saveEvaluation, saveFeedback, updateTpStatus } = useFirebase();
 
     const studentName = decodeURIComponent(params.studentId as string);
     const tpId = parseInt(params.tpId as string, 10);
@@ -103,6 +103,17 @@ export default function EvaluationPage() {
             router.push('/teacher/dashboard/tps-to-evaluate');
         }
     };
+    
+    const handleRequestRedo = () => {
+        if (!studentName || !tpId) return;
+        updateTpStatus(studentName, tpId, 'à-refaire');
+        saveFeedback(studentName, tpId, teacherFeedback, 'teacher');
+        toast({
+            title: "Demande envoyée",
+            description: `L'élève a été notifié qu'il doit refaire ce TP.`
+        });
+        router.push('/teacher/dashboard/tps-to-evaluate');
+    }
 
     if (!tp) {
         return <div className="text-center">TP non trouvé.</div>;
@@ -143,7 +154,7 @@ export default function EvaluationPage() {
                         ))}
                         <div className="pt-4 mt-4 border-t">
                             <Label htmlFor="prelim-note" className="font-bold text-lg">Note Étude Préliminaire / 10</Label>
-                             <div className="flex items-center gap-4 mt-2">
+                            <div className="flex items-center gap-4 mt-2">
                                 <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} className="w-24 text-lg h-12 border-accent border-2" />
                             </div>
                         </div>
@@ -213,6 +224,7 @@ export default function EvaluationPage() {
             </Card>
 
             <div className="flex justify-end gap-4">
+                 <Button variant="secondary" onClick={handleRequestRedo}><RefreshCw className="mr-2"/>Demander de refaire le TP</Button>
                  <Button variant="outline" onClick={() => handleSave(false)}><Save className="mr-2"/>Enregistrer le brouillon</Button>
                  <Button onClick={() => handleSave(true)}><Send className="mr-2"/>Finaliser et Rendre l'évaluation</Button>
             </div>

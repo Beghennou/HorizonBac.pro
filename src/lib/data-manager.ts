@@ -24,7 +24,7 @@ export type TP = Omit<TPSeconde, 'etudePrelim'> & {
 };
 
 export type Niveau = 'seconde' | 'premiere' | 'terminale';
-export type TpStatus = 'non-commencé' | 'en-cours' | 'terminé';
+export type TpStatus = 'non-commencé' | 'en-cours' | 'terminé' | 'à-refaire';
 
 export type CompetenceBloc = {
   title: string;
@@ -102,5 +102,6 @@ export const allBlocs: Record<string, CompetenceBloc> = {
     ...competencesParNiveau.premiere,
     ...competencesParNiveau.terminale,
 };
+
 
 

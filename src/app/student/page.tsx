@@ -10,7 +10,7 @@ import type { TpStatus } from '@/firebase/provider';
 import { PlaceHolderImages, ImagePlaceholder } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CheckCircle, Clock } from 'lucide-react';
+import { ArrowRight, CheckCircle, Clock, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { RacingHelmet } from '@/components/icons';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
@@ -20,7 +20,7 @@ import { collection } from 'firebase/firestore';
 function StudentDashboard() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { firestore, assignedTps, tps: allTps } = useFirebase();
+  const { firestore, assignedTps, tps: allTps, updateTpStatus } = useFirebase();
 
   const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
 
@@ -67,9 +67,16 @@ function StudentDashboard() {
     'non-commencé': { text: 'Non commencé', icon: <ArrowRight className="ml-2"/>, buttonText: 'Commencer le TP', variant: 'default' as const, className: 'bg-gradient-to-r from-primary to-racing-orange hover:brightness-110'},
     'en-cours': { text: 'En cours', icon: <Clock className="mr-2" />, buttonText: 'Continuer le TP', variant: 'outline' as const, className: 'border-accent text-accent hover:bg-accent hover:text-black'},
     'terminé': { text: 'Terminé', icon: <CheckCircle className="mr-2" />, buttonText: 'Revoir le TP', variant: 'outline' as const, className: 'border-green-500 text-green-400 hover:bg-green-500 hover:text-black'},
+    'à-refaire': { text: 'À refaire', icon: <RefreshCw className="mr-2" />, buttonText: 'Recommencer le TP', variant: 'destructive' as const, className: 'bg-destructive/80 hover:bg-destructive'},
   };
 
   const defaultTpImage = PlaceHolderImages.find(p => p.id === 'tp-default');
+
+  const handleRedo = (tpId: number) => {
+    if (studentName) {
+        updateTpStatus(studentName, tpId, 'en-cours');
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -89,6 +96,12 @@ function StudentDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tpModules.map((module) => {
               const currentStatusInfo = statusInfo[module.status as keyof typeof statusInfo] || statusInfo['non-commencé'];
+              const isRedo = module.status === 'à-refaire';
+
+              const linkProps = isRedo ? {} : { href: `/student/tp/${module.id}?student=${encodeURIComponent(studentName)}` };
+              const buttonProps = isRedo ? { onClick: () => handleRedo(module.id) } : { asChild: true };
+
+
               return (
                 <Card key={module.id} className="flex flex-col overflow-hidden bg-card border-primary/30 hover:border-accent/50 transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-accent/20">
                   <CardHeader className="p-0 relative">
@@ -103,7 +116,7 @@ function StudentDashboard() {
                         />
                      )}
                      <div className="absolute top-2 right-2 flex gap-2">
-                        {module.isEvaluated && (
+                        {module.isEvaluated && !isRedo && (
                             <Badge className="bg-sky-500 text-white">Évalué</Badge>
                         )}
                         <Badge className={cn(currentStatusInfo.className)}>{currentStatusInfo.text}</Badge>
@@ -115,11 +128,12 @@ function StudentDashboard() {
                     <CardDescription className="mt-2 flex-grow">{module.objectif}</CardDescription>
                   </div>
                   <CardFooter>
-                    <Button asChild className={cn("w-full font-bold font-headline uppercase tracking-wider", currentStatusInfo.className)} variant={currentStatusInfo.variant}>
-                      <Link href={`/student/tp/${module.id}?student=${encodeURIComponent(studentName)}`}>
-                        {currentStatusInfo.buttonText} 
-                        {module.status === 'non-commencé' && currentStatusInfo.icon}
-                      </Link>
+                    <Button {...buttonProps} className={cn("w-full font-bold font-headline uppercase tracking-wider", currentStatusInfo.className)} variant={currentStatusInfo.variant}>
+                        <Link {...linkProps}>
+                            {currentStatusInfo.icon}
+                            {currentStatusInfo.buttonText} 
+                            {module.status === 'non-commencé' && <ArrowRight className="ml-2"/>}
+                        </Link>
                     </Button>
                   </CardFooter>
                 </Card>
