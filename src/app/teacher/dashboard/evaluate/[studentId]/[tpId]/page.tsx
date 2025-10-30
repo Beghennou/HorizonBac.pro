@@ -131,9 +131,11 @@ export default function EvaluationPage() {
                                 </p>
                             </div>
                         ))}
-                        <div className="w-1/4 pt-4">
-                            <Label htmlFor="prelim-note">Note Étude Préliminaire / 10</Label>
-                            <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} />
+                        <div className="border border-destructive p-4 rounded-md mt-6">
+                            <div className="w-full md:w-1/4">
+                                <Label htmlFor="prelim-note" className="font-bold text-lg">Note Étude Préliminaire / 10</Label>
+                                <Input id="prelim-note" type="number" max="10" min="0" value={prelimNote} onChange={e => setPrelimNote(e.target.value)} className="mt-2 text-lg h-12" />
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -183,13 +185,13 @@ export default function EvaluationPage() {
                 </CardContent>
             </Card>
             
-            <Card>
+            <Card className="border-2 border-destructive">
                 <CardHeader>
-                    <CardTitle>Note Globale du TP</CardTitle>
+                    <CardTitle className="text-destructive">Note Globale du TP</CardTitle>
                 </CardHeader>
-                <CardContent className="w-1/4">
-                    <Label htmlFor="tp-note">Note / 20</Label>
-                    <Input id="tp-note" type="number" max="20" min="0" value={tpNote} onChange={e => setTpNote(e.target.value)} />
+                <CardContent className="w-full md:w-1/4">
+                    <Label htmlFor="tp-note" className="font-bold text-lg">Note / 20</Label>
+                    <Input id="tp-note" type="number" max="20" min="0" value={tpNote} onChange={e => setTpNote(e.target.value)} className="mt-2 text-lg h-12" />
                 </CardContent>
             </Card>
 
