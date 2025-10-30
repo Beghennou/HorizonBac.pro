@@ -1,13 +1,13 @@
 
 'use client';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { TP, Etape } from '@/lib/data-manager';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from '@/components/ui/card';
+import { TP } from '@/lib/data-manager';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Play, CheckCircle, MessageSquare, Award, Book, Video, FileText, Lock, KeyRound } from 'lucide-react';
+import { Bot, Play, CheckCircle, MessageSquare, Award, Book, Video, FileText, Lock } from 'lucide-react';
 import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { CheckeredFlag } from '@/components/icons';
@@ -45,14 +45,20 @@ const AssistantTP = dynamic(() => import('@/components/assistant-tp').then(mod =
     )
 });
 
-const TeacherValidationDialog = ({ onUnlock, isUnlocked, validationInfo }: { onUnlock: () => void; isUnlocked: boolean, validationInfo?: { teacher: string; date: string } }) => {
+const TeacherValidationDialog = ({ step, tpId, studentName }: { step: string; tpId: number; studentName: string; }) => {
     const [password, setPassword] = useState('');
     const { toast } = useToast();
-    const { teacherName } = useFirebase();
+    const { firestore, teacherName, updateTpValidation } = useFirebase();
 
+    const validationRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `tpValidations/${studentName}`) : null, [firestore, studentName]);
+    const { data: validationData } = useDoc(validationRef);
+    
+    const isUnlocked = validationData?.[tpId]?.[step];
+    const validationInfo = isUnlocked ? validationData[tpId][step] : null;
+    
     const handleUnlock = () => {
         if (password === 'Mongy') {
-            onUnlock();
+            updateTpValidation(studentName, tpId, step);
             toast({ title: 'Étape validée !', description: `Validation enregistrée par ${teacherName}.` });
         } else {
             toast({ variant: 'destructive', title: 'Mot de passe incorrect.' });
@@ -61,7 +67,7 @@ const TeacherValidationDialog = ({ onUnlock, isUnlocked, validationInfo }: { onU
     
     if (isUnlocked && validationInfo) {
         return (
-            <div className="text-green-400 font-semibold flex items-center justify-center gap-2">
+            <div className="text-green-400 font-semibold flex items-center justify-center gap-2 p-4 border border-dashed border-green-500 rounded-lg">
                 <CheckCircle className="w-5 h-5"/>
                 Étape validée par {validationInfo.teacher} le {validationInfo.date}
             </div>
@@ -69,33 +75,35 @@ const TeacherValidationDialog = ({ onUnlock, isUnlocked, validationInfo }: { onU
     }
 
     return (
-        <AlertDialog>
-            <AlertDialogTrigger asChild>
-                <Button><Lock className="mr-2"/>Valider l'étape</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Validation Enseignant Requise</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Veuillez entrer le mot de passe enseignant pour valider cette étape.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <div className="space-y-2">
-                    <Label htmlFor="teacher-password">Mot de Passe</Label>
-                    <Input
-                        id="teacher-password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                    />
-                </div>
-                <AlertDialogFooter>
-                    <AlertDialogCancel onClick={() => setPassword('')}>Annuler</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleUnlock}>Valider</AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+        <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button><Lock className="mr-2"/>Valider l'étape</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Validation Enseignant Requise</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Veuillez entrer le mot de passe enseignant pour valider cette étape.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="space-y-2">
+                        <Label htmlFor="teacher-password">Mot de Passe</Label>
+                        <Input
+                            id="teacher-password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                        />
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setPassword('')}>Annuler</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleUnlock}>Valider</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </div>
     )
 }
 
@@ -105,19 +113,8 @@ export default function TPPage() {
   const studentName = searchParams.get('student');
   const tpId = typeof params.tpId === 'string' ? parseInt(params.tpId, 10) : null;
 
-  const { firestore, assignedTps, updateTpStatus, savePrelimAnswer, saveFeedback, tps, updateStudentData, teacherName } = useFirebase();
+  const { firestore, assignedTps, updateTpStatus, savePrelimAnswer, saveFeedback, tps } = useFirebase();
   
-  const studentDataRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, 'students', studentName) : null, [firestore, studentName]);
-  const { data: studentData } = useDoc(studentDataRef);
-  
-  const validationData = useMemo(() => {
-    if (studentData && tpId) {
-      return studentData.tpValidations?.[tpId] || {};
-    }
-    return {};
-  }, [studentData, tpId]);
-
-
   const { data: studentPrelimAnswers } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName, tpId]));
   const { data: studentFeedbacks } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName, tpId]));
 
@@ -130,7 +127,6 @@ export default function TPPage() {
     const doc = studentFeedbacks?.find(d => d.id === tpId?.toString());
     return doc?.tps || {};
   }, [studentFeedbacks, tpId]);
-
 
   const tp = tpId ? tps[tpId] : null;
 
@@ -149,19 +145,6 @@ export default function TPPage() {
       saveFeedback(studentName, tpId, e.target.value, 'student');
     }
   }
-  
- const handleValidation = (step: string) => {
-    if (studentName && tpId && teacherName) {
-        const dataToUpdate = {
-            [`tpValidations.${tpId}.${step}`]: {
-                teacher: teacherName,
-                date: new Date().toLocaleDateString('fr-FR'),
-            }
-        };
-        updateStudentData(studentName, dataToUpdate);
-    }
- };
-
 
   if (!tp) {
     return (
@@ -343,14 +326,8 @@ export default function TPPage() {
                             </div>
                         ))}
                     </div>
-                    {tp.validationRequise && (
-                        <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
-                            <TeacherValidationDialog 
-                                onUnlock={() => handleValidation('prelim')}
-                                isUnlocked={!!validationData['prelim']}
-                                validationInfo={validationData['prelim']}
-                             />
-                        </div>
+                     {tp.validationRequise && studentName && tpId && (
+                       <TeacherValidationDialog step="prelim" tpId={tpId} studentName={studentName} />
                     )}
                 </CardContent>
             </Card>
@@ -372,14 +349,8 @@ export default function TPPage() {
                             <li key={stepIndex}>{e}</li>
                         ))}
                         </ul>
-                         {tp.validationRequise && (
-                             <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
-                                <TeacherValidationDialog 
-                                    onUnlock={() => handleValidation(`etape-${i + 1}`)}
-                                    isUnlocked={!!validationData[`etape-${i + 1}`]}
-                                    validationInfo={validationData[`etape-${i + 1}`]}
-                                />
-                            </div>
+                         {tp.validationRequise && studentName && tpId && (
+                             <TeacherValidationDialog step={`etape-${i + 1}`} tpId={tpId} studentName={studentName} />
                         )}
                     </div>
                 ))}

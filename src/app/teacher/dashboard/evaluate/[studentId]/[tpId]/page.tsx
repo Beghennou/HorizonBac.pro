@@ -30,7 +30,7 @@ export default function EvaluationPage() {
     const params = useParams();
     const router = useRouter();
     const { toast } = useToast();
-    const { firestore, tps, saveEvaluation, saveFeedback, user } = useFirebase();
+    const { firestore, tps, saveEvaluation, saveFeedback } = useFirebase();
 
     const studentName = decodeURIComponent(params.studentId as string);
     const tpId = parseInt(params.tpId as string, 10);
@@ -43,14 +43,14 @@ export default function EvaluationPage() {
 
     const { data: studentPrelimAnswers, isLoading: prelimLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName, tpId]));
     const { data: studentFeedbacks, isLoading: feedbackLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName, tpId]));
-    const { data: studentData, isLoading: studentDataLoading } = useDoc(useMemoFirebase(() => firestore && studentName ? doc(firestore, `students`, studentName) : null, [firestore, studentName]));
+    const { data: validationData, isLoading: validationLoading } = useDoc(useMemoFirebase(() => firestore && studentName ? doc(firestore, `tpValidations`, studentName) : null, [firestore, studentName]));
 
-    const validationData = useMemo(() => {
-        if (studentData && tpId) {
-          return studentData.tpValidations?.[tpId] || {};
+    const tpValidationData = useMemo(() => {
+        if (validationData && tpId) {
+          return validationData[tpId] || {};
         }
         return {};
-    }, [studentData, tpId]);
+    }, [validationData, tpId]);
 
 
     const prelimAnswersForTp = useMemo(() => {
@@ -102,7 +102,7 @@ export default function EvaluationPage() {
         return <div className="text-center">TP non trouvé.</div>;
     }
     
-    const isLoading = prelimLoading || feedbackLoading || studentDataLoading;
+    const isLoading = prelimLoading || feedbackLoading || validationLoading;
     if (isLoading) {
         return <div className="flex justify-center items-center h-full"><Loader2 className="w-12 h-12 animate-spin text-primary" /></div>;
     }
@@ -149,8 +149,8 @@ export default function EvaluationPage() {
                         <CardTitle className="flex items-center gap-2"><Clock />Suivi des Validations</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                        {Object.keys(validationData).length > 0 ? (
-                             Object.entries(validationData).map(([stepKey, validation]) => {
+                        {Object.keys(tpValidationData).length > 0 ? (
+                             Object.entries(tpValidationData).map(([stepKey, validation]) => {
                                 const v = validation as { teacher: string; date: string };
                                 return (
                                 <div key={stepKey} className="flex items-center gap-2 p-2 bg-background/50 rounded-md">

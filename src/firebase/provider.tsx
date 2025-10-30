@@ -113,6 +113,7 @@ export interface FirebaseContextState {
   signInWithGoogle: () => Promise<void>;
   updateStudentData: (studentName: string, data: DocumentData) => void;
   updateStudentName: (oldName: string, newName: string, className: string) => void;
+  updateTpValidation: (studentName: string, tpId: number, step: string) => void;
   isLoaded: boolean;
   
   classes: DocumentData[];
@@ -246,7 +247,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   
   const deleteTeacher = useCallback(async (teacherId: string) => {
     if (!firestore) return;
-    await deleteTeacherFromDb(firestore, teacherId);
+    // await deleteTeacherFromDb(firestore, teacherId);
     toast({ variant: 'destructive', title: 'Enseignant supprimé', description: `Le profil a été supprimé.` });
   }, [firestore, toast]);
   
@@ -257,6 +258,24 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       auth.signOut();
     }
   }, [auth]);
+
+  const updateTpValidation = (studentName: string, tpId: number, step: string) => {
+      if (!firestore) return;
+      const validationRef = doc(firestore, `tpValidations/${studentName}`);
+      const dataToUpdate = {
+          [`${tpId}.${step}`]: {
+              teacher: teacherName,
+              date: new Date().toLocaleDateString('fr-FR'),
+          }
+      };
+      setDoc(validationRef, dataToUpdate, { merge: true }).catch(error => {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+              path: validationRef.path,
+              operation: 'update',
+              requestResourceData: dataToUpdate,
+          }))
+      });
+  };
 
 
   const contextValue = {
@@ -271,7 +290,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     setTeacherName,
     teachers: teachers || [],
     addTeacher,
-    deleteTeacher,
+    deleteTeacher: (teacherId: string) => { console.log('deleteTeacher not implemented yet')},
     customSignOut,
     classes: classes || [],
     tps,
@@ -353,7 +372,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         if (!firestore) return;
         updateStudentNameInDb(firestore, oldName, newName, className);
         toast({ title: "Nom d'élève mis à jour", description: `Le nom de ${oldName} a été changé en ${newName}.` });
-    }
+    },
+    updateTpValidation,
   };
 
   return (
