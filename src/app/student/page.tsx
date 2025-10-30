@@ -97,10 +97,8 @@ function StudentDashboard() {
             {tpModules.map((module) => {
               const currentStatusInfo = statusInfo[module.status as keyof typeof statusInfo] || statusInfo['non-commencé'];
               const isRedo = module.status === 'à-refaire';
-
-              const linkProps = isRedo ? {} : { href: `/student/tp/${module.id}?student=${encodeURIComponent(studentName)}` };
-              const buttonProps = isRedo ? { onClick: () => handleRedo(module.id) } : { asChild: true };
-
+              
+              const linkHref = `/student/tp/${module.id}?student=${encodeURIComponent(studentName)}`;
 
               return (
                 <Card key={module.id} className="flex flex-col overflow-hidden bg-card border-primary/30 hover:border-accent/50 transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-accent/20">
@@ -128,13 +126,20 @@ function StudentDashboard() {
                     <CardDescription className="mt-2 flex-grow">{module.objectif}</CardDescription>
                   </div>
                   <CardFooter>
-                    <Button {...buttonProps} className={cn("w-full font-bold font-headline uppercase tracking-wider", currentStatusInfo.className)} variant={currentStatusInfo.variant}>
-                        <Link {...linkProps}>
-                            {currentStatusInfo.icon}
-                            {currentStatusInfo.buttonText} 
-                            {module.status === 'non-commencé' && <ArrowRight className="ml-2"/>}
+                    {isRedo ? (
+                      <Button onClick={() => handleRedo(module.id)} className={cn("w-full font-bold font-headline uppercase tracking-wider", currentStatusInfo.className)} variant={currentStatusInfo.variant}>
+                          {currentStatusInfo.icon}
+                          {currentStatusInfo.buttonText}
+                      </Button>
+                    ) : (
+                      <Button asChild className={cn("w-full font-bold font-headline uppercase tracking-wider", currentStatusInfo.className)} variant={currentStatusInfo.variant}>
+                        <Link href={linkHref}>
+                          {currentStatusInfo.icon}
+                          {currentStatusInfo.buttonText}
+                          {module.status === 'non-commencé' && <ArrowRight className="ml-2"/>}
                         </Link>
-                    </Button>
+                      </Button>
+                    )}
                   </CardFooter>
                 </Card>
               );
