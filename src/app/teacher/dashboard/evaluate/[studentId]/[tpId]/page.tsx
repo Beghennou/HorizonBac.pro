@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
@@ -44,6 +45,7 @@ export default function EvaluationPage() {
     const { data: studentPrelimAnswers, isLoading: prelimLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName, tpId]));
     const { data: studentFeedbacks, isLoading: feedbackLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName, tpId]));
     const { data: storedEval, isLoading: storedEvalLoading } = useDoc(useMemoFirebase(() => firestore && studentName && tpId ? doc(firestore, `students/${studentName}/storedEvals`, tpId.toString()) : null, [firestore, studentName, tpId]));
+    const { data: studentValidations, isLoading: validationsLoading } = useDoc(useMemoFirebase(() => firestore && studentName && tpId ? doc(firestore, `students/${studentName}/validations`, tpId.toString()) : null, [firestore, studentName, tpId]));
 
     const prelimAnswersForTp = useMemo(() => {
         const doc = studentPrelimAnswers?.find(d => d.id === tpId?.toString());
@@ -63,6 +65,14 @@ export default function EvaluationPage() {
     }, [studentFeedbacks, storedEval, tpId]);
 
     const evaluatedCompetenceIds = useMemo(() => tp.objectif.match(/C\d\.\d/g) || [], [tp]);
+
+    const validatedStepsCount = useMemo(() => {
+        if (!studentValidations || !studentValidations.steps) return 0;
+        const practicalStepsKeys = tp.activitePratique.map((_, i) => `etape-${i}`);
+        return practicalStepsKeys.filter(key => studentValidations.steps[key]).length;
+    }, [studentValidations, tp.activitePratique]);
+
+    const totalPracticalSteps = tp.activitePratique.length;
 
     const handleCompetenceChange = (competenceId: string, value: EvaluationStatus) => {
         setCompetenceEvals(prev => ({ ...prev, [competenceId]: value }));
@@ -98,7 +108,7 @@ export default function EvaluationPage() {
         return <div className="text-center">TP non trouvé.</div>;
     }
     
-    const isLoading = prelimLoading || feedbackLoading || storedEvalLoading;
+    const isLoading = prelimLoading || feedbackLoading || storedEvalLoading || validationsLoading;
     if (isLoading) {
         return <div className="flex justify-center items-center h-full"><Loader2 className="w-12 h-12 animate-spin text-primary" /></div>;
     }
@@ -142,8 +152,13 @@ export default function EvaluationPage() {
             )}
 
             <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row justify-between items-center">
                     <CardTitle className="flex items-center gap-2"><Award />Évaluation des Compétences</CardTitle>
+                    {totalPracticalSteps > 0 && (
+                        <Badge variant={validatedStepsCount === totalPracticalSteps ? "default" : "secondary"} className="text-base">
+                           Étapes validées : {validatedStepsCount} / {totalPracticalSteps}
+                        </Badge>
+                    )}
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {evaluatedCompetenceIds.map(compId => {
