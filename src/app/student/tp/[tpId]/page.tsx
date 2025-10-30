@@ -141,7 +141,7 @@ export default function TPPage() {
         {assignedTp.status === 'non-commencé' && (
             <Button onClick={handleStart} size="lg"><Play className="mr-2"/>Commencer le TP</Button>
         )}
-        {assignedTp.status === 'en-cours' && (
+        {(assignedTp.status === 'en-cours' || assignedTp.status === 'à-refaire') && (
             <Button onClick={handleFinish} variant="outline" size="lg" className="border-accent text-accent hover:bg-accent hover:text-black">
                 <CheckeredFlag className="mr-2"/>Terminer le TP
             </Button>
@@ -394,3 +394,6 @@ export default function TPPage() {
 
     
 
+
+
+    
