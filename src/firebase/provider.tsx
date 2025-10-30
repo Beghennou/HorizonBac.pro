@@ -92,7 +92,7 @@ export interface FirebaseContextState {
   
   assignTp: (studentNames: string[], tpId: number) => void;
   saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean) => void;
-  updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => void;
+  updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => Promise<void>;
   savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => void;
   saveFeedback: (studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => void;
   saveTpValidation: (studentName: string, tpId: number, validationId: string, teacherName: string) => void;
@@ -270,15 +270,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     });
   }, [firestore]);
 
-  const updateTpStatus = useCallback((studentName: string, tpId: number, status: TpStatus) => {
+  const updateTpStatus = useCallback(async (studentName: string, tpId: number, status: TpStatus) => {
       if (!firestore) return;
       const studentAssignedTps = assignedTps[studentName] || [];
-      updateStudentTpStatusInDb(firestore, studentName, tpId, status, studentAssignedTps)
-        .then(() => {
-            if (status === 'en-cours') {
-                window.location.reload();
-            }
-        });
+      await updateStudentTpStatusInDb(firestore, studentName, tpId, status, studentAssignedTps);
   }, [firestore, assignedTps]);
   
   const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {

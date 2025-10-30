@@ -89,7 +89,7 @@ export const updateStudentTpStatusInDb = async (firestore: Firestore, studentNam
     if (tpIndex > -1) {
         const newTps = [...assignedTpsForStudent];
         newTps[tpIndex] = { ...newTps[tpIndex], status };
-         setDoc(studentDocRef, { tps: newTps }).catch(error => {
+         await setDoc(studentDocRef, { tps: newTps }).catch(error => {
             errorEmitter.emit('permission-error', new FirestorePermissionError({
                 path: studentDocRef.path,
                 operation: 'update',

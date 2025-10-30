@@ -1,7 +1,7 @@
 
 
 'use client';
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -20,7 +20,14 @@ import { collection } from 'firebase/firestore';
 function StudentDashboard() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { firestore, assignedTps, tps: allTps, updateTpStatus } = useFirebase();
+  const { firestore, assignedTps: initialAssignedTps, tps: allTps, updateTpStatus } = useFirebase();
+
+  const [assignedTps, setAssignedTps] = useState(initialAssignedTps);
+
+  useEffect(() => {
+    setAssignedTps(initialAssignedTps);
+  }, [initialAssignedTps]);
+
 
   const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
 
@@ -49,11 +56,11 @@ function StudentDashboard() {
 
   const studentTps = assignedTps[studentName] || [];
 
-  const tpModules = studentTps.map(assignedTp => {
+  const tpModules = useMemo(() => studentTps.map(assignedTp => {
     const tp = allTps[assignedTp.id];
     const isEvaluated = storedEvalsForStudent[tp?.id.toString()]?.isFinal;
     return tp ? { ...tp, status: assignedTp.status, isEvaluated } : null;
-  }).filter((tp): tp is TP & { status: TpStatus; isEvaluated: boolean } => tp !== null);
+  }).filter((tp): tp is TP & { status: TpStatus; isEvaluated: boolean } => tp !== null), [studentTps, allTps, storedEvalsForStudent]);
 
   const getTpCategory = (tpId: number): string => {
     if (tpId >= 1000) return "TP Personnalisé";
@@ -72,9 +79,20 @@ function StudentDashboard() {
 
   const defaultTpImage = PlaceHolderImages.find(p => p.id === 'tp-default');
 
-  const handleRedo = (tpId: number) => {
+  const handleRedo = async (tpId: number) => {
     if (studentName) {
-        updateTpStatus(studentName, tpId, 'en-cours');
+        // Optimistic UI update
+        const newAssignedTps = { ...assignedTps };
+        const studentTpsToUpdate = [...(newAssignedTps[studentName] || [])];
+        const tpIndex = studentTpsToUpdate.findIndex(t => t.id === tpId);
+        if (tpIndex !== -1) {
+            studentTpsToUpdate[tpIndex].status = 'en-cours';
+            newAssignedTps[studentName] = studentTpsToUpdate;
+            setAssignedTps(newAssignedTps);
+        }
+
+        // Update database
+        await updateTpStatus(studentName, tpId, 'en-cours');
     }
   }
 
