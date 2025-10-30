@@ -34,6 +34,7 @@ export type TP = {
   securiteRangement: string[];
   pointsCles: string[];
   ressources?: string[];
+  validationRequise?: boolean;
 };
 
 function etape(titre: string, duree: string, etapes: string[]): Etape {
@@ -92,7 +93,8 @@ export const tpSeconde: Record<number, TP> = {
             'Respect strict des consignes de sécurité',
             'Utilisation correcte et systématique des EPI',
             'Gestion écologique et réglementaire des déchets'
-        ]
+        ],
+        validationRequise: false,
     },
     102: {
         id: 102,
@@ -146,7 +148,8 @@ export const tpSeconde: Record<number, TP> = {
             'Stabilité du véhicule vérifiée avant intervention',
             'Usage obligatoire des chandelles comme sécurité principale',
             'Procédure de sécurité appliquée rigoureusement'
-        ]
+        ],
+        validationRequise: false,
     },
     103: {
         id: 103,
@@ -203,7 +206,8 @@ export const tpSeconde: Record<number, TP> = {
             'Points de prise constructeur respectés scrupuleusement',
             'Sécurité mécanique obligatoirement enclenchée',
             'Stabilité vérifiée systématiquement avant intervention'
-        ]
+        ],
+        validationRequise: false,
     },
     104: {
         id: 104,
@@ -250,7 +254,8 @@ export const tpSeconde: Record<number, TP> = {
             'Classification correcte des témoins par ordre d\'urgence',
             'Capacité à donner un conseil client approprié et rassurant',
             'Utilisation systématique du manuel constructeur comme référence'
-        ]
+        ],
+        validationRequise: false,
     },
     105: {
         id: 105,
@@ -299,7 +304,8 @@ export const tpSeconde: Record<number, TP> = {
             'Anomalies détectées et immédiatement signalées',
             'Fluides utilisés conformes aux spécifications constructeur',
             'Traçabilité complète de tous les appoints effectués'
-        ]
+        ],
+        validationRequise: false,
     },
     106: {
         id: 106,
@@ -351,7 +357,8 @@ export const tpSeconde: Record<number, TP> = {
             'Remplacement correct sans contamination du verre',
             'Test systématique de chaque fonction après intervention',
             'Documentation complète des ampoules remplacées'
-        ]
+        ],
+        validationRequise: false,
     },
      107: {
         id: 107,
@@ -391,7 +398,8 @@ export const tpSeconde: Record<number, TP> = {
             'Bonne identification du type de fixation',
             'Protection du pare-brise',
             'Test fonctionnel après remplacement'
-        ]
+        ],
+        validationRequise: false,
     },
     108: {
         id: 108,
@@ -432,7 +440,8 @@ export const tpSeconde: Record<number, TP> = {
             'Pression correcte et homogène',
             'Usure régulière de la bande de roulement',
             'Absence de dommage sur les flancs'
-        ]
+        ],
+        validationRequise: false,
     },
     109: {
         id: 109,
@@ -475,7 +484,8 @@ export const tpSeconde: Record<number, TP> = {
             'Utilisation de l\'huile préconisée',
             'Remplacement systématique du joint de vidange et du filtre',
             'Serrage au couple du bouchon de vidange'
-        ]
+        ],
+        validationRequise: false,
     },
     110: {
         id: 110,
@@ -514,7 +524,8 @@ export const tpSeconde: Record<number, TP> = {
             'Diagnostic visuel fiable de l\'encrassement',
             'Bon positionnement du filtre neuf',
             'Justification du remplacement auprès du client'
-        ]
+        ],
+        validationRequise: false,
     },
     111: {
         id: 111,
@@ -558,7 +569,8 @@ export const tpSeconde: Record<number, TP> = {
             'Utilisation correcte des points de levage',
             'Procédure de sécurité (cales, frein à main)',
             'Contrôle final du serrage'
-        ]
+        ],
+        validationRequise: false,
     },
     112: {
         id: 112,
@@ -605,7 +617,8 @@ export const tpSeconde: Record<number, TP> = {
             'Ordre de déconnexion : Négatif en premier',
             'Ordre de connexion : Positif en premier',
             'Serrage ferme des cosses et de la fixation'
-        ]
+        ],
+        validationRequise: false,
     },
     113: {
         id: 113,
@@ -663,7 +676,8 @@ export const tpSeconde: Record<number, TP> = {
             '[VIDÉO] Tutoriel complet : Remplacer disques et plaquettes - https://www.youtube.com/watch?v=example1',
             '[PDF] Schéma éclaté d\'un étrier de frein flottant - /docs/etrier-flottant.pdf',
             '[TEXTE] Procédure de rodage des freins neufs - /docs/rodage-freins.txt'
-        ]
+        ],
+        validationRequise: false,
     },
     114: {
         id: 114,
@@ -716,7 +730,8 @@ export const tpSeconde: Record<number, TP> = {
             'Procédure en 3 temps : Entrée en maintenance / Remplacement / Sortie de maintenance.',
             'Propreté du moyeu et inspection des colonnettes.',
             'Serrage au couple et essai fonctionnel indispensables.'
-        ]
+        ],
+        validationRequise: false,
     },
     115: {
         id: 115,
@@ -770,7 +785,8 @@ export const tpSeconde: Record<number, TP> = {
             'Contrôle des fuites sur les cylindres de roue.',
             'Fonctionnement et réglage du rattrapage de jeu automatique.',
             'Le "léchage" correct au remontage du tambour.'
-        ]
+        ],
+        validationRequise: false,
     },
     116: {
         id: 116,
@@ -821,7 +837,8 @@ export const tpSeconde: Record<number, TP> = {
             'Remplacement systématique de la valve.',
             'Équilibrage précis jusqu\'à obtenir un résultat nul.',
             'Serrage final de la roue au couple dynamométrique.'
-        ]
+        ],
+        validationRequise: false,
     }
 };
 
@@ -829,6 +846,8 @@ export const tpSeconde: Record<number, TP> = {
 
 
     
+
+
 
 
 

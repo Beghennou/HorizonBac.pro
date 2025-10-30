@@ -33,6 +33,7 @@ export type TP = {
   securiteRangement: string[];
   pointsCles: string[];
   ressources?: string[];
+  validationRequise?: boolean;
 };
 
 function etape(titre: string, duree: string, etapes: string[]): Etape {
@@ -70,7 +71,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Gants et lunettes', 'Ventiler atelier', 'Traçabilité fluide obligatoire'],
-    pointsCles: ['Pressions nominales', 'Étanchéité', 'Dossier réglementaire']
+    pointsCles: ['Pressions nominales', 'Étanchéité', 'Dossier réglementaire'],
+    validationRequise: false,
   },
   302: {
     id: 302,
@@ -102,7 +104,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Ne pas heurter airbag', 'Stocker face vers le haut', 'Filière agréée'],
-    pointsCles: ['Attente 5 min', 'Couples serrage', 'Effacement défauts']
+    pointsCles: ['Attente 5 min', 'Couples serrage', 'Effacement défauts'],
+    validationRequise: false,
   },
    303: {
     id: 303,
@@ -134,7 +137,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Nettoyer pare-brise capteurs', 'Rebrancher connecteurs', 'Tracer paramètres'],
-    pointsCles: ['Propreté zone', 'Calibration', 'Test réel']
+    pointsCles: ['Propreté zone', 'Calibration', 'Test réel'],
+    validationRequise: false,
   },
   304: {
     id: 304,
@@ -166,7 +170,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Couples respectés', 'Étiqueter IDs', 'Ranger outil TPMS'],
-    pointsCles: ['Apprentissage', 'Ordre roues', 'Pressions correctes']
+    pointsCles: ['Apprentissage', 'Ordre roues', 'Pressions correctes'],
+    validationRequise: false,
   },
   305: {
     id: 305,
@@ -198,7 +203,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Jamais manipuler sous tension', 'Élimination spécifique ampoules', 'Tracer réglage'],
-    pointsCles: ['HT danger', 'Correcteur OK', 'Réglage anti-éblouissement']
+    pointsCles: ['HT danger', 'Correcteur OK', 'Réglage anti-éblouissement'],
+    validationRequise: false,
   },
   307: {
     id: 307,
@@ -231,7 +237,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Remettre durite d’origine', 'Serrer colliers', 'Tracer relevés'],
-    pointsCles: ['Pression cible', 'Fuites = perte', 'Commande OK']
+    pointsCles: ['Pression cible', 'Fuites = perte', 'Commande OK'],
+    validationRequise: false,
   },
   308: {
     id: 308,
@@ -265,7 +272,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Nettoyer gasoil', 'Éliminer déchets', 'Tracer'],
-    pointsCles: ['Pas d’air', 'Pression correcte', 'Filtre propre']
+    pointsCles: ['Pas d’air', 'Pression correcte', 'Filtre propre'],
+    validationRequise: false,
   },
   309: {
     id: 309,
@@ -302,7 +310,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Descendre du banc', 'Ranger capteurs', 'Archiver fiches'],
-    pointsCles: ['Pressions base', 'Symétrie G/D', 'Réglage fin']
+    pointsCles: ['Pressions base', 'Symétrie G/D', 'Réglage fin'],
+    validationRequise: false,
   },
   310: {
     id: 310,
@@ -340,7 +349,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Déconnexions propres', 'Ranger outils', 'Archiver relevés'],
-    pointsCles: ['Pression rampe clé', 'Codes + PIDs', 'Actionneurs confirment']
+    pointsCles: ['Pression rampe clé', 'Codes + PIDs', 'Actionneurs confirment'],
+    validationRequise: false,
   },
   311: {
     id: 311,
@@ -372,7 +382,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Ventilation atelier', 'Précautions température', 'Archiver mesures'],
-    pointsCles: ['Normes respectées', 'Lambda/EGR', 'FAP OK']
+    pointsCles: ['Normes respectées', 'Lambda/EGR', 'FAP OK'],
+    validationRequise: false,
   },
   312: {
     id: 312,
@@ -409,7 +420,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Protéger sondes', 'Ne pas dépasser Vmax', 'Sauvegarder et ranger'],
-    pointsCles: ['Réglages nets', 'Trigger stable', 'Lecture formes']
+    pointsCles: ['Réglages nets', 'Trigger stable', 'Lecture formes'],
+    validationRequise: false,
   },
   313: {
     id: 313,
@@ -441,7 +453,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Protéger zone', 'Éliminer gasoil', 'Tracer injecteurs'],
-    pointsCles: ['Retours homogènes', 'Isolation OK', 'Joints sains']
+    pointsCles: ['Retours homogènes', 'Isolation OK', 'Joints sains'],
+    validationRequise: false,
   },
   314: {
     id: 314,
@@ -473,7 +486,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Joints neufs', 'Purge HP', 'Ranger banc'],
-    pointsCles: ['Débit homogène', 'Codage fait', 'Étanchéité OK']
+    pointsCles: ['Débit homogène', 'Codage fait', 'Étanchéité OK'],
+    validationRequise: false,
   },
   315: {
     id: 315,
@@ -510,7 +524,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Roues calées', 'Électricité sécurisée', 'Tracer'],
-    pointsCles: ['Capteurs cohérents', 'Actionneurs OK', 'Voyant OFF']
+    pointsCles: ['Capteurs cohérents', 'Actionneurs OK', 'Voyant OFF'],
+    validationRequise: false,
   },
   316: {
     id: 316,
@@ -548,7 +563,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Compléter fluide', 'Serrer raccords', 'Ranger mano'],
-    pointsCles: ['Type identifié', 'Pression OK', 'Capteurs étalonnés']
+    pointsCles: ['Type identifié', 'Pression OK', 'Capteurs étalonnés'],
+    validationRequise: false,
   },
   317: {
     id: 317,
@@ -588,7 +604,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Dépressuriser avant intervention', 'Protéger soufflets', 'Ranger outils'],
-    pointsCles: ['Modes fonctionnels', 'Correction active', 'Pas de fuites']
+    pointsCles: ['Modes fonctionnels', 'Correction active', 'Pas de fuites'],
+    validationRequise: false,
   },
   318: {
     id: 318,
@@ -627,7 +644,8 @@ export const tpTerminale: Record<number, TP> = {
       ])
     ],
     securiteRangement: ['Véhicule calé', 'Procédures constructeur', 'Limiter sollicitations', 'Ranger outils'],
-    pointsCles: ['PIDs essentiels', 'Apprentissage obligatoire', 'Actionneurs OK']
+    pointsCles: ['PIDs essentiels', 'Apprentissage obligatoire', 'Actionneurs OK'],
+    validationRequise: false,
   }
 };
 
@@ -637,6 +655,8 @@ export const tpTerminale: Record<number, TP> = {
 
 
     
+
+
 
 
 
