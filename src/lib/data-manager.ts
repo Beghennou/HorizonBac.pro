@@ -52,26 +52,42 @@ export const initialTps: Record<number, TP> = {
   ...tpTerminale,
 };
 
-export const getTpsByNiveau = (niveau: Niveau, allTpsFromContext?: Record<number, TP>): TP[] => {
-  const sourceTps = allTpsFromContext ? Object.values(allTpsFromContext) : Object.values(initialTps);
-
-  return sourceTps.filter(tp => {
-    if(!tp) return false;
+const isTpOfNiveau = (tp: TP, niveau: Niveau): boolean => {
+    if (!tp) return false;
     const tpId = tp.id;
-    
-    // Prioritize the 'niveau' property if it exists (for custom TPs)
+
     if (tp.niveau) {
         return tp.niveau === niveau;
     }
-    
-    // Fallback for older TPs without a 'niveau' property based on ID ranges
-    switch(niveau) {
+
+    switch (niveau) {
         case 'seconde': return tpId >= 101 && tpId < 200;
         case 'premiere': return tpId >= 1 && tpId < 101;
         case 'terminale': return tpId >= 301 && tpId < 1000;
         default: return false;
     }
-  });
+}
+
+export const getTpsByNiveau = (niveau: Niveau, allTpsFromContext?: Record<number, TP>): TP[] => {
+  const sourceTps = allTpsFromContext ? Object.values(allTpsFromContext) : Object.values(initialTps);
+
+  let niveauxToShow: Niveau[] = [];
+  switch (niveau) {
+    case 'terminale':
+      niveauxToShow = ['terminale', 'premiere', 'seconde'];
+      break;
+    case 'premiere':
+      niveauxToShow = ['premiere', 'seconde'];
+      break;
+    case 'seconde':
+      niveauxToShow = ['seconde'];
+      break;
+  }
+
+  return sourceTps.filter(tp => {
+    if (!tp) return false;
+    return niveauxToShow.some(n => isTpOfNiveau(tp, n));
+  }).sort((a,b) => a.id - b.id);
 };
 
 export const getTpById = (id: number, all?: boolean, allTpsFromContext?: Record<number, TP>): TP | Record<number, TP> | undefined => {
@@ -87,3 +103,4 @@ export const allBlocs: Record<string, CompetenceBloc> = {
     ...competencesParNiveau.premiere,
     ...competencesParNiveau.terminale,
 };
+

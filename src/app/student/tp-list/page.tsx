@@ -186,7 +186,7 @@ function TpListPageContent() {
         <div className="md:col-span-1">
             <Card className="h-full flex flex-col">
                 <CardHeader>
-                    <CardTitle>TP de {niveau}</CardTitle>
+                    <CardTitle>Fiches TP</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-grow p-2">
                     <ScrollArea className="h-[calc(100vh-20rem)]">
