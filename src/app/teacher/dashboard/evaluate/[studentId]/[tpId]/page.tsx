@@ -3,18 +3,19 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { TP, EtudePrelimQCM, allBlocs } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Loader2, Save, Send, User, Award, FileText, MessageSquare } from 'lucide-react';
-import { collection } from 'firebase/firestore';
+import { Loader2, Save, Send, User, Award, FileText, MessageSquare, Check, Clock } from 'lucide-react';
+import { collection, doc } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 
@@ -42,6 +43,15 @@ export default function EvaluationPage() {
 
     const { data: studentPrelimAnswers, isLoading: prelimLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName, tpId]));
     const { data: studentFeedbacks, isLoading: feedbackLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName, tpId]));
+    const { data: studentData, isLoading: studentDataLoading } = useDoc(useMemoFirebase(() => firestore && studentName ? doc(firestore, `students/${studentName}`) : null, [firestore, studentName]));
+
+    const validationData = useMemo(() => {
+        if (studentData && tpId) {
+          return studentData.tpValidations?.[tpId] || {};
+        }
+        return {};
+    }, [studentData, tpId]);
+
 
     const prelimAnswersForTp = useMemo(() => {
         const doc = studentPrelimAnswers?.find(d => d.id === tpId?.toString());
@@ -90,7 +100,7 @@ export default function EvaluationPage() {
         return <div className="text-center">TP non trouvé.</div>;
     }
     
-    const isLoading = prelimLoading || feedbackLoading;
+    const isLoading = prelimLoading || feedbackLoading || studentDataLoading;
     if (isLoading) {
         return <div className="flex justify-center items-center h-full"><Loader2 className="w-12 h-12 animate-spin text-primary" /></div>;
     }
@@ -130,6 +140,32 @@ export default function EvaluationPage() {
                     </CardContent>
                 </Card>
             )}
+            
+            {tp.validationRequise && (
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Clock />Suivi des Validations</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                        {Object.entries(validationData).length > 0 ? (
+                             Object.entries(validationData).map(([stepKey, validation]) => {
+                                const v = validation as { teacher: string; date: string };
+                                return (
+                                <div key={stepKey} className="flex items-center gap-2 p-2 bg-background/50 rounded-md">
+                                    <Check className="text-green-500"/>
+                                    <p>
+                                        <span className="font-semibold capitalize">{stepKey.replace('-', ' ')}</span> validé(e) par <span className="font-semibold text-accent">{v.teacher}</span> le {v.date}.
+                                    </p>
+                                </div>
+                                )
+                            })
+                        ) : (
+                            <p className="text-muted-foreground italic">Aucune validation n'a été enregistrée pour ce TP.</p>
+                        )}
+                    </CardContent>
+                 </Card>
+            )}
+
 
             <Card>
                 <CardHeader>
