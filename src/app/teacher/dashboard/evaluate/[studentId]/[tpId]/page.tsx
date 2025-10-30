@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -147,7 +148,7 @@ export default function EvaluationPage() {
                         <CardTitle className="flex items-center gap-2"><Clock />Suivi des Validations</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                        {Object.entries(validationData).length > 0 ? (
+                        {Object.keys(validationData).length > 0 ? (
                              Object.entries(validationData).map(([stepKey, validation]) => {
                                 const v = validation as { teacher: string; date: string };
                                 return (
