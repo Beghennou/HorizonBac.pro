@@ -3,7 +3,7 @@
 'use client';
 import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { TP, getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

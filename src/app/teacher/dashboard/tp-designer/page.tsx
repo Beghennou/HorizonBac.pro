@@ -44,7 +44,7 @@ const tpFormSchema = z.object({
     id: z.number().int().positive("L'ID doit être un nombre positif."),
     titre: z.string().min(5, "Le titre doit faire au moins 5 caractères."),
     duree: z.string().min(3, "La durée est requise."),
-    niveau: z.enum(['seconde', 'premiere', 'terminale']),
+    niveau: z.enum(['seconde', 'premiere', 'terminale', 'cap1', 'cap2']),
     situation: z.string().min(10, "La situation doit faire au moins 10 caractères."),
     objectif: z.string().min(10, "L'objectif doit faire au moins 10 caractères."),
     competences: z.array(z.string()).min(1, "Au moins une compétence doit être sélectionnée."),
@@ -65,13 +65,16 @@ export default function TPDesignerPage() {
     const { addTp, teacherName, tps } = useFirebase(); 
     const [isEditMode, setIsEditMode] = useState(false);
     
+    const cursus = searchParams.get('cursus') || 'bacpro';
+    const defaultNiveau = cursus === 'cap' ? 'cap1' : 'seconde';
+
     const form = useForm<TpFormValues>({
         resolver: zodResolver(tpFormSchema),
         defaultValues: {
             id: Math.floor(1000 + Math.random() * 9000),
             titre: "",
             duree: "2h00",
-            niveau: "seconde",
+            niveau: defaultNiveau,
             situation: "",
             objectif: "",
             competences: [],
@@ -95,6 +98,7 @@ export default function TPDesignerPage() {
 
                 form.reset({
                     ...tpToEdit,
+                    niveau: tpToEdit.niveau || defaultNiveau,
                     etudePrelim: tpToEdit.etudePrelim.map(e => ({
                         ...e,
                         options: e.type === 'qcm' ? e.options : undefined
@@ -108,7 +112,7 @@ export default function TPDesignerPage() {
                 });
             }
         }
-    }, [searchParams, tps, form]);
+    }, [searchParams, tps, form, defaultNiveau]);
 
     const { fields: materielFields, append: appendMateriel, remove: removeMateriel } = useFieldArray({ control: form.control, name: "materiel" });
     const { fields: etudePrelimFields, append: appendEtudePrelim, remove: removeEtudePrelim } = useFieldArray({ control: form.control, name: "etudePrelim" });
@@ -150,7 +154,7 @@ export default function TPDesignerPage() {
             id: Math.floor(1000 + Math.random() * 9000),
             titre: "",
             duree: "2h00",
-            niveau: "seconde",
+            niveau: defaultNiveau,
             situation: "",
             objectif: "",
             competences: [],
@@ -162,16 +166,20 @@ export default function TPDesignerPage() {
             validationRequise: false,
         });
         } else {
-            router.push('/teacher/dashboard/tp-designer');
+            router.push(`/teacher/dashboard/tp-designer?cursus=${cursus}`);
         }
     };
+    
+    const niveauOptions = cursus === 'cap' 
+        ? [{value: 'cap1', label: 'CAP 1ère Année'}, {value: 'cap2', label: 'CAP 2ème Année'}]
+        : [{value: 'seconde', label: 'Seconde'}, {value: 'premiere', label: 'Première'}, {value: 'terminale', label: 'Terminale'}];
 
     return (
         <div className="space-y-8">
             <div>
                  <h1 className="font-headline text-5xl tracking-wide flex items-center gap-4">
                     {isEditMode ? <FilePenLine className="w-12 h-12 text-primary" /> : <DraftingCompass className="w-12 h-12 text-primary" />}
-                    {isEditMode ? 'Éditeur de TP' : 'Concepteur de modules TP'}
+                    {isEditMode ? 'Éditeur de TP' : 'Concepteur de modules TP'} ({cursus.toUpperCase()})
                 </h1>
                 <p className="text-muted-foreground mt-2">
                     {isEditMode ? 'Modifiez les détails de ce travail pratique.' : 'Créez et partagez des modules TP personnalisés avec des simulations de course intégrées.'}
@@ -218,9 +226,9 @@ export default function TPDesignerPage() {
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl><SelectTrigger><SelectValue placeholder="Sélectionnez un niveau" /></SelectTrigger></FormControl>
                                         <SelectContent>
-                                            <SelectItem value="seconde">Seconde</SelectItem>
-                                            <SelectItem value="premiere">Première</SelectItem>
-                                            <SelectItem value="terminale">Terminale</SelectItem>
+                                            {niveauOptions.map(option => (
+                                                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -473,5 +481,3 @@ export default function TPDesignerPage() {
         </div>
     );
 }
-
-    

@@ -1,6 +1,7 @@
+
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,7 +16,10 @@ export default function TeacherLoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { toast } = useToast();
+
+    const cursus = searchParams.get('cursus') || 'bacpro';
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,7 +29,7 @@ export default function TeacherLoginPage() {
                 description: 'Bienvenue dans l\'espace enseignant.',
             });
             sessionStorage.setItem('teacher_auth', 'true');
-            router.push('/teacher/select');
+            router.push(`/teacher/select?cursus=${cursus}`);
         } else {
             setError('Mot de passe incorrect.');
         }
@@ -40,7 +44,7 @@ export default function TeacherLoginPage() {
             </div>
             <Card className="w-full max-w-md border-primary shadow-lg">
                 <CardHeader className="text-center">
-                    <CardTitle className="font-headline text-3xl text-accent">Accès Enseignant</CardTitle>
+                    <CardTitle className="font-headline text-3xl text-accent">Accès Enseignant ({cursus.toUpperCase()})</CardTitle>
                     <CardDescription>Veuillez entrer le mot de passe pour continuer.</CardDescription>
                 </CardHeader>
                 <CardContent>

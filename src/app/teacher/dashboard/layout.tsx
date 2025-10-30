@@ -1,11 +1,12 @@
 
+
 'use client';
 
 import { Suspense, useEffect, useCallback, useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Niveau } from '@/lib/data-manager';
+import { Niveau, Cursus } from '@/lib/data-manager';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { LyceeLogo } from '@/components/lycee-logo';
 import {
@@ -23,8 +24,13 @@ import { Button } from '@/components/ui/button';
 import { LogoutButton } from '@/components/logout-button';
 
 function getLevelFromClassName(className: string | null): Niveau {
-    if (!className) return 'seconde';
+    if (!className) return 'seconde'; // Default
     const lowerCaseName = className.toLowerCase();
+    if (lowerCaseName.includes('cap')) {
+        if(lowerCaseName.startsWith('1')) return 'cap1';
+        if(lowerCaseName.startsWith('2')) return 'cap2';
+        return 'cap1';
+    }
     if (lowerCaseName.startsWith('t')) return 'terminale';
     if (lowerCaseName.startsWith('1')) return 'premiere';
     return 'seconde';
@@ -51,7 +57,15 @@ function DashboardLayoutContent({
   }, []);
 
   const selectedClass = searchParams.get('class') || '';
-  const classNames = (classes || []).map(c => c.id).sort((a, b) => a.localeCompare(b));
+  const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
+  
+  const classNames = (classes || [])
+    .map(c => c.id)
+    .filter(name => {
+        if (cursus === 'cap') return name.toLowerCase().includes('cap');
+        return !name.toLowerCase().includes('cap');
+    })
+    .sort((a, b) => a.localeCompare(b));
 
   useEffect(() => {
     if (isLoaded && !teacherName) {
@@ -90,7 +104,7 @@ function DashboardLayoutContent({
                         <LyceeLogo className="w-9 h-9 text-white" />
                     </div>
                      <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
-                        Horizon Bacpro
+                        Horizon Skills
                     </h1>
                     </Link>
                 </div>
@@ -114,7 +128,7 @@ function DashboardLayoutContent({
                     <SidebarContent className="p-2 justify-end">
                         <div className="space-y-4">
                             <div>
-                                <h3 className="font-headline text-sm text-accent uppercase tracking-wider mb-1 px-2">Sélection classe :</h3>
+                                <h3 className="font-headline text-sm text-accent uppercase tracking-wider mb-1 px-2">Sélection classe ({cursus.toUpperCase()}) :</h3>
                                 {classNames.length > 0 ? (
                                     <div className="px-2">
                                         <Select value={selectedClass} onValueChange={handleClassChange}>
@@ -129,7 +143,7 @@ function DashboardLayoutContent({
                                         </Select>
                                     </div>
                                 ) : (
-                                    <p className="text-sm text-muted-foreground px-2">Aucune classe n'est configurée.</p>
+                                    <p className="text-sm text-muted-foreground px-2">Aucune classe pour ce cursus.</p>
                                 )}
                             </div>
                             <DashboardNav />

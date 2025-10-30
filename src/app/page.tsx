@@ -1,4 +1,5 @@
 
+
 import { LyceeLogo } from '@/components/lycee-logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -14,37 +15,41 @@ export default function Home() {
         </div>
       </div>
       <h1 className="font-headline text-5xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text mb-2 text-center">
-        Horizon Bacpro
+        Horizon Skills
       </h1>
       <p className="text-muted-foreground text-xl mb-12 text-center">Plateforme de suivi des compétences pour la maintenance automobile</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
         <Card className="bg-gradient-to-br from-card to-background border-2 border-primary shadow-2xl hover:border-accent transition-all transform hover:-translate-y-1">
           <CardHeader className="text-center">
-            <UserCog className="mx-auto h-12 w-12 text-accent mb-4" />
             <CardTitle className="font-headline text-3xl font-black uppercase tracking-widest text-accent">
-              Espace Enseignant
+              Bac Pro
             </CardTitle>
-            <CardDescription>Gérez les classes, assignez les TP et suivez la progression de vos élèves.</CardDescription>
+            <CardDescription>Parcours de formation pour les élèves en Baccalauréat Professionnel Maintenance des Véhicules.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="grid grid-cols-2 gap-4">
             <Button asChild size="lg" className="w-full font-headline uppercase tracking-wider text-base border-2 border-accent bg-gradient-to-br from-primary to-racing-orange hover:brightness-110">
-              <Link href="/teacher/login">Accéder à l'espace enseignant</Link>
+              <Link href="/teacher/select?cursus=bacpro"><UserCog className="mr-2"/>Enseignant</Link>
+            </Button>
+             <Button asChild size="lg" className="w-full font-headline uppercase tracking-wider text-base border-accent text-accent" variant="outline">
+              <Link href="/student/select?cursus=bacpro"><School className="mr-2"/>Élève</Link>
             </Button>
           </CardContent>
         </Card>
         
         <Card className="bg-gradient-to-br from-card to-background border-2 border-primary shadow-2xl hover:border-accent transition-all transform hover:-translate-y-1">
           <CardHeader className="text-center">
-            <School className="mx-auto h-12 w-12 text-accent mb-4" />
             <CardTitle className="font-headline text-3xl font-black uppercase tracking-widest text-accent">
-              Espace Élève
+              CAP
             </CardTitle>
-            <CardDescription>Consultez vos travaux pratiques assignés et suivez votre parcours de formation.</CardDescription>
+            <CardDescription>Parcours de formation pour les élèves en CAP Maintenance des Véhicules.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <Button asChild size="lg" className="w-full font-headline uppercase tracking-wider text-base border-2 border-accent bg-gradient-to-br from-primary to-racing-orange hover:brightness-110">
+              <Link href="/teacher/select?cursus=cap"><UserCog className="mr-2"/>Enseignant</Link>
+            </Button>
              <Button asChild size="lg" className="w-full font-headline uppercase tracking-wider text-base border-accent text-accent" variant="outline">
-              <Link href="/student/select">Consulter mes TP</Link>
+              <Link href="/student/select?cursus=cap"><School className="mr-2"/>Élève</Link>
             </Button>
           </CardContent>
         </Card>

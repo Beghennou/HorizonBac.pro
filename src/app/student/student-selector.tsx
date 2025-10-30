@@ -6,6 +6,7 @@ import { useFirebase } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Cursus } from '@/lib/data-manager';
 
 export default function StudentSelector() {
   const router = useRouter();
@@ -16,6 +17,8 @@ export default function StudentSelector() {
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
   
+  const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
+
   const teachers = useMemo(() => {
       if (!allTeachers) return [];
       // Use an object to ensure names are unique if they are the same
@@ -28,8 +31,14 @@ export default function StudentSelector() {
   
   const classNames = useMemo(() => {
     if (!allClassData) return [];
-    return allClassData.map(c => c.id).sort();
-  }, [allClassData]);
+    return allClassData
+      .map(c => c.id)
+      .filter(name => {
+          if (cursus === 'cap') return name.toLowerCase().includes('cap');
+          return !name.toLowerCase().includes('cap');
+      })
+      .sort();
+  }, [allClassData, cursus]);
 
   const studentsInClass = useMemo(() => {
     if (!selectedClass || !allClassData) return [];
@@ -71,6 +80,7 @@ export default function StudentSelector() {
       params.set('teacher', selectedTeacher);
       params.set('class', selectedClass);
       params.set('student', selectedStudent);
+      params.set('cursus', cursus);
       router.push(`/student?${params.toString()}`);
     }
   };

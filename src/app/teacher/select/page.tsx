@@ -1,6 +1,7 @@
+
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,19 +10,23 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, UserPlus, LogIn } from 'lucide-react';
+import { Cursus } from '@/lib/data-manager';
 
 export default function SelectTeacherPage() {
     const { isLoaded, teachers, setTeacherName, addTeacher } = useFirebase();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { toast } = useToast();
 
     const [selectedTeacher, setSelectedTeacher] = useState('');
     const [newTeacherName, setNewTeacherName] = useState('');
 
+    const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
+
     useEffect(() => {
         const isAuth = sessionStorage.getItem('teacher_auth');
         if (isAuth !== 'true') {
-            router.replace('/teacher/login');
+            router.replace(`/teacher/login?cursus=${cursus}`);
             return;
         }
 
@@ -30,7 +35,7 @@ export default function SelectTeacherPage() {
             setSelectedTeacher(pendingTeacher);
             sessionStorage.removeItem('pendingTeacherName');
         }
-    }, [router, teachers]);
+    }, [router, teachers, cursus]);
 
     if (!isLoaded) {
         return (
@@ -46,7 +51,7 @@ export default function SelectTeacherPage() {
             return;
         }
         setTeacherName(selectedTeacher);
-        router.push('/teacher/dashboard');
+        router.push(`/teacher/dashboard?cursus=${cursus}`);
     };
     
     const handleAddTeacher = async () => {
@@ -64,8 +69,6 @@ export default function SelectTeacherPage() {
             await addTeacher(teacherNameToAdd);
             toast({ title: 'Profil créé', description: `Veuillez sélectionner ${teacherNameToAdd} dans la liste pour vous connecter.` });
             sessionStorage.setItem('pendingTeacherName', teacherNameToAdd);
-            // We don't redirect here. We let the useEffect handle the selection on reload.
-            // The data refresh will be handled by Firebase's realtime listener.
             setNewTeacherName('');
         } catch (error) {
             console.error("Failed to add teacher", error);
@@ -79,7 +82,7 @@ export default function SelectTeacherPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Sélectionner un Profil</CardTitle>
-                        <CardDescription>Choisissez votre nom dans la liste pour continuer.</CardDescription>
+                        <CardDescription>Choisissez votre nom dans la liste pour accéder au tableau de bord {cursus.toUpperCase()}.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">

@@ -3,7 +3,7 @@
 'use client';
 import { Suspense, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau } from "@/lib/data-manager";
+import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau, Cursus } from "@/lib/data-manager";
 import { useSearchParams, useRouter } from "next/navigation";
 import { User, Users, Printer, OctagonX } from "lucide-react";
 import { useFirebase } from '@/firebase';
@@ -171,9 +171,17 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
     );
 };
 
-function getLevelFromClassName(className: string | null): Niveau {
-    if (!className) return 'seconde';
+function getLevelFromClassName(className: string | null, cursus: Cursus): Niveau {
+    if (!className) return cursus === 'cap' ? 'cap1' : 'seconde';
     const lowerCaseName = className.toLowerCase();
+
+    if (cursus === 'cap') {
+        if (lowerCaseName.startsWith('1')) return 'cap1';
+        if (lowerCaseName.startsWith('2')) return 'cap2';
+        return 'cap1';
+    }
+    
+    // Bac Pro logic
     if (lowerCaseName.startsWith('t')) return 'terminale';
     if (lowerCaseName.startsWith('1')) return 'premiere';
     return 'seconde';
@@ -185,7 +193,8 @@ function TpListPageContent() {
   const { tps, isLoaded } = useFirebase();
   const studentName = searchParams.get('student');
   const className = searchParams.get('class');
-  const level = getLevelFromClassName(className);
+  const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
+  const level = getLevelFromClassName(className, cursus);
   
   const availableTps = useMemo(() => {
       return getTpsByNiveau(level, tps);
@@ -213,7 +222,7 @@ function TpListPageContent() {
         <div className="md:col-span-1">
             <Card className="h-full flex flex-col">
                 <CardHeader>
-                    <CardTitle>Fiches TP</CardTitle>
+                    <CardTitle>Fiches TP ({cursus.toUpperCase()})</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-grow p-2">
                     <ScrollArea className="h-[calc(100vh-20rem)]">
@@ -261,5 +270,3 @@ export default function TpListPage() {
         </Suspense>
     )
 }
-
-    
