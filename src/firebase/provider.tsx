@@ -29,7 +29,8 @@ import {
     deleteClassFromDb,
     updateStudentDataInDb,
     updateStudentNameInDb,
-    addTeacherInDb
+    addTeacherInDb,
+    AssignedTp
 } from './firestore-actions';
 import { checkAndSeedData } from './seed-data';
 
@@ -38,10 +39,6 @@ import { checkAndSeedData } from './seed-data';
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 export type TpStatus = 'non-commencé' | 'en-cours' | 'terminé' | 'à-refaire';
 
-type AssignedTp = {
-  id: number;
-  status: TpStatus;
-};
 
 const xpPerLevel: Record<EvaluationStatus, number> = {
   NA: 0,
@@ -143,6 +140,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const [tps, setTps] = useState<Record<number, TP>>(initialTps);
   const [teacherName, setTeacherNameState] = useState<string>('');
+  const [assignedTps, setAssignedTps] = useState<Record<string, AssignedTp[]>>({});
   const { user } = userAuthState;
   
   const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
@@ -174,9 +172,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   }, [dynamicTps]);
 
   
-  const assignedTps = useMemo(() => {
-    if (!assignedTpsData) return {};
-    return Object.fromEntries(assignedTpsData.map(doc => [doc.id, doc.tps || []]));
+  useEffect(() => {
+    if (assignedTpsData) {
+      const newAssignedTps = Object.fromEntries(assignedTpsData.map(doc => [doc.id, doc.tps || []]));
+      setAssignedTps(newAssignedTps);
+    }
   }, [assignedTpsData]);
   
   const evaluations = useMemo(() => {
@@ -275,7 +275,25 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const updateTpStatus = useCallback((studentName: string, tpId: number, status: TpStatus) => {
       if (!firestore) return;
       const studentAssignedTps = assignedTps[studentName] || [];
-      updateStudentTpStatusInDb(firestore, studentName, tpId, status, studentAssignedTps);
+      const tpIndex = studentAssignedTps.findIndex(tp => tp.id === tpId);
+      if (tpIndex > -1) {
+          const newTps = [...studentAssignedTps];
+          newTps[tpIndex] = { ...newTps[tpIndex], status };
+          
+          setAssignedTps(prev => ({
+              ...prev,
+              [studentName]: newTps,
+          }));
+
+          const studentDocRef = doc(firestore, `assignedTps/${studentName}`);
+          setDoc(studentDocRef, { tps: newTps }).catch(error => {
+              errorEmitter.emit('permission-error', new FirestorePermissionError({
+                  path: studentDocRef.path,
+                  operation: 'update',
+                  requestResourceData: { tps: newTps }
+              }));
+          });
+      }
   }, [firestore, assignedTps]);
   
   const saveFeedback = useCallback((studentName: string, tpId: number, feedback: string, author: 'student' | 'teacher') => {
@@ -298,7 +316,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     deleteTeacher: (teacherId: string) => { console.log('deleteTeacher not implemented yet')},
     customSignOut,
     classes: classes || [],
-tps,
+    tps,
     assignedTps,
     evaluations,
     assignTp: (studentNames: string[], tpId: number) => {

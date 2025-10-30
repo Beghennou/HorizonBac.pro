@@ -11,7 +11,7 @@ import { errorEmitter } from './error-emitter';
 type EvaluationStatus = 'NA' | 'EC' | 'A' | 'M';
 type PrelimAnswer = string | string[];
 
-type AssignedTp = {
+export type AssignedTp = {
   id: number;
   status: TpStatus;
 };
