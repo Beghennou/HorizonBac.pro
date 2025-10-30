@@ -69,7 +69,7 @@ export default function TpsToEvaluatePage() {
                     </CardTitle>
                     <CardDescription>
                         {selectedClassName 
-                            ? `Liste des TPs terminés pour la classe ${selectedClassName}.`
+                            ? `Liste ${totalTpsCount === 1 ? 'du TP terminé' : 'des TPs terminés'} pour la classe ${selectedClassName}.`
                             : `Veuillez sélectionner une classe pour voir les TPs à évaluer.`
                         }
                     </CardDescription>
