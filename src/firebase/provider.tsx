@@ -4,7 +4,7 @@
 
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDoc, query, where, getDocs, addDoc } from 'firebase/firestore';
+import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDoc, query, where, getDocs, addDoc, updateDoc } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
@@ -27,8 +27,9 @@ import {
     resetAllStudentListsInClasses,
     createClassInDb,
     deleteClassFromDb,
-    updateStudentData,
+    updateStudentDataInDb,
     updateStudentNameInDb,
+    addTeacherInDb
 } from './firestore-actions';
 import { checkAndSeedData } from './seed-data';
 
@@ -346,7 +347,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     signInWithGoogle,
     updateStudentData: (studentName: string, data: DocumentData) => {
       if (!firestore) return;
-      updateStudentData(firestore, studentName, data);
+      updateStudentDataInDb(firestore, studentName, data);
     },
     updateStudentName: (oldName: string, newName: string, className: string) => {
         if (!firestore) return;

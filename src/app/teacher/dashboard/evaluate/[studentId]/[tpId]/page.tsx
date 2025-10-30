@@ -43,7 +43,7 @@ export default function EvaluationPage() {
 
     const { data: studentPrelimAnswers, isLoading: prelimLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName, tpId]));
     const { data: studentFeedbacks, isLoading: feedbackLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName, tpId]));
-    const { data: studentData, isLoading: studentDataLoading } = useDoc(useMemoFirebase(() => firestore && studentName ? doc(firestore, `students/${studentName}`) : null, [firestore, studentName]));
+    const { data: studentData, isLoading: studentDataLoading } = useDoc(useMemoFirebase(() => firestore && studentName ? doc(firestore, `students`, studentName) : null, [firestore, studentName]));
 
     const validationData = useMemo(() => {
         if (studentData && tpId) {

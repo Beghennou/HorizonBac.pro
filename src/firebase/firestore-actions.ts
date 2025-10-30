@@ -56,7 +56,7 @@ export const saveStudentEvaluation = async (firestore: Firestore, studentName: s
     };
     
     const studentStoredEvalsDocRef = doc(firestore, `students/${studentName}/storedEvals`, tpId.toString());
-    setDoc(studentStoredEvalsDocRef, newStoredEval).catch(error => {
+    setDoc(studentStoredEvalsDocRef, newStoredEval, { merge: true }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: studentStoredEvalsDocRef.path,
             operation: 'write',
@@ -72,7 +72,7 @@ export const saveStudentEvaluation = async (firestore: Firestore, studentName: s
         updatedCompetences[competenceId] = { history: [...history, status] };
      });
      
-    batch.set(studentEvalsDocRef, { competences: updatedCompetences });
+    batch.set(studentEvalsDocRef, { competences: updatedCompetences }, { merge: true });
 
     await batch.commit().catch(error => {
          errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -124,9 +124,9 @@ export const saveStudentFeedback = (firestore: Firestore, studentName: string, t
     });
 };
 
-export const updateStudentData = (firestore: Firestore, studentName: string, data: DocumentData) => {
+export const updateStudentDataInDb = (firestore: Firestore, studentName: string, data: DocumentData) => {
     const studentDocRef = doc(firestore, 'students', studentName);
-    updateDoc(studentDocRef, data).catch(error => {
+    setDoc(studentDocRef, data, { merge: true }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: studentDocRef.path,
             operation: 'update',
