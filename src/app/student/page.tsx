@@ -1,5 +1,4 @@
 
-
 'use client';
 import { Suspense, useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -20,14 +19,7 @@ import { collection } from 'firebase/firestore';
 function StudentDashboard() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
-  const { firestore, assignedTps: initialAssignedTps, tps: allTps, updateTpStatus } = useFirebase();
-
-  const [assignedTps, setAssignedTps] = useState(initialAssignedTps);
-
-  useEffect(() => {
-    setAssignedTps(initialAssignedTps);
-  }, [initialAssignedTps]);
-
+  const { firestore, assignedTps, tps: allTps, updateTpStatus } = useFirebase();
 
   const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
 
@@ -79,23 +71,6 @@ function StudentDashboard() {
 
   const defaultTpImage = PlaceHolderImages.find(p => p.id === 'tp-default');
 
-  const handleRedo = async (tpId: number) => {
-    if (studentName) {
-        // Optimistic UI update
-        const newAssignedTps = { ...assignedTps };
-        const studentTpsToUpdate = [...(newAssignedTps[studentName] || [])];
-        const tpIndex = studentTpsToUpdate.findIndex(t => t.id === tpId);
-        if (tpIndex !== -1) {
-            studentTpsToUpdate[tpIndex].status = 'en-cours';
-            newAssignedTps[studentName] = studentTpsToUpdate;
-            setAssignedTps(newAssignedTps);
-        }
-
-        // Update database
-        await updateTpStatus(studentName, tpId, 'en-cours');
-    }
-  }
-
   return (
     <div className="space-y-8">
       <div>
@@ -117,6 +92,13 @@ function StudentDashboard() {
               const isRedo = module.status === 'à-refaire';
               
               const linkHref = `/student/tp/${module.id}?student=${encodeURIComponent(studentName)}`;
+              const handleRedoClick = (e: React.MouseEvent) => {
+                if (studentName) {
+                  // Prevent navigation if we only want to update status, but here we want both
+                  // e.preventDefault(); 
+                  updateTpStatus(studentName, module.id, 'en-cours');
+                }
+              };
 
               return (
                 <Card key={module.id} className="flex flex-col overflow-hidden bg-card border-primary/30 hover:border-accent/50 transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-accent/20">
@@ -144,19 +126,12 @@ function StudentDashboard() {
                     <CardDescription className="mt-2 flex-grow">{module.objectif}</CardDescription>
                   </div>
                   <CardFooter>
-                    {isRedo ? (
-                      <Button onClick={() => handleRedo(module.id)} className={cn("w-full font-bold font-headline uppercase tracking-wider", currentStatusInfo.className)} variant={currentStatusInfo.variant}>
-                          {currentStatusInfo.icon}
-                          {currentStatusInfo.buttonText}
-                      </Button>
-                    ) : (
-                      <Button asChild className={cn("w-full font-bold font-headline uppercase tracking-wider", currentStatusInfo.className)} variant={currentStatusInfo.variant}>
-                        <Link href={linkHref}>
+                    <Button asChild className={cn("w-full font-bold font-headline uppercase tracking-wider", currentStatusInfo.className)} variant={currentStatusInfo.variant}>
+                        <Link href={linkHref} onClick={isRedo ? handleRedoClick : undefined}>
                           {currentStatusInfo.icon}
                           {currentStatusInfo.buttonText}
                         </Link>
                       </Button>
-                    )}
                   </CardFooter>
                 </Card>
               );
