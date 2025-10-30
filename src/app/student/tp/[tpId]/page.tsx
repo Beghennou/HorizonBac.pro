@@ -7,7 +7,7 @@ import { TP } from '@/lib/data-manager';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Play, CheckCircle, MessageSquare, Award, Book, Video, FileText, Lock } from 'lucide-react';
+import { Bot, Play, CheckCircle, MessageSquare, Award, Book, Video, FileText, Lock, OctagonX } from 'lucide-react';
 import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { CheckeredFlag } from '@/components/icons';
@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { collection, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const AssistantTP = dynamic(() => import('@/components/assistant-tp').then(mod => mod.AssistantTP), {
     ssr: false,
@@ -253,6 +254,9 @@ export default function TPPage() {
                             </div>
                         ))}
                     </div>
+                    <div className="mt-6 text-center">
+                        <p className="font-bold text-destructive text-lg">Appel professeur avant de commencer l'activité pratique</p>
+                    </div>
                 </CardContent>
             </Card>
         )}
@@ -273,6 +277,12 @@ export default function TPPage() {
                             <li key={stepIndex}>{e}</li>
                         ))}
                         </ul>
+                         <Alert variant="destructive" className="mt-4 bg-destructive/10 border-destructive/50 text-destructive">
+                            <OctagonX className="h-5 w-5" />
+                            <AlertDescription className="font-bold text-lg">
+                                Appel Professeur
+                            </AlertDescription>
+                        </Alert>
                     </div>
                 ))}
             </CardContent>
@@ -282,7 +292,7 @@ export default function TPPage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                    <MessageSquare /> Commentaire sur le TP
+                        <MessageSquare /> Commentaire sur le TP
                     </CardTitle>
                     <CardDescription className="text-destructive">(qu'as tu appris ?)</CardDescription>
                 </CardHeader>
@@ -338,3 +348,5 @@ export default function TPPage() {
     </div>
   );
 }
+
+    
