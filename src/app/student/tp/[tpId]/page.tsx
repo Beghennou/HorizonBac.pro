@@ -5,7 +5,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { TP, Etape } from '@/lib/data-manager';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Bot, Play, CheckCircle, MessageSquare, Award, Book, Video, FileText, Lock, KeyRound } from 'lucide-react';
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const AssistantTP = dynamic(() => import('@/components/assistant-tp').then(mod => mod.AssistantTP), {
     ssr: false,
@@ -63,7 +64,10 @@ const EtapeCard = ({ etape, index, onValidate, isValidationRequired, teacherName
              {isValidationRequired && (
                  <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
                     {validationInfo ? (
-                         <div className="text-green-400 font-semibold">Étape validée par {validationInfo.teacher} le {validationInfo.date}</div>
+                         <div className="text-green-400 font-semibold flex items-center justify-center gap-2">
+                            <CheckCircle className="w-5 h-5"/>
+                            Étape validée par {validationInfo.teacher} le {validationInfo.date}
+                        </div>
                     ) : (
                         <TeacherValidationDialog onUnlock={() => onValidate(validationId)} teacherName={teacherName} />
                     )}
@@ -125,7 +129,7 @@ export default function TPPage() {
 
   const { firestore, assignedTps, updateTpStatus, savePrelimAnswer, saveFeedback, tps, updateStudentData, teacherName } = useFirebase();
   
-  const studentDataRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, `students/${studentName}`) : null, [firestore, studentName]);
+  const studentDataRef = useMemoFirebase(() => firestore && studentName ? doc(firestore, 'students', studentName) : null, [firestore, studentName]);
   const { data: studentData } = useDoc(studentDataRef);
   
   const validationData = useMemo(() => {
@@ -364,7 +368,10 @@ export default function TPPage() {
                     {tp.validationRequise && (
                         <div className="p-4 border-t border-dashed border-accent mt-4 text-center">
                             {isPrelimValidated ? (
-                                <div className="text-green-400 font-semibold">Étude préliminaire validée par {validationData['prelim'].teacher} le {validationData['prelim'].date}</div>
+                                <div className="text-green-400 font-semibold flex items-center justify-center gap-2">
+                                    <CheckCircle className="w-5 h-5"/>
+                                    Étude préliminaire validée par {validationData['prelim'].teacher} le {validationData['prelim'].date}
+                                </div>
                             ) : (
                                 <TeacherValidationDialog onUnlock={() => handleValidation('prelim')} teacherName={teacherName} />
                             )}
@@ -399,6 +406,7 @@ export default function TPPage() {
                     <CardTitle className="flex items-center gap-2">
                     <MessageSquare /> Commentaire sur le TP
                     </CardTitle>
+                    <CardDescription className="text-destructive">(qu'as tu appris ?)</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Textarea 
