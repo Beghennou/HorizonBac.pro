@@ -78,7 +78,7 @@ export default function SettingsPage() {
     const niveauxForCursus = NIVEAUX[cursus];
     const grouped: Record<Niveau, string[]> = {} as Record<Niveau, string[]>;
     niveauxForCursus.forEach(n => {
-        grouped[n.value] = (classes || []).filter(c => c.niveau === n.value).map(c => c.id).sort();
+        grouped[n.value] = (classes || []).filter(c => c.niveau === n.value && c.cursus === cursus).map(c => c.id).sort();
     });
     return grouped;
   }, [classes, cursus]);
@@ -105,7 +105,8 @@ export default function SettingsPage() {
         header: false,
         skipEmptyLines: true,
         complete: (results) => {
-            const studentNames = (results.data as string[][])
+            // Ignore the first line (header) by slicing the array from the second element.
+            const studentNames = (results.data as string[][]).slice(1)
                 .map(row => row[0]?.trim())
                 .filter(name => name);
             
@@ -115,7 +116,7 @@ export default function SettingsPage() {
                 toast({
                     variant: "destructive",
                     title: "Fichier CSV vide ou invalide",
-                    description: "Aucun nom d'élève n'a été trouvé dans le fichier.",
+                    description: "Aucun nom d'élève n'a été trouvé dans le fichier (en dehors de l'en-tête).",
                 });
             }
         },
