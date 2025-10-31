@@ -17,22 +17,13 @@ export default function TutorialPage() {
     window.print();
   };
 
-  const getLevelFromId = (tpId: number): Niveau | null => {
-    if (tpId >= 101 && tpId < 200) return 'seconde';
-    if (tpId >= 1 && tpId < 101) return 'premiere';
-    if (tpId >= 301 && tpId < 500) return 'terminale';
-    if (tpId >= 501 && tpId < 600) return 'cap1';
-    if (tpId >= 601 && tpId < 700) return 'cap2';
-    return null;
-  }
-
   const renderTpTable = (niveaux: { value: Niveau, label: string }[]) => {
     return (
       <Accordion type="single" collapsible className="w-full">
         {niveaux.map(niveau => {
           const tpsForLevel = getTpsByNiveau(niveau.value, initialTps);
           // Filter to show only TPs specific to this level for clarity in the table
-          const specificTps = tpsForLevel.filter(tp => tp.niveau ? tp.niveau === niveau.value : getLevelFromId(tp.id) === niveau.value);
+          const specificTps = tpsForLevel.filter(tp => tp.niveau === niveau.value);
 
           return (
             <AccordionItem value={niveau.value} key={niveau.value}>
@@ -158,7 +149,7 @@ export default function TutorialPage() {
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">L'onglet <DraftingCompass className="inline h-5 w-5 text-accent"/> <strong>Concepteur TP</strong> vous donne une autonomie totale pour créer des travaux pratiques sur mesure.</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li><strong>Informations Générales :</strong> Donnez un ID unique (>1000), un titre, une durée, et assignez un niveau (Seconde, Première, Terminale).</li>
+                                            <li><strong>Informations Générales :</strong> Donnez un ID unique (&gt;1000), un titre, une durée, et assignez un niveau (Seconde, Première, Terminale).</li>
                                             <li><strong>Compétences :</strong> Associez votre TP à une ou plusieurs compétences du référentiel en cochant les cases correspondantes.</li>
                                             <li><strong>Sections dynamiques :</strong> Utilisez les boutons "Ajouter" pour créer autant de champs que nécessaire pour le matériel, l'étude préliminaire (questions texte ou QCM), les étapes pratiques, les points clés et les consignes de sécurité.</li>
                                             <li><strong>Sauvegarde :</strong> Une fois le formulaire rempli, cliquez sur "Créer le Travail Pratique". Votre nouveau TP sera automatiquement disponible dans la liste d'assignation pour le niveau que vous avez sélectionné.</li>
