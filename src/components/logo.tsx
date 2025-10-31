@@ -18,15 +18,15 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
             
             <text 
                 x="50" 
-                y="52" 
+                y="55" 
                 fontFamily="Orbitron, sans-serif" 
                 fontWeight="900" 
-                fontSize="20" 
+                fontSize="48" 
                 fill="white" 
                 textAnchor="middle"
-                letterSpacing="-1"
+                letterSpacing="-2"
             >
-                HORIZON
+                HB
             </text>
         </svg>
     )
