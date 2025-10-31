@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { initialTps, getTpsByNiveau, Cursus, Niveau, NIVEAUX_BACPRO, NIVEaux_CAP } from '@/lib/data-manager';
+import { initialTps, getTpsByNiveau, Cursus, Niveau, NIVEAUX_BACPRO, NIVEAUX_CAP } from '@/lib/data-manager';
 
 
 export default function TutorialPage() {
@@ -158,7 +158,7 @@ export default function TutorialPage() {
                                     <AccordionContent className="text-base text-muted-foreground p-4">
                                         <p className="mb-4">L'onglet <DraftingCompass className="inline h-5 w-5 text-accent"/> <strong>Concepteur TP</strong> vous donne une autonomie totale pour créer des travaux pratiques sur mesure.</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li><strong>Informations Générales :</strong> Donnez un ID unique (&gt;1000), un titre, une durée, et assignez un niveau (Seconde, Première, Terminale).</li>
+                                            <li><strong>Informations Générales :</strong> Donnez un ID unique (>1000), un titre, une durée, et assignez un niveau (Seconde, Première, Terminale).</li>
                                             <li><strong>Compétences :</strong> Associez votre TP à une ou plusieurs compétences du référentiel en cochant les cases correspondantes.</li>
                                             <li><strong>Sections dynamiques :</strong> Utilisez les boutons "Ajouter" pour créer autant de champs que nécessaire pour le matériel, l'étude préliminaire (questions texte ou QCM), les étapes pratiques, les points clés et les consignes de sécurité.</li>
                                             <li><strong>Sauvegarde :</strong> Une fois le formulaire rempli, cliquez sur "Créer le Travail Pratique". Votre nouveau TP sera automatiquement disponible dans la liste d'assignation pour le niveau que vous avez sélectionné.</li>
@@ -325,7 +325,7 @@ export default function TutorialPage() {
                                 {renderTpTable(NIVEAUX_BACPRO)}
                             </TabsContent>
                             <TabsContent value="cap" className="mt-4">
-                                {renderTpTable(NIVEaux_CAP)}
+                                {renderTpTable(NIVEAUX_CAP)}
                             </TabsContent>
                         </Tabs>
                     </CardContent>
