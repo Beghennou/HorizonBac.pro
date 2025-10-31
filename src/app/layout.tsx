@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className="dark">
       <head>
-        <title>Horizon Bacpro • Suivi des compétences</title>
+        <title>HORIZON BAC. PRO. • Suivi des compétences</title>
         <meta name="description" content="Suivi des compétences pour la maintenance automobile." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

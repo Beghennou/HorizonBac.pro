@@ -129,7 +129,7 @@ export default function StudentLayoutContent({
                     <LyceeLogo className="w-9 h-9 text-white" />
                   </div>
                   <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
-                    Horizon Bacpro
+                    HORIZON BAC. PRO.
                   </h1>
                 </Link>
               </div>

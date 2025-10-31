@@ -13,7 +13,7 @@ export default function TutorialPage() {
         <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl">
             <div className="container flex h-20 items-center justify-between">
                  <h1 className="font-headline text-3xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
-                    Tutoriel Horizon Bacpro
+                    Tutoriel HORIZON BAC. PRO.
                  </h1>
                  <Button asChild>
                     <Link href="/">Retour à l'accueil</Link>
@@ -23,9 +23,9 @@ export default function TutorialPage() {
 
         <main className="container py-12 space-y-12">
             <section className="text-center">
-                <h2 className="font-headline text-5xl tracking-wide text-accent">Bienvenue sur Horizon Bacpro</h2>
+                <h2 className="font-headline text-5xl tracking-wide text-accent">Bienvenue sur HORIZON BAC. PRO.</h2>
                 <p className="text-muted-foreground text-lg mt-4 max-w-4xl mx-auto">
-                    Conçue par des enseignants en maintenance des véhicules, Horizon Bacpro est votre plateforme tout-en-un pour le suivi des compétences en maintenance automobile. Le nom "Horizon Bacpro" a été choisi pour évoquer la progression, l'avenir et le parcours de formation des élèves. Choisissez votre profil pour démarrer.
+                    Conçue par des enseignants en maintenance des véhicules, HORIZON BAC. PRO. est votre plateforme tout-en-un pour le suivi des compétences en maintenance automobile. Le nom "HORIZON BAC. PRO." a été choisi pour évoquer la progression, l'avenir et le parcours de formation des élèves. Choisissez votre profil pour démarrer.
                 </p>
             </section>
 
