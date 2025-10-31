@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, ShieldCheck } from 'lucide-react';
 import { useFirebase } from '@/firebase/provider';
-import { cn } from '@/lib/utils';
+import { Cursus } from '@/lib/data-manager';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface ValidationTeacherButtonProps {
@@ -37,11 +38,21 @@ export function ValidationTeacherButton({
   validationId,
   validationData,
 }: ValidationTeacherButtonProps) {
-  const { teachers, saveTpValidation } = useFirebase();
+  const { teachers: allTeachers, saveTpValidation } = useFirebase();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+  
   const [password, setPassword] = useState('');
   const [selectedTeacher, setSelectedTeacher] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+
+  const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
+  
+  const teachersForCursus = useMemo(() => {
+    if (!allTeachers) return [];
+    return allTeachers.filter(t => t.cursus === cursus);
+  }, [allTeachers, cursus]);
+
 
   const handleValidate = () => {
     if (!selectedTeacher) {
@@ -92,7 +103,7 @@ export function ValidationTeacherButton({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Validation Enseignant</DialogTitle>
+          <DialogTitle>Validation Enseignant ({cursus.toUpperCase()})</DialogTitle>
           <DialogDescription>
             Cette action est réservée à l'enseignant. Veuillez vous identifier et entrer le mot de passe pour confirmer la validation de cette étape.
           </DialogDescription>
@@ -107,7 +118,7 @@ export function ValidationTeacherButton({
                     <SelectValue placeholder="Choisir votre nom..." />
                 </SelectTrigger>
                 <SelectContent>
-                    {teachers?.map(t => <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>)}
+                    {teachersForCursus?.map(t => <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>)}
                 </SelectContent>
             </Select>
           </div>
