@@ -21,15 +21,15 @@ export default function Home() {
         
         <div className="flex items-center justify-center mb-6 relative">
             <h1 className="font-headline text-5xl md:text-7xl font-black uppercase tracking-widest text-shadow-lg">
-              HORIZON
+              <span className="text-primary">H</span>ORIZON
             </h1>
             <div className="absolute -top-4 -right-16 md:-right-20 w-16 h-16 md:w-20 md:h-20">
-              <Logo className="w-full h-full text-white" />
+              <Logo />
             </div>
         </div>
         
-        <p className="font-headline text-2xl md:text-3xl font-bold uppercase tracking-wider bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text mb-4 text-shadow">
-          BAC. PRO. & CAP
+        <p className="font-headline text-2xl md:text-3xl font-bold uppercase tracking-wider mb-4 text-shadow">
+          <span className="text-primary">B</span>AC. <span className="text-primary">P</span>RO. & CAP
         </p>
         <p className="text-lg md:text-xl text-neutral-300 max-w-2xl mb-10 text-shadow">
           La plateforme de suivi des compétences pour la nouvelle génération de techniciens automobiles.
