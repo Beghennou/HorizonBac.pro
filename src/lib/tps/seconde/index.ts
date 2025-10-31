@@ -15,13 +15,6 @@ import tp114 from './tp-114';
 import tp115 from './tp-115';
 import tp116 from './tp-116';
 import tp117 from './tp-117';
-import { TP as TP_101, Etape, EtudePrelim, EtudePrelimQCM, EtudePrelimText } from './tp-101';
-
-export type TP_SECONDE = typeof tp101;
-export type Etape_SECONDE = Etape;
-export type EtudePrelim_SECONDE = EtudePrelim;
-export type EtudePrelimQCM_SECONDE = EtudePrelimQCM;
-export type EtudePrelimText_SECONDE = EtudePrelimText;
 
 export const tps = {
     [tp101.id]: tp101,

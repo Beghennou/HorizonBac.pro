@@ -156,13 +156,13 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                     <div>
                         <h4 className="font-bold text-accent mb-2">Points Clés</h4>
                         <ul className="list-disc pl-5 space-y-1">
-                            {tp.pointsCles.map((pt, i) => <li key={i}>{pt}</li>)}
+                            {tp.pointsCles.map((pt: string, i: number) => <li key={i}>{pt}</li>)}
                         </ul>
                     </div>
                      <div>
                         <h4 className="font-bold text-destructive mb-2">Sécurité</h4>
                         <ul className="list-disc pl-5 space-y-1">
-                            {tp.securiteRangement.map((sec, i) => <li key={i}>{sec}</li>)}
+                            {tp.securiteRangement.map((sec: string, i: number) => <li key={i}>{sec}</li>)}
                         </ul>
                     </div>
                 </CardContent>
