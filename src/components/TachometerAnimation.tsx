@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -76,7 +77,9 @@ export const TachometerAnimation = () => {
                 <SkillCircuitAnimation />
             </div>
             <div className="flex items-center gap-4 animate-logo-appear">
-                 <LyceeLogo className="w-16 h-16"/>
+                 <div className="w-16 h-16">
+                    <LyceeLogo />
+                 </div>
                  <p className="font-headline text-2xl tracking-widest text-accent">ACCÈS AUTORISÉ</p>
             </div>
             <style jsx>{`

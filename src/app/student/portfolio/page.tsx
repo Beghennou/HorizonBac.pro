@@ -105,7 +105,9 @@ function StudentPortfolio() {
       <div className="bg-card p-8 rounded-lg shadow-lg" id="printable-portfolio">
           <header className="flex flex-col items-center text-center border-b-2 border-primary pb-6 mb-6">
               <div className="flex items-center gap-4">
-                  <LyceeLogo className="w-20 h-20"/>
+                  <div className="w-20 h-20">
+                    <LyceeLogo />
+                  </div>
                   <div>
                       <h1 className="font-headline text-5xl tracking-wide text-accent">Portfolio de Compétences</h1>
                       <p className="text-muted-foreground text-xl">Maintenance des Véhicules</p>

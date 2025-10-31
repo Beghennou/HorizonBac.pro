@@ -126,7 +126,7 @@ export default function StudentLayoutContent({
                 <SidebarTrigger className="md:hidden"/>
                 <Link href="/" className="flex items-center gap-4">
                   <div className="flex items-center justify-center w-12 h-12 rounded-md bg-gradient-to-br from-primary to-racing-orange border-2 border-accent">
-                    <LyceeLogo className="w-9 h-9 text-white" />
+                    <LyceeLogo className="w-10 h-10 text-white" />
                   </div>
                   <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
                     HORIZON BAC. PRO.

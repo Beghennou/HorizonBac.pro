@@ -1,15 +1,27 @@
-'use client';
 
-import { Wrench } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import type { SVGProps } from 'react';
 
-export function LyceeLogo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
-  return (
-    <div className={cn("relative flex items-center justify-center", className)}>
-      <Wrench className="w-full h-full" {...props} />
-      <span className="absolute bottom-0 right-0 font-headline text-xs font-bold" style={{ textShadow: '0 0 3px hsl(var(--background))' }}>
-        HB
-      </span>
-    </div>
-  );
+export function LyceeLogo(props: SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 100 100"
+            {...props}
+        >
+            <g transform="translate(50,50)">
+                <path d="M0 -45 L40 25 L-40 25 Z" fill="hsl(var(--accent))" />
+                <text 
+                    x="0" 
+                    y="10" 
+                    fontFamily="Orbitron, sans-serif" 
+                    fontWeight="900" 
+                    fontSize="40" 
+                    fill="white" 
+                    textAnchor="middle"
+                >
+                    HB
+                </text>
+            </g>
+        </svg>
+    )
 }

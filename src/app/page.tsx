@@ -14,9 +14,7 @@ export default function Home() {
   const [cursus, setCursus] = useState('bacpro');
 
   return (
-    <div 
-        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 bg-hero-image"
-    >
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 bg-hero-image">
       <div className="absolute inset-0 bg-black/60 z-10" />
 
       <main className="z-20 flex flex-col items-center justify-center text-center text-white w-full max-w-4xl">
