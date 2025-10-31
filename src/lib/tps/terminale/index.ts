@@ -16,9 +16,6 @@ import tp316 from './tp-316';
 import tp317 from './tp-317';
 import tp318 from './tp-318';
 import tp319 from './tp-319';
-import type { TP as TP_TERMINALE, Etape as Etape_TERMINALE, EtudePrelim as EtudePrelim_TERMINALE, EtudePrelimQCM as EtudePrelimQCM_TERMINALE, EtudePrelimText as EtudePrelimText_TERMINALE } from '@/lib/types/tp-types';
-
-export type { TP_TERMINALE, Etape_TERMINALE, EtudePrelim_TERMINALE, EtudePrelimQCM_TERMINALE, EtudePrelimText_TERMINALE };
 
 export const tps = {
     [tp301.id]: tp301,

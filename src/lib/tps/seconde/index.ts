@@ -15,9 +15,6 @@ import tp114 from './tp-114';
 import tp115 from './tp-115';
 import tp116 from './tp-116';
 import tp117 from './tp-117';
-import type { TP as TP_SECONDE, Etape as Etape_SECONDE, EtudePrelim as EtudePrelim_SECONDE, EtudePrelimQCM as EtudePrelimQCM_SECONDE, EtudePrelimText as EtudePrelimText_SECONDE } from '@/lib/types/tp-types';
-
-export type { TP_SECONDE, Etape_SECONDE, EtudePrelim_SECONDE, EtudePrelimQCM_SECONDE, EtudePrelimText_SECONDE };
 
 export const tps = {
     [tp101.id]: tp101,

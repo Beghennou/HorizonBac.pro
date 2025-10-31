@@ -173,7 +173,7 @@ export default function TPPage() {
               <CardTitle className="flex items-center gap-2"><Award />Compétences Ciblées</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
-                {evaluatedCompetenceIds.map(id => (
+                {evaluatedCompetenceIds.map((id: string) => (
                     <Badge key={id} variant="outline" className="border-accent text-accent font-semibold text-sm">
                         {id}
                     </Badge>

@@ -5,9 +5,14 @@ import { tps as tpsCap } from './tps/cap';
 import { tps as tpsPremiere } from './tps/premiere';
 import { tps as tpsSeconde } from './tps/seconde';
 import { tps as tpsTerminale } from './tps/terminale';
-import type { TP, Niveau, Cursus, ClassData, CompetenceBloc } from './types/tp-types';
+import type { TP_BASE, Niveau, Cursus, ClassData, CompetenceBloc, Etape, EtudePrelim, EtudePrelimQCM, EtudePrelimText, TpStatus } from './types/tp-types';
 
-export type { TP, Niveau, Cursus, ClassData, CompetenceBloc, Etape, EtudePrelim, EtudePrelimQCM, EtudePrelimText, TpStatus } from './types/tp-types';
+// Re-export all types for easy access from other parts of the app
+export type { Niveau, Cursus, ClassData, CompetenceBloc, Etape, EtudePrelim, EtudePrelimQCM, EtudePrelimText, TpStatus };
+
+// Create the final, unified TP type by extending the base.
+// This is the single source of truth for the TP type.
+export type TP = TP_BASE;
 
 // Combine all imported TPs into a single object
 export const initialTps: Record<number, TP> = {
@@ -93,5 +98,5 @@ export const NIVEAUX_CAP: { value: Niveau, label: string, prefix: string }[] = [
 
 export const NIVEAUX: Record<Cursus, { value: Niveau, label: string, prefix: string }[]> = {
     bacpro: NIVEAUX_BACPRO,
-    cap: NIVEAUX_CAP,
+    cap: NIVEaux_CAP,
 };
