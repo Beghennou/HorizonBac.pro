@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 8,
     duree: '3h00',
     titre: 'Diagnostic d\'un circuit électrique (feux stop)',
+    niveau: 'premiere',
     situation: 'Un client se présente pour le contrôle technique de sa Peugeot 207. Lors de la pré-visite, vous constatez qu\'aucun des feux de stop ne s\'allume lorsque vous appuyez sur la pédale de frein. C\'est un défaut critique qui entraîne une contre-visite immédiate.',
     objectif: 'Mener un diagnostic électrique complet pour trouver la cause de la panne et rendre le véhicule sûr. (Compétences C3.1, C3.3, C3.4, C2.1)',
     materiel: ['Schéma électrique', 'Multimètre', 'Jeu de fusibles', 'Jeu d\'ampoules'],
@@ -19,22 +16,9 @@ const tp: TP = {
         { type: 'text', q: "Une lampe de feu stop a une puissance de 21W sous 12V. Calculez l'intensité (I) qui la traverse et sa résistance (R).", r: 'I = P/U = 21/12 = 1.75 A. R = U/I = 12/1.75 ≈ 6.86 Ω.' }
     ],
     activitePratique: [
-        etape('Contrôles Simples & Visuels', '45 min', [
-            'Vérifier visuellement les ampoules et le fusible correspondant.',
-            'Inspecter les connecteurs des feux arrière et les points de masse visibles.',
-            'Tester manuellement le fonctionnement du contacteur de pédale de frein (clic audible).'
-        ]),
-        etape('Mesures Ciblées avec Multimètre', '60 min', [
-            'Suivre le schéma électrique pour mesurer la tension en entrée et en sortie du contacteur (pédale appuyée).',
-            'Vérifier la présence de 12V sur le connecteur d\'alimentation des feux arrière.',
-            'Mesurer la continuité et la qualité de la mise à la masse des platines de feux.',
-            'Contrôler la résistance de l\'ampoule si elle est accessible et comparer au calcul théorique.'
-        ]),
-        etape('Diagnostic Final et Validation', '25 min', [
-            'À partir des mesures, identifier l\'élément défaillant (fusible, contacteur, faisceau, ampoule, masse).',
-            'Effectuer la réparation nécessaire (remplacement de l\'élément).',
-            'Recontrôler le fonctionnement complet des feux stop pour valider la réparation.'
-        ])
+        { titre: 'Contrôles Simples & Visuels', duree: '45 min', etapes: ['Vérifier visuellement les ampoules et le fusible correspondant.','Inspecter les connecteurs des feux arrière et les points de masse visibles.','Tester manuellement le fonctionnement du contacteur de pédale de frein (clic audible).']},
+        { titre: 'Mesures Ciblées avec Multimètre', duree: '60 min', etapes: ['Suivre le schéma électrique pour mesurer la tension en entrée et en sortie du contacteur (pédale appuyée).','Vérifier la présence de 12V sur le connecteur d\'alimentation des feux arrière.','Mesurer la continuité et la qualité de la mise à la masse des platines de feux.','Contrôler la résistance de l\'ampoule si elle est accessible et comparer au calcul théorique.']},
+        { titre: 'Diagnostic Final et Validation', duree: '25 min', etapes: ['À partir des mesures, identifier l\'élément défaillant (fusible, contacteur, faisceau, ampoule, masse).','Effectuer la réparation nécessaire (remplacement de l\'élément).','Recontrôler le fonctionnement complet des feux stop pour valider la réparation.']}
     ],
     securiteRangement: [
         'Couper le contact avant de manipuler les fusibles ou les connecteurs.',

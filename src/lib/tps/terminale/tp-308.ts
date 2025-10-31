@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 308,
     duree: '2h00',
-    titre: 'BAC PRO Terminale • Contrôle du circuit basse pression diesel',
+    titre: 'Contrôle du circuit basse pression diesel',
+    niveau: 'terminale',
     situation: 'Un moteur diesel présente des difficultés de démarrage et des coupures moteur intermittentes. Vous suspectez un problème d\'alimentation et devez contrôler le circuit basse pression pour confirmer votre diagnostic.',
     objectif: 'Mesurer pression/dépression, détecter bulles et colmatage. (Compétence C3.3)',
     materiel: ['Mano BP', 'Tuyau transparent', 'Filtre gasoil', 'Valise diag'],
@@ -18,23 +15,35 @@ const tp: TP = {
       { q: 'Quel est le rôle du clapet anti-retour souvent intégré au support de filtre ?', r: 'Il empêche le circuit de se désamorcer en maintenant le gasoil dans les tuyaux lorsque le moteur est à l\'arrêt, facilitant ainsi les démarrages.', type: 'text' }
     ],
     activitePratique: [
-      etape('Visuel', '30 min', [
-        'Durites/colliers/fuites.',
-        'Propreté filtre.',
-        'Niveau carburant.'
-      ]),
-      etape('Mesures', '50 min', [
-        'Mano en sortie filtre/entrée pompe HP.',
-        'Ralenti/accélération.',
-        'Comparer RTA.',
-        'Stabilité de la pression.'
-      ]),
-      etape('Bulles/purge', '40 min', [
-        'Tuyau transparent en retour.',
-        'Observer bulles.',
-        'Purger circuit.',
-        'Remplacer filtre si colmaté.'
-      ])
+      {
+        titre: 'Visuel',
+        duree: '30 min',
+        etapes: [
+          'Durites/colliers/fuites.',
+          'Propreté filtre.',
+          'Niveau carburant.'
+        ]
+      },
+      {
+        titre: 'Mesures',
+        duree: '50 min',
+        etapes: [
+          'Mano en sortie filtre/entrée pompe HP.',
+          'Ralenti/accélération.',
+          'Comparer RTA.',
+          'Stabilité de la pression.'
+        ]
+      },
+      {
+        titre: 'Bulles/purge',
+        duree: '40 min',
+        etapes: [
+          'Tuyau transparent en retour.',
+          'Observer bulles.',
+          'Purger circuit.',
+          'Remplacer filtre si colmaté.'
+        ]
+      }
     ],
     securiteRangement: ['Nettoyer gasoil', 'Éliminer déchets', 'Tracer'],
     pointsCles: ['Pas d’air', 'Pression correcte', 'Filtre propre'],

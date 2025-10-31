@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 319,
     duree: '2h00',
-    titre: 'BAC PRO Terminale • Contrôle des Compressions et Étanchéité Moteur',
+    titre: 'Contrôle des Compressions et Étanchéité Moteur',
+    niveau: 'terminale',
     situation: 'Un moteur essence manque de puissance et présente un ralenti instable. Un relevé des compressions et un test d\'étanchéité sont nécessaires pour évaluer l\'état de santé du moteur.',
     objectif: 'Évaluer l\'étanchéité de la chambre de combustion pour poser un diagnostic moteur. (Compétences C1.1, C2.2, C2.3)',
     materiel: ['Véhicule essence', 'Compressiomètre', 'Contrôleur de fuite de cylindre', 'Clé à bougie', 'Documentation technique (RTA)', 'Fiche de relevé'],
@@ -18,30 +15,46 @@ const tp: TP = {
         { type: 'qcm', q: 'Lors d\'un test de fuite, vous entendez un sifflement d\'air dans le collecteur d\'admission. Quel composant est en cause ?', options: ['La segmentation', 'Une soupape d\'échappement', 'Une soupape d\'admission'], r: 'Une soupape d\'admission' }
     ],
     activitePratique: [
-        etape('Préparation et Identification', '25 min', [
-            'Faire chauffer le moteur à sa température de fonctionnement.',
-            'Identifier le type de moteur et collecter les données techniques (RTA).',
-            'Désactiver l\'allumage et l\'injection pour effectuer les tests en sécurité.',
-            'Déposer toutes les bougies d\'allumage.'
-        ]),
-        etape('Prise des Compressions', '40 min', [
-            'Installer le compressiomètre sur le premier cylindre.',
-            'Accélérateur ouvert à fond, actionner le démarreur pendant 5 à 7 secondes.',
-            'Relever la pression maximale et la noter.',
-            'Répéter l\'opération pour chaque cylindre.',
-            'Comparer les valeurs entre elles (écart < 15% en général).'
-        ]),
-        etape('Test de Fuite des Cylindres', '40 min', [
-            'Positionner le piston du cylindre à tester au Point Mort Haut (PMH), fin de compression.',
-            'Raccorder le contrôleur de fuite et injecter de l\'air comprimé (environ 6-8 bars).',
-            'Lire le pourcentage de fuite sur le manomètre.',
-            'Écouter où l\'air s\'échappe : échappement (soupape éch.), admission (soupape adm.), carter d\'huile (segmentation), ou circuit de refroidissement (joint de culasse).'
-        ]),
-        etape('Conclusion et Rangement', '15 min', [
-            'Synthétiser les résultats pour diagnostiquer l\'état du moteur.',
-            'Remonter les bougies en respectant le couple de serrage.',
-            'Ranger et nettoyer le poste de travail.'
-        ])
+        {
+            titre: 'Préparation et Identification',
+            duree: '25 min',
+            etapes: [
+                'Faire chauffer le moteur à sa température de fonctionnement.',
+                'Identifier le type de moteur et collecter les données techniques (RTA).',
+                'Désactiver l\'allumage et l\'injection pour effectuer les tests en sécurité.',
+                'Déposer toutes les bougies d\'allumage.'
+            ]
+        },
+        {
+            titre: 'Prise des Compressions',
+            duree: '40 min',
+            etapes: [
+                'Installer le compressiomètre sur le premier cylindre.',
+                'Accélérateur ouvert à fond, actionner le démarreur pendant 5 à 7 secondes.',
+                'Relever la pression maximale et la noter.',
+                'Répéter l\'opération pour chaque cylindre.',
+                'Comparer les valeurs entre elles (écart < 15% en général).'
+            ]
+        },
+        {
+            titre: 'Test de Fuite des Cylindres',
+            duree: '40 min',
+            etapes: [
+                'Positionner le piston du cylindre à tester au Point Mort Haut (PMH), fin de compression.',
+                'Raccorder le contrôleur de fuite et injecter de l\'air comprimé (environ 6-8 bars).',
+                'Lire le pourcentage de fuite sur le manomètre.',
+                'Écouter où l\'air s\'échappe : échappement (soupape éch.), admission (soupape adm.), carter d\'huile (segmentation), ou circuit de refroidissement (joint de culasse).'
+            ]
+        },
+        {
+            titre: 'Conclusion et Rangement',
+            duree: '15 min',
+            etapes: [
+                'Synthétiser les résultats pour diagnostiquer l\'état du moteur.',
+                'Remonter les bougies en respectant le couple de serrage.',
+                'Ranger et nettoyer le poste de travail.'
+            ]
+        }
     ],
     securiteRangement: [
         'Travailler sur un moteur chaud avec précaution.',

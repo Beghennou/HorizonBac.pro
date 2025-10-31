@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 301,
     duree: '2h30',
-    titre: 'BAC PRO Terminale • Contrôle des pressions. Recharge d\'une climatisation',
+    titre: 'Contrôle des pressions. Recharge d\'une climatisation',
+    niveau: 'terminale',
     situation: 'Un client se plaint que sa climatisation ne produit plus d\'air froid. Il demande un diagnostic complet et une intervention avant son départ en vacances. Vous devez prendre en charge le diagnostic du circuit de climatisation en respectant les normes environnementales.',
     objectif: 'Mesurer pressions HP/BP, diagnostiquer fuites, effectuer recharge et traçabilité fluide frigorigène. (Compétence C3.1)',
     materiel: ['Station clim agréée', 'Manomètres', 'Détecteur de fuites', 'Fluide R134a/R1234yf', 'EPIs', 'Fiches traçabilité'],
@@ -18,21 +15,33 @@ const tp: TP = {
       { type: 'text', q: 'Pourquoi le tirage au vide du circuit avant la recharge est-il une étape absolument cruciale ? Citez deux raisons.', r: '1. Éliminer toute trace d\'humidité qui, mélangée au fluide, crée de l\'acidité et détruit le circuit. 2. Permettre un test d\'étanchéité : si le vide ne tient pas, il y a une fuite.' }
     ],
     activitePratique: [
-      etape('Contrôles préalables', '30 min', [
-        'Inspection visuelle: tuyaux, compresseur, condenseur.',
-        'Branchement manomètres et relevé à l’arrêt.',
-        'Test fuites (UV/électronique) sur jonctions.'
-      ]),
-      etape('Mesures en fonctionnement', '40 min', [
-        'Démarrer moteur + clim MAX.',
-        'Relever HP/BP à divers régimes.',
-        'Observer embrayage compresseur et ventilateurs.'
-      ]),
-      etape('Recharge si nécessaire', '50 min', [
-        'Raccorder station, tirage au vide, test étanchéité.',
-        'Charger quantité constructeur avec traçabilité.',
-        'Contrôle performances et températures.'
-      ])
+      {
+        titre: 'Contrôles préalables',
+        duree: '30 min',
+        etapes: [
+          'Inspection visuelle: tuyaux, compresseur, condenseur.',
+          'Branchement manomètres et relevé à l’arrêt.',
+          'Test fuites (UV/électronique) sur jonctions.'
+        ]
+      },
+      {
+        titre: 'Mesures en fonctionnement',
+        duree: '40 min',
+        etapes: [
+          'Démarrer moteur + clim MAX.',
+          'Relever HP/BP à divers régimes.',
+          'Observer embrayage compresseur et ventilateurs.'
+        ]
+      },
+      {
+        titre: 'Recharge si nécessaire',
+        duree: '50 min',
+        etapes: [
+          'Raccorder station, tirage au vide, test étanchéité.',
+          'Charger quantité constructeur avec traçabilité.',
+          'Contrôle performances et températures.'
+        ]
+      }
     ],
     securiteRangement: ['Gants et lunettes', 'Ventiler atelier', 'Traçabilité fluide obligatoire'],
     pointsCles: ['Pressions nominales', 'Étanchéité', 'Dossier réglementaire'],

@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-  return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 112,
     duree: '1h15',
     titre: 'Contrôle et Remplacement d\'une Batterie',
+    niveau: 'seconde',
     situation: 'Un client se plaint de difficultés de démarrage le matin. Vous devez contrôler la batterie et la remplacer si le diagnostic le confirme.',
     objectif: 'Diagnostiquer l\'état d\'une batterie, la remplacer en toute sécurité et initialiser le nouveau composant si nécessaire. (Compétence C1.2, C1.3)',
     materiel: ['Multimètre', 'Testeur de batterie', 'Jeu de clés', 'Graisse pour cosses', 'Sauvegarde mémoire (si nécessaire)', 'Batterie neuve'],
@@ -18,26 +15,38 @@ const tp: TP = {
         { type: 'text', q: 'Pourquoi peut-il être nécessaire d\'utiliser un appareil de sauvegarde mémoire avant de débrancher la batterie sur un véhicule moderne ?', r: 'Pour éviter de perdre les données des calculateurs (autoradio, horloge, adaptations moteur, initialisation de vitres électriques, etc.).' }
     ],
     activitePratique: [
-        etape('Diagnostic de la Batterie', '25 min', [
-            'Inspecter visuellement la batterie (propreté, absence de fuite, date).',
-            'Mesurer la tension à vide avec un multimètre (doit être > 12.4V).',
-            'Effectuer un test complet avec le testeur de batterie (état de santé et état de charge).',
-            'Contrôler la bonne fixation de la batterie et des cosses.'
-        ]),
-        etape('Remplacement de la Batterie', '30 min', [
-            'Brancher une sauvegarde mémoire si nécessaire.',
-            'Débrancher la cosse négative (-), puis la cosse positive (+).',
-            'Déposer le système de fixation et retirer l\'ancienne batterie.',
-            'Nettoyer les cosses et le support de batterie.',
-            'Installer la nouvelle batterie, la fixer correctement.',
-            'Brancher la cosse positive (+), puis la cosse négative (-).',
-            'Graisser les cosses pour les protéger de la corrosion.'
-        ]),
-        etape('Initialisation et Validation', '20 min', [
-            'Débrancher la sauvegarde mémoire.',
-            'Effectuer les réinitialisations nécessaires (horloge, vitres électriques...) selon la procédure constructeur.',
-            'Démarrer le véhicule et contrôler la tension de charge de l\'alternateur (entre 13.5V et 14.8V).'
-        ])
+        {
+            titre: 'Diagnostic de la Batterie',
+            duree: '25 min',
+            etapes: [
+                'Inspecter visuellement la batterie (propreté, absence de fuite, date).',
+                'Mesurer la tension à vide avec un multimètre (doit être > 12.4V).',
+                'Effectuer un test complet avec le testeur de batterie (état de santé et état de charge).',
+                'Contrôler la bonne fixation de la batterie et des cosses.'
+            ]
+        },
+        {
+            titre: 'Remplacement de la Batterie',
+            duree: '30 min',
+            etapes: [
+                'Brancher une sauvegarde mémoire si nécessaire.',
+                'Débrancher la cosse négative (-), puis la cosse positive (+).',
+                'Déposer le système de fixation et retirer l\'ancienne batterie.',
+                'Nettoyer les cosses et le support de batterie.',
+                'Installer la nouvelle batterie, la fixer correctement.',
+                'Brancher la cosse positive (+), puis la cosse négative (-).',
+                'Graisser les cosses pour les protéger de la corrosion.'
+            ]
+        },
+        {
+            titre: 'Initialisation et Validation',
+            duree: '20 min',
+            etapes: [
+                'Débrancher la sauvegarde mémoire.',
+                'Effectuer les réinitialisations nécessaires (horloge, vitres électriques...) selon la procédure constructeur.',
+                'Démarrer le véhicule et contrôler la tension de charge de l\'alternateur (entre 13.5V et 14.8V).'
+            ]
+        }
     ],
     securiteRangement: [
         'Porter des gants et des lunettes de protection.',

@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-  return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 117,
     duree: '2h00',
     titre: 'Entretien d\'une Tondeuse à Gazon Thermique',
+    niveau: 'seconde',
     situation: 'Un client amène sa tondeuse thermique pour un entretien annuel avant la saison de tonte. Vous devez effectuer les opérations de maintenance préventive de base pour garantir son bon fonctionnement.',
     objectif: 'Réaliser les opérations d\'entretien préventif sur un moteur 4 temps de motoculture (vidange, filtre, bougie, lame). (Compétences C1.1, C1.2, C1.3)',
     materiel: [
@@ -24,35 +21,55 @@ const tp: TP = {
         { type: 'text', q: 'Pourquoi est-il important de respecter le couple de serrage de la lame de coupe ?', r: 'Un serrage insuffisant peut entraîner le desserrage de la lame en fonctionnement (très dangereux). Un serrage excessif peut endommager la vis ou le support moteur. Le couple recommandé est souvent de 30 Nm.' }
     ],
     activitePratique: [
-        etape('Dépose et affûtage de la lame', '25 min', [
-            'Arrêter la tondeuse, débrancher le fil de la bougie et sécuriser.',
-            'Basculer la tondeuse sur le côté (côté filtre à air vers le haut).',
-            'Utiliser une clé adaptée pour déposer la lame (bloquer la lame avec une cale en bois).',
-            'Affûter la lame en respectant un angle d\'environ 30°, puis vérifier l\'équilibrage.',
-            'Remonter la lame et la serrer au couple recommandé (ex: 30 Nm).'
-        ]),
-        etape('Remplacement du filtre à air', '20 min', [
-            'Localiser le boîtier du filtre à air.',
-            'Déposer le filtre usagé.',
-            'Nettoyer le boîtier et insérer le nouveau filtre.',
-            'Vérifier l’étanchéité du couvercle.'
-        ]),
-        etape('Vidange de l\'huile moteur', '20 min', [
-            'Placer le récipient sous le bouchon de vidange (ou basculer la tondeuse pour vidanger par l\'orifice de remplissage si pas de bouchon).',
-            'Ouvrir le bouchon et laisser l’huile s’écouler.',
-            'Remplacer par de l’huile neuve en respectant la quantité et les spécifications.',
-            'Reposer le bouchon (couple 25 Nm si applicable) et vérifier le niveau d’huile.'
-        ]),
-        etape('Entretien de la bougie d\'allumage', '20 min', [
-            'Localiser et déposer la bougie avec la clé à bougie.',
-            'Vérifier son état (usure, dépôts) et l\'écartement des électrodes.',
-            'Remplacer la bougie si nécessaire et la serrer au couple recommandé (ex: 20 Nm).',
-            'Reconnecter l\'antiparasite.'
-        ]),
-         etape('Conclusion et nettoyage', '10 min', [
-            'Nettoyer la zone de travail et les outils.',
-            'Démarrer la tondeuse pour vérifier son bon fonctionnement.'
-        ])
+        {
+            titre: 'Dépose et affûtage de la lame',
+            duree: '25 min',
+            etapes: [
+                'Arrêter la tondeuse, débrancher le fil de la bougie et sécuriser.',
+                'Basculer la tondeuse sur le côté (côté filtre à air vers le haut).',
+                'Utiliser une clé adaptée pour déposer la lame (bloquer la lame avec une cale en bois).',
+                'Affûter la lame en respectant un angle d\'environ 30°, puis vérifier l\'équilibrage.',
+                'Remonter la lame et la serrer au couple recommandé (ex: 30 Nm).'
+            ]
+        },
+        {
+            titre: 'Remplacement du filtre à air',
+            duree: '20 min',
+            etapes: [
+                'Localiser le boîtier du filtre à air.',
+                'Déposer le filtre usagé.',
+                'Nettoyer le boîtier et insérer le nouveau filtre.',
+                'Vérifier l’étanchéité du couvercle.'
+            ]
+        },
+        {
+            titre: 'Vidange de l\'huile moteur',
+            duree: '20 min',
+            etapes: [
+                'Placer le récipient sous le bouchon de vidange (ou basculer la tondeuse pour vidanger par l\'orifice de remplissage si pas de bouchon).',
+                'Ouvrir le bouchon et laisser l’huile s’écouler.',
+                'Remplacer par de l’huile neuve en respectant la quantité et les spécifications.',
+                'Reposer le bouchon (couple 25 Nm si applicable) et vérifier le niveau d’huile.'
+            ]
+        },
+        {
+            titre: 'Entretien de la bougie d\'allumage',
+            duree: '20 min',
+            etapes: [
+                'Localiser et déposer la bougie avec la clé à bougie.',
+                'Vérifier son état (usure, dépôts) et l\'écartement des électrodes.',
+                'Remplacer la bougie si nécessaire et la serrer au couple recommandé (ex: 20 Nm).',
+                'Reconnecter l\'antiparasite.'
+            ]
+        },
+         {
+            titre: 'Conclusion et nettoyage',
+            duree: '10 min',
+            etapes: [
+                'Nettoyer la zone de travail et les outils.',
+                'Démarrer la tondeuse pour vérifier son bon fonctionnement.'
+            ]
+        }
     ],
     securiteRangement: [
         'Toujours débrancher la bougie avant de toucher à la lame.',

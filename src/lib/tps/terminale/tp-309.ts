@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 309,
     duree: '2h00',
-    titre: 'BAC PRO Terminale • Diagnostic géométrie',
+    titre: 'Diagnostic géométrie',
+    niveau: 'terminale',
     situation: 'Le client se plaint que son véhicule tire à droite et que ses pneus avant s\'usent de manière irrégulière. Un diagnostic complet de la géométrie des trains roulants est nécessaire.',
     objectif: 'Mesurer et interpréter angles, régler parallélisme. (Compétence C3.4)',
     materiel: ['Banc géométrie 3D', 'Clés réglage', 'Fiche constructeur'],
@@ -18,26 +15,42 @@ const tp: TP = {
       { q: 'Pourquoi est-il crucial de vérifier les pressions des pneus et de les ajuster avant de commencer un contrôle de géométrie ?', r: 'Parce que des pressions incorrectes modifient la hauteur de caisse et l\'assiette du véhicule, ce qui fausse complètement toutes les mesures d\'angles.', type: 'text' }
     ],
     activitePratique: [
-      etape('Préparation', '20 min', [
-        'Pressions et jeux OK.',
-        'Capteurs montés.',
-        'Volant centré.'
-      ]),
-      etape('Mesures', '50 min', [
-        'Compensation jantes.',
-        'Lecture valeurs AV/AR.',
-        'Comparer aux tolérances.'
-      ]),
-      etape('Réglages', '40 min', [
-        'Ajuster biellettes AV (et AR si possible).',
-        'Itérer jusqu’en vert.',
-        'Centrer volant.'
-      ]),
-      etape('Validation', '10 min', [
-        'Re-mesure complète.',
-        'Imprimer avant/après.',
-        'Essai court.'
-      ])
+      {
+        titre: 'Préparation',
+        duree: '20 min',
+        etapes: [
+          'Pressions et jeux OK.',
+          'Capteurs montés.',
+          'Volant centré.'
+        ]
+      },
+      {
+        titre: 'Mesures',
+        duree: '50 min',
+        etapes: [
+          'Compensation jantes.',
+          'Lecture valeurs AV/AR.',
+          'Comparer aux tolérances.'
+        ]
+      },
+      {
+        titre: 'Réglages',
+        duree: '40 min',
+        etapes: [
+          'Ajuster biellettes AV (et AR si possible).',
+          'Itérer jusqu’en vert.',
+          'Centrer volant.'
+        ]
+      },
+      {
+        titre: 'Validation',
+        duree: '10 min',
+        etapes: [
+          'Re-mesure complète.',
+          'Imprimer avant/après.',
+          'Essai court.'
+        ]
+      }
     ],
     securiteRangement: ['Descendre du banc', 'Ranger capteurs', 'Archiver fiches'],
     pointsCles: ['Pressions base', 'Symétrie G/D', 'Réglage fin'],

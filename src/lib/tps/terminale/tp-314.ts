@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 314,
     duree: '2h00',
-    titre: 'BAC PRO Terminale • Contrôle des injecteurs moteur à rampe commune 2',
+    titre: 'Contrôle des injecteurs moteur à rampe commune 2',
+    niveau: 'terminale',
     situation: 'Suite au diagnostic précédent, un injecteur a été identifié comme défectueux. Vous devez le déposer, le tester sur banc, et coder le nouvel injecteur dans le calculateur moteur.',
     objectif: 'Mesurer débits/étanchéité sur banc et coder corrections (IMA/IQA). (Compétence C3.4)',
     materiel: ['Banc injecteurs', 'Éprouvettes', 'Valise diag', 'RTA'],
@@ -18,21 +15,33 @@ const tp: TP = {
       { q: 'Que se passe-t-il si on monte un injecteur neuf sans le coder dans le calculateur ?', r: 'Le moteur peut mal tourner, claquer, fumer ou manquer de puissance car le calculateur utilise les corrections de l\'ancien injecteur, qui ne sont pas adaptées au nouveau.', type: 'text' }
     ],
     activitePratique: [
-      etape('Dépose', '30 min', [
-        'Dépressuriser rampe.',
-        'Déposer injecteurs, nettoyer logements.',
-        'Préparer joints neufs.'
-      ]),
-      etape('Tests banc', '60 min', [
-        'Monter injecteur, lancer séquences.',
-        'Mesurer débits et pulvérisation.',
-        'Tester étanchéité.'
-      ]),
-      etape('Codage', '30 min', [
-        'Relever codes IMA/IQA.',
-        'Programmer dans ECU.',
-        'Effacer défauts et valider.'
-      ])
+      {
+        titre: 'Dépose',
+        duree: '30 min',
+        etapes: [
+          'Dépressuriser rampe.',
+          'Déposer injecteurs, nettoyer logements.',
+          'Préparer joints neufs.'
+        ]
+      },
+      {
+        titre: 'Tests banc',
+        duree: '60 min',
+        etapes: [
+          'Monter injecteur, lancer séquences.',
+          'Mesurer débits et pulvérisation.',
+          'Tester étanchéité.'
+        ]
+      },
+      {
+        titre: 'Codage',
+        duree: '30 min',
+        etapes: [
+          'Relever codes IMA/IQA.',
+          'Programmer dans ECU.',
+          'Effacer défauts et valider.'
+        ]
+      }
     ],
     securiteRangement: ['Joints neufs', 'Purge HP', 'Ranger banc'],
     pointsCles: ['Débit homogène', 'Codage fait', 'Étanchéité OK'],

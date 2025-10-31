@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -8,7 +9,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { initialTps, getTpsByNiveau, Cursus, Niveau, NIVEAUX_BACPRO, NIVEAUX_CAP } from '@/lib/data-manager';
+import { initialTps, Cursus, Niveau, NIVEAUX_BACPRO, NIVEAUX_CAP } from '@/lib/data-manager';
 
 
 export default function TutorialPage() {
@@ -21,13 +22,11 @@ export default function TutorialPage() {
     return (
       <Accordion type="single" collapsible className="w-full">
         {niveaux.map(niveau => {
-          const tpsForLevel = getTpsByNiveau(niveau.value, initialTps);
-          // Filter to show only TPs specific to this level for clarity in the table
-          const specificTps = tpsForLevel.filter(tp => tp.niveau === niveau.value);
+          const tpsForLevel = Object.values(initialTps).filter(tp => tp.niveau === niveau.value);
 
           return (
             <AccordionItem value={niveau.value} key={niveau.value}>
-              <AccordionTrigger className="text-xl font-headline">{niveau.label} ({specificTps.length} TP)</AccordionTrigger>
+              <AccordionTrigger className="text-xl font-headline">{niveau.label} ({tpsForLevel.length} TP)</AccordionTrigger>
               <AccordionContent>
                 <Table>
                   <TableHeader>
@@ -37,7 +36,7 @@ export default function TutorialPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {specificTps.map(tp => (
+                    {tpsForLevel.map(tp => (
                       <TableRow key={tp.id}>
                         <TableCell className="font-medium">{tp.id}</TableCell>
                         <TableCell>{tp.titre}</TableCell>
@@ -61,7 +60,7 @@ export default function TutorialPage() {
                     Tutoriel HORIZON BAC. PRO.
                  </h1>
                  <div className="flex items-center gap-4">
-                    <Button onClick={handlePrint} variant="outline">
+                    <Button onClick={handlePrint} variant="outline" className="print-hidden">
                         <Printer className="mr-2"/>
                         Imprimer
                     </Button>

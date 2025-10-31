@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-  return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 503,
     duree: '45 min',
-    titre: "CAP 1ère Année • Remplacement des Balais d'Essuie-Glace",
+    titre: "Remplacement des Balais d'Essuie-Glace",
+    niveau: 'cap1',
     situation: "Un client se plaint d'une mauvaise visibilité sous la pluie, avec des traces laissées par les essuie-glaces. Un remplacement est nécessaire.",
     objectif: 'Réaliser le remplacement des balais d’essuie-glace et conseiller le client. (Compétences C1.1, C1.3)',
     materiel: ['Jeu de balais neufs', 'Chiffon', 'Produit de nettoyage vitre'],
@@ -17,21 +14,9 @@ const tp: TP = {
         { type: 'text', q: 'Citez deux signes qui indiquent qu\'un balai d\'essuie-glace est usé.', r: 'Il laisse des traces sur le pare-brise, il fait du bruit (saccades), la lame en caoutchouc est craquelée ou déchirée.' }
     ],
     activitePratique: [
-        etape('Contrôle et Diagnostic', '15 min', [
-            'Inspecter visuellement les balais existants (fissures, déformations).',
-            'Tester le fonctionnement et observer les traces sur le pare-brise.',
-            'Nettoyer le pare-brise pour éliminer les impuretés.'
-        ]),
-        etape('Remplacement des Balais', '20 min', [
-            'Protéger le pare-brise avec un carton pour éviter les impacts.',
-            'Déposer les anciens balais en identifiant le type de fixation (clip, crochet).',
-            'Installer les nouveaux balais en s\'assurant du verrouillage correct.'
-        ]),
-        etape('Validation et Conseil', '10 min', [
-            'Tester le balayage avec du liquide lave-glace.',
-            'Vérifier l\'absence de bruit et de trace.',
-            'Conseiller le client sur l\'entretien (nettoyage régulier des lames).'
-        ])
+        { titre: 'Contrôle et Diagnostic', duree: '15 min', etapes: ['Inspecter visuellement les balais existants (fissures, déformations).', 'Tester le fonctionnement et observer les traces sur le pare-brise.', 'Nettoyer le pare-brise pour éliminer les impuretés.']},
+        { titre: 'Remplacement des Balais', duree: '20 min', etapes: ['Protéger le pare-brise avec un carton pour éviter les impacts.', 'Déposer les anciens balais en identifiant le type de fixation (clip, crochet).', 'Installer les nouveaux balais en s\'assurant du verrouillage correct.']},
+        { titre: 'Validation et Conseil', duree: '10 min', etapes: ['Tester le balayage avec du liquide lave-glace.', 'Vérifier l\'absence de bruit et de trace.', 'Conseiller le client sur l\'entretien (nettoyage régulier des lames).']}
     ],
     securiteRangement: [
         'Protéger le pare-brise pendant l\'intervention',

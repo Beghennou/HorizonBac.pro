@@ -1,14 +1,11 @@
 
 import type { Etape, TP } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-  return { titre, duree, etapes };
-}
-
 const tp: TP = {
   id: 1,
   duree: '2h00',
   titre: 'Diagnostic par méthode du point-milieu',
+  niveau: 'premiere',
   situation: 'Un client signale qu\'un équipement électrique (ex: feu stop, dégivrage) ne fonctionne plus. Plutôt que de tout tester au hasard, le chef d\'atelier vous demande d\'appliquer une méthode de diagnostic systématique pour trouver la panne efficacement.',
   objectif: 'Appliquer la méthode de diagnostic du point-milieu pour isoler rapidement un défaut dans un circuit électrique. (Compétences C3.1, C3.2, C3.3)',
   materiel: ['Multimètre', 'Schéma électrique du circuit concerné', 'Fiches de mesure'],
@@ -31,26 +28,42 @@ const tp: TP = {
     },
   ],
   activitePratique: [
-    etape('Observation et Préparation', '20 min', [
-      'Constater le dysfonctionnement (ex: le feu de croisement droit ne s\'allume pas).',
-      'Se procurer le schéma électrique correspondant.',
-      'Identifier sur le schéma : la source (batterie), la protection (fusible), la commande (commodo), et le récepteur (ampoule).',
-    ]),
-    etape('Application de la Méthode - 1ère Division', '30 min', [
+    {
+      titre: 'Observation et Préparation',
+      duree: '20 min',
+      etapes: [
+        'Constater le dysfonctionnement (ex: le feu de croisement droit ne s\'allume pas).',
+        'Se procurer le schéma électrique correspondant.',
+        'Identifier sur le schéma : la source (batterie), la protection (fusible), la commande (commodo), et le récepteur (ampoule).',
+      ]
+    },
+    {
+      titre: 'Application de la Méthode - 1ère Division',
+      duree: '30 min',
+      etapes: [
         'Identifier un point central dans le circuit (ex: un connecteur intermédiaire, la sortie du commodo).',
         'Mesurer la tension à ce point. (Contact mis, commande actionnée).',
         'Noter la valeur : si 12V présents, le problème est en aval (vers l\'ampoule). Si 0V, le problème est en amont (vers le fusible/batterie).',
-    ]),
-    etape('Application de la Méthode - 2ème Division', '30 min', [
-      'Choisir un nouveau point-milieu dans la section défectueuse identifiée.',
-      'Refaire une mesure de tension (ou de continuité si la section est hors tension).',
-      'Continuer le processus jusqu\'à isoler le composant ou la portion de faisceau défaillante.',
-    ]),
-    etape('Validation et Conclusion', '20 min', [
-      'Une fois la cause identifiée (ex: fil coupé, connecteur oxydé, masse défectueuse), effectuer la réparation.',
-      'Vérifier que l\'équipement fonctionne à nouveau correctement.',
-      'Expliquer la démarche et la panne trouvée sur la fiche d\'intervention.',
-    ]),
+      ]
+    },
+    {
+      titre: 'Application de la Méthode - 2ème Division',
+      duree: '30 min',
+      etapes: [
+        'Choisir un nouveau point-milieu dans la section défectueuse identifiée.',
+        'Refaire une mesure de tension (ou de continuité si la section est hors tension).',
+        'Continuer le processus jusqu\'à isoler le composant ou la portion de faisceau défaillante.',
+      ]
+    },
+    {
+      titre: 'Validation et Conclusion',
+      duree: '20 min',
+      etapes: [
+        'Une fois la cause identifiée (ex: fil coupé, connecteur oxydé, masse défectueuse), effectuer la réparation.',
+        'Vérifier que l\'équipement fonctionne à nouveau correctement.',
+        'Expliquer la démarche et la panne trouvée sur la fiche d\'intervention.',
+      ]
+    }
   ],
   securiteRangement: [
     'Toujours couper le contact avant de mesurer une continuité (Ohmmètre).',

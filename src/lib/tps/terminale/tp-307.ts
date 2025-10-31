@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 307,
     duree: '1h45',
-    titre: 'BAC PRO Terminale • Relevé de pressions de suralimentation',
+    titre: 'Relevé de pressions de suralimentation',
+    niveau: 'terminale',
     situation: 'Un client rapporte une perte de puissance significative et un sifflement anormal à l\'accélération sur son moteur turbo. Vous êtes chargé de contrôler le circuit de suralimentation pour identifier la cause du problème.',
     objectif: 'Comparer pressions aux valeurs constructeur, identifier fuites/wastegate/VGT. (Compétences C3.1, C3.4)',
     materiel: ['Mano turbo', 'Valise diag', 'T de dérivation', 'Fumigène'],
@@ -18,22 +15,34 @@ const tp: TP = {
       { q: 'Quels sont les symptômes d\'une fuite sur le circuit de suralimentation ?', r: 'Perte de puissance, sifflement, fumée noire à l\'échappement (mélange trop riche en carburant), et mise en sécurité du moteur (mode dégradé).', type: 'text' }
     ],
     activitePratique: [
-      etape('Montage mano', '25 min', [
-        'T sur durite admission.',
-        'Sécuriser raccords.',
-        'Brancher diag.'
-      ]),
-      etape('Mesures', '50 min', [
-        'Ralenti ~0 bar.',
-        'Charge progressive: relever max.',
-        'Comparer RTA ±0,2 bar.',
-        'Observer commande wastegate.'
-      ]),
-      etape('Fuites', '30 min', [
-        'Fumigène durites/intercooler.',
-        'Serrer colliers.',
-        'Tester électrovanne commande.'
-      ])
+      {
+        titre: 'Montage mano',
+        duree: '25 min',
+        etapes: [
+          'T sur durite admission.',
+          'Sécuriser raccords.',
+          'Brancher diag.'
+        ]
+      },
+      {
+        titre: 'Mesures',
+        duree: '50 min',
+        etapes: [
+          'Ralenti ~0 bar.',
+          'Charge progressive: relever max.',
+          'Comparer RTA ±0,2 bar.',
+          'Observer commande wastegate.'
+        ]
+      },
+      {
+        titre: 'Fuites',
+        duree: '30 min',
+        etapes: [
+          'Fumigène durites/intercooler.',
+          'Serrer colliers.',
+          'Tester électrovanne commande.'
+        ]
+      }
     ],
     securiteRangement: ['Remettre durite d’origine', 'Serrer colliers', 'Tracer relevés'],
     pointsCles: ['Pression cible', 'Fuites = perte', 'Commande OK'],

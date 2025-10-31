@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 313,
     duree: '2h00',
-    titre: 'BAC PRO Terminale • Contrôle des injecteurs moteur à rampe commune 1',
+    titre: 'Contrôle des injecteurs moteur à rampe commune 1',
+    niveau: 'terminale',
     situation: 'Un moteur Common Rail claque et fume. Le chef d\'atelier vous missionne pour la première phase du diagnostic injecteur : les contrôles électriques et l\'analyse des retours de fuite.',
     objectif: 'Mesurer résistances, contrôler retours et étanchéité. (Compétence C3.1)',
     materiel: ['Multimètre', 'Éprouvettes', 'Valise diag', 'Chiffons'],
@@ -18,21 +15,33 @@ const tp: TP = {
       { q: 'Quel test simple permet de vérifier l\'isolation électrique d\'un injecteur ?', r: 'Mesurer la résistance entre chaque borne de l\'injecteur et sa masse (corps métallique). La valeur doit être infinie (OL), sinon l\'injecteur est en court-circuit.', type: 'text' }
     ],
     activitePratique: [
-      etape('Tests électriques', '40 min', [
-        'Résistance bobine.',
-        'Isolation masse.',
-        'Commande calculateur (oscillo).'
-      ]),
-      etape('Retours gasoil', '50 min', [
-        'Éprouvettes sur retours.',
-        'Ralenti 30 s, mesurer volumes.',
-        'Écart >30% = injecteur en cause.'
-      ]),
-      etape('Fuites externes', '30 min', [
-        'Joints, suintements.',
-        'Serrages et tuyaux HP.',
-        'Tracer.'
-      ])
+      {
+        titre: 'Tests électriques',
+        duree: '40 min',
+        etapes: [
+          'Résistance bobine.',
+          'Isolation masse.',
+          'Commande calculateur (oscillo).'
+        ]
+      },
+      {
+        titre: 'Retours gasoil',
+        duree: '50 min',
+        etapes: [
+          'Éprouvettes sur retours.',
+          'Ralenti 30 s, mesurer volumes.',
+          'Écart >30% = injecteur en cause.'
+        ]
+      },
+      {
+        titre: 'Fuites externes',
+        duree: '30 min',
+        etapes: [
+          'Joints, suintements.',
+          'Serrages et tuyaux HP.',
+          'Tracer.'
+        ]
+      }
     ],
     securiteRangement: ['Protéger zone', 'Éliminer gasoil', 'Tracer injecteurs'],
     pointsCles: ['Retours homogènes', 'Isolation OK', 'Joints sains'],

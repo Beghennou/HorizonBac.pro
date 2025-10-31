@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-  return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 114,
     duree: '2h00',
     titre: 'Remplacement Plaquettes et Disques de Frein Arrière',
+    niveau: 'seconde',
     situation: 'Lors d\'une visite d\'entretien, vous constatez que les freins arrière à disques sont usés. Le frein de stationnement est un modèle électrique intégré à l\'étrier. Le client valide le remplacement.',
     objectif: 'Remplacer les plaquettes et disques arrière en utilisant l\'outil de diagnostic pour gérer le frein de stationnement électrique (EPB). (Compétences C1.2, C1.3, C1.1)',
     materiel: ['Valise de diagnostic', 'Repousse-piston (pneumatique ou manuel)', 'Jeu de plaquettes et disques neufs', 'Nettoyant frein', 'Clé dynamométrique'],
@@ -20,30 +17,46 @@ const tp: TP = {
         { type: 'text', q: 'Un disque de frein arrière intègre souvent la piste pour le roulement de roue. Quelle précaution supplémentaire cela impose-t-il lors du remplacement ?', r: 'Il faut s\'assurer de transférer le roulement ou d\'en installer un neuf avec précaution, en respectant le couple de serrage de l\'écrou central, qui est crucial pour la sécurité.' }
     ],
     activitePratique: [
-        etape('Mise en Mode Maintenance', '20 min', [
-            'Brancher la valise de diagnostic et identifier le véhicule.',
-            'Naviguer dans le calculateur de freinage pour trouver la fonction "Mode Maintenance EPB".',
-            'Activer le mode maintenance et attendre la confirmation de la rétraction des pistons.',
-            'Mettre le véhicule sur pont et déposer les roues arrière.'
-        ]),
-        etape('Dépose et Nettoyage', '40 min', [
-            'Déposer l\'étrier de frein (sans débrancher le connecteur électrique si possible) et le suspendre.',
-            'Retirer les plaquettes et le disque usés.',
-            'Nettoyer et inspecter le moyeu et le support d\'étrier.',
-            'Vérifier l\'état des colonnettes et du soufflet de piston.'
-        ]),
-        etape('Remontage et Serrage', '40 min', [
-            'Installer le disque neuf.',
-            'Installer les nouvelles plaquettes.',
-            'Remonter l\'étrier et serrer les vis de fixation au couple préconisé.',
-            'Remonter les roues et les serrer au couple.'
-        ]),
-        etape('Sortie du Mode Maintenance et Validation', '20 min', [
-            'Redescendre le véhicule.',
-            'Avec la valise de diagnostic, sortir du mode maintenance et lancer la procédure de calibrage.',
-            'Actionner plusieurs fois le frein de service et le frein de stationnement.',
-            'Vérifier l\'absence de code défaut et effectuer un essai routier.'
-        ])
+        {
+            titre: 'Mise en Mode Maintenance',
+            duree: '20 min',
+            etapes: [
+                'Brancher la valise de diagnostic et identifier le véhicule.',
+                'Naviguer dans le calculateur de freinage pour trouver la fonction "Mode Maintenance EPB".',
+                'Activer le mode maintenance et attendre la confirmation de la rétraction des pistons.',
+                'Mettre le véhicule sur pont et déposer les roues arrière.'
+            ]
+        },
+        {
+            titre: 'Dépose et Nettoyage',
+            duree: '40 min',
+            etapes: [
+                'Déposer l\'étrier de frein (sans débrancher le connecteur électrique si possible) et le suspendre.',
+                'Retirer les plaquettes et le disque usés.',
+                'Nettoyer et inspecter le moyeu et le support d\'étrier.',
+                'Vérifier l\'état des colonnettes et du soufflet de piston.'
+            ]
+        },
+        {
+            titre: 'Remontage et Serrage',
+            duree: '40 min',
+            etapes: [
+                'Installer le disque neuf.',
+                'Installer les nouvelles plaquettes.',
+                'Remonter l\'étrier et serrer les vis de fixation au couple préconisé.',
+                'Remonter les roues et les serrer au couple.'
+            ]
+        },
+        {
+            titre: 'Sortie du Mode Maintenance et Validation',
+            duree: '20 min',
+            etapes: [
+                'Redescendre le véhicule.',
+                'Avec la valise de diagnostic, sortir du mode maintenance et lancer la procédure de calibrage.',
+                'Actionner plusieurs fois le frein de service et le frein de stationnement.',
+                'Vérifier l\'absence de code défaut et effectuer un essai routier.'
+            ]
+        }
     ],
     securiteRangement: [
         'Ne jamais intervenir sur un système EPB sans l\'outil de diagnostic adapté.',

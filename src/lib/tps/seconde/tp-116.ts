@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-  return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 116,
     duree: '1h30',
     titre: 'Remplacement d\'un Pneumatique sur Jante',
+    niveau: 'seconde',
     situation: 'Suite à une crevaison non réparable, vous devez déposer un pneu usagé de sa jante, monter un pneu neuf, l\'équilibrer et le remonter sur le véhicule du client.',
     objectif: 'Maîtriser la chaîne complète du remplacement d\'un pneumatique : démontage, montage, équilibrage et remontage sur véhicule. (Compétences C1.3, C1.1)',
     materiel: ['Démonte-pneu', 'Équilibreuse', 'Masses d\'équilibrage', 'Valve neuve', 'Graisse à pneu', 'Clé dynamométrique'],
@@ -20,28 +17,44 @@ const tp: TP = {
         { type: 'text', q: 'Quelle est la pression de "claquage" généralement utilisée pour coller les talons du pneu sur les rebords de la jante, et quelle précaution prendre ?', r: 'Environ 3 à 3.5 bars. Il faut se tenir à distance de la roue pendant cette opération et ne jamais dépasser cette pression pour éviter un éclatement.' }
     ],
     activitePratique: [
-        etape('Préparation et Démontage', '25 min', [
-            'Déposer la roue du véhicule et la dégonfler complètement en retirant l\'obus de valve.',
-            'Placer la roue sur le démonte-pneu et décoller les deux talons du pneu de la jante.',
-            'À l\'aide du levier et de la tête de démontage, extraire le pneu de la jante en protégeant celle-ci.'
-        ]),
-        etape('Nettoyage et Montage', '30 min', [
-            'Nettoyer les portées de la jante où le pneu vient faire l\'étanchéité.',
-            'Installer une valve neuve.',
-            'Lubrifier les talons du pneu neuf avec de la graisse à pneu.',
-            'Monter le pneu sur la jante en respectant le sens de rotation ou le côté "Outside" si applicable.'
-        ]),
-        etape('Gonflage et Équilibrage', '25 min', [
-            'Gonfler le pneu jusqu\'au "claquage" des talons (environ 3.5 bars) puis ajuster à la pression d\'utilisation.',
-            'Monter la roue sur l\'équilibreuse, entrer les paramètres de la jante.',
-            'Lancer la mesure et poser les masses d\'équilibrage aux endroits indiqués par la machine.',
-            'Relancer une mesure de contrôle qui doit indiquer "0" ou "OK".'
-        ]),
-        etape('Remontage et Contrôle Final', '10 min', [
-            'Remonter la roue sur le véhicule.',
-            'Serrer les écrous en étoile et au couple préconisé avec la clé dynamométrique.',
-            'Vérifier la pression une dernière fois.'
-        ])
+        {
+            titre: 'Préparation et Démontage',
+            duree: '25 min',
+            etapes: [
+                'Déposer la roue du véhicule et la dégonfler complètement en retirant l\'obus de valve.',
+                'Placer la roue sur le démonte-pneu et décoller les deux talons du pneu de la jante.',
+                'À l\'aide du levier et de la tête de démontage, extraire le pneu de la jante en protégeant celle-ci.'
+            ]
+        },
+        {
+            titre: 'Nettoyage et Montage',
+            duree: '30 min',
+            etapes: [
+                'Nettoyer les portées de la jante où le pneu vient faire l\'étanchéité.',
+                'Installer une valve neuve.',
+                'Lubrifier les talons du pneu neuf avec de la graisse à pneu.',
+                'Monter le pneu sur la jante en respectant le sens de rotation ou le côté "Outside" si applicable.'
+            ]
+        },
+        {
+            titre: 'Gonflage et Équilibrage',
+            duree: '25 min',
+            etapes: [
+                'Gonfler le pneu jusqu\'au "claquage" des talons (environ 3.5 bars) puis ajuster à la pression d\'utilisation.',
+                'Monter la roue sur l\'équilibreuse, entrer les paramètres de la jante.',
+                'Lancer la mesure et poser les masses d\'équilibrage aux endroits indiqués par la machine.',
+                'Relancer une mesure de contrôle qui doit indiquer "0" ou "OK".'
+            ]
+        },
+        {
+            titre: 'Remontage et Contrôle Final',
+            duree: '10 min',
+            etapes: [
+                'Remonter la roue sur le véhicule.',
+                'Serrer les écrous en étoile et au couple préconisé avec la clé dynamométrique.',
+                'Vérifier la pression une dernière fois.'
+            ]
+        }
     ],
     securiteRangement: [
         'Porter des lunettes de protection pendant toutes les opérations.',

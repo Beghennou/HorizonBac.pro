@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 304,
     duree: '1h30',
-    titre: 'BAC PRO Terminale • Reconnaissance des valves de roues',
+    titre: 'Reconnaissance des valves de roues',
+    niveau: 'terminale',
     situation: 'Malgré une pression des pneus correcte, le témoin TPMS (Tire Pressure Monitoring System) reste allumé. Vous devez diagnostiquer le système, identifier le capteur défaillant et le réappairer au calculateur.',
     objectif: 'Appairer capteurs, remplacer valve défectueuse et valider pressions. (Compétence C3.4)',
     materiel: ['Outil TPMS', 'Valise diag', 'Manomètre', 'Valves neuves'],
@@ -18,21 +15,33 @@ const tp: TP = {
       { q: 'Quelle est la durée de vie moyenne de la pile d\'un capteur TPMS ?', r: 'Environ 5 à 7 ans. La pile n\'est généralement pas remplaçable, il faut changer le capteur complet.', type: 'text' }
     ],
     activitePratique: [
-      etape('Identification', '25 min', [
-        'Lire IDs via outil TPMS.',
-        'Comparer pressions affichées/réelles.',
-        'Contrôler état valves/joints.'
-      ]),
-      etape('Remplacement', '40 min', [
-        'Démonter pneu si nécessaire.',
-        'Remplacer valve, serrage 4–6 Nm.',
-        'Programmer ID capteur.'
-      ]),
-      etape('Apprentissage', '25 min', [
-        'Lancer procédure calculateur.',
-        'Activer capteurs AVG→AVD→ARD→ARG.',
-        'Valider extinction voyant TPMS.'
-      ])
+      {
+        titre: 'Identification',
+        duree: '25 min',
+        etapes: [
+          'Lire IDs via outil TPMS.',
+          'Comparer pressions affichées/réelles.',
+          'Contrôler état valves/joints.'
+        ]
+      },
+      {
+        titre: 'Remplacement',
+        duree: '40 min',
+        etapes: [
+          'Démonter pneu si nécessaire.',
+          'Remplacer valve, serrage 4–6 Nm.',
+          'Programmer ID capteur.'
+        ]
+      },
+      {
+        titre: 'Apprentissage',
+        duree: '25 min',
+        etapes: [
+          'Lancer procédure calculateur.',
+          'Activer capteurs AVG→AVD→ARD→ARG.',
+          'Valider extinction voyant TPMS.'
+        ]
+      }
     ],
     securiteRangement: ['Couples respectés', 'Étiqueter IDs', 'Ranger outil TPMS'],
     pointsCles: ['Apprentissage', 'Ordre roues', 'Pressions correctes'],

@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 305,
     duree: '2h00',
-    titre: 'BAC PRO Terminale • Phares au xénon',
+    titre: 'Phares au xénon',
+    niveau: 'terminale',
     situation: 'Un client se plaint d\'un éclairage faible sur son véhicule équipé de phares au xénon. De plus, le faisceau semble trop bas. Vous devez diagnostiquer le système haute tension et le correcteur d\'assiette automatique.',
     objectif: 'Contrôler ballasts, ampoules, correcteur auto et réglage faisceau. (Compétences C3.2, C3.3)',
     materiel: ['Valise diag', 'Régloscope', 'EPIs diélectriques'],
@@ -18,21 +15,33 @@ const tp: TP = {
       { q: 'Pourquoi le correcteur d\'assiette automatique est-il obligatoire avec les phares au xénon ?', r: 'Pour ajuster en temps réel la hauteur du faisceau en fonction de la charge du véhicule et éviter d\'éblouir les autres usagers.', type: 'text' }
     ],
     activitePratique: [
-      etape('Sécurité/diag', '30 min', [
-        'Batterie coupée avant ballast.',
-        'Lire défauts xénon.',
-        'Inspecter ampoules et câbles HT.'
-      ]),
-      etape('Contrôles', '40 min', [
-        'Alim 12 V ballast OK.',
-        'Test correcteur auto.',
-        'Absence arc parasite.'
-      ]),
-      etape('Réglage', '20 min', [
-        'Régloscope à 10 m.',
-        'Ajuster hauteur/orientation.',
-        'Valider coupure nette.'
-      ])
+      {
+        titre: 'Sécurité/diag',
+        duree: '30 min',
+        etapes: [
+          'Batterie coupée avant ballast.',
+          'Lire défauts xénon.',
+          'Inspecter ampoules et câbles HT.'
+        ]
+      },
+      {
+        titre: 'Contrôles',
+        duree: '40 min',
+        etapes: [
+          'Alim 12 V ballast OK.',
+          'Test correcteur auto.',
+          'Absence arc parasite.'
+        ]
+      },
+      {
+        titre: 'Réglage',
+        duree: '20 min',
+        etapes: [
+          'Régloscope à 10 m.',
+          'Ajuster hauteur/orientation.',
+          'Valider coupure nette.'
+        ]
+      }
     ],
     securiteRangement: ['Jamais manipuler sous tension', 'Élimination spécifique ampoules', 'Tracer réglage'],
     pointsCles: ['HT danger', 'Correcteur OK', 'Réglage anti-éblouissement'],

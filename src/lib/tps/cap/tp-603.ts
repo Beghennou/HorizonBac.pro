@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-  return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 603,
     duree: '1h30',
-    titre: 'CAP 2ème Année • Remplacement des Bougies d\'Allumage',
+    titre: 'Remplacement des Bougies d\'Allumage',
+    niveau: 'cap2',
     situation: 'Le moteur d\'un véhicule essence présente des ratés. L\'entretien préconise le remplacement des bougies d\'allumage.',
     objectif: 'Remplacer les bougies d\'allumage en respectant le couple de serrage. (Compétence C2.2)',
     materiel: ['Jeu de bougies neuves', 'Clé à bougie', 'Clé dynamométrique'],
@@ -17,8 +14,8 @@ const tp: TP = {
         { type: 'text', q: 'Pourquoi le serrage au couple est-il si important pour une bougie ?', r: 'Un serrage insuffisant cause une mauvaise dissipation de la chaleur et des fuites. Un serrage excessif peut endommager le filetage de la culasse.' }
     ],
     activitePratique: [
-        etape('Dépose', '20 min', ['Nettoyer les puits de bougies.', 'Débrancher les bobines ou fils de bougies.', 'Dévisser et retirer les anciennes bougies.']),
-        etape('Repose et Serrage', '25 min', ['Vérifier l\'écartement des électrodes des bougies neuves.', 'Visser les bougies neuves à la main, puis serrer au couple préconisé.']),
+        { titre: 'Dépose', duree: '20 min', etapes: ['Nettoyer les puits de bougies.', 'Débrancher les bobines ou fils de bougies.', 'Dévisser et retirer les anciennes bougies.']},
+        { titre: 'Repose et Serrage', duree: '25 min', etapes: ['Vérifier l\'écartement des électrodes des bougies neuves.', 'Visser les bougies neuves à la main, puis serrer au couple préconisé.']},
     ],
     securiteRangement: ['Travailler sur moteur froid.', 'Respecter impérativement le couple de serrage.'],
     pointsCles: ['Propreté des puits de bougie', 'Serrage au couple'],

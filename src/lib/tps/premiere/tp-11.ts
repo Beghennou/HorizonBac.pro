@@ -1,14 +1,10 @@
-
 import type { TP, Etape } from '@/lib/types/tp-types';
-
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
 
 const tp: TP = {
     id: 11,
     duree: '2h00',
     titre: 'Contrôle circuit moto-ventilation refroidissement',
+    niveau: 'premiere',
     situation: 'Le propriétaire d\'une Citroën C3 est inquiet car le voyant de température de son moteur s\'allume et l\'indicateur dépasse fréquemment les 110°C en ville. Vous devez mener un diagnostic électrique pour trouver l\'origine de cette surchauffe.',
     objectif: 'Mener un diagnostic électrique précis sur le circuit de refroidissement pour identifier l\'origine d\'une surchauffe anormale. (Compétences C3.1, C3.3, C3.4, C2.1)',
     materiel: ['Valise de diagnostic', 'Multimètre', 'Thermomètre infrarouge', 'Documentation Technique (RTA)'],
@@ -19,25 +15,10 @@ const tp: TP = {
         { type: 'text', q: "Pourquoi est-il plus fiable de forcer l'activation du ventilateur via la valise de diagnostic que de simplement shunter le relais ?", r: 'La valise de diag teste toute la chaîne de commande (calculateur, faisceau, relais, moteur), alors que shunter le relais ne teste que le circuit de puissance à partir du relais.' }
     ],
     activitePratique: [
-        etape('Contrôle de la source d\'énergie', '20 min', [
-            'Mesurer la tension de la batterie moteur coupé (doit être > 12V).',
-            'Démarrer le moteur et mesurer la tension de charge (doit être ~14V).'
-        ]),
-        etape('Contrôle de la sonde de température (Thermistance)', '30 min', [
-            'Mettre le moteur en marche.',
-            'Relever la résistance de la sonde à différentes températures (froid, 60°C, 90°C) et comparer aux valeurs de la RTA.'
-        ]),
-        etape('Contrôle du déclenchement des motoventilateurs', '40 min', [
-            'Laisser le moteur chauffer au ralenti en surveillant la température sur l\'outil de diagnostic.',
-            'Noter la température exacte de déclenchement de la 1ère vitesse du ventilateur.',
-            'Noter la température d\'arrêt.',
-            'Si possible (ex: en activant la climatisation), vérifier le déclenchement de la 2ème vitesse.'
-        ]),
-        etape('Analyse et Diagnostic', '30 min', [
-            'Comparer toutes les valeurs mesurées aux données constructeur.',
-            'Conclure sur l\'élément défaillant (sonde, relais, motoventilateur, calculateur).',
-            'Proposer une solution corrective chiffrée.'
-        ])
+        { titre: 'Contrôle de la source d\'énergie', duree: '20 min', etapes: ['Mesurer la tension de la batterie moteur coupé (doit être > 12V).','Démarrer le moteur et mesurer la tension de charge (doit être ~14V).']},
+        { titre: 'Contrôle de la sonde de température (Thermistance)', duree: '30 min', etapes: ['Mettre le moteur en marche.','Relever la résistance de la sonde à différentes températures (froid, 60°C, 90°C) et comparer aux valeurs de la RTA.']},
+        { titre: 'Contrôle du déclenchement des motoventilateurs', duree: '40 min', etapes: ['Laisser le moteur chauffer au ralenti en surveillant la température sur l\'outil de diagnostic.','Noter la température exacte de déclenchement de la 1ère vitesse du ventilateur.','Noter la température d\'arrêt.','Si possible (ex: en activant la climatisation), vérifier le déclenchement de la 2ème vitesse.']},
+        { titre: 'Analyse et Diagnostic', duree: '30 min', etapes: ['Comparer toutes les valeurs mesurées aux données constructeur.','Conclure sur l\'élément défaillant (sonde, relais, motoventilateur, calculateur).','Proposer une solution corrective chiffrée.']}
     ],
     securiteRangement: [
         'Attention aux organes en mouvement (ventilateur, courroies).',

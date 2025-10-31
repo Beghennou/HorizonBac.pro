@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 303,
     duree: '2h00',
-    titre: 'BAC PRO Terminale • Essuyage automatique des vitres. Allumage automatique',
+    titre: 'Essuyage automatique des vitres. Allumage automatique',
+    niveau: 'terminale',
     situation: 'Un client rapporte que ses essuie-glaces se déclenchent de manière aléatoire et que ses phares ne s\'allument plus automatiquement dans les tunnels. Vous devez diagnostiquer les capteurs de pluie et de luminosité.',
     objectif: 'Tester capteurs pluie/lumière, calibrer et valider. (Compétence C3.1)',
     materiel: ['Valise diag', 'Multimètre', 'Schéma', 'Vaporisateur'],
@@ -18,21 +15,33 @@ const tp: TP = {
       { q: 'À quoi sert la procédure de calibrage du capteur via la valise de diagnostic ?', r: 'Elle permet de définir le point "zéro" (pare-brise sec et propre) pour que le calculateur puisse interpréter correctement les variations de signal dues à la pluie.', type: 'text' }
     ],
     activitePratique: [
-      etape('Essuyage auto', '40 min', [
-        'Lire défauts capteur pluie.',
-        'Tester alimentation et signal.',
-        'Simuler pluie et observer réaction.'
-      ]),
-      etape('Feux auto', '40 min', [
-        'Lire paramètres luminosité.',
-        'Varier lumière et observer délais.',
-        'Ajuster sensibilité si possible.'
-      ]),
-      etape('Étalonnage', '40 min', [
-        'Lancer calibration via valise.',
-        'Régler sensibilités.',
-        'Valider sur conditions variées.'
-      ])
+      {
+        titre: 'Essuyage auto',
+        duree: '40 min',
+        etapes: [
+          'Lire défauts capteur pluie.',
+          'Tester alimentation et signal.',
+          'Simuler pluie et observer réaction.'
+        ]
+      },
+      {
+        titre: 'Feux auto',
+        duree: '40 min',
+        etapes: [
+          'Lire paramètres luminosité.',
+          'Varier lumière et observer délais.',
+          'Ajuster sensibilité si possible.'
+        ]
+      },
+      {
+        titre: 'Étalonnage',
+        duree: '40 min',
+        etapes: [
+          'Lancer calibration via valise.',
+          'Régler sensibilités.',
+          'Valider sur conditions variées.'
+        ]
+      }
     ],
     securiteRangement: ['Nettoyer pare-brise capteurs', 'Rebrancher connecteurs', 'Tracer paramètres'],
     pointsCles: ['Propreté zone', 'Calibration', 'Test réel'],

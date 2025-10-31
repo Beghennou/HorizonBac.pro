@@ -1,14 +1,11 @@
 
 import type { TP, Etape } from '@/lib/types/tp-types';
 
-function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
-}
-
 const tp: TP = {
     id: 312,
     duree: '2h00',
-    titre: 'BAC PRO Terminale • Utilisation d\'un oscilloscope',
+    titre: 'Utilisation d\'un oscilloscope',
+    niveau: 'terminale',
     situation: 'Pour diagnostiquer des pannes électroniques complexes, la maîtrise de l\'oscilloscope est indispensable. Cet atelier vise à vous former à la capture et à l\'analyse de signaux électriques automobiles.',
     objectif: 'Paramétrer, capter et interpréter des signaux capteurs/actionneurs. (Compétence C3.3)',
     materiel: ['Oscilloscope', 'Sondes diff', 'Pince ampèremétrique', 'Schémas'],
@@ -18,26 +15,42 @@ const tp: TP = {
       { q: 'Quel est le rôle du "trigger" (déclenchement) ?', r: 'Il stabilise l\'affichage en démarrant la capture du signal toujours au même niveau de tension, évitant que le signal ne "défile" de manière illisible sur l\'écran.', type: 'text' }
     ],
     activitePratique: [
-      etape('Réglages', '25 min', [
-        'Signal carré interne.',
-        'Ajuster temps/tension.',
-        'Stabiliser trigger.'
-      ]),
-      etape('Capteurs', '45 min', [
-        'PMH (inductif/Hall).',
-        'Lambda amont oscillante.',
-        'AAC (forme, amplitude).'
-      ]),
-      etape('Actionneurs', '30 min', [
-        'Commande injecteur (temps ouverture).',
-        'PWM ventilateur/EGR.',
-        'Repérer anomalies.'
-      ]),
-      etape('Interprétation', '20 min', [
-        'Comparer références.',
-        'Identifier défauts.',
-        'Sauvegarder captures.'
-      ])
+      {
+        titre: 'Réglages',
+        duree: '25 min',
+        etapes: [
+          'Signal carré interne.',
+          'Ajuster temps/tension.',
+          'Stabiliser trigger.'
+        ]
+      },
+      {
+        titre: 'Capteurs',
+        duree: '45 min',
+        etapes: [
+          'PMH (inductif/Hall).',
+          'Lambda amont oscillante.',
+          'AAC (forme, amplitude).'
+        ]
+      },
+      {
+        titre: 'Actionneurs',
+        duree: '30 min',
+        etapes: [
+          'Commande injecteur (temps ouverture).',
+          'PWM ventilateur/EGR.',
+          'Repérer anomalies.'
+        ]
+      },
+      {
+        titre: 'Interprétation',
+        duree: '20 min',
+        etapes: [
+          'Comparer références.',
+          'Identifier défauts.',
+          'Sauvegarder captures.'
+        ]
+      }
     ],
     securiteRangement: ['Protéger sondes', 'Ne pas dépasser Vmax', 'Sauvegarder et ranger'],
     pointsCles: ['Réglages nets', 'Trigger stable', 'Lecture formes'],
