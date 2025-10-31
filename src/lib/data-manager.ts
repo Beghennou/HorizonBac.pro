@@ -98,5 +98,5 @@ export const NIVEAUX_CAP: { value: Niveau, label: string, prefix: string }[] = [
 
 export const NIVEAUX: Record<Cursus, { value: Niveau, label: string, prefix: string }[]> = {
     bacpro: NIVEAUX_BACPRO,
-    cap: NIVEaux_CAP,
+    cap: NIVEAUX_CAP,
 };

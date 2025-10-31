@@ -1,6 +1,5 @@
 
-
-import type { CompetenceBloc, Niveau } from './data-manager';
+import type { CompetenceBloc, Niveau } from './types/tp-types';
 
 export const competencesParNiveau: Record<Exclude<Niveau, 'cap1' | 'cap2'>, Record<string, CompetenceBloc>> = {
   seconde: {
