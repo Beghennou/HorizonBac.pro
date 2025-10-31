@@ -108,7 +108,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                               <p><strong>Q{i+1}:</strong> {item.q}</p>
                               {item.type === 'qcm' && (
                                   <div className="mt-2 space-y-2">
-                                      {(item as EtudePrelimQCM).options.map((option, optIndex) => (
+                                      {(item as EtudePrelimQCM).options.map((option: string, optIndex: number) => (
                                           <div key={optIndex} className="flex items-center gap-2">
                                               <div className="w-4 h-4 border border-foreground rounded-sm"></div>
                                               <label>{option}</label>
@@ -123,7 +123,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                           </div>
                       ))}
                       <div className="mt-6 text-center border-t-2 border-dashed border-destructive/50 pt-4">
-                        <p className="font-bold text-destructive text-lg">Appel professeur avant de commencer l'activité pratique</p>
+                        <p className="font-bold text-destructive text-lg">Appel Professeur avant de commencer l'activité pratique</p>
                          {studentName && (
                             <ValidationTeacherButton 
                                 studentName={studentName}
