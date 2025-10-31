@@ -15,16 +15,10 @@ export default function Home() {
   const [cursus, setCursus] = useState('bacpro');
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
-      {/* Background Image */}
-      <Image
-        src="/images/background.jpg"
-        alt="Deux étudiants en mécanique travaillant sur un moteur de voiture"
-        data-ai-hint="mechanic students"
-        fill
-        className="object-cover object-center z-0"
-        priority
-      />
+    <div 
+        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/background.jpg')" }}
+    >
       <div className="absolute inset-0 bg-black/60 z-10" />
 
       <main className="z-20 flex flex-col items-center justify-center text-center text-white w-full max-w-4xl">
