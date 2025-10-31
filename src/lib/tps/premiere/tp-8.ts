@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 8,
     duree: '3h00',
-    titre: 'BAC PRO Première • Diagnostic d\'un circuit électrique (feux stop)',
+    titre: 'Diagnostic d\'un circuit électrique (feux stop)',
     situation: 'Un client se présente pour le contrôle technique de sa Peugeot 207. Lors de la pré-visite, vous constatez qu\'aucun des feux de stop ne s\'allume lorsque vous appuyez sur la pédale de frein. C\'est un défaut critique qui entraîne une contre-visite immédiate.',
     objectif: 'Mener un diagnostic électrique complet pour trouver la cause de la panne et rendre le véhicule sûr. (Compétences C3.1, C3.3, C3.4, C2.1)',
     materiel: ['Schéma électrique', 'Multimètre', 'Jeu de fusibles', 'Jeu d\'ampoules'],

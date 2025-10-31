@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 112,
     duree: '1h15',
-    titre: 'BAC PRO Seconde • Contrôle et Remplacement d\'une Batterie',
+    titre: 'Contrôle et Remplacement d\'une Batterie',
     situation: 'Un client se plaint de difficultés de démarrage le matin. Vous devez contrôler la batterie et la remplacer si le diagnostic le confirme.',
     objectif: 'Diagnostiquer l\'état d\'une batterie, la remplacer en toute sécurité et initialiser le nouveau composant si nécessaire. (Compétence C1.2, C1.3)',
     materiel: ['Multimètre', 'Testeur de batterie', 'Jeu de clés', 'Graisse pour cosses', 'Sauvegarde mémoire (si nécessaire)', 'Batterie neuve'],

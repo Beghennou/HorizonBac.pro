@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 105,
     duree: '1h00',
-    titre: 'BAC PRO Seconde • Contrôle des Niveaux et Appoint des Fluides',
+    titre: 'Contrôle des Niveaux et Appoint des Fluides',
     situation: 'Lors d\'une réception véhicule pour un entretien courant, vous devez effectuer les contrôles systématiques des niveaux des différents fluides du compartiment moteur selon la check-list atelier.',
     objectif: 'Identifier les anomalies et réaliser les ajustements. (Compétences C1.1, C1.2, C1.3, C1.4)',
     materiel: ['Liquide de refroidissement spécifié', 'Produit lave-glace concentré', 'Liquide de frein DOT4 ou 5.1', 'Entonnoirs de différentes tailles', 'Chiffons propres non pelucheux'],

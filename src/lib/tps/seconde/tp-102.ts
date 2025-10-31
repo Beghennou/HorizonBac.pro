@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 102,
     duree: '1h30',
-    titre: 'BAC PRO Seconde • Levage d\'un Véhicule en Sécurité',
+    titre: 'Levage d\'un Véhicule en Sécurité',
     situation: 'Un client dépose sa berline pour une inspection du soubassement. Vous devez lever le véhicule en utilisant un cric rouleur et des chandelles pour permettre une intervention en toute sécurité.',
     objectif: 'Maîtriser la procédure de levage sécurisé pour permettre une intervention sous le véhicule en respectant les points de levage constructeur. (Compétence C1.1)',
     materiel: ['Cric rouleur hydraulique', 'Paire de chandelles (capacité adaptée)', 'Cales de roues', 'Documentation technique (points de levage)', 'Clé de roue'],

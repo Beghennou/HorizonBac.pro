@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 110,
     duree: '1h00',
-    titre: 'BAC PRO Seconde • Contrôle et Remplacement du Filtre à Air',
+    titre: 'Contrôle et Remplacement du Filtre à Air',
     situation: 'Lors d\'un entretien, vous devez vérifier l\'état du filtre à air et le remplacer si nécessaire pour garantir une bonne respiration du moteur.',
     objectif: 'Évaluer l\'état du filtre à air et le remplacer si besoin. (Compétences C1.2, C1.3, C1.4)',
     materiel: ['Filtre à air neuf', 'Soufflette (optionnel, pour nettoyage boîtier)', 'Tournevis ou clés adaptés'],

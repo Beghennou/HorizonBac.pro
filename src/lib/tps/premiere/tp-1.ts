@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
   id: 1,
   duree: '2h00',
-  titre: 'BAC PRO Première • Diagnostic par méthode du point-milieu',
+  titre: 'Diagnostic par méthode du point-milieu',
   situation: 'Un client signale qu\'un équipement électrique (ex: feu stop, dégivrage) ne fonctionne plus. Plutôt que de tout tester au hasard, le chef d\'atelier vous demande d\'appliquer une méthode de diagnostic systématique pour trouver la panne efficacement.',
   objectif: 'Appliquer la méthode de diagnostic du point-milieu pour isoler rapidement un défaut dans un circuit électrique. (Compétences C3.1, C3.2, C3.3)',
   materiel: ['Multimètre', 'Schéma électrique du circuit concerné', 'Fiches de mesure'],

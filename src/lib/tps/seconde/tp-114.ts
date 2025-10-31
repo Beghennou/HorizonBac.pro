@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 114,
     duree: '2h00',
-    titre: 'BAC PRO Seconde • Remplacement Plaquettes et Disques de Frein Arrière',
+    titre: 'Remplacement Plaquettes et Disques de Frein Arrière',
     situation: 'Lors d\'une visite d\'entretien, vous constatez que les freins arrière à disques sont usés. Le frein de stationnement est un modèle électrique intégré à l\'étrier. Le client valide le remplacement.',
     objectif: 'Remplacer les plaquettes et disques arrière en utilisant l\'outil de diagnostic pour gérer le frein de stationnement électrique (EPB). (Compétences C1.2, C1.3, C1.1)',
     materiel: ['Valise de diagnostic', 'Repousse-piston (pneumatique ou manuel)', 'Jeu de plaquettes et disques neufs', 'Nettoyant frein', 'Clé dynamométrique'],

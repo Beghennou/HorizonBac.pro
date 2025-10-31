@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 113,
     duree: '2h00',
-    titre: 'BAC PRO Seconde • Remplacement Plaquettes et Disques de Frein Avant',
+    titre: 'Remplacement Plaquettes et Disques de Frein Avant',
     situation: 'Un client se plaint d\'un bruit strident et de vibrations au volant lors du freinage. Après contrôle, vous constatez que les plaquettes et les disques avant sont usés au-delà de la cote minimale et doivent être remplacés.',
     objectif: 'Effectuer le remplacement des plaquettes et disques de frein avant en respectant les procédures de sécurité et de nettoyage, et réaliser le rodage. (Compétences C1.2, C1.3, C1.4)',
     materiel: ['Jeu de plaquettes neuves', 'Jeu de disques neufs', 'Repousse-piston', 'Nettoyant frein', 'Graisse au cuivre', 'Clé dynamométrique', 'Pied à coulisse'],
