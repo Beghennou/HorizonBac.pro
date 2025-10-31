@@ -1,39 +1,5 @@
 
-export type Etape = {
-  titre: string;
-  duree: string;
-  etapes: string[];
-};
-
-export type EtudePrelimText = {
-  type: 'text';
-  q: string;
-  r: string; // Correct answer
-};
-
-export type EtudePrelimQCM = {
-  type: 'qcm';
-  q: string;
-  options: string[];
-  r: string; // Correct answer
-};
-
-export type EtudePrelim = EtudePrelimText | EtudePrelimQCM;
-
-export type TP = {
-  id: number;
-  duree: string;
-  titre: string;
-  situation: string;
-  objectif: string;
-  materiel: string[];
-  etudePrelim: EtudePrelim[];
-  activitePratique: Etape[];
-  securiteRangement: string[];
-  pointsCles: string[];
-  ressources?: string[];
-  validationRequise?: boolean;
-};
+import type { TP, Etape } from '@/lib/data-manager';
 
 function etape(titre: string, duree: string, etapes: string[]): Etape {
     return { titre, duree, etapes };

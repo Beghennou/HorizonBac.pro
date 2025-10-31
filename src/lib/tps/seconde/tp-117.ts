@@ -1,7 +1,7 @@
 
-import type { TP } from './tp-101';
+import type { TP, Etape } from '@/lib/data-manager';
 
-function etape(titre: string, duree: string, etapes: string[]): any {
+function etape(titre: string, duree: string, etapes: string[]): Etape {
   return { titre, duree, etapes };
 }
 
@@ -57,7 +57,7 @@ const tp: TP = {
     securiteRangement: [
         'Toujours débrancher la bougie avant de toucher à la lame.',
         'Porter des gants et des lunettes de protection.',
-        'Recycler l\'huile usagée et les anciennes pièces dans les bacs dédiés.',
+        'Recycler l\'huile usagée et les anciennes pièces dans les bacs de dédiés.',
         'Respecter les couples de serrage (Lame: 30 Nm, Bouchon vidange: 25 Nm, Bougie: 20 Nm).'
     ],
     pointsCles: [

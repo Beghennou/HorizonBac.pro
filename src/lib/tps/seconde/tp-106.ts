@@ -1,7 +1,7 @@
 
-import type { TP } from './tp-101';
+import type { TP, Etape } from '@/lib/data-manager';
 
-function etape(titre: string, duree: string, etapes: string[]): any {
+function etape(titre: string, duree: string, etapes: string[]): Etape {
   return { titre, duree, etapes };
 }
 
