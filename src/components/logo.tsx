@@ -1,7 +1,7 @@
 
 import type { SVGProps } from 'react';
 
-// This is a different logo, used for other purposes.
+// This is the main logo for the application
 export function Logo(props: SVGProps<SVGSVGElement>) {
     return (
         <svg
@@ -10,7 +10,7 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
             {...props}
         >
             <g transform="translate(50,50)">
-                <path d="M0 -45 L40 25 L-40 25 Z" fill="hsl(var(--primary))" />
+                <path d="M0 -45 L40 25 L-40 25 Z" fill="hsl(var(--accent))" />
                 <text 
                     x="0" 
                     y="10" 
@@ -20,7 +20,7 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
                     fill="white" 
                     textAnchor="middle"
                 >
-                    RP
+                    HB
                 </text>
             </g>
         </svg>

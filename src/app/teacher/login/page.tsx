@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { KeyRound, ArrowRight } from 'lucide-react';
-import { LyceeLogo } from '@/components/lycee-logo';
+import { Logo } from '@/components/logo';
 
 const TEACHER_PASSWORD = 'Mongy';
 
@@ -39,7 +39,7 @@ export default function TeacherLoginPage() {
         <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-background">
              <div className="flex items-center justify-center mb-8">
                 <div className="flex items-center justify-center w-32 h-32 rounded-lg bg-gradient-to-br from-primary to-racing-orange border-4 border-accent shadow-lg">
-                    <LyceeLogo className="w-24 h-24 text-white" />
+                    <Logo className="w-24 h-24 text-white" />
                 </div>
             </div>
             <Card className="w-full max-w-md border-primary shadow-lg">

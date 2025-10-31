@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { School, UserCog } from 'lucide-react';
 
-import { LyceeLogo } from '@/components/lycee-logo';
+import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,7 +20,7 @@ export default function Home() {
       <main className="z-20 flex flex-col items-center justify-center text-center text-white w-full max-w-4xl">
         <div className="flex items-center justify-center mb-6">
           <div className="flex items-center justify-center w-24 h-24 rounded-lg bg-gradient-to-br from-primary to-racing-orange border-2 border-accent shadow-lg">
-            <LyceeLogo className="w-20 h-20 text-white" />
+            <Logo className="w-20 h-20 text-white" />
           </div>
         </div>
 

@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Printer, User, CheckCircle, FileText } from 'lucide-react';
-import { LyceeLogo } from '@/components/lycee-logo';
+import { Logo } from '@/components/logo';
 import { cn } from '@/lib/utils';
 import { Award, Trophy } from '@/components/icons';
 import { Progress } from '@/components/ui/progress';
@@ -106,7 +106,7 @@ function StudentPortfolio() {
           <header className="flex flex-col items-center text-center border-b-2 border-primary pb-6 mb-6">
               <div className="flex items-center gap-4">
                   <div className="w-20 h-20">
-                    <LyceeLogo />
+                    <Logo />
                   </div>
                   <div>
                       <h1 className="font-headline text-5xl tracking-wide text-accent">Portfolio de Compétences</h1>

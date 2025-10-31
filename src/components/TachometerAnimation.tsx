@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { LyceeLogo } from './lycee-logo';
+import { Logo } from './logo';
 import { BookOpen, Car, Wrench } from 'lucide-react';
 
 const SkillCircuitAnimation = () => {
@@ -78,7 +78,7 @@ export const TachometerAnimation = () => {
             </div>
             <div className="flex items-center gap-4 animate-logo-appear">
                  <div className="w-16 h-16">
-                    <LyceeLogo />
+                    <Logo />
                  </div>
                  <p className="font-headline text-2xl tracking-widest text-accent">ACCÈS AUTORISÉ</p>
             </div>

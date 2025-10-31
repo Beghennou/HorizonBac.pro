@@ -1,5 +1,5 @@
 
-import { LyceeLogo } from '@/components/lycee-logo';
+import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Frown, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
