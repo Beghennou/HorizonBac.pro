@@ -1,71 +1,103 @@
 
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { School, UserCog, ArrowRight } from 'lucide-react';
 
 import { LyceeLogo } from '@/components/lycee-logo';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { School, UserCog } from 'lucide-react';
-import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
-  return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-      <div className="flex items-center justify-center mb-8">
-        <div className="flex items-center justify-center w-32 h-32 rounded-lg bg-gradient-to-br from-primary to-racing-orange border-4 border-accent shadow-lg">
-          <LyceeLogo className="w-24 h-24 text-white" />
-        </div>
-      </div>
-      <h1 className="font-headline text-5xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text mb-2 text-center">
-        HORIZON BAC. PRO.
-      </h1>
-      <p className="text-muted-foreground text-xl mb-12 text-center">Plateforme de suivi des compétences pour la maintenance automobile</p>
+  const [cursus, setCursus] = useState('bacpro');
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-        <Card className="bg-gradient-to-br from-card to-background border-2 border-primary shadow-2xl hover:border-accent transition-all transform hover:-translate-y-1">
-          <CardHeader className="text-center">
-            <CardTitle className="font-headline text-3xl font-black uppercase tracking-widest text-accent">
-              Bac Pro
-            </CardTitle>
-            <CardDescription>Parcours de formation pour les élèves en Baccalauréat Professionnel Maintenance des Véhicules.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
-            <Button asChild size="lg" className="w-full font-headline uppercase tracking-wider text-base border-2 border-accent bg-gradient-to-br from-primary to-racing-orange hover:brightness-110">
-              <Link href="/teacher/select?cursus=bacpro"><UserCog className="mr-2"/>Enseignant</Link>
-            </Button>
-             <Button asChild size="lg" className="w-full font-headline uppercase tracking-wider text-base border-accent text-accent" variant="outline">
-              <Link href="/student/select?cursus=bacpro"><School className="mr-2"/>Élève</Link>
-            </Button>
+  return (
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
+      {/* Background Image */}
+      <Image
+        src="https://images.unsplash.com/photo-1621999903936-7c9b8c3b9b4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtZWNoYW5pYyUyMHN0dWRlbnRzfGVufDB8fHx8MTcyNDA2NzE3MXww&ixlib=rb-4.1.0&q=80&w=1080"
+        alt="Deux étudiants en mécanique travaillant sur un moteur de voiture"
+        data-ai-hint="mechanic students"
+        fill
+        className="object-cover object-center z-0"
+        priority
+      />
+      <div className="absolute inset-0 bg-black/60 z-10" />
+
+      <main className="z-20 flex flex-col items-center justify-center text-center text-white w-full max-w-4xl">
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center justify-center w-24 h-24 rounded-lg bg-gradient-to-br from-primary to-racing-orange border-2 border-accent shadow-lg">
+            <LyceeLogo className="w-20 h-20 text-white" />
+          </div>
+        </div>
+
+        <h1 className="font-headline text-5xl md:text-7xl font-black uppercase tracking-widest text-shadow-lg">
+          HORIZON
+        </h1>
+        <p className="font-headline text-2xl md:text-3xl font-bold uppercase tracking-wider bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text mb-4 text-shadow">
+          BAC. PRO. & CAP
+        </p>
+        <p className="text-lg md:text-xl text-neutral-300 max-w-2xl mb-10 text-shadow">
+          La plateforme de suivi des compétences pour la nouvelle génération de techniciens automobiles.
+        </p>
+
+        <Card className="w-full max-w-lg bg-black/50 backdrop-blur-lg border-2 border-primary/50 shadow-2xl">
+          <CardContent className="p-6">
+            <h2 className="text-2xl font-bold font-headline text-accent mb-4">Choisissez votre parcours</h2>
+            <Tabs defaultValue="bacpro" value={cursus} onValueChange={setCursus} className="w-full mb-6">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="bacpro">Bac Pro</TabsTrigger>
+                <TabsTrigger value="cap">CAP</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Button asChild size="lg" className="h-20 text-lg w-full font-headline uppercase tracking-wider border-2 border-accent bg-gradient-to-br from-primary to-racing-orange hover:brightness-125 transition-all duration-300 transform hover:scale-105">
+                <Link href={`/teacher/select?cursus=${cursus}`}>
+                  <div className="flex flex-col items-center">
+                    <UserCog className="h-8 w-8 mb-1"/>
+                    <span>Enseignant</span>
+                  </div>
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-20 text-lg w-full font-headline uppercase tracking-wider border-2 border-accent text-accent bg-transparent hover:bg-accent hover:text-black transition-all duration-300 transform hover:scale-105">
+                <Link href={`/student/select?cursus=${cursus}`}>
+                  <div className="flex flex-col items-center">
+                    <School className="h-8 w-8 mb-1"/>
+                    <span>Élève</span>
+                  </div>
+                </Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
-        
-        <Card className="bg-gradient-to-br from-card to-background border-2 border-primary shadow-2xl hover:border-accent transition-all transform hover:-translate-y-1">
-          <CardHeader className="text-center">
-            <CardTitle className="font-headline text-3xl font-black uppercase tracking-widest text-accent">
-              CAP
-            </CardTitle>
-            <CardDescription>Parcours de formation pour les élèves en CAP Maintenance des Véhicules.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
-            <Button asChild size="lg" className="w-full font-headline uppercase tracking-wider text-base border-2 border-accent bg-gradient-to-br from-primary to-racing-orange hover:brightness-110">
-              <Link href="/teacher/select?cursus=cap"><UserCog className="mr-2"/>Enseignant</Link>
-            </Button>
-             <Button asChild size="lg" className="w-full font-headline uppercase tracking-wider text-base border-accent text-accent" variant="outline">
-              <Link href="/student/select?cursus=cap"><School className="mr-2"/>Élève</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-       <div className="mt-12 text-center flex gap-4">
-            <Button asChild variant="link" className="text-accent">
+
+        <div className="mt-10 flex gap-4">
+            <Button asChild variant="link" className="text-accent hover:text-yellow-300">
                 <Link href="/tutorial">
-                    Comment ça marche ? (Tutoriel)
+                    Comment ça marche ?
                 </Link>
             </Button>
-            <Button asChild variant="link" className="text-muted-foreground">
+            <Button asChild variant="link" className="text-neutral-400 hover:text-white">
                 <Link href="/privacy">
-                    Politique de Confidentialité
+                    Confidentialité
                 </Link>
             </Button>
         </div>
+      </main>
+      
+      <style jsx>{`
+        .text-shadow-lg {
+          text-shadow: 0 0 15px rgba(0,0,0,0.7);
+        }
+        .text-shadow {
+          text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+      `}</style>
     </div>
   );
 }
