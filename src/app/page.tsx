@@ -18,15 +18,16 @@ export default function Home() {
       <div className="absolute inset-0 bg-black/60 z-10" />
 
       <main className="z-20 flex flex-col items-center justify-center text-center text-white w-full max-w-4xl">
-        <div className="flex items-center justify-center mb-6">
-          <div className="flex items-center justify-center w-24 h-24 rounded-lg bg-gradient-to-br from-primary to-racing-orange border-2 border-accent shadow-lg">
-            <Logo className="w-20 h-20 text-white" />
-          </div>
+        
+        <div className="flex items-center justify-center mb-6 relative">
+            <h1 className="font-headline text-5xl md:text-7xl font-black uppercase tracking-widest text-shadow-lg">
+              HORIZON
+            </h1>
+            <div className="absolute -top-16 -right-20 md:-right-24 w-24 h-24">
+              <Logo className="w-full h-full text-white" />
+            </div>
         </div>
-
-        <h1 className="font-headline text-5xl md:text-7xl font-black uppercase tracking-widest text-shadow-lg">
-          HORIZON
-        </h1>
+        
         <p className="font-headline text-2xl md:text-3xl font-bold uppercase tracking-wider bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text mb-4 text-shadow">
           BAC. PRO. & CAP
         </p>
