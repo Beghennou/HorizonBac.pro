@@ -62,11 +62,12 @@ function DashboardLayoutContent({
   const classNames = (classes || [])
     .map(c => c.id)
     .filter(name => {
-        const lowerCaseName = name.toLowerCase();
+        const upperCaseName = name.toUpperCase();
         if (cursus === 'cap') {
-            return lowerCaseName.includes('cap');
+            return upperCaseName.includes('CAP');
         }
-        return lowerCaseName.includes('bac');
+        // Pour bacpro, on inclut ce qui contient BAC et on exclut ce qui contient CAP
+        return upperCaseName.includes('BAC') && !upperCaseName.includes('CAP');
     })
     .sort((a, b) => a.localeCompare(b));
 
