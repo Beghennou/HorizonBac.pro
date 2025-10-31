@@ -7,15 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Cursus } from '@/lib/data-manager';
+import { Loader2 } from 'lucide-react';
 
 export default function StudentSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { classes: allClassData, teachers: allTeachers, isLoaded } = useFirebase();
+  const { classes: allClassData, teachers: allTeachers, isLoaded: firebaseIsLoaded } = useFirebase();
 
   const [selectedTeacher, setSelectedTeacher] = useState<string>('');
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
+  const [isClientLoaded, setIsClientLoaded] = useState(false);
   
   const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
 
@@ -41,20 +43,25 @@ export default function StudentSelector() {
   }, [selectedClass, allClassData]);
 
   useEffect(() => {
-    if (isLoaded) {
+    setIsClientLoaded(true);
+    if (firebaseIsLoaded) {
       const teacherFromUrl = searchParams.get('teacher') || '';
       const classFromUrl = searchParams.get('class') || '';
       const studentFromUrl = searchParams.get('student') || '';
 
-      if (teacherFromUrl) setSelectedTeacher(teacherFromUrl);
-      if(classFromUrl) setSelectedClass(classFromUrl);
-      if (studentFromUrl) setSelectedStudent(studentFromUrl);
+      if (teacherFromUrl && teachers.some(t => t.name === teacherFromUrl)) setSelectedTeacher(teacherFromUrl);
+      if(classFromUrl && classNames.includes(classFromUrl)) setSelectedClass(classFromUrl);
+      if (studentFromUrl) {
+          const currentStudents = allClassData?.find(c => c.id === classFromUrl)?.studentNames || [];
+          if (currentStudents.includes(studentFromUrl)) {
+              setSelectedStudent(studentFromUrl);
+          }
+      }
     }
-  }, [searchParams, isLoaded]);
+  }, [searchParams, firebaseIsLoaded, teachers, classNames, allClassData]);
 
   const handleTeacherChange = (newTeacher: string) => {
     setSelectedTeacher(newTeacher);
-    // Potentially reset class and student if teacher changes
     setSelectedClass('');
     setSelectedStudent('');
   };
@@ -79,14 +86,16 @@ export default function StudentSelector() {
     }
   };
 
-  if (!isLoaded) {
-    return <div>Chargement...</div>;
+  const isLoading = !firebaseIsLoaded || !isClientLoaded;
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
 
   return (
     <div className="flex flex-col space-y-4">
         <div className="space-y-2">
-            <Label htmlFor="teacher-select" className="font-bold">Enseignant</Label>
+            <Label htmlFor="teacher-select" className="font-bold text-left">Enseignant</Label>
             <Select onValueChange={handleTeacherChange} value={selectedTeacher}>
                 <SelectTrigger id="teacher-select">
                     <SelectValue placeholder="Choisir un enseignant..." />
@@ -100,7 +109,7 @@ export default function StudentSelector() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="class-select" className="font-bold">Classe</Label>
+          <Label htmlFor="class-select" className="font-bold text-left">Classe</Label>
           <Select onValueChange={handleClassChange} value={selectedClass} disabled={!selectedTeacher}>
             <SelectTrigger id="class-select">
               <SelectValue placeholder="Choisir une classe..." />
@@ -114,7 +123,7 @@ export default function StudentSelector() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="student-select" className="font-bold">Élève</Label>
+          <Label htmlFor="student-select" className="font-bold text-left">Élève</Label>
           <Select onValueChange={handleStudentChange} value={selectedStudent} disabled={!selectedClass || studentsInClass.length === 0}>
             <SelectTrigger id="student-select">
               <SelectValue placeholder={!selectedClass ? "Choisis d'abord une classe" : "Choisir ton nom..."} />

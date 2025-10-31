@@ -1,14 +1,13 @@
 
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { Suspense } from 'react';
 import StudentSelector from '../student-selector';
+import { Loader2 } from 'lucide-react';
 
-export default function SelectStudentPage() {
+function SelectStudentPageContent() {
     return (
-        <div className="flex items-center justify-center h-full">
+        <div className="flex items-center justify-center min-h-screen bg-background">
             <Card className="w-full max-w-md text-center">
                 <CardHeader>
                     <CardTitle className="font-headline text-3xl text-accent">Identification Élève</CardTitle>
@@ -19,5 +18,14 @@ export default function SelectStudentPage() {
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+
+export default function SelectStudentPage() {
+    return (
+        <Suspense fallback={<div className="flex justify-center items-center h-screen"><Loader2 className="h-16 w-16 animate-spin text-primary"/></div>}>
+            <SelectStudentPageContent />
+        </Suspense>
     );
 }
