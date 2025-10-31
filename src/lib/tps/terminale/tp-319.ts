@@ -2,7 +2,7 @@
 import type { TP, Etape } from '@/lib/types/tp-types';
 
 function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
+  return { titre, duree, etapes };
 }
 
 const tp: TP = {

@@ -40,9 +40,8 @@ export interface ClassData {
     niveau: Niveau;
 };
 
-// This is the base shape of a TP object.
-// The final unified TP type is assembled in data-manager.ts
-export interface TP_BASE {
+// This is the single source of truth for the TP type.
+export interface TP {
     id: number;
     duree: string;
     titre: string;
