@@ -36,6 +36,13 @@ export type CompetenceBloc = {
   items: Record<string, string>;
 };
 
+export type ClassData = {
+    id: string;
+    studentNames: string[];
+    cursus: Cursus;
+    niveau: Niveau;
+};
+
 export const competencesParNiveau: Record<Niveau, Record<string, CompetenceBloc>> = {
   ...bacProCompetences,
   ...capCompetences
@@ -106,3 +113,19 @@ export const getTpById = (id: number, all?: boolean, allTpsFromContext?: Record<
 export const allBlocs: Record<string, CompetenceBloc> = Object.values(competencesParNiveau).reduce((acc, curr) => {
     return { ...acc, ...curr };
 }, {});
+
+export const NIVEAUX_BACPRO: { value: Niveau, label: string, prefix: string }[] = [
+    { value: 'seconde', label: 'Seconde', prefix: '2BAC' },
+    { value: 'premiere', label: 'Première', prefix: '1BAC' },
+    { value: 'terminale', label: 'Terminale', prefix: 'TBAC' },
+];
+
+export const NIVEAUX_CAP: { value: Niveau, label: string, prefix: string }[] = [
+    { value: 'cap1', label: '1ère Année CAP', prefix: '1CAP' },
+    { value: 'cap2', label: '2ème Année CAP', prefix: '2CAP' },
+];
+
+export const NIVEAUX: Record<Cursus, { value: Niveau, label: string, prefix: string }[]> = {
+    bacpro: NIVEAUX_BACPRO,
+    cap: NIVEAUX_CAP,
+};

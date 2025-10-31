@@ -6,7 +6,7 @@ import { Suspense, useEffect, useCallback, useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Niveau, Cursus } from '@/lib/data-manager';
+import { Niveau, Cursus, ClassData } from '@/lib/data-manager';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { LyceeLogo } from '@/components/lycee-logo';
 import {
@@ -23,17 +23,10 @@ import { Home, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LogoutButton } from '@/components/logout-button';
 
-function getLevelFromClassName(className: string | null): Niveau {
-    if (!className) return 'seconde'; // Default
-    const lowerCaseName = className.toLowerCase();
-    if (lowerCaseName.includes('cap')) {
-        if(lowerCaseName.startsWith('1')) return 'cap1';
-        if(lowerCaseName.startsWith('2')) return 'cap2';
-        return 'cap1';
-    }
-    if (lowerCaseName.startsWith('t')) return 'terminale';
-    if (lowerCaseName.startsWith('1')) return 'premiere';
-    return 'seconde';
+function getLevelFromClass(className: string | null, classes: ClassData[]): Niveau {
+    if (!className) return 'seconde'; // Default, should be handled better
+    const classInfo = classes.find(c => c.id === className);
+    return classInfo?.niveau || 'seconde';
 }
 
 function DashboardLayoutContent({
@@ -86,7 +79,8 @@ function DashboardLayoutContent({
   const handleClassChange = (className: string) => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('class', className);
-    newSearchParams.set('level', getLevelFromClassName(className));
+    const newLevel = getLevelFromClass(className, classes);
+    newSearchParams.set('level', newLevel);
     newSearchParams.delete('student');
     
     const targetPath = pathname === '/teacher/dashboard' ? '/teacher/dashboard/class-progress' : pathname;

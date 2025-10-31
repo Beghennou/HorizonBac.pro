@@ -8,7 +8,7 @@ import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc
 import { Auth, User, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
-import { TP, initialTps, Cursus } from '@/lib/data-manager';
+import { TP, initialTps, Cursus, Niveau, ClassData } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
@@ -107,14 +107,14 @@ export interface FirebaseContextState {
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
   resetAllStudentLists: () => void;
   addTp: (tp: TP) => void;
-  createClass: (className: string, cursus: Cursus) => void;
+  createClass: (className: string, cursus: Cursus, niveau: Niveau) => void;
   deleteClass: (className: string) => void;
   signInWithGoogle: () => Promise<void>;
   updateStudentData: (studentName: string, data: DocumentData) => void;
   updateStudentName: (oldName: string, newName: string, className: string) => void;
   isLoaded: boolean;
   
-  classes: DocumentData[];
+  classes: ClassData[];
   tps: Record<number, TP>;
   assignedTps: Record<string, AssignedTp[]>;
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
@@ -145,7 +145,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   const { user } = userAuthState;
   
   const { data: dynamicTps, isLoading: isTpsLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'tps') : null, [firestore]));
-  const { data: classes, isLoading: isClassesLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
+  const { data: classesData, isLoading: isClassesLoading } = useCollection<ClassData>(useMemoFirebase(() => firestore ? collection(firestore, 'classes') : null, [firestore]));
   const { data: teachers, isLoading: isTeachersLoading } = useCollection(useMemoFirebase(() => firestore ? collection(firestore, 'teachers') : null, [firestore]));
   
   const assignedTpsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'assignedTps') : null, [firestore]);
@@ -295,7 +295,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     addTeacher,
     deleteTeacher,
     customSignOut,
-    classes: classes || [],
+    classes: classesData || [],
     tps,
     assignedTps,
     evaluations,
@@ -334,8 +334,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         toast({ title: "Importation réussie", description: `La classe ${className} a été mise à jour.` });
     },
     resetAllStudentLists: async () => {
-        if (!firestore || !classes) return;
-        await resetAllStudentListsInClasses(firestore, classes);
+        if (!firestore || !classesData) return;
+        await resetAllStudentListsInClasses(firestore, classesData);
         toast({ title: "Listes réinitialisées", description: `Toutes les listes d'élèves ont été vidées.` });
     },
     addTp: (newTp: TP) => {
@@ -344,9 +344,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       addCustomTp(firestore, tpWithAuthor);
       setTps(prev => ({...prev, [newTp.id]: tpWithAuthor}));
     },
-    createClass: (className: string, cursus: Cursus) => {
+    createClass: (className: string, cursus: Cursus, niveau: Niveau) => {
       if (!firestore) return;
-      createClassInDb(firestore, className, cursus);
+      createClassInDb(firestore, className, cursus, niveau);
       toast({ title: 'Classe Créée', description: `La classe "${className}" a été créée avec succès.` });
     },
     deleteClass: (className: string) => {

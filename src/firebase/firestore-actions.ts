@@ -3,7 +3,7 @@
 'use client';
 import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs, updateDoc, addDoc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { TP, Cursus } from '@/lib/data-manager';
+import { TP, Cursus, Niveau } from '@/lib/data-manager';
 import type { TpStatus } from './provider';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
@@ -232,13 +232,13 @@ export const addCustomTp = (firestore: Firestore, newTp: TP) => {
     });
 };
 
-export const createClassInDb = async (firestore: Firestore, className: string, cursus: Cursus) => {
+export const createClassInDb = async (firestore: Firestore, className: string, cursus: Cursus, niveau: Niveau) => {
     const classDocRef = doc(firestore, 'classes', className);
-    await setDoc(classDocRef, { studentNames: [], cursus: cursus }).catch(error => {
+    await setDoc(classDocRef, { studentNames: [], cursus: cursus, niveau: niveau }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: classDocRef.path,
             operation: 'create',
-            requestResourceData: { studentNames: [], cursus: cursus }
+            requestResourceData: { studentNames: [], cursus: cursus, niveau: niveau }
         }));
     });
 }

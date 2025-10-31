@@ -27,42 +27,36 @@ import Papa from 'papaparse';
 import { Student } from '@/lib/types';
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Cursus } from '@/lib/data-manager';
+import { Cursus, Niveau, NIVEAUX } from '@/lib/data-manager';
 
 
 export default function SettingsPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
-  const { firestore, classes, teacherName, setTeacherName, updateClassWithCsv, deleteStudent, emptyClass, resetAllStudentLists, createClass, deleteClass, addTeacher, deleteTeacher, teachers, updateStudentName } = useFirebase();
+  const { classes, teacherName, setTeacherName, updateClassWithCsv, deleteStudent, emptyClass, resetAllStudentLists, createClass, deleteClass, addTeacher, deleteTeacher, teachers, updateStudentName } = useFirebase();
 
   const [localTeacherName, setLocalTeacherName] = useState(teacherName);
   const [schoolName, setSchoolName] = useState('Lycée des Métiers de l\'Automobile');
   
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [newClassNameForStudent, setNewClassNameForStudent] = useState('');
   const [selectedClassForStudent, setSelectedClassForStudent] = useState('');
   
   const [newClassName, setNewClassName] = useState('');
+  const [selectedNiveau, setSelectedNiveau] = useState<Niveau | ''>('');
   const [classToDelete, setClassToDelete] = useState('');
 
   const [resetDataPassword, setResetDataPassword] = useState('');
   const [resetListsPassword, setResetListsPassword] = useState('');
   
   const [importClassName, setImportClassName] = useState('');
-  const [newImportClassName, setNewImportClassName] = useState('');
 
   const [deleteStudentClass, setDeleteStudentClass] = useState('');
   const [studentToDelete, setStudentToDelete] = useState('');
   const [classToEmpty, setClassToEmpty] = useState('');
   
   const [classStudents, setClassStudents] = useState<string[]>([]);
-  const [secondeClassToUpdate, setSecondeClassToUpdate] = useState('');
-  const [premiereClassToUpdate, setPremiereClassToUpdate] = useState('');
-  const [terminaleClassToUpdate, setTerminaleClassToUpdate] = useState('');
-  const [cap1ClassToUpdate, setCap1ClassToUpdate] = useState('');
-  const [cap2ClassToUpdate, setCap2ClassToUpdate] = useState('');
-  
+
   const [newTeacherName, setNewTeacherName] = useState('');
   const [teacherToDelete, setTeacherToDelete] = useState('');
   
@@ -73,19 +67,21 @@ export default function SettingsPage() {
 
   const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
 
-  const classNames = useMemo(() => classes
+  const classNames = useMemo(() => (classes || [])
     .filter(c => c.cursus === cursus)
     .map(c => c.id)
     .sort(), [classes, cursus]);
 
-  const teacherList = useMemo(() => teachers.filter(t => t.cursus === cursus).sort((a,b) => a.name.localeCompare(b.name)), [teachers, cursus]);
+  const teacherList = useMemo(() => (teachers || []).filter(t => t.cursus === cursus).sort((a,b) => a.name.localeCompare(b.name)), [teachers, cursus]);
 
-  const secondeClasses = useMemo(() => classNames.filter(name => name.startsWith('2BAC')), [classNames]);
-  const premiereClasses = useMemo(() => classNames.filter(name => name.startsWith('1BAC')), [classNames]);
-  const terminaleClasses = useMemo(() => classNames.filter(name => name.startsWith('TBAC')), [classNames]);
-  const cap1Classes = useMemo(() => classNames.filter(name => name.startsWith('1CAP')), [classNames]);
-  const cap2Classes = useMemo(() => classNames.filter(name => name.startsWith('2CAP')), [classNames]);
-
+  const classesByNiveau = useMemo(() => {
+    const niveauxForCursus = NIVEAUX[cursus];
+    const grouped: Record<Niveau, string[]> = {} as Record<Niveau, string[]>;
+    niveauxForCursus.forEach(n => {
+        grouped[n.value] = (classes || []).filter(c => c.niveau === n.value).map(c => c.id).sort();
+    });
+    return grouped;
+  }, [classes, cursus]);
 
   useEffect(() => {
     setLocalTeacherName(teacherName);
@@ -158,16 +154,22 @@ export default function SettingsPage() {
   };
   
   const handleCreateClass = () => {
-    if (!newClassName.trim()) {
-        toast({ variant: 'destructive', title: 'Nom de classe vide', description: 'Veuillez entrer un nom pour la nouvelle classe.' });
+    if (!newClassName.trim() || !selectedNiveau) {
+        toast({ variant: 'destructive', title: 'Champs manquants', description: 'Veuillez choisir une section et entrer un nom de classe.' });
         return;
     }
-    if (classes.map(c=>c.id).includes(newClassName.trim())) {
+    const niveauInfo = NIVEAUX[cursus].find(n => n.value === selectedNiveau);
+    if(!niveauInfo) return;
+
+    const finalClassName = `${niveauInfo.prefix}-${newClassName.trim().toUpperCase()}`;
+
+    if (classes.some(c=>c.id === finalClassName)) {
         toast({ variant: 'destructive', title: 'Classe existante', description: 'Une classe avec ce nom existe déjà.' });
         return;
     }
-    createClass(newClassName.trim(), cursus);
+    createClass(finalClassName, cursus, selectedNiveau);
     setNewClassName('');
+    setSelectedNiveau('');
   };
 
   const handleDeleteClass = () => {
@@ -218,13 +220,6 @@ export default function SettingsPage() {
       }
       emptyClass(classToEmpty);
   }
-
-  const handleLegacyCsvImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const finalImportClassName = newImportClassName || importClassName;
-      handleFileUpload(event, finalImportClassName);
-      setImportClassName('');
-      setNewImportClassName('');
-  };
   
   const handleAddTeacher = () => {
       if (!newTeacherName.trim()) {
@@ -494,97 +489,45 @@ export default function SettingsPage() {
         <CardContent className="space-y-6">
             <div className="space-y-2 p-4 border rounded-lg">
                 <Label className="font-bold">Créer une nouvelle classe</Label>
-                <div className="flex items-center gap-2">
-                    <Input placeholder="Nom de la nouvelle classe, ex: 1CAP-A ou 2BAC-MV" value={newClassName} onChange={e => setNewClassName(e.target.value)} />
-                    <Button onClick={handleCreateClass}><PlusCircle className="mr-2" /> Créer</Button>
+                <div className="flex flex-col md:flex-row items-stretch md:items-end gap-2">
+                     <div className="flex-1 space-y-2">
+                        <Label htmlFor="select-niveau">Section</Label>
+                        <Select onValueChange={(v) => setSelectedNiveau(v as Niveau)} value={selectedNiveau}>
+                            <SelectTrigger id="select-niveau">
+                                <SelectValue placeholder="Choisir une section..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {NIVEAUX[cursus].map(n => (
+                                    <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="flex-1 space-y-2">
+                        <Label htmlFor="new-class-name">Nom de la classe</Label>
+                        <Input id="new-class-name" placeholder="ex: A, B, etc." value={newClassName} onChange={e => setNewClassName(e.target.value)} />
+                    </div>
+                    <Button onClick={handleCreateClass} disabled={!selectedNiveau || !newClassName}><PlusCircle className="mr-2" /> Créer</Button>
                 </div>
             </div>
              <div className="space-y-2 p-4 border rounded-lg">
-                <Label className="font-bold">Importer des listes d'élèves par niveau</Label>
-                <Tabs defaultValue={cursus}>
-                    <TabsList className="grid w-full grid-cols-2 mt-2">
-                        <TabsTrigger value="bacpro" disabled={cursus !== 'bacpro'}>BAC PRO</TabsTrigger>
-                        <TabsTrigger value="cap" disabled={cursus !== 'cap'}>CAP</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="bacpro" className="pt-4">
-                        <div className="space-y-3">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                                <Select value={secondeClassToUpdate} onValueChange={setSecondeClassToUpdate}>
-                                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Seconde..."/></SelectTrigger>
-                                    <SelectContent>
-                                        {secondeClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <Button asChild variant="outline">
-                                    <label className="cursor-pointer w-full">
-                                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Seconde
-                                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, secondeClassToUpdate)} />
-                                    </label>
-                                </Button>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                                <Select value={premiereClassToUpdate} onValueChange={setPremiereClassToUpdate}>
-                                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Première..."/></SelectTrigger>
-                                    <SelectContent>
-                                        {premiereClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <Button asChild variant="outline">
-                                    <label className="cursor-pointer w-full">
-                                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Première
-                                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, premiereClassToUpdate)} />
-                                    </label>
-                                </Button>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                                <Select value={terminaleClassToUpdate} onValueChange={setTerminaleClassToUpdate}>
-                                    <SelectTrigger><SelectValue placeholder="Choisir une classe de Terminale..."/></SelectTrigger>
-                                    <SelectContent>
-                                        {terminaleClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <Button asChild variant="outline">
-                                    <label className="cursor-pointer w-full">
-                                        <Upload className="mr-2 h-4 w-4" /> Importer CSV Terminale
-                                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, terminaleClassToUpdate)} />
-                                    </label>
-                                </Button>
-                            </div>
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="cap" className="pt-4">
-                        <div className="space-y-3">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                                <Select value={cap1ClassToUpdate} onValueChange={setCap1ClassToUpdate}>
-                                    <SelectTrigger><SelectValue placeholder="Choisir une classe de 1ère année CAP..."/></SelectTrigger>
-                                    <SelectContent>
-                                        {cap1Classes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <Button asChild variant="outline">
-                                    <label className="cursor-pointer w-full">
-                                        <Upload className="mr-2 h-4 w-4" /> Importer CSV 1ère Année CAP
-                                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, cap1ClassToUpdate)} />
-                                    </label>
-                                </Button>
-                            </div>
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                                <Select value={cap2ClassToUpdate} onValueChange={setCap2ClassToUpdate}>
-                                    <SelectTrigger><SelectValue placeholder="Choisir une classe de 2ème année CAP..."/></SelectTrigger>
-                                    <SelectContent>
-                                        {cap2Classes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <Button asChild variant="outline">
-                                    <label className="cursor-pointer w-full">
-                                        <Upload className="mr-2 h-4 w-4" /> Importer CSV 2ème Année CAP
-                                        <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, cap2ClassToUpdate)} />
-                                    </label>
-                                </Button>
-                            </div>
-                        </div>
-                    </TabsContent>
-                </Tabs>
+                <Label className="font-bold">Importer des listes d'élèves par section</Label>
+                {NIVEAUX[cursus].map(niveau => (
+                     <div key={niveau.value} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end mt-2">
+                        <Select onValueChange={setImportClassName}>
+                            <SelectTrigger><SelectValue placeholder={`Choisir une classe de ${niveau.label}...`}/></SelectTrigger>
+                            <SelectContent>
+                                {classesByNiveau[niveau.value]?.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <Button asChild variant="outline">
+                            <label className="cursor-pointer w-full">
+                                <Upload className="mr-2 h-4 w-4" /> Importer CSV pour {niveau.label}
+                                <Input type="file" accept=".csv" className="sr-only" onChange={(e) => handleFileUpload(e, importClassName)} />
+                            </label>
+                        </Button>
+                    </div>
+                ))}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2 p-4 border rounded-lg">

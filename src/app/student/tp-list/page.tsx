@@ -3,7 +3,7 @@
 'use client';
 import { Suspense, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau, Cursus } from "@/lib/data-manager";
+import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau, Cursus, ClassData } from "@/lib/data-manager";
 import { useSearchParams, useRouter } from "next/navigation";
 import { User, Users, Printer, OctagonX } from "lucide-react";
 import { useFirebase } from '@/firebase';
@@ -171,32 +171,24 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
     );
 };
 
-function getLevelFromClassName(className: string | null, cursus: Cursus): Niveau {
-    if (!className) return cursus === 'cap' ? 'cap1' : 'seconde';
-    const lowerCaseName = className.toLowerCase();
-
-    if (cursus === 'cap') {
-        if (lowerCaseName.startsWith('1')) return 'cap1';
-        if (lowerCaseName.startsWith('2')) return 'cap2';
-        return 'cap1';
-    }
-    
-    // Bac Pro logic
-    if (lowerCaseName.startsWith('t')) return 'terminale';
-    if (lowerCaseName.startsWith('1')) return 'premiere';
-    return 'seconde';
+function getLevelFromClassName(className: string | null, classes: ClassData[]): Niveau | null {
+    if (!className) return null;
+    const classInfo = classes.find(c => c.id === className);
+    return classInfo?.niveau || null;
 }
 
 function TpListPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { tps, isLoaded } = useFirebase();
+  const { tps, isLoaded, classes } = useFirebase();
   const studentName = searchParams.get('student');
   const className = searchParams.get('class');
   const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
-  const level = getLevelFromClassName(className, cursus);
   
+  const level = useMemo(() => getLevelFromClassName(className, classes), [className, classes]);
+
   const availableTps = useMemo(() => {
+      if (!level) return [];
       return getTpsByNiveau(level, tps);
   }, [level, tps]);
 
