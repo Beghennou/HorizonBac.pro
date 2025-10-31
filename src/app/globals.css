@@ -64,6 +64,13 @@
   }
 }
 
+@layer components {
+  .bg-hero-image {
+    @apply bg-cover bg-center;
+    background-image: url('/images/background.jpg');
+  }
+}
+
 @media print {
   body {
     background: #fff !important;

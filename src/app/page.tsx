@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { School, UserCog } from 'lucide-react';
 
@@ -16,8 +15,7 @@ export default function Home() {
 
   return (
     <div 
-        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/background.jpg')" }}
+        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 bg-hero-image"
     >
       <div className="absolute inset-0 bg-black/60 z-10" />
 
