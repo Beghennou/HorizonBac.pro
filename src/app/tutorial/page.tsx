@@ -3,15 +3,19 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass, ClipboardCheck, LayoutDashboard, CheckSquare, CircuitBoard, ShieldCheck, Wrench, Search, Sparkles, CheckCircle, Trophy } from 'lucide-react';
+import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass, ClipboardCheck, LayoutDashboard, CheckSquare, CircuitBoard, ShieldCheck, Wrench, Search, Sparkles, CheckCircle, Trophy, Printer } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { initialTps, getTpsByNiveau, Cursus, Niveau, NIVEAUX_BACPRO, NIVEAUX_CAP } from '@/lib/data-manager';
+import { initialTps, getTpsByNiveau, Cursus, Niveau, NIVEAUX_BACPRO, NIVEaux_CAP } from '@/lib/data-manager';
 
 
 export default function TutorialPage() {
+  
+  const handlePrint = () => {
+    window.print();
+  };
 
   const getLevelFromId = (tpId: number): Niveau | null => {
     if (tpId >= 101 && tpId < 200) return 'seconde';
@@ -60,14 +64,20 @@ export default function TutorialPage() {
 
   return (
     <div className="bg-background min-h-screen text-foreground">
-        <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl">
+        <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl print-hidden">
             <div className="container flex h-20 items-center justify-between">
                  <h1 className="font-headline text-3xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
                     Tutoriel HORIZON BAC. PRO.
                  </h1>
-                 <Button asChild>
-                    <Link href="/">Retour à l'accueil</Link>
-                 </Button>
+                 <div className="flex items-center gap-4">
+                    <Button onClick={handlePrint} variant="outline">
+                        <Printer className="mr-2"/>
+                        Imprimer
+                    </Button>
+                    <Button asChild>
+                        <Link href="/">Retour à l'accueil</Link>
+                    </Button>
+                 </div>
             </div>
         </header>
 
@@ -80,7 +90,7 @@ export default function TutorialPage() {
             </section>
 
             <Tabs defaultValue="enseignant" className="w-full max-w-5xl mx-auto">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-2 print-hidden">
                     <TabsTrigger value="enseignant" className="font-headline text-lg uppercase tracking-wider"><Users className="mr-2"/>Espace Enseignant</TabsTrigger>
                     <TabsTrigger value="eleve" className="font-headline text-lg uppercase tracking-wider"><GraduationCap className="mr-2"/>Espace Élève</TabsTrigger>
                 </TabsList>
@@ -307,7 +317,7 @@ export default function TutorialPage() {
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue="bacpro">
-                            <TabsList className="grid w-full grid-cols-2">
+                            <TabsList className="grid w-full grid-cols-2 print-hidden">
                                 <TabsTrigger value="bacpro">BAC PRO</TabsTrigger>
                                 <TabsTrigger value="cap">CAP</TabsTrigger>
                             </TabsList>
@@ -315,7 +325,7 @@ export default function TutorialPage() {
                                 {renderTpTable(NIVEAUX_BACPRO)}
                             </TabsContent>
                             <TabsContent value="cap" className="mt-4">
-                                {renderTpTable(NIVEAUX_CAP)}
+                                {renderTpTable(NIVEaux_CAP)}
                             </TabsContent>
                         </Tabs>
                     </CardContent>
