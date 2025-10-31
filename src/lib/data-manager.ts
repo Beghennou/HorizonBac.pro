@@ -1,23 +1,27 @@
 
 
-import { tpSeconde, TP as TPSeconde } from './tp-seconde';
-import { tpPremiere, TP as TPPremiere } from './tp-premiere';
-import { tpTerminale, TP as TPTerminale } from './tp-terminale';
-import { tpCap, TP as TPCap } from './tp-cap';
 import { competencesParNiveau as bacProCompetences } from './bac-pro-data';
 import { competencesParNiveau as capCompetences } from './cap-data';
-import type { EtudePrelim as EtudePrelimSeconde } from './tp-seconde';
-import type { EtudePrelim as EtudePrelimPremiere } from './tp-premiere';
-import type { EtudePrelimQCM as EtudePrelimQCMTerminale, EtudePrelimText as EtudePrelimTextTerminale } from './tp-terminale';
+import type { TP_CAP_1, TP_CAP_2, Etape_CAP, EtudePrelim_CAP, EtudePrelimQCM_CAP, EtudePrelimText_CAP } from './tps/cap';
+import type { TP_PREMIERE, Etape_PREMIERE, EtudePrelim_PREMIERE, EtudePrelimQCM_PREMIERE, EtudePrelimText_PREMIERE } from './tps/premiere';
+import type { TP_SECONDE, Etape_SECONDE, EtudePrelim_SECONDE, EtudePrelimQCM_SECONDE, EtudePrelimText_SECONDE } from './tps/seconde';
+import type { TP_TERMINALE, Etape_TERMINALE, EtudePrelim_TERMINALE, EtudePrelimQCM_TERMINALE, EtudePrelimText_TERMINALE } from './tps/terminale';
+
+// Import all TPs from the new structure
+import { tps as tpsCap } from './tps/cap';
+import { tps as tpsPremiere } from './tps/premiere';
+import { tps as tpsSeconde } from './tps/seconde';
+import { tps as tpsTerminale } from './tps/terminale';
 
 
-export type EtudePrelimQCM = EtudePrelimQCMTerminale;
-export type EtudePrelimText = EtudePrelimTextTerminale;
+export type EtudePrelimQCM = EtudePrelimQCM_SECONDE | EtudePrelimQCM_PREMIERE | EtudePrelimQCM_TERMINALE | EtudePrelimQCM_CAP;
+export type EtudePrelimText = EtudePrelimText_SECONDE | EtudePrelimText_PREMIERE | EtudePrelimText_TERMINALE | EtudePrelimText_CAP;
 
-export type Etape = TPSeconde['activitePratique'][0];
-export type EtudePrelim = EtudePrelimSeconde | EtudePrelimPremiere | EtudePrelimQCM | EtudePrelimText;
+export type Etape = Etape_SECONDE | Etape_PREMIERE | Etape_TERMINALE | Etape_CAP;
+export type EtudePrelim = EtudePrelim_SECONDE | EtudePrelim_PREMIERE | EtudePrelim_TERMINALE | EtudePrelim_CAP;
 
-export type TP = Omit<TPSeconde, 'etudePrelim'> & {
+// Unified TP type
+export type TP = (TP_SECONDE | TP_PREMIERE | TP_TERMINALE | TP_CAP_1 | TP_CAP_2) & {
     etudePrelim: EtudePrelim[];
     author?: string;
     creationDate?: string;
@@ -49,11 +53,12 @@ export const competencesParNiveau: Record<Niveau, Record<string, CompetenceBloc>
 };
 
 
+// Combine all imported TPs into a single object
 export const initialTps: Record<number, TP> = {
-  ...tpSeconde,
-  ...tpPremiere,
-  ...tpTerminale,
-  ...tpCap,
+  ...tpsSeconde,
+  ...tpsPremiere,
+  ...tpsTerminale,
+  ...tpsCap,
 };
 
 const isTpOfNiveau = (tp: TP, niveau: Niveau): boolean => {
