@@ -17,19 +17,19 @@ export default function Home() {
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 bg-hero-image">
       <div className="absolute inset-0 bg-black/60 z-10" />
 
-      <main className="z-20 flex flex-1 flex-col items-center justify-center text-center text-white w-full">
+      <main className="z-20 flex w-full max-w-4xl flex-1 flex-col items-center justify-center text-center text-white">
         
         <div className="flex items-center justify-center mb-6 relative">
             <h1 className="font-headline text-5xl md:text-7xl font-black uppercase tracking-widest text-shadow-lg">
-              <span className="text-primary">H</span>ORIZON
+              <span className="text-primary">H</span>orizon
             </h1>
             <div className="absolute -top-4 -right-16 md:-right-20 w-16 h-16 md:w-20 md:h-20">
               <Logo />
             </div>
         </div>
         
-        <p className="font-headline text-2xl md:text-3xl font-bold uppercase tracking-wider mb-4 text-shadow">
-          <span className="text-primary">B</span>AC. <span className="text-primary">P</span>RO. & CAP
+        <p className="font-headline text-5xl md:text-7xl font-bold uppercase tracking-wider mb-4 text-shadow">
+          <span className="text-primary">B</span>ac. Pro. & Cap
         </p>
         <p className="text-lg md:text-xl text-neutral-300 max-w-2xl mb-10 text-shadow">
           La plateforme de suivi des compétences pour la nouvelle génération de techniciens automobiles.
