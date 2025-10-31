@@ -47,6 +47,7 @@ function DashboardLayoutContent({
   const { isLoaded, classes, teacherName, customSignOut } = useFirebase();
 
   const [isAnimationTimeElapsed, setIsAnimationTimeElapsed] = useState(false);
+  const [selectedClass, setSelectedClass] = useState(searchParams.get('class') || '');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -56,7 +57,10 @@ function DashboardLayoutContent({
     return () => clearTimeout(timer);
   }, []);
 
-  const selectedClass = searchParams.get('class') || '';
+  useEffect(() => {
+    setSelectedClass(searchParams.get('class') || '');
+  }, [searchParams]);
+
   const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
   
   const classNames = (classes || [])
@@ -66,7 +70,6 @@ function DashboardLayoutContent({
         if (cursus === 'cap') {
             return upperCaseName.includes('CAP');
         }
-        // Pour bacpro, on inclut ce qui contient BAC et on exclut ce qui contient CAP
         return upperCaseName.includes('BAC') && !upperCaseName.includes('CAP');
     })
     .sort((a, b) => a.localeCompare(b));

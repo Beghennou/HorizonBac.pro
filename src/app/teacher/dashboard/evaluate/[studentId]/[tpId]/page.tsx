@@ -38,6 +38,8 @@ export default function EvaluationPage() {
     const tpId = parseInt(params.tpId as string, 10);
     const tp = tps[tpId];
     const cursus = searchParams.get('cursus');
+    const className = searchParams.get('class');
+    const level = searchParams.get('level');
 
     const [competenceEvals, setCompetenceEvals] = useState<Record<string, EvaluationStatus>>({});
     const [prelimNote, setPrelimNote] = useState('');
@@ -75,10 +77,19 @@ export default function EvaluationPage() {
     }, [studentValidations, tp.activitePratique]);
 
     const totalPracticalSteps = tp.activitePratique.length;
+    const allStepsValidated = validatedStepsCount === totalPracticalSteps;
 
     const handleCompetenceChange = (competenceId: string, value: EvaluationStatus) => {
         setCompetenceEvals(prev => ({ ...prev, [competenceId]: value }));
     };
+    
+    const redirectToTpsToEvaluate = () => {
+        const params = new URLSearchParams();
+        if (cursus) params.set('cursus', cursus);
+        if (className) params.set('class', className);
+        if (level) params.set('level', level);
+        router.push(`/teacher/dashboard/tps-to-evaluate?${params.toString()}`);
+    }
 
     const handleSave = (isFinal: boolean) => {
         if (!studentName || !tpId) return;
@@ -102,8 +113,7 @@ export default function EvaluationPage() {
         });
 
         if (isFinal) {
-            const params = new URLSearchParams(searchParams.toString());
-            router.push(`/teacher/dashboard/tps-to-evaluate?${params.toString()}`);
+            redirectToTpsToEvaluate();
         }
     };
     
@@ -115,8 +125,7 @@ export default function EvaluationPage() {
             title: "Demande envoyée",
             description: `L'élève a été notifié qu'il doit refaire ce TP.`
         });
-        const params = new URLSearchParams(searchParams.toString());
-        router.push(`/teacher/dashboard/tps-to-evaluate?${params.toString()}`);
+        redirectToTpsToEvaluate();
     }
 
     if (!tp) {
@@ -127,8 +136,6 @@ export default function EvaluationPage() {
     if (isLoading) {
         return <div className="flex justify-center items-center h-full"><Loader2 className="w-12 h-12 animate-spin text-primary" /></div>;
     }
-
-    const allStepsValidated = validatedStepsCount === totalPracticalSteps;
 
     return (
         <div className="space-y-6">
@@ -173,10 +180,9 @@ export default function EvaluationPage() {
                     <CardTitle className="flex items-center gap-2"><Award />Évaluation des Compétences</CardTitle>
                     {totalPracticalSteps > 0 && (
                         <Badge 
-                            variant={allStepsValidated ? "default" : "destructive"} 
                             className={cn(
                                 "text-base",
-                                allStepsValidated ? "bg-green-600" : "bg-destructive/80"
+                                allStepsValidated ? "bg-green-600 text-white" : "bg-destructive text-destructive-foreground"
                             )}
                         >
                            Étapes validées : {validatedStepsCount} / {totalPracticalSteps}
