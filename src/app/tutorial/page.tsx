@@ -1,4 +1,5 @@
 
+'use client';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,8 +7,57 @@ import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, B
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { initialTps, getTpsByNiveau, Cursus, Niveau, NIVEAUX_BACPRO, NIVEAUX_CAP } from '@/lib/data-manager';
+
 
 export default function TutorialPage() {
+
+  const renderTpTable = (niveaux: { value: Niveau, label: string }[]) => {
+    return (
+      <Accordion type="single" collapsible className="w-full">
+        {niveaux.map(niveau => {
+          const tpsForLevel = getTpsByNiveau(niveau.value, initialTps);
+          // Filter to show only TPs specific to this level for clarity in the table
+          const specificTps = tpsForLevel.filter(tp => tp.niveau ? tp.niveau === niveau.value : getLevelFromId(tp.id) === niveau.value);
+
+          return (
+            <AccordionItem value={niveau.value} key={niveau.value}>
+              <AccordionTrigger className="text-xl font-headline">{niveau.label} ({specificTps.length} TPs)</AccordionTrigger>
+              <AccordionContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">ID</TableHead>
+                      <TableHead>Titre du TP</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {specificTps.map(tp => (
+                      <TableRow key={tp.id}>
+                        <TableCell className="font-medium">{tp.id}</TableCell>
+                        <TableCell>{tp.titre}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+    );
+  };
+
+  const getLevelFromId = (tpId: number): Niveau | null => {
+    if (tpId >= 101 && tpId < 200) return 'seconde';
+    if (tpId >= 1 && tpId < 101) return 'premiere';
+    if (tpId >= 301 && tpId < 500) return 'terminale';
+    if (tpId >= 501 && tpId < 600) return 'cap1';
+    if (tpId >= 601 && tpId < 700) return 'cap2';
+    return null;
+  }
+
   return (
     <div className="bg-background min-h-screen text-foreground">
         <header className="sticky top-0 z-50 w-full border-b-2 border-primary bg-gradient-to-b from-card to-background shadow-2xl">
@@ -246,6 +296,32 @@ export default function TutorialPage() {
                     </Card>
                 </TabsContent>
             </Tabs>
+
+            <section>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline text-4xl tracking-wide text-accent">Liste des Travaux Pratiques</CardTitle>
+                        <CardDescription>
+                            Aperçu de tous les TP disponibles dans la plateforme, classés par cursus et niveau.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Tabs defaultValue="bacpro">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="bacpro">BAC PRO</TabsTrigger>
+                                <TabsTrigger value="cap">CAP</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="bacpro" className="mt-4">
+                                {renderTpTable(NIVEAUX_BACPRO)}
+                            </TabsContent>
+                            <TabsContent value="cap" className="mt-4">
+                                {renderTpTable(NIVEAUX_CAP)}
+                            </TabsContent>
+                        </Tabs>
+                    </CardContent>
+                </Card>
+            </section>
+
         </main>
     </div>
   );
