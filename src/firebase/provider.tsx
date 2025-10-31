@@ -107,7 +107,7 @@ export interface FirebaseContextState {
   updateClassWithCsv: (className: string, studentNames: string[]) => void;
   resetAllStudentLists: () => void;
   addTp: (tp: TP) => void;
-  createClass: (className: string) => void;
+  createClass: (className: string, cursus: Cursus) => void;
   deleteClass: (className: string) => void;
   signInWithGoogle: () => Promise<void>;
   updateStudentData: (studentName: string, data: DocumentData) => void;
@@ -344,9 +344,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       addCustomTp(firestore, tpWithAuthor);
       setTps(prev => ({...prev, [newTp.id]: tpWithAuthor}));
     },
-    createClass: (className: string) => {
+    createClass: (className: string, cursus: Cursus) => {
       if (!firestore) return;
-      createClassInDb(firestore, className);
+      createClassInDb(firestore, className, cursus);
       toast({ title: 'Classe Créée', description: `La classe "${className}" a été créée avec succès.` });
     },
     deleteClass: (className: string) => {

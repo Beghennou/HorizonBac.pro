@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -73,15 +74,8 @@ export default function SettingsPage() {
   const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
 
   const classNames = useMemo(() => classes
+    .filter(c => c.cursus === cursus)
     .map(c => c.id)
-    .filter(name => {
-        const upperCaseName = name.toUpperCase();
-        if (cursus === 'cap') {
-            return upperCaseName.includes('CAP');
-        }
-        // Pour bacpro, on exclut les CAPs
-        return upperCaseName.includes('BAC') && !upperCaseName.includes('CAP');
-    })
     .sort(), [classes, cursus]);
 
   const teacherList = useMemo(() => teachers.filter(t => t.cursus === cursus).sort((a,b) => a.name.localeCompare(b.name)), [teachers, cursus]);
@@ -153,7 +147,13 @@ export default function SettingsPage() {
       const existingStudents = classData?.studentNames || [];
       const newStudentList = [...existingStudents, studentName];
       
-      updateClassWithCsv(targetClass, newStudentList);
+      if (classData) {
+        updateClassWithCsv(targetClass, newStudentList);
+      } else {
+        createClass(targetClass, cursus);
+        // We need a slight delay to ensure the class is created before adding students
+        setTimeout(() => updateClassWithCsv(targetClass, newStudentList), 500);
+      }
 
       toast({ title: 'Élève ajouté', description: `${studentName} a été ajouté à la classe ${targetClass}.` });
       setFirstName('');
@@ -170,7 +170,7 @@ export default function SettingsPage() {
         toast({ variant: 'destructive', title: 'Classe existante', description: 'Une classe avec ce nom existe déjà.' });
         return;
     }
-    createClass(newClassName.trim());
+    createClass(newClassName.trim(), cursus);
     setNewClassName('');
   };
 
@@ -400,7 +400,7 @@ export default function SettingsPage() {
                       </div>
                       <div className="space-y-2">
                           <Label htmlFor="new-class-student">Ou créer une nouvelle classe pour l'élève</Label>
-                          <Input id="new-class-student" placeholder="ex: 2MV6" value={newClassNameForStudent} onChange={(e) => setNewClassNameForStudent(e.target.value)} />
+                          <Input id="new-class-student" placeholder="ex: 2BAC-MV6" value={newClassNameForStudent} onChange={(e) => setNewClassNameForStudent(e.target.value)} />
                       </div>
                   </div>
                   <div className="flex justify-end">
@@ -505,7 +505,7 @@ export default function SettingsPage() {
             <div className="space-y-2 p-4 border rounded-lg">
                 <Label className="font-bold">Créer une nouvelle classe</Label>
                 <div className="flex items-center gap-2">
-                    <Input placeholder="Nom de la nouvelle classe, ex: 1CAP-A" value={newClassName} onChange={e => setNewClassName(e.target.value)} />
+                    <Input placeholder="Nom de la nouvelle classe, ex: 1CAP-A ou 2BAC-MV" value={newClassName} onChange={e => setNewClassName(e.target.value)} />
                     <Button onClick={handleCreateClass}><PlusCircle className="mr-2" /> Créer</Button>
                 </div>
             </div>
@@ -745,5 +745,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-    

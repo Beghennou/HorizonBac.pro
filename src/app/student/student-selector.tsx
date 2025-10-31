@@ -29,15 +29,8 @@ export default function StudentSelector() {
   const classNames = useMemo(() => {
     if (!allClassData) return [];
     return allClassData
+      .filter(c => c.cursus === cursus)
       .map(c => c.id)
-      .filter(name => {
-          const upperCaseName = name.toUpperCase();
-          if (cursus === 'cap') {
-              return upperCaseName.includes('CAP');
-          }
-          // Pour bacpro, on inclut ce qui contient BAC et on exclut ce qui contient CAP
-          return upperCaseName.includes('BAC') && !upperCaseName.includes('CAP');
-      })
       .sort();
   }, [allClassData, cursus]);
 

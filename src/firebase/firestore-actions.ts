@@ -196,12 +196,15 @@ export const emptyClass = async (firestore: Firestore, className: string) => {
 
 export const updateClassWithStudents = async (firestore: Firestore, className: string, studentNames: string[]) => {
     const classDocRef = doc(firestore, 'classes', className);
-    await setDoc(classDocRef, { studentNames }, { merge: true }).catch(error => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: classDocRef.path,
-            operation: 'write'
-        }));
-    });
+    const classDoc = await getDoc(classDocRef);
+    if (classDoc.exists()) {
+        await updateDoc(classDocRef, { studentNames }).catch(error => {
+            errorEmitter.emit('permission-error', new FirestorePermissionError({
+                path: classDocRef.path,
+                operation: 'update'
+            }));
+        });
+    }
 };
 
 export const resetAllStudentListsInClasses = async (firestore: Firestore, classes: DocumentData[]) => {
@@ -229,13 +232,13 @@ export const addCustomTp = (firestore: Firestore, newTp: TP) => {
     });
 };
 
-export const createClassInDb = async (firestore: Firestore, className: string) => {
+export const createClassInDb = async (firestore: Firestore, className: string, cursus: Cursus) => {
     const classDocRef = doc(firestore, 'classes', className);
-    await setDoc(classDocRef, { studentNames: [] }).catch(error => {
+    await setDoc(classDocRef, { studentNames: [], cursus: cursus }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: classDocRef.path,
             operation: 'create',
-            requestResourceData: { studentNames: [] }
+            requestResourceData: { studentNames: [], cursus: cursus }
         }));
     });
 }

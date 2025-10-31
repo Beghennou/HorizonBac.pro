@@ -64,14 +64,8 @@ function DashboardLayoutContent({
   const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
   
   const classNames = (classes || [])
+    .filter(c => c.cursus === cursus)
     .map(c => c.id)
-    .filter(name => {
-        const upperCaseName = name.toUpperCase();
-        if (cursus === 'cap') {
-            return upperCaseName.includes('CAP');
-        }
-        return upperCaseName.includes('BAC') && !upperCaseName.includes('CAP');
-    })
     .sort((a, b) => a.localeCompare(b));
 
   useEffect(() => {

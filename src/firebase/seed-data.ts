@@ -6,26 +6,31 @@ const initialClasses = [
     {
         id: "2BAC-A",
         studentNames: ["Martin Dubois", "Léa Petit", "Thomas Robert", "Chloé Durand", "Hugo Bernard", "Manon Girard", "Lucas Moreau", "Camille Lefevre", "Enzo Roux", "Clara Fournier", "Pierre Lartigue", "AKROUCHI Yanis", "Élève TEST (2BAC)"].sort((a, b) => a.localeCompare(b)),
+        cursus: "bacpro",
     },
     {
         id: "1BAC-B",
         studentNames: ["Jules Royer", "Rose Gauthier", "Adam Lemaire", "Louise Lambert", "Raphaël Picard", "Juliette Leclerc", "Élève TEST (1BAC)"].sort((a, b) => a.localeCompare(b)),
+        cursus: "bacpro",
     },
     {
         id: "TBAC-C",
         studentNames: ["Arthur Caron", "Lina Mercier", "Noah Philippe", "Eva Chevalier", "Léo Andre", "Romy Bonnet", "Élève TEST (TBAC)"].sort((a, b) => a.localeCompare(b)),
+        cursus: "bacpro",
     },
     {
         id: "1CAP-A",
         studentNames: ["Tom Lefebvre", "Zoe Da Silva", "Élève TEST (1CAP)"].sort((a, b) => a.localeCompare(b)),
+        cursus: "cap",
     },
     {
         id: "2CAP-B",
         studentNames: ["Maxime Petit", "Eva Leroy", "Élève TEST (2CAP)"].sort((a, b) => a.localeCompare(b)),
+        cursus: "cap",
     }
 ];
 
-const initialTeachers: { name: string }[] = [
+const initialTeachers: { name: string, cursus: 'bacpro' | 'cap' }[] = [
     // La liste est vide pour empêcher la création de doublons.
     // Les enseignants doivent être ajoutés manuellement via la page Paramètres.
 ];
@@ -57,7 +62,7 @@ export const seedInitialData = async (firestore: Firestore) => {
     // Seed classes - assuming we want to reset them on each version bump
     initialClasses.forEach(classData => {
         const classRef = doc(firestore, 'classes', classData.id);
-        batch.set(classRef, { studentNames: classData.studentNames });
+        batch.set(classRef, { studentNames: classData.studentNames, cursus: classData.cursus });
     });
 
     // Seed TPs - assuming we want to reset them on each version bump
@@ -76,7 +81,7 @@ export const seedInitialData = async (firestore: Firestore) => {
 
 
 export const checkAndSeedData = async (firestore: Firestore) => {
-    const seedDocRef = doc(firestore, 'config', 'initial_seed_v9'); // Version incrémentée pour garantir la cohérence
+    const seedDocRef = doc(firestore, 'config', 'initial_seed_v10'); // Version incrémentée pour garantir la cohérence
     try {
         const seedDoc = await getDoc(seedDocRef);
         if (!seedDoc.exists()) {
