@@ -23,6 +23,7 @@ const tp: TP = {
     activitePratique: [
         {
             titre: 'Dépose et affûtage de la lame',
+            duree: '30 min',
             etapes: [
                 'Arrêter la tondeuse, débrancher le fil de la bougie et sécuriser.',
                 'Basculer la tondeuse sur le côté (côté filtre à air vers le haut).',
@@ -33,6 +34,7 @@ const tp: TP = {
         },
         {
             titre: 'Remplacement du filtre à air',
+            duree: '15 min',
             etapes: [
                 'Localiser le boîtier du filtre à air.',
                 'Déposer le filtre usagé.',
@@ -42,6 +44,7 @@ const tp: TP = {
         },
         {
             titre: 'Vidange de l\'huile moteur',
+            duree: '20 min',
             etapes: [
                 'Placer le récipient sous le bouchon de vidange (ou basculer la tondeuse pour vidanger par l\'orifice de remplissage si pas de bouchon).',
                 'Ouvrir le bouchon et laisser l’huile s’écouler.',
@@ -51,6 +54,7 @@ const tp: TP = {
         },
         {
             titre: 'Entretien de la bougie d\'allumage',
+            duree: '15 min',
             etapes: [
                 'Localiser et déposer la bougie avec la clé à bougie.',
                 'Vérifier son état (usure, dépôts) et l\'écartement des électrodes.',
@@ -60,6 +64,7 @@ const tp: TP = {
         },
          {
             titre: 'Conclusion et nettoyage',
+            duree: '10 min',
             etapes: [
                 'Nettoyer la zone de travail et les outils.',
                 'Démarrer la tondeuse pour vérifier son bon fonctionnement.'
