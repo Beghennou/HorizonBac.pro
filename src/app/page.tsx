@@ -28,7 +28,8 @@ export default function Home() {
         
         <p className="font-headline text-4xl md:text-6xl font-bold uppercase tracking-wider mb-10 text-shadow">
           <span className="text-primary">B</span>
-          <span className="bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">ac. Pro. & Cap</span>
+          <span className="bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">ac. </span>
+          <span className="bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">Pro. & Cap</span>
         </p>
 
         <p className="text-lg md:text-xl text-neutral-300 max-w-2xl mb-10 text-shadow">

@@ -8,8 +8,8 @@ export default function NotFound() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center p-4 bg-background text-foreground">
       <div className="flex items-center justify-center mb-8">
-        <div className="flex items-center justify-center w-32 h-32 rounded-lg bg-gradient-to-br from-card to-background border-4 border-destructive shadow-lg">
-          <Frown className="w-24 h-24 text-destructive" />
+        <div className="flex items-center justify-center w-24 h-24 rounded-lg bg-gradient-to-br from-card to-background border-4 border-destructive shadow-lg">
+          <Frown className="w-16 h-16 text-destructive" />
         </div>
       </div>
       <h1 className="font-headline text-6xl font-black uppercase tracking-widest text-destructive mb-2 text-center">

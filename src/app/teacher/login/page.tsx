@@ -38,8 +38,8 @@ export default function TeacherLoginPage() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-background">
              <div className="flex items-center justify-center mb-8">
-                <div className="flex items-center justify-center w-32 h-32 rounded-lg bg-gradient-to-br from-primary to-racing-orange border-4 border-accent shadow-lg">
-                    <Logo className="w-24 h-24 text-white" />
+                <div className="flex items-center justify-center w-24 h-24 rounded-lg bg-gradient-to-br from-primary to-racing-orange border-4 border-accent shadow-lg">
+                    <Logo className="w-16 h-16 text-white" />
                 </div>
             </div>
             <Card className="w-full max-w-md border-primary shadow-lg">
