@@ -14,26 +14,23 @@ export default function Home() {
   const [cursus, setCursus] = useState('bacpro');
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 bg-hero-image">
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden p-4 bg-hero-image">
       <div className="absolute inset-0 bg-black/60 z-10" />
 
-      <main className="z-20 flex w-full flex-1 flex-col items-center justify-center text-center text-white">
+      <main className="z-20 flex w-full flex-1 flex-col items-center justify-center text-center">
         
         <div className="flex items-center justify-center mb-6 relative">
-            <h1 className="font-headline text-5xl md:text-6xl font-black uppercase tracking-widest text-shadow-lg flex items-baseline gap-x-4">
-              <span>
+             <h1 className="font-headline text-4xl md:text-6xl font-black uppercase tracking-widest text-shadow-lg">
                 <span className="text-primary">H</span>
-                <span className="text-racing-orange">orizon</span>
-              </span>
+                <span className="bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">orizon</span>
             </h1>
         </div>
         
-        <p className="font-headline text-5xl md:text-6xl font-bold uppercase tracking-wider mb-10 text-shadow">
+        <p className="font-headline text-4xl md:text-6xl font-bold uppercase tracking-wider mb-10 text-shadow">
           <span className="text-primary">B</span>
-          <span className="text-racing-orange">ac. </span>
-          <span className="text-racing-orange">P</span>
-          <span className="text-racing-orange">ro. & Cap</span>
+          <span className="bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">ac. Pro. & Cap</span>
         </p>
+
         <p className="text-lg md:text-xl text-neutral-300 max-w-2xl mb-10 text-shadow">
           La plateforme de suivi des compétences pour la nouvelle génération de techniciens automobiles.
         </p>
