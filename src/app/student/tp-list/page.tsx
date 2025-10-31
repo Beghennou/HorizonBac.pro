@@ -3,7 +3,7 @@
 'use client';
 import { Suspense, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau, Cursus, ClassData } from "@/lib/data-manager";
+import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau, Cursus, ClassData, EtudePrelim } from "@/lib/data-manager";
 import { useSearchParams, useRouter } from "next/navigation";
 import { User, Users, Printer, OctagonX } from "lucide-react";
 import { useFirebase } from '@/firebase';
@@ -91,7 +91,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                     <CardTitle>Matériel Requis</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                    {tp.materiel.map((item, i) => (
+                    {tp.materiel.map((item: string, i: number) => (
                         <span key={i} className="bg-muted text-muted-foreground text-sm font-medium px-3 py-1 rounded-full">{item}</span>
                     ))}
                 </CardContent>
@@ -103,7 +103,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                       <CardTitle>Étude Préliminaire</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                      {tp.etudePrelim.map((item, i) => (
+                      {tp.etudePrelim.map((item: EtudePrelim, i: number) => (
                           <div key={i}>
                               <p><strong>Q{i+1}:</strong> {item.q}</p>
                               {item.type === 'qcm' && (

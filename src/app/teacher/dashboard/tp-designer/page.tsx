@@ -53,6 +53,7 @@ const tpFormSchema = z.object({
     activitePratique: z.array(etapeSchema).min(1, "Au moins une étape pratique est requise."),
     pointsCles: z.array(z.object({ value: z.string().min(1, "Le point clé est requis.") })).min(1, "Au moins un point clé est requis."),
     securiteRangement: z.array(z.object({ value: z.string().min(1, "La consigne de sécurité est requise.") })).min(1, "Au moins une consigne de sécurité est requise."),
+    ressources: z.array(z.object({ value: z.string().min(1, "La ressource est requise.") })),
     validationRequise: z.boolean().default(false),
 });
 
@@ -83,6 +84,7 @@ export default function TPDesignerPage() {
             activitePratique: [{ titre: "", duree: "30 min", etapes: [""] }],
             pointsCles: [{ value: "" }],
             securiteRangement: [{ value: "" }],
+            ressources: [],
             validationRequise: false,
         },
     });
@@ -106,6 +108,7 @@ export default function TPDesignerPage() {
                     materiel: tpToEdit.materiel.map(m => ({ value: m })),
                     pointsCles: tpToEdit.pointsCles.map(pc => ({ value: pc })),
                     securiteRangement: tpToEdit.securiteRangement.map(sr => ({ value: sr })),
+                    ressources: (tpToEdit.ressources || []).map(res => ({ value: res })),
                     objectif: objectifWithoutCompetences,
                     competences,
                     validationRequise: tpToEdit.validationRequise || false,
@@ -119,6 +122,8 @@ export default function TPDesignerPage() {
     const { fields: activitePratiqueFields, append: appendActivitePratique, remove: removeActivitePratique } = useFieldArray({ control: form.control, name: "activitePratique" });
     const { fields: pointsClesFields, append: appendPointsCles, remove: removePointsCles } = useFieldArray({ control: form.control, name: "pointsCles" });
     const { fields: securiteRangementFields, append: appendSecuriteRangement, remove: removeSecuriteRangement } = useFieldArray({ control: form.control, name: "securiteRangement" });
+    const { fields: ressourcesFields, append: appendRessources, remove: removeRessources } = useFieldArray({ control: form.control, name: "ressources" });
+
 
     const selectedNiveau = form.watch('niveau');
 
@@ -131,6 +136,7 @@ export default function TPDesignerPage() {
           materiel: data.materiel.map(item => item.value),
           pointsCles: data.pointsCles.map(item => item.value),
           securiteRangement: data.securiteRangement.map(item => item.value),
+          ressources: data.ressources.map(item => item.value),
           etudePrelim: data.etudePrelim.map(e => {
             if (e.type === 'qcm') {
               return { type: 'qcm', q: e.q, r: e.r, options: e.options };
@@ -163,6 +169,7 @@ export default function TPDesignerPage() {
             activitePratique: [{ titre: "", duree: "30 min", etapes: [""] }],
             pointsCles: [{ value: "" }],
             securiteRangement: [{ value: "" }],
+            ressources: [],
             validationRequise: false,
         });
         } else {
@@ -472,6 +479,28 @@ export default function TPDesignerPage() {
                         </CardContent>
                     </Card>
                  </div>
+                 
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                            <span>Ressources Additionnelles</span>
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendRessources({ value: "" })}><PlusCircle className="mr-2"/>Ajouter</Button>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                        {ressourcesFields.map((field, index) => (
+                            <FormField key={field.id} control={form.control} name={`ressources.${index}.value`} render={({ field }) => (
+                                <FormItem>
+                                    <div className="flex items-center gap-2">
+                                        <FormControl><Input placeholder="ex: [VIDÉO] Lien vers une ressource - https://..." {...field} /></FormControl>
+                                        <Button type="button" variant="destructive" size="icon" onClick={() => removeRessources(index)}><Trash2 /></Button>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                        ))}
+                    </CardContent>
+                </Card>
 
                 <div className="flex justify-end">
                     <Button type="submit" size="lg">
