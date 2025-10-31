@@ -3,7 +3,7 @@
 'use client';
 import { Suspense, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau, Cursus, ClassData, EtudePrelim } from "@/lib/data-manager";
+import { TP, EtudePrelimQCM, getTpsByNiveau, Niveau, Cursus, ClassData, EtudePrelim, Etape } from "@/lib/data-manager";
 import { useSearchParams, useRouter } from "next/navigation";
 import { User, Users, Printer, OctagonX } from "lucide-react";
 import { useFirebase } from '@/firebase';
@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ValidationTeacherButton } from '@/components/ValidationTeacherButton';
 
-const EtapeCard = ({ etape, index, studentName, tpId }: { etape: any, index: number, studentName: string | null, tpId: number }) => (
+const EtapeCard = ({ etape, index, studentName, tpId }: { etape: Etape, index: number, studentName: string | null, tpId: number }) => (
     <div className="mb-4 rounded-lg border border-primary/20 p-4 bg-background/50 break-inside-avoid">
         <h4 className="font-headline text-lg text-accent">Étape {index + 1}: {etape.titre} <span className="text-sm text-muted-foreground font-body">({etape.duree})</span></h4>
         <ul className="list-disc pl-5 mt-2 space-y-1 text-foreground/90">
@@ -142,7 +142,7 @@ const TpDetailView = ({ tp }: { tp: TP }) => {
                     <CardTitle>Activité Pratique</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {tp.activitePratique.map((etape, i) => (
+                    {tp.activitePratique.map((etape: Etape, i: number) => (
                         <EtapeCard key={i} etape={etape} index={i} studentName={studentName} tpId={tp.id} />
                     ))}
                 </CardContent>
