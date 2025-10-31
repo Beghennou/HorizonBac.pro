@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { TP } from '@/lib/data-manager';
+import { TP, Etape } from '@/lib/data-manager';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -127,7 +127,7 @@ export default function TPPage() {
 
   const validatedStepsCount = useMemo(() => {
     if (!studentValidations || !studentValidations.steps) return 0;
-    const practicalStepsKeys = tp.activitePratique.map((_, i) => `etape-${i}`);
+    const practicalStepsKeys = tp.activitePratique.map((_: Etape, i: number) => `etape-${i}`);
     return practicalStepsKeys.filter(key => studentValidations.steps[key]).length;
   }, [studentValidations, tp.activitePratique]);
 

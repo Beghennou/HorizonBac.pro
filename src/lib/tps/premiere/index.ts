@@ -34,13 +34,6 @@ import tp34 from './tp-34';
 import tp35 from './tp-35';
 import tp36 from './tp-36';
 import tp38 from './tp-38';
-import { TP as TP_1, Etape, EtudePrelim, EtudePrelimQCM, EtudePrelimText } from './tp-1';
-
-export type TP_PREMIERE = typeof tp1;
-export type Etape_PREMIERE = Etape;
-export type EtudePrelim_PREMIERE = EtudePrelim;
-export type EtudePrelimQCM_PREMIERE = EtudePrelimQCM;
-export type EtudePrelimText_PREMIERE = EtudePrelimText;
 
 export const tps = {
     [tp1.id]: tp1, [tp2.id]: tp2, [tp3.id]: tp3, [tp4.id]: tp4, [tp5.id]: tp5,
