@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 309,
     duree: '2h00',
-    titre: 'L 307 • Diagnostic géométrie',
+    titre: 'BAC PRO Terminale • Diagnostic géométrie',
     situation: 'Le client se plaint que son véhicule tire à droite et que ses pneus avant s\'usent de manière irrégulière. Un diagnostic complet de la géométrie des trains roulants est nécessaire.',
     objectif: 'Mesurer et interpréter angles, régler parallélisme. (Compétence C3.4)',
     materiel: ['Banc géométrie 3D', 'Clés réglage', 'Fiche constructeur'],

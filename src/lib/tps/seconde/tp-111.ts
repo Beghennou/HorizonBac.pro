@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 111,
     duree: '1h15',
-    titre: 'Remplacement d\'une Roue',
+    titre: 'BAC PRO Seconde • Remplacement d\'une Roue',
     situation: 'Un client a crevé et a utilisé sa roue de secours. Il vient à l\'atelier pour faire réparer son pneu et remonter la roue d\'origine. Vous devez effectuer le changement de roue en toute sécurité en utilisant le cric de bord du véhicule.',
     objectif: 'Maîtriser la procédure sécurisée de remplacement d\'une roue en utilisant les outils fournis avec le véhicule. (Compétence C1.1)',
     materiel: ['Cric de bord', 'Clé de roue', 'Cales de roues', 'Roue de secours/réparée', 'Gants de protection', 'Clé dynamométrique'],

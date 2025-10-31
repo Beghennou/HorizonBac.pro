@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 302,
     duree: '2h00',
-    titre: 'CA 306 • Diagnostic et remplacement airbag',
+    titre: 'BAC PRO Terminale • Diagnostic et remplacement airbag',
     situation: 'Le témoin d\'airbag d\'un véhicule reste allumé en permanence. Le client s\'inquiète pour sa sécurité. Votre mission est de diagnostiquer le système de retenue programmée et de remplacer le composant défectueux en suivant un protocole de sécurité strict.',
     objectif: 'Appliquer procédures sécurité, déposer/reposer airbag, effacer défauts et valider. (Compétence C3.3)',
     materiel: ['Outil diag', 'Airbag neuf', 'Clé dynamométrique', 'EPIs'],

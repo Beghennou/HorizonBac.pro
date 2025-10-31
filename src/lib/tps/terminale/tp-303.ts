@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 303,
     duree: '2h00',
-    titre: 'CA 305 • Essuyage automatique des vitres. Allumage automatique',
+    titre: 'BAC PRO Terminale • Essuyage automatique des vitres. Allumage automatique',
     situation: 'Un client rapporte que ses essuie-glaces se déclenchent de manière aléatoire et que ses phares ne s\'allument plus automatiquement dans les tunnels. Vous devez diagnostiquer les capteurs de pluie et de luminosité.',
     objectif: 'Tester capteurs pluie/lumière, calibrer et valider. (Compétence C3.1)',
     materiel: ['Valise diag', 'Multimètre', 'Schéma', 'Vaporisateur'],

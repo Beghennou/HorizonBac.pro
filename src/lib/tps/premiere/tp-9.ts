@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 9, duree:'1h45', titre:'UE 210 • Câblage des clignotants', situation:'Sur une maquette pédagogique, vous devez réaliser de A à Z le câblage fonctionnel du circuit de clignotants et de feux de détresse.', objectif:'Câbler un circuit conforme et effectuer le réglage de la fréquence. (Compétence C2.3)', materiel:['Centrale clignotante','Commodo','Ampoules 21W','Câbles et cosses diverses'], 
+const tp: TP = { id: 9, duree:'1h45', titre:'BAC PRO Première • Câblage des clignotants', situation:'Sur une maquette pédagogique, vous devez réaliser de A à Z le câblage fonctionnel du circuit de clignotants et de feux de détresse.', objectif:'Câbler un circuit conforme et effectuer le réglage de la fréquence. (Compétence C2.3)', materiel:['Centrale clignotante','Commodo','Ampoules 21W','Câbles et cosses diverses'], 
     etudePrelim:[
         {type: 'qcm', q:"Après câblage, vos clignotants flashent beaucoup trop vite. Quelle est la cause la plus probable ?", options: ["La batterie est trop chargée", "Une des ampoules est grillée ou a une mauvaise puissance", "La centrale clignotante est trop puissante"], r:"Une des ampoules est grillée ou a une mauvaise puissance"},
         {type: 'text', q:"Analyse de fonctionnement : Pourquoi les feux de détresse (warning) doivent-ils pouvoir fonctionner même si le contact du véhicule est coupé ?",r:'Pour des raisons de sécurité évidentes. Si le véhicule est en panne sur le bord de la route, il doit pouvoir signaler sa présence même si le moteur est coupé.'},

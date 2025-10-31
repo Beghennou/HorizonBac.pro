@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 317,
     duree: '2h00',
-    titre: 'L 312 • Diagnostiquer un système de suspension pilotée',
+    titre: 'BAC PRO Terminale • Diagnostiquer un système de suspension pilotée',
     situation: 'Le véhicule, équipé d\'une suspension pilotée, est "bloqué" en position basse ou présente un confort très dégradé. Votre mission est de diagnostiquer le système électronique et pneumatique/hydraulique.',
     objectif: 'Diagnostiquer via codes/paramètres, tester actionneurs, valider comportement dynamique. (Compétence C3.3)',
     materiel: ['Valise suspension', 'Mano pneumatique', 'Multimètre', 'Schéma'],

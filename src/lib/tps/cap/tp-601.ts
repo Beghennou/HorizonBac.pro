@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 601,
     duree: '2h00',
-    titre: 'CAP • Remplacement des Plaquettes de Frein Avant',
+    titre: 'CAP 2ème Année • Remplacement des Plaquettes de Frein Avant',
     situation: 'Un véhicule présente un témoin d\'usure des freins allumé. Le diagnostic confirme que les plaquettes de frein avant doivent être remplacées.',
     objectif: 'Remplacer les plaquettes de frein avant en respectant les règles de sécurité. (Compétence C2.2)',
     materiel: ['Jeu de plaquettes neuves', 'Repousse-piston', 'Nettoyant frein', 'Clé dynamométrique', 'Cric et chandelles'],

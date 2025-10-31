@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 603,
     duree: '1h30',
-    titre: 'CAP • Remplacement des Bougies d\'Allumage',
+    titre: 'CAP 2ème Année • Remplacement des Bougies d\'Allumage',
     situation: 'Le moteur d\'un véhicule essence présente des ratés. L\'entretien préconise le remplacement des bougies d\'allumage.',
     objectif: 'Remplacer les bougies d\'allumage en respectant le couple de serrage. (Compétence C2.2)',
     materiel: ['Jeu de bougies neuves', 'Clé à bougie', 'Clé dynamométrique'],

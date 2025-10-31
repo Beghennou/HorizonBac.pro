@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 108,
     duree: '1h30',
-    titre: 'Contrôle de l\'État et de la Pression des Pneus',
+    titre: 'BAC PRO Seconde • Contrôle de l\'État et de la Pression des Pneus',
     situation: 'Dans le cadre d\'une révision systématique, vous devez contrôler l\'ensemble des pneumatiques du véhicule, y compris la roue de secours.',
     objectif: 'Identifier les anomalies d\'usure et de pression et y remédier. (Compétences C1.2, C1.3)',
     materiel: ['Manomètre de pression', 'Jauge de profondeur', 'Documentation technique (pressions préconisées)'],

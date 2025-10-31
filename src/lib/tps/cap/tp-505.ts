@@ -7,7 +7,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 505,
     duree: '1h15',
-    titre: 'CAP • Vidange et Remplacement du Filtre à Huile',
+    titre: 'CAP 1ère Année • Vidange et Remplacement du Filtre à Huile',
     situation: "Un véhicule se présente pour sa vidange annuelle. Vous devez effectuer l'opération en respectant les procédures, le type d'huile et le recyclage des déchets.",
     objectif: "Réaliser une vidange moteur dans les règles de l'art. (Compétences C1.2, C1.4)",
     materiel: ['Huile moteur préconisée', 'Filtre à huile neuf', 'Joint de vidange neuf', 'Clé à filtre', 'Récupérateur d\'huile usagée', 'Clé dynamométrique'],

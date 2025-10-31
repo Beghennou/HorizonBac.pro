@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 311,
     duree: '2h00',
-    titre: 'MP 303 • Diagnostic et mesures de paramètres antipollution',
+    titre: 'BAC PRO Terminale • Diagnostic et mesures de paramètres antipollution',
     situation: 'Le véhicule a été refusé au contrôle technique pour pollution excessive. Vous devez diagnostiquer les systèmes antipollution (lambda, EGR, FAP) pour trouver la cause et valider la conformité après réparation.',
     objectif: 'Mesurer émissions et vérifier fonctionnement des organes. (Compétences C3.2, C3.3)',
     materiel: ['Analyseur 4/5 gaz', 'Opacimètre', 'Valise diag', 'Thermo IR'],

@@ -42,7 +42,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 301,
     duree: '2h30',
-    titre: 'CA 301 • Contrôle des pressions. Recharge d\'une climatisation',
+    titre: 'BAC PRO Terminale • Contrôle des pressions. Recharge d\'une climatisation',
     situation: 'Un client se plaint que sa climatisation ne produit plus d\'air froid. Il demande un diagnostic complet et une intervention avant son départ en vacances. Vous devez prendre en charge le diagnostic du circuit de climatisation en respectant les normes environnementales.',
     objectif: 'Mesurer pressions HP/BP, diagnostiquer fuites, effectuer recharge et traçabilité fluide frigorigène. (Compétence C3.1)',
     materiel: ['Station clim agréée', 'Manomètres', 'Détecteur de fuites', 'Fluide R134a/R1234yf', 'EPIs', 'Fiches traçabilité'],

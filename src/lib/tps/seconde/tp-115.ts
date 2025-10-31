@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 115,
     duree: '2h30',
-    titre: 'Entretien des Freins Arrière à Tambours',
+    titre: 'BAC PRO Seconde • Entretien des Freins Arrière à Tambours',
     situation: 'Un client amène sa citadine pour un entretien. Le carnet préconise un contrôle et un nettoyage des freins à tambour arrière. Le client se plaint également d\'une faible efficacité du frein à main.',
     objectif: 'Déposer, contrôler, nettoyer et régler un système de freinage à tambours, y compris le mécanisme de rattrapage de jeu automatique. (Compétences C1.2, C1.3)',
     materiel: ['Kit de freins arrière neuf (si nécessaire)', 'Nettoyant frein', 'Graisse haute température', 'Pince à ressorts de frein', 'Clé dynamométrique'],

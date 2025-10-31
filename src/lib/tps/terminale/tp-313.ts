@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 313,
     duree: '2h00',
-    titre: 'MA 306 • Contrôle des injecteurs moteur à rampe commune 1',
+    titre: 'BAC PRO Terminale • Contrôle des injecteurs moteur à rampe commune 1',
     situation: 'Un moteur Common Rail claque et fume. Le chef d\'atelier vous missionne pour la première phase du diagnostic injecteur : les contrôles électriques et l\'analyse des retours de fuite.',
     objectif: 'Mesurer résistances, contrôler retours et étanchéité. (Compétence C3.1)',
     materiel: ['Multimètre', 'Éprouvettes', 'Valise diag', 'Chiffons'],

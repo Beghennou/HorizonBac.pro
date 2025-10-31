@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 315,
     duree: '2h30',
-    titre: 'F 307 • Diagnostic du système ABS (contrôle des éléments)',
+    titre: 'BAC PRO Terminale • Diagnostic du système ABS (contrôle des éléments)',
     situation: 'Le témoin ABS est allumé. Le client signale une sensation étrange à la pédale. Vous devez mener un diagnostic complet pour assurer la sécurité du système de freinage antiblocage.',
     objectif: 'Identifier défauts par codes, mesures et tests actionneurs. (Compétences C3.2, C3.4)',
     materiel: ['Valise ABS', 'Multimètre', 'Oscillo', 'Banc freinage'],

@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 24, duree:'4h00', titre:'T 201 • Dépose-pose embrayage', situation:'Un véhicule patine à l\'accélération. Le diagnostic confirme l\'usure de l\'embrayage. Vous êtes chargé du remplacement complet du kit (disque, mécanisme, butée).', objectif:'Remplacer le kit et valider un débrayage correct après réparation. (Compétence C2.2)', materiel:['Kit d\'embrayage neuf', 'Centreur d\'embrayage', 'Cric de fosse pour boîte de vitesses', 'Clé dynamométrique'], 
+const tp: TP = { id: 24, duree:'4h00', titre:'BAC PRO Première • Dépose-pose embrayage', situation:'Un véhicule patine à l\'accélération. Le diagnostic confirme l\'usure de l\'embrayage. Vous êtes chargé du remplacement complet du kit (disque, mécanisme, butée).', objectif:'Remplacer le kit et valider un débrayage correct après réparation. (Compétence C2.2)', materiel:['Kit d\'embrayage neuf', 'Centreur d\'embrayage', 'Cric de fosse pour boîte de vitesses', 'Clé dynamométrique'], 
     etudePrelim:[
         { type: 'qcm', q: "Le moteur prend des tours mais la voiture n'accélère pas. C'est du patinage. Mais si les vitesses craquent au passage, quel autre symptôme cela indique-t-il ?", options: ["L'embrayage est neuf", "L'embrayage ne débraye plus correctement", "Le moteur est trop puissant"], r: "L'embrayage ne débraye plus correctement" },
         { type: 'text', q: "Réflexion critique : Pourquoi faut-il éviter de laisser la boîte de vitesses suspendue par l'arbre primaire lors de la dépose ?", r: 'Pour ne pas endommager l\'arbre primaire, le disque d\'embrayage ou le roulement pilote. Le poids de la boîte doit être supporté par un cric adapté.' },

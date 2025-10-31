@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 22, duree:'2h00', titre:'F 208 • Diagnostic du circuit de freinage avec passage au banc', situation:'Un véhicule doit passer au banc de freinage pour évaluer objectivement son efficacité et son équilibre avant le contrôle technique.', objectif:'Mesurer efficacité/équilibre/frein à main et effectuer un contrôle qualité. (Compétence C2.4)', materiel:['Banc de freinage à rouleaux','Fiche de résultats imprimée'], 
+const tp: TP = { id: 22, duree:'2h00', titre:'BAC PRO Première • Diagnostic du circuit de freinage avec passage au banc', situation:'Un véhicule doit passer au banc de freinage pour évaluer objectivement son efficacité et son équilibre avant le contrôle technique.', objectif:'Mesurer efficacité/équilibre/frein à main et effectuer un contrôle qualité. (Compétence C2.4)', materiel:['Banc de freinage à rouleaux','Fiche de résultats imprimée'], 
     etudePrelim:[
         {type: 'text', q:"Analyse de résultats : Efficacité globale = 55% (OK). Déséquilibre AV = 15% (OK). Déséquilibre AR = 45% (KO). Quelle est votre conclusion sur l'état du véhicule ?",r:'Le véhicule sera refusé au contrôle technique à cause du déséquilibre arrière supérieur à 30%. Il y a un problème sur un des freins arrière (étrier grippé, cylindre de roue HS...).'},
         {type: 'qcm', q:"Le véhicule tire à droite lors du test sur le banc. Quelle est la cause la plus probable en dehors du système de freinage lui-même ?", options: ["Le volant n'est pas droit", "Un pneu avant est sous-gonflé", "Le moteur est trop puissant"], r:"Un pneu avant est sous-gonflé"},

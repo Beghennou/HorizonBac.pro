@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 20, duree:'2h30', titre:'F 204 • Remplacement maître-cylindre', situation:'La pédale de frein est spongieuse et s\'enfonce lentement. Le diagnostic indique une fuite interne du maître-cylindre. Vous devez le remplacer.', objectif:'Reposer et purger correctement pour réparer le circuit. (Compétence C2.2)', materiel:['Maître-cylindre neuf','Liquide de frein DOT 4','Appareil de purge sous pression','Clés à tuyauter'], 
+const tp: TP = { id: 20, duree:'2h30', titre:'BAC PRO Première • Remplacement maître-cylindre', situation:'La pédale de frein est spongieuse et s\'enfonce lentement. Le diagnostic indique une fuite interne du maître-cylindre. Vous devez le remplacer.', objectif:'Reposer et purger correctement pour réparer le circuit. (Compétence C2.2)', materiel:['Maître-cylindre neuf','Liquide de frein DOT 4','Appareil de purge sous pression','Clés à tuyauter'], 
     etudePrelim:[
         {type: 'text', q:"Analyse de symptôme : Pédale spongieuse = Air dans le circuit. Pédale qui s'enfonce lentement au plancher = Fuite interne. Expliquez la différence physique entre ces deux défauts.",r:'Spongieuse : l\'air se comprime. Enfoncement lent : le liquide passe à travers les coupelles usées à l\'intérieur du maître-cylindre, il n\'y a pas de perte de liquide mais pas de maintien en pression.'},
         {type: 'qcm', q:"Pourquoi est-il conseillé de pré-remplir le maître-cylindre sur l'établi avant de le monter sur le véhicule ?", options: ["Pour le nettoyer", "Pour rendre la purge ultérieure beaucoup plus facile et rapide", "Ce n'est pas nécessaire"], r:"Pour rendre la purge ultérieure beaucoup plus facile et rapide"},

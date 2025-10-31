@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 117,
     duree: '2h00',
-    titre: 'Entretien d\'une Tondeuse à Gazon Thermique',
+    titre: 'BAC PRO Seconde • Entretien d\'une Tondeuse à Gazon Thermique',
     situation: 'Un client amène sa tondeuse thermique pour un entretien annuel avant la saison de tonte. Vous devez effectuer les opérations de maintenance préventive de base pour garantir son bon fonctionnement.',
     objectif: 'Réaliser les opérations d\'entretien préventif sur un moteur 4 temps de motoculture (vidange, filtre, bougie, lame). (Compétences C1.1, C1.2, C1.3)',
     materiel: [

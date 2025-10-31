@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 308,
     duree: '2h00',
-    titre: 'MA 307 • Contrôle du circuit basse pression diesel',
+    titre: 'BAC PRO Terminale • Contrôle du circuit basse pression diesel',
     situation: 'Un moteur diesel présente des difficultés de démarrage et des coupures moteur intermittentes. Vous suspectez un problème d\'alimentation et devez contrôler le circuit basse pression pour confirmer votre diagnostic.',
     objectif: 'Mesurer pression/dépression, détecter bulles et colmatage. (Compétence C3.3)',
     materiel: ['Mano BP', 'Tuyau transparent', 'Filtre gasoil', 'Valise diag'],

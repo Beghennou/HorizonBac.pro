@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 34, duree:'2h30', titre:'MA 204 • Diagnostic système injection essence', situation:'Un véhicule essence présente un manque de puissance et le témoin moteur est allumé. Vous devez mener un diagnostic complet du système d\'injection.', objectif:'Lier DTC/PIDs à des tests capteurs/actionneurs et réparer. (Compétences C2.1, C2.2, C2.4)', materiel:['Valise de diagnostic','Multimètre','Oscilloscope','Manomètre de pression essence'], 
+const tp: TP = { id: 34, duree:'2h30', titre:'BAC PRO Première • Diagnostic système injection essence', situation:'Un véhicule essence présente un manque de puissance et le témoin moteur est allumé. Vous devez mener un diagnostic complet du système d\'injection.', objectif:'Lier DTC/PIDs à des tests capteurs/actionneurs et réparer. (Compétences C2.1, C2.2, C2.4)', materiel:['Valise de diagnostic','Multimètre','Oscilloscope','Manomètre de pression essence'], 
     etudePrelim:[
         {type: 'text', q:"Méthodologie : La valise affiche 'P0171 - Système trop pauvre'. Listez 3 causes possibles, allant de la plus simple à la plus complexe, et expliquez comment les tester.",r:'1. Prise d\'air à l\'admission (test avec fumigène). 2. Pompe à essence faible ou filtre colmaté (test de pression/débit). 3. Injecteur bouché ou débitmètre défectueux (test des paramètres).'},
         {type: 'qcm', q:"La sonde lambda amont reste bloquée à 0.1V. Le mélange est-il riche ou pauvre ? Le calculateur va-t-il essayer d'enrichir ou d'appauvrir ?", options: ["Riche / Il va appauvrir", "Pauvre / Il va enrichir", "Normal / Il ne fait rien"], r:"Pauvre / Il va enrichir"},

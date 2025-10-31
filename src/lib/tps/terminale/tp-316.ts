@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 316,
     duree: '2h00',
-    titre: 'L 311 • Direction assistée électrique et hydraulique',
+    titre: 'BAC PRO Terminale • Direction assistée électrique et hydraulique',
     situation: 'Un client se plaint d\'une direction dure par moments et de bruits au braquage. Vous devez identifier le type de direction assistée (hydraulique ou électrique) et mener le diagnostic approprié.',
     objectif: 'Identifier système, lire codes, mesurer pression/params et valider. (Compétences C3.1, C3.2)',
     materiel: ['Valise DAE', 'Mano 0–150 bar', 'Multimètre', 'Fluide DA'],

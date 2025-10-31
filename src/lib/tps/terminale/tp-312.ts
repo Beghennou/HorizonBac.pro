@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 312,
     duree: '2h00',
-    titre: 'UE 304 • Utilisation d\'un oscilloscope',
+    titre: 'BAC PRO Terminale • Utilisation d\'un oscilloscope',
     situation: 'Pour diagnostiquer des pannes électroniques complexes, la maîtrise de l\'oscilloscope est indispensable. Cet atelier vise à vous former à la capture et à l\'analyse de signaux électriques automobiles.',
     objectif: 'Paramétrer, capter et interpréter des signaux capteurs/actionneurs. (Compétence C3.3)',
     materiel: ['Oscilloscope', 'Sondes diff', 'Pince ampèremétrique', 'Schémas'],

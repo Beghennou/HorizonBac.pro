@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 502,
     duree: '1h00',
-    titre: 'CAP • Remplacement du Filtre à Air',
+    titre: 'CAP 1ère Année • Remplacement du Filtre à Air',
     situation: 'Dans le cadre de l\'entretien périodique d\'un véhicule, le remplacement du filtre à air est préconisé.',
     objectif: 'Remplacer le filtre à air pour garantir une bonne qualité de l\'air admis par le moteur. (Compétence C1.3)',
     materiel: ['Filtre à air neuf', 'Tournevis', 'Chiffon'],

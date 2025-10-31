@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 21, duree:'1h45', titre:'F 206 • Relevé de pressions de freinage', situation:'Pour diagnostiquer un déséquilibre de freinage, vous devez mesurer les pressions hydrauliques aux 4 roues à l\'aide de manomètres.', objectif:'Détecter les déséquilibres, localiser la cause et effectuer le réglage. (Compétences C2.1, C2.3)', materiel:['Jeu de 4 manomètres haute pression','Adaptateurs de purge','Assistant pour actionner la pédale'], 
+const tp: TP = { id: 21, duree:'1h45', titre:'BAC PRO Première • Relevé de pressions de freinage', situation:'Pour diagnostiquer un déséquilibre de freinage, vous devez mesurer les pressions hydrauliques aux 4 roues à l\'aide de manomètres.', objectif:'Détecter les déséquilibres, localiser la cause et effectuer le réglage. (Compétences C2.1, C2.3)', materiel:['Jeu de 4 manomètres haute pression','Adaptateurs de purge','Assistant pour actionner la pédale'], 
     etudePrelim:[
         {type: 'text', q:"Analyse de données : Pression AVD=100b, AVG=60b, ARD=40b, ARG=40b. Quelle est l'anomalie principale et quel composant est probablement en cause ?",r:'Un déséquilibre avant important. La cause est probablement un étrier AVG grippé ou une canalisation bouchée.'},
         {type: 'qcm', q:"Les pressions avant sont bonnes mais vous n'avez quasiment aucune pression à l'arrière. Quelle est la cause la plus probable ?", options: ["Les plaquettes arrière sont neuves", "Le répartiteur de freinage est défectueux ou bloqué", "Le liquide de frein est trop vieux"], r:"Le répartiteur de freinage est défectueux ou bloqué"},

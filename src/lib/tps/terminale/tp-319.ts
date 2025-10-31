@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 319,
     duree: '2h00',
-    titre: 'Contrôle des Compressions et Étanchéité Moteur',
+    titre: 'BAC PRO Terminale • Contrôle des Compressions et Étanchéité Moteur',
     situation: 'Un moteur essence manque de puissance et présente un ralenti instable. Un relevé des compressions et un test d\'étanchéité sont nécessaires pour évaluer l\'état de santé du moteur.',
     objectif: 'Évaluer l\'étanchéité de la chambre de combustion pour poser un diagnostic moteur. (Compétences C1.1, C2.2, C2.3)',
     materiel: ['Véhicule essence', 'Compressiomètre', 'Contrôleur de fuite de cylindre', 'Clé à bougie', 'Documentation technique (RTA)', 'Fiche de relevé'],

@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 305,
     duree: '2h00',
-    titre: 'CA 311 • Phares au xénon',
+    titre: 'BAC PRO Terminale • Phares au xénon',
     situation: 'Un client se plaint d\'un éclairage faible sur son véhicule équipé de phares au xénon. De plus, le faisceau semble trop bas. Vous devez diagnostiquer le système haute tension et le correcteur d\'assiette automatique.',
     objectif: 'Contrôler ballasts, ampoules, correcteur auto et réglage faisceau. (Compétences C3.2, C3.3)',
     materiel: ['Valise diag', 'Régloscope', 'EPIs diélectriques'],

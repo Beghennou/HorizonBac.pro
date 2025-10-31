@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 19, duree:'2h00', titre:'MA 208 • Contrôle des injecteurs moteur diesel classique', situation:'Sur un moteur diesel ancienne génération, vous devez tester les injecteurs mécaniques sur un banc pour vérifier leur tarage et leur pulvérisation.', objectif:'Tester au banc, remplacer et conclure. (Compétences C2.2, C2.4)', materiel:['Banc de test d\'injecteurs','Gasoil propre','Éprouvettes graduées'], 
+const tp: TP = { id: 19, duree:'2h00', titre:'BAC PRO Première • Contrôle des injecteurs moteur diesel classique', situation:'Sur un moteur diesel ancienne génération, vous devez tester les injecteurs mécaniques sur un banc pour vérifier leur tarage et leur pulvérisation.', objectif:'Tester au banc, remplacer et conclure. (Compétences C2.2, C2.4)', materiel:['Banc de test d\'injecteurs','Gasoil propre','Éprouvettes graduées'], 
     etudePrelim:[
         {type: 'text', q:"Analyse de défaut : Un injecteur 'pisse' (laisse couler du gasoil) au lieu de pulvériser. Quelle sera la conséquence sur la combustion dans le cylindre concerné ?",r:'Une mauvaise combustion, provoquant de la fumée noire, des imbrûlés, un manque de puissance et potentiellement la fonte du piston à long terme.'},
         {type: 'qcm', q:"La pression d'ouverture d'un injecteur est trop basse. Comment cela va-t-il affecter le moment de l'injection et le bruit du moteur (claquements) ?", options: ["L'injection sera retardée et le moteur plus silencieux", "L'injection sera avancée et le moteur claquera davantage", "Ça n'a aucun effet"], r:"L'injection sera avancée et le moteur claquera davantage"},

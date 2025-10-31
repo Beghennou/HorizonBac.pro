@@ -7,7 +7,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 506,
     duree: '1h00',
-    titre: 'CAP • Contrôle et Remplacement des Ampoules',
+    titre: 'CAP 1ère Année • Contrôle et Remplacement des Ampoules',
     situation: "Un client signale qu'un de ses feux ne fonctionne plus. Vous devez effectuer un contrôle complet de l'éclairage et remplacer les ampoules défectueuses.",
     objectif: 'Identifier et remplacer les ampoules défectueuses. (Compétences C1.2, C1.3)',
     materiel: ['Jeu d\'ampoules de rechange', 'Tournevis', 'Chiffon microfibre', 'Gants'],

@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 11,
     duree: '2h00',
-    titre: 'Contrôle circuit moto-ventilation refroidissement',
+    titre: 'BAC PRO Première • Contrôle circuit moto-ventilation refroidissement',
     situation: 'Le propriétaire d\'une Citroën C3 est inquiet car le voyant de température de son moteur s\'allume et l\'indicateur dépasse fréquemment les 110°C en ville. Vous devez mener un diagnostic électrique pour trouver l\'origine de cette surchauffe.',
     objectif: 'Mener un diagnostic électrique précis sur le circuit de refroidissement pour identifier l\'origine d\'une surchauffe anormale. (Compétences C3.1, C3.3, C3.4, C2.1)',
     materiel: ['Valise de diagnostic', 'Multimètre', 'Thermomètre infrarouge', 'Documentation Technique (RTA)'],

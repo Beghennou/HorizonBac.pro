@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 314,
     duree: '2h00',
-    titre: 'MA 311 • Contrôle des injecteurs moteur à rampe commune 2',
+    titre: 'BAC PRO Terminale • Contrôle des injecteurs moteur à rampe commune 2',
     situation: 'Suite au diagnostic précédent, un injecteur a été identifié comme défectueux. Vous devez le déposer, le tester sur banc, et coder le nouvel injecteur dans le calculateur moteur.',
     objectif: 'Mesurer débits/étanchéité sur banc et coder corrections (IMA/IQA). (Compétence C3.4)',
     materiel: ['Banc injecteurs', 'Éprouvettes', 'Valise diag', 'RTA'],

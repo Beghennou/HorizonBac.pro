@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 310,
     duree: '2h30',
-    titre: 'MA 303 • Diagnostic système injection diesel',
+    titre: 'BAC PRO Terminale • Diagnostic système injection diesel',
     situation: 'Un véhicule diesel Common Rail présente le voyant moteur allumé, avec des pertes de puissance. Vous êtes chargé de mener un diagnostic avancé du système d\'injection pour identifier la source de la panne.',
     objectif: 'Analyser codes/paramètres, tester actionneurs et conclure. (Compétence C3.2)',
     materiel: ['Valise diag', 'Multimètre', 'Mano rampe', 'Oscilloscope', 'RTA'],

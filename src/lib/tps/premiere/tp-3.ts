@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 3, duree:'1h45', titre:'UE 202 • Contrôle circuit de démarrage', situation:'Un client se plaint que son véhicule refuse de démarrer. Le démarreur ne tourne pas. Vous devez diagnostiquer le circuit de démarrage pour identifier la cause de la panne.', objectif:'Identifier la cause d’un non-démarrage et valider le diagnostic. (Compétences C2.1, C2.4)', materiel:['Multimètre','Schéma électrique','Pince ampèremétrique','Chargeur de batterie'], 
+const tp: TP = { id: 3, duree:'1h45', titre:'BAC PRO Première • Contrôle circuit de démarrage', situation:'Un client se plaint que son véhicule refuse de démarrer. Le démarreur ne tourne pas. Vous devez diagnostiquer le circuit de démarrage pour identifier la cause de la panne.', objectif:'Identifier la cause d’un non-démarrage et valider le diagnostic. (Compétences C2.1, C2.4)', materiel:['Multimètre','Schéma électrique','Pince ampèremétrique','Chargeur de batterie'], 
     etudePrelim:[
         {type: 'qcm', q:"Le démarreur ne tourne pas. Quelle est la première chose à contrôler ?", options: ["Le démarreur lui-même", "L'alternateur", "La tension et l'état des cosses de la batterie"], r:"La tension et l'état des cosses de la batterie"},
         {type: 'text', q:"Interprétation de mesure : Vous mesurez 12,5V à la batterie, mais seulement 9V sur la borne de commande (solénoïde) lorsque vous tournez la clé. Que suspectez-vous ?",r:'Une chute de tension importante sur le circuit de commande, probablement due à un mauvais contact sur le Neiman, un relais défectueux ou un faisceau endommagé.'},

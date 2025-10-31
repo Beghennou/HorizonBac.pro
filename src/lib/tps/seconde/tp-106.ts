@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 106,
     duree: '1h45',
-    titre: 'Contrôle et Remplacement des Ampoules',
+    titre: 'BAC PRO Seconde • Contrôle et Remplacement des Ampoules',
     situation: 'Un client a été alerté par les forces de l\'ordre d\'un feu stop défectueux. Il demande un contrôle complet de l\'éclairage et le remplacement de toutes les ampoules nécessaires.',
     objectif: 'Identifier et remplacer les ampoules défectueuses. (Compétences C1.1, C1.2, C1.3)',
     materiel: ['Jeu d\'ampoules de rechange variées', 'Tournevis adaptés', 'Chiffon microfibre propre', 'Gants de protection', 'Assistant pour les tests'],

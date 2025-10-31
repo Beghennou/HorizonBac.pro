@@ -7,7 +7,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 507,
     duree: '1h00',
-    titre: "CAP • Contrôle et Remplacement d'une Batterie",
+    titre: "CAP 1ère Année • Contrôle et Remplacement d'une Batterie",
     situation: "Un client se plaint de difficultés de démarrage le matin. Vous devez contrôler la batterie et la remplacer si le diagnostic le confirme.",
     objectif: "Diagnostiquer l'état d'une batterie et la remplacer en toute sécurité. (Compétences C1.2, C1.3)",
     materiel: ['Multimètre', 'Testeur de batterie', 'Jeu de clés', 'Graisse pour cosses', 'Batterie neuve'],

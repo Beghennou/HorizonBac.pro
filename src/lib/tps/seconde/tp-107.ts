@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 107,
     duree: '1h00',
-    titre: 'Contrôle et Remplacement des Balais d\'Essuie-Glace',
+    titre: 'BAC PRO Seconde • Contrôle et Remplacement des Balais d\'Essuie-Glace',
     situation: 'Un client se plaint d\'une mauvaise visibilité sous la pluie, avec des traces laissées par les essuie-glaces. Un remplacement est nécessaire avant un long trajet.',
     objectif: 'Réaliser le remplacement des balais d\'essuie-glace et conseiller le client. (Compétences C1.1, C1.3)',
     materiel: ['Jeu de balais neufs', 'Chiffon', 'Produit de nettoyage vitre'],

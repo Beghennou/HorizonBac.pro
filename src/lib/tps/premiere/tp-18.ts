@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 18, duree:'2h00', titre:'MA 201 • Contrôle pression et débit essence', situation:'Un véhicule essence présente des pertes de puissance. Vous devez contrôler le circuit d\'alimentation basse pression pour vérifier la pompe à essence.', objectif:'Vérifier la régulation et le débit de la pompe avant une intervention. (Compétence C2.1)', materiel:['Manomètre de pression essence (0–6 bar)','Éprouvette graduée','Documentation technique (RTA)'], 
+const tp: TP = { id: 18, duree:'2h00', titre:'BAC PRO Première • Contrôle pression et débit essence', situation:'Un véhicule essence présente des pertes de puissance. Vous devez contrôler le circuit d\'alimentation basse pression pour vérifier la pompe à essence.', objectif:'Vérifier la régulation et le débit de la pompe avant une intervention. (Compétence C2.1)', materiel:['Manomètre de pression essence (0–6 bar)','Éprouvette graduée','Documentation technique (RTA)'], 
     etudePrelim:[
         {type: 'qcm', q:"La pression est correcte au ralenti, mais elle chute fortement lors d'une accélération franche. Le problème est-il plutôt la pompe, le régulateur ou le filtre à essence ?", options: ["Le régulateur", "La pompe est faible ou le filtre est colmaté, empêchant un débit suffisant", "Le réservoir est vide"], r:"La pompe est faible ou le filtre est colmaté, empêchant un débit suffisant"},
         {type: 'text', q:"Analyse de panne : Vous coupez le contact, la pression chute immédiatement à zéro. Quel composant du circuit est certainement défectueux ?",r:'Le clapet anti-retour de la pompe à essence.'},

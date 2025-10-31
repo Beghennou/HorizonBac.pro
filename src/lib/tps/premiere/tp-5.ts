@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 5, duree:'1h45', titre:'UE 201 • Contrôle circuit de charge', situation:'Le témoin de batterie s\'allume par intermittence. Le client craint une panne imminente. Vous devez contrôler le circuit de charge pour diagnostiquer le problème.', objectif:'Mesurer la tension de charge et les chutes de tension pour diagnostiquer. (Compétence C2.1)', materiel:['Multimètre','Pince ampèremétrique','Schéma électrique'], 
+const tp: TP = { id: 5, duree:'1h45', titre:'BAC PRO Première • Contrôle circuit de charge', situation:'Le témoin de batterie s\'allume par intermittence. Le client craint une panne imminente. Vous devez contrôler le circuit de charge pour diagnostiquer le problème.', objectif:'Mesurer la tension de charge et les chutes de tension pour diagnostiquer. (Compétence C2.1)', materiel:['Multimètre','Pince ampèremétrique','Schéma électrique'], 
     etudePrelim:[
         {type: 'text', q:"Scénario : Moteur tournant, vous mesurez 13.9V aux bornes de la batterie, mais le témoin reste allumé. Quelle pourrait être la cause, autre que l'alternateur lui-même ?",r:'Le fil d\'excitation (borne L/D+) de l\'alternateur est peut-être coupé ou le voyant lui-même est en défaut, car la tension de charge est correcte.'},
         {type: 'qcm', q:"Analyse Cause à Effet : Une courroie d'accessoires détendue patine. Quel sera l'impact sur la tension de charge mesurée aux bornes de la batterie ?", options: ["Aucun, l'alternateur compensera", "La tension sera instable et souvent trop basse", "La tension sera trop élevée"], r:"La tension sera instable et souvent trop basse"},

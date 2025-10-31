@@ -43,7 +43,7 @@ function etape(titre: string, duree: string, etapes: string[]): Etape {
 const tp: TP = {
     id: 501,
     duree: '1h30',
-    titre: 'CAP • Contrôle et Mise à Niveau des Fluides',
+    titre: 'CAP 1ère Année • Contrôle et Mise à Niveau des Fluides',
     situation: 'Un véhicule est présenté pour un contrôle de routine. Vous devez vérifier l\'ensemble des niveaux des fluides et effectuer les appoints nécessaires.',
     objectif: 'Contrôler les niveaux d\'huile, de liquide de refroidissement, de frein et de lave-glace et réaliser les ajustements. (Compétences C1.2, C1.3)',
     materiel: ['Chiffons', 'Entonnoir', 'Huile moteur préconisée', 'Liquide de refroidissement', 'Liquide de frein', 'Produit lave-glace'],

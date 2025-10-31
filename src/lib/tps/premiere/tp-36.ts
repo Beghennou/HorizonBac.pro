@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 36, duree:'1h45', titre:'ME 203 • Contrôle du circuit de pré-post chauffage', situation:'Un moteur diesel démarre mal à froid et fume blanc. Vous devez contrôler le circuit de préchauffage pour trouver la cause.', objectif:'Tester les bougies, relais et temporisation puis effectuer le réglage. (Compétences C2.2, C2.3)', materiel:['Multimètre','Pince ampèremétrique','Chronomètre','Schéma électrique'], 
+const tp: TP = { id: 36, duree:'1h45', titre:'BAC PRO Première • Contrôle du circuit de pré-post chauffage', situation:'Un moteur diesel démarre mal à froid et fume blanc. Vous devez contrôler le circuit de préchauffage pour trouver la cause.', objectif:'Tester les bougies, relais et temporisation puis effectuer le réglage. (Compétences C2.2, C2.3)', materiel:['Multimètre','Pince ampèremétrique','Chronomètre','Schéma électrique'], 
     etudePrelim:[
         {type: 'qcm', q:"Le moteur démarre mal mais le témoin de préchauffage s'allume correctement. Quelle est votre première hypothèse de diagnostic ?", options: ["Le calculateur est HS", "Une ou plusieurs bougies de préchauffage sont grillées", "La batterie est neuve"], r:"Une ou plusieurs bougies de préchauffage sont grillées"},
         {type: 'text', q:"Scénario : Vous mesurez une intensité totale de 30A sur un moteur 4 cylindres. Est-ce cohérent ? Combien de bougies sont probablement défectueuses ?",r:'Non, ce n\'est pas cohérent. Une bougie consomme environ 10-15A. Pour 4 cylindres, on attend 40-60A. Avec 30A, il y a probablement une bougie de défectueuse (voire deux).'},

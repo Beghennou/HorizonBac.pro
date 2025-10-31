@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 307,
     duree: '1h45',
-    titre: 'MA 305 • Relevé de pressions de suralimentation',
+    titre: 'BAC PRO Terminale • Relevé de pressions de suralimentation',
     situation: 'Un client rapporte une perte de puissance significative et un sifflement anormal à l\'accélération sur son moteur turbo. Vous êtes chargé de contrôler le circuit de suralimentation pour identifier la cause du problème.',
     objectif: 'Comparer pressions aux valeurs constructeur, identifier fuites/wastegate/VGT. (Compétences C3.1, C3.4)',
     materiel: ['Mano turbo', 'Valise diag', 'T de dérivation', 'Fumigène'],

@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 116,
     duree: '1h30',
-    titre: 'Remplacement d\'un Pneumatique sur Jante',
+    titre: 'BAC PRO Seconde • Remplacement d\'un Pneumatique sur Jante',
     situation: 'Suite à une crevaison non réparable, vous devez déposer un pneu usagé de sa jante, monter un pneu neuf, l\'équilibrer et le remonter sur le véhicule du client.',
     objectif: 'Maîtriser la chaîne complète du remplacement d\'un pneumatique : démontage, montage, équilibrage et remontage sur véhicule. (Compétences C1.3, C1.1)',
     materiel: ['Démonte-pneu', 'Équilibreuse', 'Masses d\'équilibrage', 'Valve neuve', 'Graisse à pneu', 'Clé dynamométrique'],

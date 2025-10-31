@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 318,
     duree: '2h30',
-    titre: 'T 307 • Diagnostic BV robotisée',
+    titre: 'BAC PRO Terminale • Diagnostic BV robotisée',
     situation: 'Les vitesses passent mal sur une boîte robotisée : passages lents, à-coups, ou blocage sur un rapport. Vous devez diagnostiquer le système de commande électro-hydraulique et effectuer les apprentissages nécessaires.',
     objectif: 'Lire paramètres, tester actionneurs, réaliser apprentissages et valider passages. (Compétence C3.4)',
     materiel: ['Valise constructeur', 'Multimètre', 'Schéma BV robotisée', 'EPIs'],

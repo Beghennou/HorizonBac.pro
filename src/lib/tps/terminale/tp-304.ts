@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 304,
     duree: '1h30',
-    titre: 'CA 303 • Reconnaissance des valves de roues',
+    titre: 'BAC PRO Terminale • Reconnaissance des valves de roues',
     situation: 'Malgré une pression des pneus correcte, le témoin TPMS (Tire Pressure Monitoring System) reste allumé. Vous devez diagnostiquer le système, identifier le capteur défaillant et le réappairer au calculateur.',
     objectif: 'Appairer capteurs, remplacer valve défectueuse et valider pressions. (Compétence C3.4)',
     materiel: ['Outil TPMS', 'Valise diag', 'Manomètre', 'Valves neuves'],

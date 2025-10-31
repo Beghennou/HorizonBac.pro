@@ -5,7 +5,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
     return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 38, duree:'1h30', titre:'MP 202 • Contrôle des sondes lambda', situation:'Le témoin moteur est allumé et le diagnostic pointe vers un défaut sur les sondes lambda. Vous devez les contrôler pour valider le diagnostic.', objectif:'Vérifier oscillations, temps de réponse et effectuer les réglages. (Compétences C2.2, C2.3)', materiel:['Valise de diagnostic','Oscilloscope','Multimètre','Clé à sonde lambda'], 
+const tp: TP = { id: 38, duree:'1h30', titre:'BAC PRO Première • Contrôle des sondes lambda', situation:'Le témoin moteur est allumé et le diagnostic pointe vers un défaut sur les sondes lambda. Vous devez les contrôler pour valider le diagnostic.', objectif:'Vérifier oscillations, temps de réponse et effectuer les réglages. (Compétences C2.2, C2.3)', materiel:['Valise de diagnostic','Oscilloscope','Multimètre','Clé à sonde lambda'], 
     etudePrelim:[
         {type: 'text', q:"Analyse de signal : À l'oscilloscope, le signal de la sonde amont varie lentement, prenant plus d'une seconde pour passer de 0.2V à 0.8V. Quel est le diagnostic pour cette sonde ?",r:'La sonde est \'vieillissante\' ou \'paresseuse\'. Elle ne réagit plus assez vite aux changements de richesse, ce qui nuit à la régulation et à la consommation.'},
         {type: 'qcm', q:"La sonde aval oscille de la même manière que la sonde amont. Quelle est la conclusion sur l'état du catalyseur ?", options: ["Le catalyseur fonctionne parfaitement", "Le catalyseur est HS, il ne traite plus les gaz.", "C'est un problème de sonde"], r:"Le catalyseur est HS, il ne traite plus les gaz."},

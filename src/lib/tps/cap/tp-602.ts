@@ -8,7 +8,7 @@ function etape(titre: string, duree: string, etapes: string[]): any {
 const tp: TP = {
     id: 602,
     duree: '1h30',
-    titre: 'CAP • Diagnostic Simple : Feux Stop',
+    titre: 'CAP 2ème Année • Diagnostic Simple : Feux Stop',
     situation: 'Un client signale que ses feux stop ne fonctionnent plus. Vous devez réaliser un diagnostic de premier niveau.',
     objectif: 'Identifier la cause d\'une panne simple sur le circuit d\'éclairage. (Compétence C2.5)',
     materiel: ['Multimètre', 'Jeu d\'ampoules neuves', 'Jeu de fusibles'],
