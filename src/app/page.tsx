@@ -17,13 +17,13 @@ export default function Home() {
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 bg-hero-image">
       <div className="absolute inset-0 bg-black/60 z-10" />
 
-      <main className="z-20 flex flex-col items-center justify-center text-center text-white w-full max-w-4xl">
+      <main className="z-20 flex flex-1 flex-col items-center justify-center text-center text-white w-full">
         
         <div className="flex items-center justify-center mb-6 relative">
             <h1 className="font-headline text-5xl md:text-7xl font-black uppercase tracking-widest text-shadow-lg">
               HORIZON
             </h1>
-            <div className="absolute -top-16 -right-20 md:-right-24 w-24 h-24">
+            <div className="absolute -top-4 -right-16 md:-right-20 w-16 h-16 md:w-20 md:h-20">
               <Logo className="w-full h-full text-white" />
             </div>
         </div>
