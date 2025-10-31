@@ -4,13 +4,12 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { School, UserCog, ArrowRight } from 'lucide-react';
+import { School, UserCog } from 'lucide-react';
 
 import { LyceeLogo } from '@/components/lycee-logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils';
 
 export default function Home() {
   const [cursus, setCursus] = useState('bacpro');
