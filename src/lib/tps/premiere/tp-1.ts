@@ -1,4 +1,3 @@
-
 export type Etape = {
   titre: string;
   duree: string;
@@ -20,7 +19,6 @@ export type EtudePrelimQCM = {
 
 export type EtudePrelim = EtudePrelimText | EtudePrelimQCM;
 
-
 export type TP = {
   id: number;
   duree: string;
@@ -37,15 +35,67 @@ export type TP = {
 };
 
 function etape(titre: string, duree: string, etapes: string[]): Etape {
-    return { titre, duree, etapes };
+  return { titre, duree, etapes };
 }
 
-const tp: TP = { id: 1, duree:'2h00', titre:'AS 207 • Accueillir le client et restituer le véhicule', situation:'Un client se présente à l\'atelier sans rendez-vous. Son véhicule est immobilisé. Vous êtes chargé de l\'accueillir, de prendre en charge le véhicule en créant un Ordre de Réparation (OR) complet et de lui expliquer la procédure à suivre.', objectif:'Réaliser un accueil et une restitution professionnels, avec OR et traçabilité. (Compétence C2.1)', materiel:['OR','Grille d’état','Tablette atelier','Documents garantie'], 
-    etudePrelim:[
-        {type: 'text', q:"Analyse de scénario : Un client arrive, sa voiture ne démarre plus. Il n'a pas de rendez-vous et semble pressé. Quelle est votre première action pour le rassurer tout en respectant la procédure de l'atelier ?",r:'Écouter activement, montrer de l\'empathie, puis expliquer les étapes à venir (prise en charge, diagnostic initial).'},
-        {type: 'text', q:"L'OR est un contrat. Citez les 3 informations les plus critiques à y faire figurer pour protéger à la fois le client et l'atelier. Justifiez vos choix.",r:'1. Identité client/véhicule (immat, km). 2. Demande claire du client (symptôme). 3. Date et signature pour accord. Cela évite les litiges.'},
-        {type: 'qcm', q:"Le client vous dit : 'Le problème est apparu juste après votre dernière intervention, ça doit être sous garantie !'. Comment réagissez-vous ?", options: ["Je confirme que c'est sous garantie pour le calmer.", "Je lui dis que ce n'est pas possible.", "Je reste factuel, vérifie l'historique et lui explique que nous allons diagnostiquer la cause avant de parler de garantie."], r:"Je reste factuel, vérifie l'historique et lui explique que nous allons diagnostiquer la cause avant de parler de garantie."}
-    ], 
-    activitePratique:[ etape('Accueil et Prise en Charge','30 min',['Accueillir le client avec professionnalisme et courtoisie.','Écouter activement les symptômes décrits par le client.','Effectuer une inspection visuelle du véhicule en présence du client.','Rédiger un Ordre de Réparation (OR) complet incluant immatriculation, kilométrage et demande précise.']), etape('Suivi de l\'Intervention','30 min',['Informer le client des délais prévisionnels.','Obtenir un accord écrit pour les travaux complémentaires.']), etape('Restitution du Véhicule','40 min',['Expliquer clairement la facture au client.','Donner des conseils d\'entretien et planifier le prochain rendez-vous.','Archiver le dossier et s\'assurer de la satisfaction du client.']) ], securiteRangement:['Protection des données personnelles (RGPD)','Archivage méthodique des OR','Maintien d\'un espace d\'accueil propre et ordonné'], pointsCles:['Clarté de l\'OR','Traçabilité des interventions','Posture professionnelle'], validationRequise: false, };
+const tp: TP = {
+  id: 1,
+  duree: '2h00',
+  titre: 'Diagnostic par méthode du point-milieu',
+  situation: 'Un client signale qu\'un équipement électrique (ex: feu stop, dégivrage) ne fonctionne plus. Plutôt que de tout tester au hasard, le chef d\'atelier vous demande d\'appliquer une méthode de diagnostic systématique pour trouver la panne efficacement.',
+  objectif: 'Appliquer la méthode de diagnostic du point-milieu pour isoler rapidement un défaut dans un circuit électrique. (Compétences C3.1, C3.2, C3.3)',
+  materiel: ['Multimètre', 'Schéma électrique du circuit concerné', 'Fiches de mesure'],
+  etudePrelim: [
+    {
+      type: 'text',
+      q: 'Expliquez avec vos mots le principe de la méthode du point-milieu. Pourquoi est-elle plus rapide qu\'un test linéaire de chaque composant ?',
+      r: 'Elle consiste à diviser le circuit en deux et à tester le point central. Cela permet d\'éliminer la moitié du circuit à chaque mesure, réduisant ainsi exponentiellement le nombre de tests nécessaires.',
+    },
+    {
+        type: 'qcm',
+        q: 'Le démarreur ne tourne pas. Le circuit part de la batterie, passe par le neiman, puis va au démarreur. Où faites-vous votre première mesure selon la méthode du point-milieu ?',
+        options: ['Directement aux bornes de la batterie', 'Sur la borne de commande du démarreur', 'Au niveau du neiman (contacteur à clé)'],
+        r: 'Au niveau du neiman (contacteur à clé)',
+    },
+    {
+      type: 'text',
+      q: 'Quels sont les risques si l\'on ne suit pas une méthode structurée pour un diagnostic électrique (ex: piquer les fils au hasard) ?',
+      r: 'Perte de temps, risque de créer un court-circuit, d\'endommager un calculateur, ou de passer à côté de la vraie panne.',
+    },
+  ],
+  activitePratique: [
+    etape('Observation et Préparation', '20 min', [
+      'Constater le dysfonctionnement (ex: le feu de croisement droit ne s\'allume pas).',
+      'Se procurer le schéma électrique correspondant.',
+      'Identifier sur le schéma : la source (batterie), la protection (fusible), la commande (commodo), et le récepteur (ampoule).',
+    ]),
+    etape('Application de la Méthode - 1ère Division', '30 min', [
+        'Identifier un point central dans le circuit (ex: un connecteur intermédiaire, la sortie du commodo).',
+        'Mesurer la tension à ce point. (Contact mis, commande actionnée).',
+        'Noter la valeur : si 12V présents, le problème est en aval (vers l\'ampoule). Si 0V, le problème est en amont (vers le fusible/batterie).',
+    ]),
+    etape('Application de la Méthode - 2ème Division', '30 min', [
+      'Choisir un nouveau point-milieu dans la section défectueuse identifiée.',
+      'Refaire une mesure de tension (ou de continuité si la section est hors tension).',
+      'Continuer le processus jusqu\'à isoler le composant ou la portion de faisceau défaillante.',
+    ]),
+    etape('Validation et Conclusion', '20 min', [
+      'Une fois la cause identifiée (ex: fil coupé, connecteur oxydé, masse défectueuse), effectuer la réparation.',
+      'Vérifier que l\'équipement fonctionne à nouveau correctement.',
+      'Expliquer la démarche et la panne trouvée sur la fiche d\'intervention.',
+    ]),
+  ],
+  securiteRangement: [
+    'Toujours couper le contact avant de mesurer une continuité (Ohmmètre).',
+    'Ne jamais "piquer" un fil isolé, toujours se connecter sur une prise existante.',
+    'Respecter les calibres du multimètre pour ne pas griller son fusible interne.',
+  ],
+  pointsCles: [
+    'Diviser pour régner : la clé de la méthode.',
+    'La lecture de schéma est la première étape indispensable.',
+    'Une mesure à la fois, une conclusion à la fois.',
+  ],
+  validationRequise: false,
+};
 
 export default tp;
