@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { TP, EtudePrelimQCM, allBlocs } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,12 +30,14 @@ const statusOptions: { value: EvaluationStatus, label: string, color: string }[]
 export default function EvaluationPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { toast } = useToast();
     const { firestore, tps, saveEvaluation, saveFeedback, updateTpStatus } = useFirebase();
 
     const studentName = decodeURIComponent(params.studentId as string);
     const tpId = parseInt(params.tpId as string, 10);
     const tp = tps[tpId];
+    const cursus = searchParams.get('cursus');
 
     const [competenceEvals, setCompetenceEvals] = useState<Record<string, EvaluationStatus>>({});
     const [prelimNote, setPrelimNote] = useState('');
@@ -100,7 +102,8 @@ export default function EvaluationPage() {
         });
 
         if (isFinal) {
-            router.push('/teacher/dashboard/tps-to-evaluate');
+            const params = new URLSearchParams(searchParams.toString());
+            router.push(`/teacher/dashboard/tps-to-evaluate?${params.toString()}`);
         }
     };
     
@@ -112,7 +115,8 @@ export default function EvaluationPage() {
             title: "Demande envoyée",
             description: `L'élève a été notifié qu'il doit refaire ce TP.`
         });
-        router.push('/teacher/dashboard/tps-to-evaluate');
+        const params = new URLSearchParams(searchParams.toString());
+        router.push(`/teacher/dashboard/tps-to-evaluate?${params.toString()}`);
     }
 
     if (!tp) {
