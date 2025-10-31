@@ -19,7 +19,7 @@ export default function Home() {
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
       {/* Background Image */}
       <Image
-        src="https://images.unsplash.com/photo-1621999903936-7c9b8c3b9b4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtZWNoYW5pYyUyMHN0dWRlbnRzfGVufDB8fHx8MTcyNDA2NzE3MXww&ixlib=rb-4.1.0&q=80&w=1080"
+        src="/images/background.jpg"
         alt="Deux étudiants en mécanique travaillant sur un moteur de voiture"
         data-ai-hint="mechanic students"
         fill
