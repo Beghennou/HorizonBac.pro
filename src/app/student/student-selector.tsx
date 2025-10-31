@@ -20,14 +20,11 @@ export default function StudentSelector() {
   const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
 
   const teachers = useMemo(() => {
-      if (!allTeachers) return [];
-      // Use an object to ensure names are unique if they are the same
-      const uniqueTeachers = allTeachers.filter(
-        (teacher, index, self) =>
-          index === self.findIndex(t => t.id === teacher.id)
-      );
-      return uniqueTeachers.sort((a, b) => a.name.localeCompare(b.name));
-  }, [allTeachers]);
+    if (!allTeachers) return [];
+    return allTeachers
+      .filter(teacher => teacher.cursus === cursus)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [allTeachers, cursus]);
   
   const classNames = useMemo(() => {
     if (!allClassData) return [];

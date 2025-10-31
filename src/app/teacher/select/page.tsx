@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +23,11 @@ export default function SelectTeacherPage() {
 
     const cursus = (searchParams.get('cursus') as Cursus) || 'bacpro';
 
+    const teachersForCursus = useMemo(() => {
+        if (!teachers) return [];
+        return teachers.filter(t => t.cursus === cursus).sort((a,b) => a.name.localeCompare(b.name));
+    }, [teachers, cursus]);
+
     useEffect(() => {
         const isAuth = sessionStorage.getItem('teacher_auth');
         if (isAuth !== 'true') {
@@ -31,7 +36,7 @@ export default function SelectTeacherPage() {
         }
 
         const pendingTeacher = sessionStorage.getItem('pendingTeacherName');
-        if (pendingTeacher && teachers.some(t => t.name === pendingTeacher)) {
+        if (pendingTeacher && teachers.some(t => t.name === pendingTeacher && t.cursus === cursus)) {
             setSelectedTeacher(pendingTeacher);
             sessionStorage.removeItem('pendingTeacherName');
         }
@@ -60,13 +65,13 @@ export default function SelectTeacherPage() {
             toast({ variant: 'destructive', title: 'Le nom ne peut pas être vide.' });
             return;
         }
-        if (teachers.some(t => t.name === teacherNameToAdd)) {
+        if (teachers.some(t => t.name === teacherNameToAdd && t.cursus === cursus)) {
             toast({ variant: 'destructive', title: 'Ce nom existe déjà', description: 'Veuillez choisir un autre nom ou sélectionner ce profil dans la liste.' });
             return;
         }
 
         try {
-            await addTeacher(teacherNameToAdd);
+            await addTeacher(teacherNameToAdd, cursus);
             toast({ title: 'Profil créé', description: `Veuillez sélectionner ${teacherNameToAdd} dans la liste pour vous connecter.` });
             sessionStorage.setItem('pendingTeacherName', teacherNameToAdd);
             setNewTeacherName('');
@@ -92,7 +97,7 @@ export default function SelectTeacherPage() {
                                     <SelectValue placeholder="Choisir un profil..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {teachers.sort((a,b) => a.name.localeCompare(b.name)).map(teacher => (
+                                    {teachersForCursus.map(teacher => (
                                         <SelectItem key={teacher.id} value={teacher.name}>{teacher.name}</SelectItem>
                                     ))}
                                 </SelectContent>
@@ -106,7 +111,7 @@ export default function SelectTeacherPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Créer un Nouveau Profil</CardTitle>
-                        <CardDescription>Si votre nom n'est pas dans la liste, créez un nouveau profil.</CardDescription>
+                        <CardDescription>Si votre nom n'est pas dans la liste, créez un nouveau profil pour le cursus {cursus.toUpperCase()}.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">

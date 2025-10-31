@@ -8,7 +8,7 @@ import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc
 import { Auth, User, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { useToast } from '@/hooks/use-toast';
-import { TP, initialTps } from '@/lib/data-manager';
+import { TP, initialTps, Cursus } from '@/lib/data-manager';
 import { Student } from '@/lib/types';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
@@ -99,7 +99,7 @@ export interface FirebaseContextState {
   teacherName: string;
   setTeacherName: (name: string) => void;
   teachers: DocumentData[];
-  addTeacher: (name: string) => Promise<void>;
+  addTeacher: (name: string, cursus: Cursus) => Promise<void>;
   deleteTeacher: (teacherId: string) => void;
   customSignOut: () => void;
   deleteStudent: (studentId: string, studentName: string) => void;
@@ -233,9 +233,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     sessionStorage.setItem('teacherName', name);
   }, [firestore]);
 
-  const addTeacher = useCallback(async (name: string) => {
+  const addTeacher = useCallback(async (name: string, cursus: Cursus) => {
     if (!firestore) return;
-    await addTeacherInDb(firestore, name);
+    await addTeacherInDb(firestore, name, cursus);
   }, [firestore]);
   
   const deleteTeacher = useCallback(async (teacherId: string) => {

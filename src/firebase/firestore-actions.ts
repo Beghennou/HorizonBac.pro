@@ -3,7 +3,7 @@
 'use client';
 import { Firestore, doc, setDoc, writeBatch, DocumentData, collection, deleteDoc, getDocs, updateDoc, addDoc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { TP } from '@/lib/data-manager';
+import { TP, Cursus } from '@/lib/data-manager';
 import type { TpStatus } from './provider';
 import { FirestorePermissionError } from './errors';
 import { errorEmitter } from './error-emitter';
@@ -147,12 +147,12 @@ export const setTeacherNameInDb = async (firestore: Firestore, teacherId: string
     });
 };
 
-export const addTeacherInDb = async (firestore: Firestore, name: string) => {
-    await addDoc(collection(firestore, 'teachers'), { name }).catch(error => {
+export const addTeacherInDb = async (firestore: Firestore, name: string, cursus: Cursus) => {
+    await addDoc(collection(firestore, 'teachers'), { name, cursus }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: 'teachers',
             operation: 'create',
-            requestResourceData: { name },
+            requestResourceData: { name, cursus },
         }));
     });
 };

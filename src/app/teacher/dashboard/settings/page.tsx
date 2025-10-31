@@ -75,16 +75,16 @@ export default function SettingsPage() {
   const classNames = useMemo(() => classes
     .map(c => c.id)
     .filter(name => {
-        const lowerCaseName = name.toLowerCase();
+        const upperCaseName = name.toUpperCase();
         if (cursus === 'cap') {
-            return lowerCaseName.includes('cap');
+            return upperCaseName.includes('CAP');
         }
         // Pour bacpro, on exclut les CAPs
-        return !lowerCaseName.includes('cap');
+        return upperCaseName.includes('BAC') && !upperCaseName.includes('CAP');
     })
     .sort(), [classes, cursus]);
 
-  const teacherList = useMemo(() => teachers.sort((a,b) => a.name.localeCompare(b.name)), [teachers]);
+  const teacherList = useMemo(() => teachers.filter(t => t.cursus === cursus).sort((a,b) => a.name.localeCompare(b.name)), [teachers, cursus]);
 
   const secondeClasses = useMemo(() => classNames.filter(name => name.startsWith('2BAC')), [classNames]);
   const premiereClasses = useMemo(() => classNames.filter(name => name.startsWith('1BAC')), [classNames]);
@@ -235,7 +235,7 @@ export default function SettingsPage() {
           toast({ variant: 'destructive', title: 'Le nom ne peut pas être vide.' });
           return;
       }
-      addTeacher(newTeacherName.trim());
+      addTeacher(newTeacherName.trim(), cursus);
       setNewTeacherName('');
   };
   
@@ -304,8 +304,8 @@ export default function SettingsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><UserCog /> Gestion des Enseignants</CardTitle>
-          <CardDescription>Ajoutez ou supprimez des profils d'enseignants. Cette section est commune à tous les cursus.</CardDescription>
+          <CardTitle className="flex items-center gap-2"><UserCog /> Gestion des Enseignants ({cursus.toUpperCase()})</CardTitle>
+          <CardDescription>Ajoutez ou supprimez des profils d'enseignants pour ce cursus.</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="add">
