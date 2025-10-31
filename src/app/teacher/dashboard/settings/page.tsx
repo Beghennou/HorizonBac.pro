@@ -136,7 +136,7 @@ export default function SettingsPage() {
   
   const handleAddStudent = async () => {
       const studentName = `${firstName.trim()} ${lastName.trim().toUpperCase()}`;
-      const targetClass = newClassNameForStudent.trim() || selectedClassForStudent;
+      const targetClass = selectedClassForStudent;
 
       if (!firstName || !lastName || !targetClass) {
         toast({ variant: 'destructive', title: 'Champs manquants', description: 'Veuillez remplir tous les champs pour ajouter un élève.' });
@@ -149,16 +149,12 @@ export default function SettingsPage() {
       
       if (classData) {
         updateClassWithCsv(targetClass, newStudentList);
-      } else {
-        createClass(targetClass, cursus);
-        // We need a slight delay to ensure the class is created before adding students
-        setTimeout(() => updateClassWithCsv(targetClass, newStudentList), 500);
-      }
+      } 
 
       toast({ title: 'Élève ajouté', description: `${studentName} a été ajouté à la classe ${targetClass}.` });
       setFirstName('');
       setLastName('');
-      setNewClassNameForStudent('');
+      setSelectedClassForStudent('');
   };
   
   const handleCreateClass = () => {
@@ -384,27 +380,21 @@ export default function SettingsPage() {
                           <Input id="last-name" placeholder="ex: BAKHTAR" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                       </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                          <Label htmlFor="select-class-student">Assigner à une classe existante</Label>
-                          <Select onValueChange={setSelectedClassForStudent} value={selectedClassForStudent} >
-                              <SelectTrigger id="select-class-student">
-                                  <SelectValue placeholder="Choisir une classe..." />
-                              </SelectTrigger>
-                              <SelectContent>
-                                  {classNames.map(c => (
-                                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                                  ))}
-                              </SelectContent>
-                          </Select>
-                      </div>
-                      <div className="space-y-2">
-                          <Label htmlFor="new-class-student">Ou créer une nouvelle classe pour l'élève</Label>
-                          <Input id="new-class-student" placeholder="ex: 2BAC-MV6" value={newClassNameForStudent} onChange={(e) => setNewClassNameForStudent(e.target.value)} />
-                      </div>
-                  </div>
+                   <div className="space-y-2">
+                        <Label htmlFor="select-class-student">Assigner à une classe existante</Label>
+                        <Select onValueChange={setSelectedClassForStudent} value={selectedClassForStudent} >
+                            <SelectTrigger id="select-class-student">
+                                <SelectValue placeholder="Choisir une classe..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {classNames.map(c => (
+                                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                   <div className="flex justify-end">
-                      <Button onClick={handleAddStudent}>
+                      <Button onClick={handleAddStudent} disabled={!firstName || !lastName || !selectedClassForStudent}>
                           <UserPlus className="mr-2 h-4 w-4" />
                           Ajouter l'élève
                       </Button>
