@@ -98,8 +98,8 @@ function DashboardLayoutContent({
                      <h1 className="font-headline text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-primary to-racing-orange text-transparent bg-clip-text">
                         HORIZON BAC. PRO.
                     </h1>
-                    <div className="flex items-center justify-center w-9 h-9 rounded-md bg-gradient-to-br from-primary to-racing-orange border-2 border-accent">
-                      <Logo className="w-7 h-7 text-white" />
+                    <div className="w-9 h-9">
+                      <Logo />
                     </div>
                     </Link>
                 </div>
