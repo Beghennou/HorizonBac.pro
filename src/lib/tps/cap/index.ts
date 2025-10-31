@@ -8,6 +8,10 @@ import tp507 from './tp-507';
 import tp601 from './tp-601';
 import tp602 from './tp-602';
 import tp603 from './tp-603';
+import type { TP as TP_CAP_1, Etape as Etape_CAP, EtudePrelim as EtudePrelim_CAP, EtudePrelimQCM as EtudePrelimQCM_CAP, EtudePrelimText as EtudePrelimText_CAP } from '@/lib/types/tp-types';
+import type { TP as TP_CAP_2 } from '@/lib/types/tp-types';
+
+export type { TP_CAP_1, TP_CAP_2, Etape_CAP, EtudePrelim_CAP, EtudePrelimQCM_CAP, EtudePrelimText_CAP };
 
 export const tps = {
     [tp501.id]: tp501,

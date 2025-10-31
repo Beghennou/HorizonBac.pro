@@ -128,7 +128,7 @@ export default function TPPage() {
   const validatedStepsCount = useMemo(() => {
     if (!studentValidations || !studentValidations.steps) return 0;
     const practicalStepsKeys = tp.activitePratique.map((_: Etape, i: number) => `etape-${i}`);
-    return practicalStepsKeys.filter(key => studentValidations.steps[key]).length;
+    return practicalStepsKeys.filter((key: string) => studentValidations.steps[key]).length;
   }, [studentValidations, tp.activitePratique]);
 
   const totalPracticalSteps = tp.activitePratique.length;
@@ -391,10 +391,3 @@ export default function TPPage() {
     </div>
   );
 }
-
-    
-
-
-
-    
-

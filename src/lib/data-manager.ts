@@ -1,57 +1,13 @@
 
-
 import { competencesParNiveau as bacProCompetences } from './bac-pro-data';
 import { competencesParNiveau as capCompetences } from './cap-data';
-import type { TP_CAP_1, TP_CAP_2, Etape_CAP, EtudePrelim_CAP, EtudePrelimQCM_CAP, EtudePrelimText_CAP } from './tps/cap';
-import type { TP_PREMIERE, Etape_PREMIERE, EtudePrelim_PREMIERE, EtudePrelimQCM_PREMIERE, EtudePrelimText_PREMIERE } from './tps/premiere';
-import type { TP_SECONDE, Etape_SECONDE, EtudePrelim_SECONDE, EtudePrelimQCM_SECONDE, EtudePrelimText_SECONDE } from './tps/seconde';
-import type { TP_TERMINALE, Etape_TERMINALE, EtudePrelim_TERMINALE, EtudePrelimQCM_TERMINALE, EtudePrelimText_TERMINALE } from './tps/terminale';
-
-// Import all TPs from the new structure
 import { tps as tpsCap } from './tps/cap';
 import { tps as tpsPremiere } from './tps/premiere';
 import { tps as tpsSeconde } from './tps/seconde';
 import { tps as tpsTerminale } from './tps/terminale';
+import type { TP, Niveau, Cursus, ClassData, CompetenceBloc } from './types/tp-types';
 
-
-export type EtudePrelimQCM = EtudePrelimQCM_SECONDE | EtudePrelimQCM_PREMIERE | EtudePrelimQCM_TERMINALE | EtudePrelimQCM_CAP;
-export type EtudePrelimText = EtudePrelimText_SECONDE | EtudePrelimText_PREMIERE | EtudePrelimText_TERMINALE | EtudePrelimText_CAP;
-
-export type Etape = Etape_SECONDE | Etape_PREMIERE | Etape_TERMINALE | Etape_CAP;
-export type EtudePrelim = EtudePrelim_SECONDE | EtudePrelim_PREMIERE | EtudePrelim_TERMINALE | EtudePrelim_CAP;
-
-// Unified TP type
-export type TP = (TP_SECONDE | TP_PREMIERE | TP_TERMINALE | TP_CAP_1 | TP_CAP_2) & {
-    etudePrelim: EtudePrelim[];
-    author?: string;
-    creationDate?: string;
-    niveau?: Niveau;
-    ressources?: string[];
-    validationRequise?: boolean;
-};
-
-export type Niveau = 'seconde' | 'premiere' | 'terminale' | 'cap1' | 'cap2';
-export type Cursus = 'bacpro' | 'cap';
-export type TpStatus = 'non-commencé' | 'en-cours' | 'terminé' | 'à-refaire';
-
-export type CompetenceBloc = {
-  title: string;
-  colorClass: string;
-  items: Record<string, string>;
-};
-
-export type ClassData = {
-    id: string;
-    studentNames: string[];
-    cursus: Cursus;
-    niveau: Niveau;
-};
-
-export const competencesParNiveau: Record<Niveau, Record<string, CompetenceBloc>> = {
-  ...bacProCompetences,
-  ...capCompetences
-};
-
+export type { TP, Niveau, Cursus, ClassData, CompetenceBloc, Etape, EtudePrelim, EtudePrelimQCM, EtudePrelimText, TpStatus } from './types/tp-types';
 
 // Combine all imported TPs into a single object
 export const initialTps: Record<number, TP> = {
@@ -113,6 +69,11 @@ export const getTpById = (id: number, all?: boolean, allTpsFromContext?: Record<
         return sourceTps;
     }
     return sourceTps[id];
+};
+
+export const competencesParNiveau: Record<Niveau, Record<string, CompetenceBloc>> = {
+  ...bacProCompetences,
+  ...capCompetences
 };
 
 export const allBlocs: Record<string, CompetenceBloc> = Object.values(competencesParNiveau).reduce((acc, curr) => {
