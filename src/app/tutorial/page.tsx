@@ -13,6 +13,15 @@ import { initialTps, getTpsByNiveau, Cursus, Niveau, NIVEAUX_BACPRO, NIVEAUX_CAP
 
 export default function TutorialPage() {
 
+  const getLevelFromId = (tpId: number): Niveau | null => {
+    if (tpId >= 101 && tpId < 200) return 'seconde';
+    if (tpId >= 1 && tpId < 101) return 'premiere';
+    if (tpId >= 301 && tpId < 500) return 'terminale';
+    if (tpId >= 501 && tpId < 600) return 'cap1';
+    if (tpId >= 601 && tpId < 700) return 'cap2';
+    return null;
+  }
+
   const renderTpTable = (niveaux: { value: Niveau, label: string }[]) => {
     return (
       <Accordion type="single" collapsible className="w-full">
@@ -23,7 +32,7 @@ export default function TutorialPage() {
 
           return (
             <AccordionItem value={niveau.value} key={niveau.value}>
-              <AccordionTrigger className="text-xl font-headline">{niveau.label} ({specificTps.length} TPs)</AccordionTrigger>
+              <AccordionTrigger className="text-xl font-headline">{niveau.label} ({specificTps.length} TP)</AccordionTrigger>
               <AccordionContent>
                 <Table>
                   <TableHeader>
@@ -48,15 +57,6 @@ export default function TutorialPage() {
       </Accordion>
     );
   };
-
-  const getLevelFromId = (tpId: number): Niveau | null => {
-    if (tpId >= 101 && tpId < 200) return 'seconde';
-    if (tpId >= 1 && tpId < 101) return 'premiere';
-    if (tpId >= 301 && tpId < 500) return 'terminale';
-    if (tpId >= 501 && tpId < 600) return 'cap1';
-    if (tpId >= 601 && tpId < 700) return 'cap2';
-    return null;
-  }
 
   return (
     <div className="bg-background min-h-screen text-foreground">
