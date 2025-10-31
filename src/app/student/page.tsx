@@ -19,6 +19,7 @@ import { collection } from 'firebase/firestore';
 function StudentDashboard() {
   const searchParams = useSearchParams();
   const studentName = searchParams.get('student');
+  const cursus = searchParams.get('cursus');
   const { firestore, assignedTps, tps: allTps, updateTpStatus } = useFirebase();
 
   const { data: studentStoredEvals } = useCollection(useMemoFirebase(() => firestore && studentName ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName]));
@@ -56,6 +57,7 @@ function StudentDashboard() {
 
   const getTpCategory = (tpId: number): string => {
     if (tpId >= 1000) return "TP Personnalisé";
+    if (tpId >= 501) return 'CAP';
     if (tpId >= 301) return 'Terminale / Diagnostic Avancé';
     if (tpId >= 1 && tpId < 101) return 'Première / Maintenance Corrective';
     if (tpId >= 101) return 'Seconde / Entretien Périodique';
@@ -91,7 +93,14 @@ function StudentDashboard() {
               const currentStatusInfo = statusInfo[module.status as keyof typeof statusInfo] || statusInfo['non-commencé'];
               const isRedo = module.status === 'à-refaire';
               
-              const linkHref = `/student/tp/${module.id}?student=${encodeURIComponent(studentName)}`;
+              const linkParams = new URLSearchParams();
+              if (studentName) linkParams.set('student', studentName);
+              if (cursus) linkParams.set('cursus', cursus);
+              if (searchParams.get('class')) linkParams.set('class', searchParams.get('class')!);
+
+
+              const linkHref = `/student/tp/${module.id}?${linkParams.toString()}`;
+
               const handleRedoClick = (e: React.MouseEvent) => {
                 if (studentName) {
                   // Prevent navigation if we only want to update status, but here we want both
