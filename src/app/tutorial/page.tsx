@@ -39,7 +39,11 @@ export default function TutorialPage() {
                     {tpsForLevel.map(tp => (
                       <TableRow key={tp.id}>
                         <TableCell className="font-medium">{tp.id}</TableCell>
-                        <TableCell>{tp.titre}</TableCell>
+                        <TableCell>
+                          <Link href={`/student/tp-list?tp=${tp.id}`} target="_blank" className="hover:underline hover:text-accent">
+                            {tp.titre}
+                          </Link>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -304,14 +308,6 @@ export default function TutorialPage() {
                         <CardDescription>
                             Aperçu de tous les TP disponibles dans la plateforme, classés par cursus et niveau.
                         </CardDescription>
-                        <div className="pt-4">
-                            <Button asChild>
-                                <Link href="/student/tp-list" target="_blank">
-                                    <BookCopy className="mr-2 h-4 w-4" />
-                                    Consulter les Fiches TP
-                                </Link>
-                            </Button>
-                        </div>
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue="bacpro">
