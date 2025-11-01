@@ -40,7 +40,7 @@ export default function TutorialPage() {
                       <TableRow key={tp.id}>
                         <TableCell className="font-medium">{tp.id}</TableCell>
                         <TableCell>
-                          <Link href={`/student/tp-list?tp=${tp.id}`} target="_blank" className="hover:underline hover:text-accent">
+                          <Link href={`/tp-fiche/${tp.id}`} target="_blank" className="hover:underline hover:text-accent">
                             {tp.titre}
                           </Link>
                         </TableCell>
