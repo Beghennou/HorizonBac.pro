@@ -304,6 +304,14 @@ export default function TutorialPage() {
                         <CardDescription>
                             Aperçu de tous les TP disponibles dans la plateforme, classés par cursus et niveau.
                         </CardDescription>
+                        <div className="pt-4">
+                            <Button asChild>
+                                <Link href="/student/tp-list" target="_blank">
+                                    <BookCopy className="mr-2 h-4 w-4" />
+                                    Consulter les Fiches TP
+                                </Link>
+                            </Button>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue="bacpro">
