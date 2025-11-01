@@ -46,6 +46,18 @@ const tp: TP = {
                 'Retester le multimètre sur la source 12V pour s\'assurer qu\'il n\'est pas tombé en panne pendant la mesure.',
                 'Le véhicule est maintenant sécurisé. Vous pouvez procéder à l\'intervention non électrique.'
             ]
+        },
+        {
+            titre: 'Étape 4 : Remise en Service',
+            duree: '15 min',
+            etapes: [
+                'S\'assurer que l\'intervention est terminée et que tout l\'outillage est retiré.',
+                'Récupérer son cadenas personnel et retirer la "Service Plug" et la clé du boîtier de consignation.',
+                'Retirer la pancarte de signalisation du volant.',
+                'Reconnecter la "Service Plug" haute tension.',
+                'Reconnecter la cosse négative de la batterie 12V.',
+                'Mettre le contact et vérifier l\'absence de voyant d\'erreur lié au système hybride.'
+            ]
         }
     ],
     securiteRangement: [
