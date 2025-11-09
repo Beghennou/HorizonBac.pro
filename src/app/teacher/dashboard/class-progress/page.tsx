@@ -7,7 +7,7 @@ import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Check, Clock, X, CheckSquare, Loader2, AlertTriangle, BookOpen, Users } from 'lucide-react';
+import { Check, Clock, X, CheckSquare, Loader2, AlertTriangle, BookOpen, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
@@ -15,15 +15,27 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function ClassProgressPage() {
     const searchParams = useSearchParams();
     const { toast } = useToast();
-    const { firestore, tps: allTps, assignedTps, assignTp, isLoaded: isFirebaseLoaded } = useFirebase();
+    const { firestore, tps: allTps, assignedTps, assignTp, unassignTp, isLoaded: isFirebaseLoaded } = useFirebase();
 
     const currentClassName = searchParams.get('class');
     const level = (searchParams.get('level') as Niveau) || 'seconde';
-    const [selectedTpId, setSelectedTpId] = useState<string>('');
+    const [selectedTpIdToAssign, setSelectedTpIdToAssign] = useState<string>('');
+    const [selectedTpIdToUnassign, setSelectedTpIdToUnassign] = useState<string>('');
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
 
@@ -44,16 +56,20 @@ export default function ClassProgressPage() {
     const tpsForLevel = useMemo(() => getTpsByNiveau(level, allTps), [level, allTps]);
 
     const handleAssignTp = () => {
-        if (selectedStudents.length > 0 && selectedTpId) {
-            assignTp(selectedStudents, parseInt(selectedTpId, 10));
-            toast({
-              title: "TP Assigné",
-              description: `Le TP #${selectedTpId} a été assigné à ${selectedStudents.length} élève(s).`,
-            });
-            setSelectedTpId('');
+        if (selectedStudents.length > 0 && selectedTpIdToAssign) {
+            assignTp(selectedStudents, parseInt(selectedTpIdToAssign, 10));
+            setSelectedTpIdToAssign('');
             setSelectedStudents([]);
         }
     };
+    
+    const handleUnassignTp = () => {
+        if (selectedStudents.length > 0 && selectedTpIdToUnassign) {
+            unassignTp(selectedStudents, parseInt(selectedTpIdToUnassign, 10));
+            setSelectedTpIdToUnassign('');
+            setSelectedStudents([]);
+        }
+    }
 
     const handleSelectAll = (checked: boolean) => {
         setSelectedStudents(checked ? studentsInClass : []);
@@ -129,13 +145,18 @@ export default function ClassProgressPage() {
                 tooltipText = 'En cours';
                 className = 'bg-yellow-500/20';
                 break;
+             case 'à-refaire':
+                icon = <AlertTriangle className="text-orange-400" />;
+                tooltipText = 'À refaire';
+                className = 'bg-orange-500/20';
+                break;
             case 'non-commencé':
                 icon = <X className="text-red-500" />;
                 tooltipText = 'Non commencé';
                 className = 'bg-red-500/20';
                 break;
             default:
-                icon = <span className="text-muted-foreground text-xs">N/A</span>;
+                icon = <span className="text-muted-foreground text-xs"></span>;
                 tooltipText = 'Non assigné';
                 className = 'bg-muted/10';
         }
@@ -167,24 +188,67 @@ export default function ClassProgressPage() {
                                 Suivi de la Classe: {currentClassName}
                             </CardTitle>
                             <CardDescription>
-                                Vue d'ensemble de la progression des élèves. Sélectionnez des élèves et un TP pour une assignation rapide.
+                                Vue d'ensemble de la progression des élèves. Sélectionnez des élèves et un TP pour une assignation ou une suppression.
                             </CardDescription>
                         </div>
-                        <div className="flex items-center gap-2">
-                             <Select onValueChange={setSelectedTpId} value={selectedTpId}>
-                                <SelectTrigger className="w-[350px]">
-                                    <SelectValue placeholder="Assigner un TP..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {tpsForLevel.map(tp => (
-                                        <SelectItem key={tp.id} value={tp.id.toString()}>TP {tp.id} - {tp.titre}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Button onClick={handleAssignTp} disabled={!selectedTpId || selectedStudents.length === 0}>
-                                <BookOpen className="mr-2"/>
-                                Assigner ({selectedStudents.length})
-                            </Button>
+                        <div className="flex items-start gap-4">
+                            <div className="flex flex-col gap-2">
+                                <p className="text-sm font-medium text-muted-foreground">Assigner un nouveau TP :</p>
+                                <div className="flex items-center gap-2">
+                                    <Select onValueChange={setSelectedTpIdToAssign} value={selectedTpIdToAssign}>
+                                        <SelectTrigger className="w-[350px]">
+                                            <SelectValue placeholder="Choisir un TP à assigner..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {tpsForLevel.map(tp => (
+                                                <SelectItem key={tp.id} value={tp.id.toString()}>TP {tp.id} - {tp.titre}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <Button onClick={handleAssignTp} disabled={!selectedTpIdToAssign || selectedStudents.length === 0}>
+                                        <BookOpen className="mr-2"/>
+                                        Assigner ({selectedStudents.length})
+                                    </Button>
+                                </div>
+                            </div>
+                             <div className="flex flex-col gap-2">
+                                <p className="text-sm font-medium text-muted-foreground">Retirer un TP assigné :</p>
+                                <div className="flex items-center gap-2">
+                                    <Select onValueChange={setSelectedTpIdToUnassign} value={selectedTpIdToUnassign}>
+                                        <SelectTrigger className="w-[350px]">
+                                            <SelectValue placeholder="Choisir un TP à retirer..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {allAssignedTpIdsInClass.map(tpId => {
+                                                const tp = allTps[tpId];
+                                                return (
+                                                    <SelectItem key={tpId} value={tpId.toString()}>TP {tpId} - {tp?.titre || 'Titre inconnu'}</SelectItem>
+                                                )
+                                            })}
+                                        </SelectContent>
+                                    </Select>
+                                     <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="destructive" disabled={!selectedTpIdToUnassign || selectedStudents.length === 0}>
+                                                <Trash2 className="mr-2"/>
+                                                Retirer ({selectedStudents.length})
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                            <AlertDialogTitle>Êtes-vous sûr de vouloir retirer ce TP ?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Cette action est irréversible. Le TP et toute progression associée seront supprimés pour les {selectedStudents.length} élèves sélectionnés.
+                                            </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleUnassignTp} className="bg-destructive hover:bg-destructive/90">Confirmer la suppression</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </CardHeader>

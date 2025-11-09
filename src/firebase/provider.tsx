@@ -31,7 +31,8 @@ import {
     updateStudentNameInDb,
     addTeacherInDb,
     AssignedTp,
-    deleteTeacherFromDb
+    deleteTeacherFromDb,
+    unassignTpFromStudents
 } from './firestore-actions';
 import { checkAndSeedData } from './seed-data';
 
@@ -91,6 +92,7 @@ export interface FirebaseContextState {
   userError: Error | null;
   
   assignTp: (studentNames: string[], tpId: number) => void;
+  unassignTp: (studentNames: string[], tpId: number) => void;
   saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean) => void;
   updateTpStatus: (studentName: string, tpId: number, status: TpStatus) => Promise<void>;
   savePrelimAnswer: (studentName: string, tpId: number, questionIndex: number, answer: PrelimAnswer) => void;
@@ -305,6 +307,15 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       toast({
           title: "TP Assigné",
           description: `Le TP #${tpId} a été assigné à ${studentNames.length} élève(s).`,
+      });
+    },
+    unassignTp: (studentNames: string[], tpId: number) => {
+      if (!firestore) return;
+      unassignTpFromStudents(firestore, studentNames, tpId, assignedTps);
+       toast({
+          variant: "destructive",
+          title: "TP Retiré",
+          description: `Le TP #${tpId} a été retiré pour ${studentNames.length} élève(s).`,
       });
     },
     saveEvaluation: (studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, prelimNote: string, tpNote: string, isFinal: boolean) => {

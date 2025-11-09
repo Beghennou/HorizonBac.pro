@@ -44,6 +44,28 @@ export const assignTpToStudents = async (firestore: Firestore, studentNames: str
     });
 };
 
+export const unassignTpFromStudents = async (firestore: Firestore, studentNames: string[], tpId: number, allAssignedTps: Record<string, AssignedTp[]>) => {
+    const batch = writeBatch(firestore);
+
+    studentNames.forEach(studentName => {
+        const currentTps = allAssignedTps[studentName] || [];
+        const newTps = currentTps.filter(tp => tp.id !== tpId);
+        
+        // Only write if the list has changed
+        if (newTps.length !== currentTps.length) {
+            const studentDocRef = doc(firestore, `assignedTps/${studentName}`);
+            batch.set(studentDocRef, { tps: newTps });
+        }
+    });
+
+    await batch.commit().catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: 'batch unassignTp',
+            operation: 'write',
+        }));
+    });
+};
+
 export const saveStudentEvaluation = async (firestore: Firestore, studentName: string, tpId: number, currentEvals: Record<string, EvaluationStatus>, evaluations: Record<string, any>, prelimNote?: string, tpNote?: string, isFinal?: boolean) => {
     const evalDate = new Date().toLocaleDateString('fr-FR');
     

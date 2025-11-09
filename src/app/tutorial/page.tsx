@@ -4,7 +4,7 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass, ClipboardCheck, LayoutDashboard, CheckSquare, CircuitBoard, ShieldCheck, Wrench, Search, Sparkles, CheckCircle, Trophy, Printer } from 'lucide-react';
+import { Users, BookCopy, FileText, Settings, ArrowRight, User, GraduationCap, Bot, ChevronsRight, MessageSquare, Award, BarChart3, DraftingCompass, ClipboardCheck, LayoutDashboard, CheckSquare, CircuitBoard, ShieldCheck, Wrench, Search, Sparkles, CheckCircle, Trophy, Printer, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -148,14 +148,14 @@ export default function TutorialPage() {
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-3">
-                                    <AccordionTrigger className="text-xl font-headline">3. Assigner des TP</AccordionTrigger>
+                                    <AccordionTrigger className="text-xl font-headline">3. Assigner et Retirer des TP</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <Users className="inline h-5 w-5"/> <strong>Assigner des TP</strong> :</p>
+                                        <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <CheckSquare className="inline h-5 w-5"/> <strong>Progression</strong> :</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li>Sélectionnez la classe concernée dans le menu en haut.</li>
                                             <li>Cochez les cases des élèves que vous souhaitez concerner (ou "Tout sélectionner").</li>
-                                             <li>Utilisez le menu déroulant pour choisir le TP à leur affecter.</li>
-                                             <li>Cliquez sur "Assigner". Le TP apparaît instantanément sur le tableau de bord de chaque élève sélectionné.</li>
+                                            <li><strong>Pour assigner :</strong> Utilisez le menu déroulant "Choisir un TP à assigner...", sélectionnez le TP, puis cliquez sur le bouton <span className="font-bold text-accent">Assigner</span>.</li>
+                                            <li><strong>Pour retirer :</strong> Utilisez le menu "Choisir un TP à retirer..." qui ne liste que les TPs déjà assignés. Sélectionnez-en un et cliquez sur <span className="font-bold text-destructive">Retirer</span>. Une confirmation vous sera demandée.</li>
+                                             <li>Le tableau se met à jour instantanément pour refléter les changements sur le tableau de bord des élèves.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>
