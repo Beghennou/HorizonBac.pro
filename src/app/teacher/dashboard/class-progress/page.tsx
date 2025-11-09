@@ -191,65 +191,67 @@ export default function ClassProgressPage() {
                                 Vue d'ensemble de la progression des élèves. Sélectionnez des élèves et un TP pour une assignation ou une suppression.
                             </CardDescription>
                         </div>
-                        <div className="flex items-start gap-4">
-                            <div className="flex flex-col gap-2">
-                                <p className="text-sm font-medium text-muted-foreground">Assigner un nouveau TP :</p>
-                                <div className="flex items-center gap-2">
-                                    <Select onValueChange={setSelectedTpIdToAssign} value={selectedTpIdToAssign}>
-                                        <SelectTrigger className="w-[350px]">
-                                            <SelectValue placeholder="Choisir un TP à assigner..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {tpsForLevel.map(tp => (
-                                                <SelectItem key={tp.id} value={tp.id.toString()}>TP {tp.id} - {tp.titre}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <Button onClick={handleAssignTp} disabled={!selectedTpIdToAssign || selectedStudents.length === 0}>
-                                        <BookOpen className="mr-2"/>
-                                        Assigner ({selectedStudents.length})
-                                    </Button>
+                        {studentsInClass.length > 0 && (
+                            <div className="flex items-start gap-4">
+                                <div className="flex flex-col gap-2">
+                                    <p className="text-sm font-medium text-muted-foreground">Assigner un nouveau TP :</p>
+                                    <div className="flex items-center gap-2">
+                                        <Select onValueChange={setSelectedTpIdToAssign} value={selectedTpIdToAssign}>
+                                            <SelectTrigger className="w-[350px]">
+                                                <SelectValue placeholder="Choisir un TP à assigner..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {tpsForLevel.map(tp => (
+                                                    <SelectItem key={tp.id} value={tp.id.toString()}>TP {tp.id} - {tp.titre}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Button onClick={handleAssignTp} disabled={!selectedTpIdToAssign || selectedStudents.length === 0}>
+                                            <BookOpen className="mr-2"/>
+                                            Assigner ({selectedStudents.length})
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <p className="text-sm font-medium text-muted-foreground">Retirer un TP assigné :</p>
+                                    <div className="flex items-center gap-2">
+                                        <Select onValueChange={setSelectedTpIdToUnassign} value={selectedTpIdToUnassign}>
+                                            <SelectTrigger className="w-[350px]">
+                                                <SelectValue placeholder="Choisir un TP à retirer..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {allAssignedTpIdsInClass.map(tpId => {
+                                                    const tp = allTps ? allTps[tpId] : null;
+                                                    return (
+                                                        <SelectItem key={tpId} value={tpId.toString()}>TP {tpId} - {tp?.titre || 'Titre inconnu'}</SelectItem>
+                                                    )
+                                                })}
+                                            </SelectContent>
+                                        </Select>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="destructive" disabled={!selectedTpIdToUnassign || selectedStudents.length === 0}>
+                                                    <Trash2 className="mr-2"/>
+                                                    Retirer ({selectedStudents.length})
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                <AlertDialogTitle>Êtes-vous sûr de vouloir retirer ce TP ?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Cette action est irréversible. Le TP et toute progression associée seront supprimés pour les {selectedStudents.length} élèves sélectionnés.
+                                                </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                                <AlertDialogAction onClick={handleUnassignTp} className="bg-destructive hover:bg-destructive/90">Confirmer la suppression</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
                                 </div>
                             </div>
-                             <div className="flex flex-col gap-2">
-                                <p className="text-sm font-medium text-muted-foreground">Retirer un TP assigné :</p>
-                                <div className="flex items-center gap-2">
-                                    <Select onValueChange={setSelectedTpIdToUnassign} value={selectedTpIdToUnassign}>
-                                        <SelectTrigger className="w-[350px]">
-                                            <SelectValue placeholder="Choisir un TP à retirer..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {allAssignedTpIdsInClass.map(tpId => {
-                                                const tp = allTps ? allTps[tpId] : null;
-                                                return (
-                                                    <SelectItem key={tpId} value={tpId.toString()}>TP {tpId} - {tp?.titre || 'Titre inconnu'}</SelectItem>
-                                                )
-                                            })}
-                                        </SelectContent>
-                                    </Select>
-                                     <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button variant="destructive" disabled={!selectedTpIdToUnassign || selectedStudents.length === 0}>
-                                                <Trash2 className="mr-2"/>
-                                                Retirer ({selectedStudents.length})
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                            <AlertDialogTitle>Êtes-vous sûr de vouloir retirer ce TP ?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                Cette action est irréversible. Le TP et toute progression associée seront supprimés pour les {selectedStudents.length} élèves sélectionnés.
-                                            </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleUnassignTp} className="bg-destructive hover:bg-destructive/90">Confirmer la suppression</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </div>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </CardHeader>
                 <CardContent>
