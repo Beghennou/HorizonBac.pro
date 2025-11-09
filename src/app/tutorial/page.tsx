@@ -116,7 +116,7 @@ export default function TutorialPage() {
                                         <ul className="list-disc pl-6 space-y-2">
                                             <li>Des statistiques clés : nombre d'élèves, TP à évaluer, et progression moyenne de la classe.</li>
                                             <li>Des accès rapides pour assigner des TP ou évaluer les élèves.</li>
-                                            <li>Un aperçu de la progression de chaque élève.</li>
+                                            <li>Un aperçu de la progression de chaque élève. La sélection de la classe reste active lorsque vous naviguez entre les différents écrans.</li>
                                             <li>Pour une vue détaillée, allez dans l'onglet <CheckSquare className="inline h-5 w-5"/> <strong>Progression</strong>, qui vous montre une grille complète de l'avancement de chaque élève sur chaque TP assigné.</li>
                                         </ul>
                                     </AccordionContent>
@@ -306,7 +306,7 @@ export default function TutorialPage() {
                     <CardHeader>
                         <CardTitle className="font-headline text-4xl tracking-wide text-accent">Liste des Travaux Pratiques</CardTitle>
                         <CardDescription>
-                            Aperçu de tous les TP disponibles dans la plateforme, classés par cursus et niveau.
+                            Aperçu de tous les TP disponibles dans la plateforme, classés par cursus et niveau. Cliquez sur un titre pour ouvrir sa fiche détaillée dans une nouvelle fenêtre.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
