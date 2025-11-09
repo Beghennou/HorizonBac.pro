@@ -31,7 +31,7 @@ export default function TutorialPage() {
       switch (niveau) {
           case 'seconde': return tpId >= 101 && tpId < 200;
           case 'premiere': return tpId >= 1 && tpId < 101;
-          case 'terminale': return tpId >= 301;
+          case 'terminale': return tpId >= 301 && tpId < 500;
           case 'cap1': return tpId >= 501 && tpId < 600;
           case 'cap2': return tpId >= 601 && tpId < 700;
           default: return false;
