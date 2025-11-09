@@ -29,7 +29,7 @@ const isTpOfNiveau = (tp: TP, niveau: Niveau): boolean => {
     switch (niveau) {
         case 'seconde': return tpId >= 101 && tpId < 200;
         case 'premiere': return tpId >= 1 && tpId < 101;
-        case 'terminale': return tpId >= 301 && tpId < 500;
+        case 'terminale': return tpId >= 301;
         case 'cap1': return tpId >= 501 && tpId < 600; // Assuming CAP TPs start at 501
         case 'cap2': return tpId >= 601 && tpId < 700; // Assuming CAP 2nd year TPs start at 601
         default: return false;
