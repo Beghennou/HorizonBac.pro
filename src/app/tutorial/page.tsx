@@ -9,21 +9,46 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getTpsByNiveau, Cursus, Niveau, NIVEAUX_BACPRO, NIVEAUX_CAP } from '@/lib/data-manager';
+import { useFirebase } from '@/firebase';
+import { TP, Cursus, Niveau, NIVEAUX_BACPRO, NIVEAUX_CAP } from '@/lib/data-manager';
 
 
 export default function TutorialPage() {
-  
+  const { tps: allTps } = useFirebase();
+
   const handlePrint = () => {
     window.print();
   };
+
+  const isTpOfSpecificLevel = (tp: TP, niveau: Niveau): boolean => {
+      if (!tp) return false;
+      const tpId = tp.id;
+
+      if (tp.niveau) {
+          return tp.niveau === niveau;
+      }
+      
+      switch (niveau) {
+          case 'seconde': return tpId >= 101 && tpId < 200;
+          case 'premiere': return tpId >= 1 && tpId < 101;
+          case 'terminale': return tpId >= 301;
+          case 'cap1': return tpId >= 501 && tpId < 600;
+          case 'cap2': return tpId >= 601 && tpId < 700;
+          default: return false;
+      }
+  }
+
+  const getTpsForLevelOnly = (niveau: Niveau): TP[] => {
+      const sourceTps = allTps ? Object.values(allTps) : [];
+      return sourceTps.filter(tp => isTpOfSpecificLevel(tp, niveau)).sort((a,b) => a.id - b.id);
+  };
+
 
   const renderTpTable = (niveaux: { value: Niveau, label: string }[]) => {
     return (
       <Accordion type="single" collapsible className="w-full">
         {niveaux.map(niveau => {
-          // Utilisation de la fonction getTpsByNiveau pour un filtrage correct et complet
-          const tpsForLevel = getTpsByNiveau(niveau.value);
+          const tpsForLevel = getTpsForLevelOnly(niveau.value);
 
           return (
             <AccordionItem value={niveau.value} key={niveau.value}>
