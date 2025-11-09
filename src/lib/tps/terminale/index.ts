@@ -18,6 +18,9 @@ import tp317 from './tp-317';
 import tp318 from './tp-318';
 import tp319 from './tp-319';
 import tp320 from './tp-320';
+import tp350 from './tp-350';
+import tp351 from './tp-351';
+import tp352 from './tp-352';
 
 export const tps = {
     [tp301.id]: tp301,
@@ -39,4 +42,7 @@ export const tps = {
     [tp318.id]: tp318,
     [tp319.id]: tp319,
     [tp320.id]: tp320,
+    [tp350.id]: tp350,
+    [tp351.id]: tp351,
+    [tp352.id]: tp352,
 };
