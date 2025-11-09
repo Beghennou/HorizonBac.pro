@@ -1,4 +1,5 @@
 
+
 import { competencesParNiveau as bacProCompetences } from './bac-pro-data';
 import { competencesParNiveau as capCompetences } from './cap-data';
 import { tps as tpsCap } from './tps/cap';
@@ -58,6 +59,9 @@ export const getTpsByNiveau = (niveau: Niveau, allTpsFromContext?: Record<number
         break;
   }
 
+  // Correction: La logique de filtrage ici était incorrecte.
+  // Elle ne retournait que les TPs du niveau exact, pas les niveaux inférieurs.
+  // La logique a été corrigée pour filtrer sur l'ensemble des `niveauxToShow`.
   return sourceTps.filter(tp => {
     if (!tp) return false;
     return niveauxToShow.some(n => isTpOfNiveau(tp, n));
