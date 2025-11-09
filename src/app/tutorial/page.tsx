@@ -20,26 +20,26 @@ export default function TutorialPage() {
     window.print();
   };
 
-  const isTpOfSpecificLevel = (tp: TP, niveau: Niveau): boolean => {
-      if (!tp) return false;
-      const tpId = tp.id;
-
-      if (tp.niveau) {
-          return tp.niveau === niveau;
-      }
-      
-      switch (niveau) {
-          case 'seconde': return tpId >= 101 && tpId < 200;
-          case 'premiere': return tpId >= 1 && tpId < 101;
-          case 'terminale': return tpId >= 301 && tpId < 500;
-          case 'cap1': return tpId >= 501 && tpId < 600;
-          case 'cap2': return tpId >= 601 && tpId < 700;
-          default: return false;
-      }
-  }
-
   const getTpsForLevelOnly = (niveau: Niveau): TP[] => {
       const sourceTps = allTps ? Object.values(allTps) : [];
+      
+      const isTpOfSpecificLevel = (tp: TP, niveau: Niveau): boolean => {
+          if (!tp) return false;
+          const tpId = tp.id;
+
+          if (tp.niveau) {
+              return tp.niveau === niveau;
+          }
+          
+          switch (niveau) {
+              case 'seconde': return tpId >= 101 && tpId < 200;
+              case 'premiere': return tpId >= 1 && tpId < 101;
+              case 'terminale': return tpId >= 301 && tpId < 500;
+              case 'cap1': return tpId >= 501 && tpId < 600;
+              case 'cap2': return tpId >= 601 && tpId < 700;
+              default: return false;
+          }
+      }
       return sourceTps.filter(tp => isTpOfSpecificLevel(tp, niveau)).sort((a,b) => a.id - b.id);
   };
 
@@ -150,12 +150,12 @@ export default function TutorialPage() {
                                 <AccordionItem value="item-3">
                                     <AccordionTrigger className="text-xl font-headline">3. Assigner et Retirer des TP</AccordionTrigger>
                                     <AccordionContent className="text-base text-muted-foreground p-4">
-                                        <p className="mb-4">Une fois vos élèves inscrits, rendez-vous sur la page <CheckSquare className="inline h-5 w-5"/> <strong>Progression</strong> :</p>
+                                        <p className="mb-4">Vous pouvez gérer les TPs depuis les pages <CheckSquare className="inline h-5 w-5"/> <strong>Progression</strong> et <Users className="inline h-5 w-5"/> <strong>Assigner des TP</strong>.</p>
                                         <ul className="list-disc pl-6 space-y-2">
-                                            <li>Cochez les cases des élèves que vous souhaitez concerner (ou "Tout sélectionner").</li>
-                                            <li><strong>Pour assigner :</strong> Utilisez le menu déroulant "Choisir un TP à assigner...", sélectionnez le TP, puis cliquez sur le bouton <span className="font-bold text-accent">Assigner</span>.</li>
-                                            <li><strong>Pour retirer :</strong> Utilisez le menu "Choisir un TP à retirer..." qui ne liste que les TPs déjà assignés. Sélectionnez-en un et cliquez sur <span className="font-bold text-destructive">Retirer</span>. Une confirmation vous sera demandée.</li>
-                                             <li>Le tableau se met à jour instantanément pour refléter les changements sur le tableau de bord des élèves.</li>
+                                            <li>La première étape est toujours de cocher les cases des élèves que vous souhaitez concerner (ou d'utiliser "Tout sélectionner").</li>
+                                            <li><strong>Pour assigner un TP :</strong> Dans les deux pages, utilisez le menu déroulant "Choisir un TP à assigner...", sélectionnez le TP, puis cliquez sur le bouton <span className="font-bold text-accent">Assigner</span>.</li>
+                                            <li><strong>Pour retirer un TP :</strong> Utilisez le menu déroulant "Choisir un TP à retirer...". Ce menu ne liste que les TPs déjà assignés à au moins un élève de la classe. Sélectionnez un TP et cliquez sur <span className="font-bold text-destructive">Retirer</span>. Une confirmation vous sera demandée pour éviter les erreurs.</li>
+                                            <li>Cette double fonctionnalité vous offre une flexibilité maximale pour gérer rapidement les devoirs de toute une classe ou d'élèves spécifiques.</li>
                                         </ul>
                                     </AccordionContent>
                                 </AccordionItem>

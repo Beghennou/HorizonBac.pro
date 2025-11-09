@@ -220,7 +220,7 @@ export default function ClassProgressPage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {allAssignedTpIdsInClass.map(tpId => {
-                                                const tp = allTps[tpId];
+                                                const tp = allTps ? allTps[tpId] : null;
                                                 return (
                                                     <SelectItem key={tpId} value={tpId.toString()}>TP {tpId} - {tp?.titre || 'Titre inconnu'}</SelectItem>
                                                 )
@@ -285,7 +285,7 @@ export default function ClassProgressPage() {
                                             </div>
                                         </TableHead>
                                         {allAssignedTpIdsInClass.map(tpId => {
-                                            const tp = allTps[tpId];
+                                            const tp = allTps ? allTps[tpId] : null;
                                             return (
                                                 <TableHead key={tpId} className="text-center min-w-[100px]">
                                                     <TooltipProvider>
