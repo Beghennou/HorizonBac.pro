@@ -120,7 +120,7 @@ function DashboardLayoutContent({
           <SidebarInset>
               <div className="container flex flex-1 py-8">
                   <Sidebar>
-                    <SidebarContent className="p-2 justify-end">
+                    <SidebarContent className="p-2">
                         <div className="space-y-4">
                             <div>
                                 <h3 className="font-headline text-sm text-accent uppercase tracking-wider mb-1 px-2">Sélection classe ({cursus.toUpperCase()}) :</h3>
