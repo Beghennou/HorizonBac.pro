@@ -13,14 +13,18 @@ import { doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ClassProgressPage() {
     const searchParams = useSearchParams();
+    const { toast } = useToast();
     const { firestore, tps: allTps, assignedTps, assignTp, isLoaded: isFirebaseLoaded } = useFirebase();
 
     const currentClassName = searchParams.get('class');
     const level = (searchParams.get('level') as Niveau) || 'seconde';
     const [selectedTpId, setSelectedTpId] = useState<string>('');
+    const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
 
     const { data: classData, isLoading: isClassLoading } = useDoc(useMemoFirebase(() => {
@@ -39,12 +43,27 @@ export default function ClassProgressPage() {
 
     const tpsForLevel = useMemo(() => getTpsByNiveau(level, allTps), [level, allTps]);
 
-    const handleAssignTpToClass = () => {
-        if (studentsInClass.length > 0 && selectedTpId) {
-            assignTp(studentsInClass, parseInt(selectedTpId, 10));
+    const handleAssignTp = () => {
+        if (selectedStudents.length > 0 && selectedTpId) {
+            assignTp(selectedStudents, parseInt(selectedTpId, 10));
+            toast({
+              title: "TP Assigné",
+              description: `Le TP #${selectedTpId} a été assigné à ${selectedStudents.length} élève(s).`,
+            });
             setSelectedTpId('');
+            setSelectedStudents([]);
         }
-    }
+    };
+
+    const handleSelectAll = (checked: boolean) => {
+        setSelectedStudents(checked ? studentsInClass : []);
+    };
+
+    const handleStudentSelect = (studentName: string, checked: boolean) => {
+        setSelectedStudents(prev => 
+            checked ? [...prev, studentName] : prev.filter(name => name !== studentName)
+        );
+    };
 
     const studentProgressData = useMemo(() => {
         if (!studentsInClass || !assignedTps) return {};
@@ -148,13 +167,13 @@ export default function ClassProgressPage() {
                                 Suivi de la Classe: {currentClassName}
                             </CardTitle>
                             <CardDescription>
-                                Vue d'ensemble de la progression des élèves.
+                                Vue d'ensemble de la progression des élèves. Sélectionnez des élèves et un TP pour une assignation rapide.
                             </CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
                              <Select onValueChange={setSelectedTpId} value={selectedTpId}>
                                 <SelectTrigger className="w-[350px]">
-                                    <SelectValue placeholder="Assigner un TP à toute la classe..." />
+                                    <SelectValue placeholder="Assigner un TP..." />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {tpsForLevel.map(tp => (
@@ -162,9 +181,9 @@ export default function ClassProgressPage() {
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <Button onClick={handleAssignTpToClass} disabled={!selectedTpId || studentsInClass.length === 0}>
+                            <Button onClick={handleAssignTp} disabled={!selectedTpId || selectedStudents.length === 0}>
                                 <BookOpen className="mr-2"/>
-                                Assigner
+                                Assigner ({selectedStudents.length})
                             </Button>
                         </div>
                     </div>
@@ -191,7 +210,16 @@ export default function ClassProgressPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="sticky left-0 bg-card z-10 font-bold min-w-[200px]">Élève</TableHead>
+                                        <TableHead className="sticky left-0 bg-card z-10 font-bold min-w-[200px]">
+                                            <div className="flex items-center gap-2">
+                                                <Checkbox
+                                                    id="select-all"
+                                                    onCheckedChange={handleSelectAll}
+                                                    checked={studentsInClass.length > 0 && selectedStudents.length === studentsInClass.length}
+                                                />
+                                                <label htmlFor="select-all">Élève</label>
+                                            </div>
+                                        </TableHead>
                                         {allAssignedTpIdsInClass.map(tpId => {
                                             const tp = allTps[tpId];
                                             return (
@@ -213,7 +241,14 @@ export default function ClassProgressPage() {
                                     {studentsInClass.map(studentName => (
                                         <TableRow key={studentName}>
                                             <TableCell className="sticky left-0 bg-card z-10 font-bold text-accent">
-                                                {studentName}
+                                                <div className="flex items-center gap-2">
+                                                    <Checkbox
+                                                        id={studentName}
+                                                        onCheckedChange={(checked) => handleStudentSelect(studentName, !!checked)}
+                                                        checked={selectedStudents.includes(studentName)}
+                                                    />
+                                                    <label htmlFor={studentName}>{studentName}</label>
+                                                </div>
                                             </TableCell>
                                             {allAssignedTpIdsInClass.map(tpId => {
                                                 const progress = studentProgressData[studentName]?.[tpId.toString()];
