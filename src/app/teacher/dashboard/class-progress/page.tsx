@@ -7,7 +7,7 @@ import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Check, Clock, X, CheckSquare, Loader2, AlertTriangle, BookOpen, Trash2 } from 'lucide-react';
+import { Check, Clock, X, CheckSquare, Loader2, AlertTriangle, BookOpen, Trash2, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
