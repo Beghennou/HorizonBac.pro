@@ -17,6 +17,10 @@ import tp116 from './tp-116';
 import tp117 from './tp-117';
 import tp118 from './tp-118';
 import tp119 from './tp-119';
+import tp120 from './tp-120';
+import tp121 from './tp-121';
+import tp122 from './tp-122';
+import tp123 from './tp-123';
 
 export const tps = {
     [tp101.id]: tp101,
@@ -38,4 +42,8 @@ export const tps = {
     [tp117.id]: tp117,
     [tp118.id]: tp118,
     [tp119.id]: tp119,
+    [tp120.id]: tp120,
+    [tp121.id]: tp121,
+    [tp122.id]: tp122,
+    [tp123.id]: tp123,
 };
