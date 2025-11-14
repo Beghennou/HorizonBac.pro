@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, BookOpen, AlertTriangle, Trash2 } from 'lucide-react';
+import { Users, BookOpen, AlertTriangle, Trash2, Search } from 'lucide-react';
 import { collection, doc } from 'firebase/firestore';
 import {
   AlertDialog,
@@ -23,6 +23,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 
 export default function AssignTpsPage() {
     const searchParams = useSearchParams();
@@ -34,6 +35,8 @@ export default function AssignTpsPage() {
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
     const [selectedTpId, setSelectedTpId] = useState<string>('');
     const [selectedTpIdToUnassign, setSelectedTpIdToUnassign] = useState<string>('');
+    const [searchTerm, setSearchTerm] = useState('');
+
 
     const { data: classData, isLoading: isClassLoading } = useDoc(useMemoFirebase(() => {
       if (currentClassName && firestore) {
@@ -49,7 +52,16 @@ export default function AssignTpsPage() {
         return [];
     }, [classData]);
 
-    const tpsForLevel = useMemo(() => getTpsByNiveau(level, allTps), [level, allTps]);
+    const tpsForLevel = useMemo(() => {
+        const tps = getTpsByNiveau(level, allTps);
+        if (!searchTerm) {
+            return tps;
+        }
+        return tps.filter(tp => 
+            tp.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            tp.id.toString().includes(searchTerm)
+        );
+    }, [level, allTps, searchTerm]);
 
     const allAssignedTpIdsInClass = useMemo(() => {
         const tpIdSet = new Set<number>();
@@ -155,7 +167,21 @@ export default function AssignTpsPage() {
 
                     <div className="border p-4 rounded-lg">
                         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><BookOpen/>Étape 2 : Assigner un nouveau TP</h3>
+                        
                         <div className="flex items-center gap-4">
+                            <div className="relative w-full md:w-[500px]">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Input 
+                                    type="text"
+                                    placeholder="Rechercher par ID ou titre..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 mt-4">
                              <Select onValueChange={setSelectedTpId} value={selectedTpId}>
                                 <SelectTrigger className="w-full md:w-[500px]">
                                     <SelectValue placeholder="Sélectionner un TP..." />
