@@ -19,9 +19,14 @@ export default function TpsToEvaluatePage() {
     const searchParams = useSearchParams();
     const selectedClassName = searchParams.get('class');
 
+    // Récupérer les évaluations pour filtrer les TPs déjà notés
     const { data: storedEvalsByStudent } = useCollection(useMemoFirebase(() => {
-        if (!firestore) return null;
-        return collection(firestore, `students`);
+        if (firestore) {
+            // Requête simplifiée qui récupère tous les étudiants.
+            // Pour une application à grande échelle, il faudrait optimiser ceci.
+            return collection(firestore, 'students');
+        }
+        return null;
     }, [firestore]));
 
     const tpsToEvaluateByStudent = useMemo(() => {
@@ -43,21 +48,20 @@ export default function TpsToEvaluatePage() {
             if (studentTps) {
                 const finishedTps = studentTps.filter(tp => {
                     if (tp.status !== 'terminé') return false;
-                    
-                    const studentEvalsDoc = storedEvalsByStudent?.find(s => s.id === studentName);
-                    const evalData = studentEvalsDoc?.storedEvals?.[tp.id];
-                    
-                    // This logic is simplified. A real app might need a more robust way to check evaluations.
-                    // For now, let's assume `storedEvals` is a subcollection we can't easily query this way.
-                    // A better structure or more complex query would be needed.
-                    // Let's rely on a more direct, albeit less performant check if needed.
-                    
-                    // We need a way to check if an evaluation for this student/tp exists and isFinal.
-                    // The current data structure makes this hard without a direct fetch per TP.
-                    // Let's assume for now the check will be done elsewhere or this logic needs improvement.
-                    // The bug fix is to remove the async filter.
-                    
-                    return true; // Simplified: show all 'terminé' for now. The logic needs to be fixed.
+
+                    if (storedEvalsByStudent) {
+                        const studentDoc = storedEvalsByStudent.find(doc => doc.id === studentName);
+                        if (studentDoc && (studentDoc as any).storedEvals) {
+                            const evalData = (studentDoc as any).storedEvals[tp.id];
+                            // Le TP ne doit être évalué que si l'évaluation n'existe pas ou n'est pas finale.
+                            if (evalData && evalData.isFinal) {
+                                return false; 
+                            }
+                        }
+                    }
+                    // Si on n'a pas encore les données d'évaluation, on l'inclut par défaut pour l'instant.
+                    // Ou si l'évaluation n'est pas finale, on l'inclut.
+                    return true;
                 });
 
                 if (finishedTps.length > 0) {
@@ -67,7 +71,6 @@ export default function TpsToEvaluatePage() {
                     finishedTps.forEach(assignedTp => {
                         const tpDetail = allTps[assignedTp.id];
                         if (tpDetail) {
-                            // Here we should ideally check against the actual storedEvals
                             result[studentName].push({
                                 tpId: assignedTp.id,
                                 titre: tpDetail.titre,
@@ -78,26 +81,6 @@ export default function TpsToEvaluatePage() {
                 }
             }
         }
-        
-        // This is a temporary filter until the data fetching is more robust
-        if(storedEvalsByStudent) {
-             Object.keys(result).forEach(studentName => {
-                const studentData = storedEvalsByStudent.find(s => s.id === studentName);
-                if (studentData && studentData.storedEvals) {
-                    result[studentName] = result[studentName].filter(tp => {
-                        const evalInfo = studentData.storedEvals[tp.tpId];
-                        return !evalInfo || !evalInfo.isFinal;
-                    });
-                }
-             });
-        }
-        
-        // Final cleanup of students with no TPs left to evaluate
-        Object.keys(result).forEach(studentName => {
-            if (result[studentName].length === 0) {
-                delete result[studentName];
-            }
-        });
 
         return result;
     }, [assignedTps, allTps, classes, selectedClassName, storedEvalsByStudent]);
