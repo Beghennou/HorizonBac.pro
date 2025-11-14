@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -11,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Loader2, Save, Send, User, Award, FileText, MessageSquare, RefreshCw } from 'lucide-react';
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, getDoc } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -32,7 +33,7 @@ export default function EvaluationPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { toast } = useToast();
-    const { firestore, tps, saveEvaluation, saveFeedback, updateTpStatus } = useFirebase();
+    const { firestore, tps, saveEvaluation, saveFeedback, updateTpStatus, isLoaded: isFirebaseLoaded } = useFirebase();
 
     const studentName = decodeURIComponent(params.studentId as string);
     const tpId = parseInt(params.tpId as string, 10);
@@ -45,6 +46,7 @@ export default function EvaluationPage() {
     const [prelimNote, setPrelimNote] = useState('');
     const [tpNote, setTpNote] = useState('');
     const [teacherFeedback, setTeacherFeedback] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     const { data: studentPrelimAnswers, isLoading: prelimLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/prelimAnswers`) : null, [firestore, studentName, tpId]));
     const { data: studentFeedbacks, isLoading: feedbackLoading } = useCollection(useMemoFirebase(() => firestore && studentName && tpId ? collection(firestore, `students/${studentName}/feedbacks`) : null, [firestore, studentName, tpId]));
@@ -55,6 +57,12 @@ export default function EvaluationPage() {
         const doc = studentPrelimAnswers?.find(d => d.id === tpId?.toString());
         return doc?.answers || {};
     }, [studentPrelimAnswers, tpId]);
+    
+    const studentComment = useMemo(() => {
+        const doc = studentFeedbacks?.find(d => d.id === tpId?.toString());
+        return doc?.tps?.student || '';
+    }, [studentFeedbacks, tpId]);
+
 
     useEffect(() => {
         const feedbackDoc = studentFeedbacks?.find(d => d.id === tpId?.toString());
@@ -68,15 +76,15 @@ export default function EvaluationPage() {
         }
     }, [studentFeedbacks, storedEval, tpId]);
 
-    const evaluatedCompetenceIds = useMemo(() => tp.objectif.match(/C\d\.\d/g) || [], [tp]);
+    const evaluatedCompetenceIds = useMemo(() => tp?.objectif.match(/C\d\.\d/g) || [], [tp]);
 
     const validatedStepsCount = useMemo(() => {
-        if (!studentValidations || !studentValidations.steps) return 0;
+        if (!studentValidations || !studentValidations.steps || !tp) return 0;
         const practicalStepsKeys = tp.activitePratique.map((_, i) => `etape-${i}`);
         return practicalStepsKeys.filter(key => studentValidations.steps[key]).length;
-    }, [studentValidations, tp.activitePratique]);
+    }, [studentValidations, tp]);
 
-    const totalPracticalSteps = tp.activitePratique.length;
+    const totalPracticalSteps = tp ? tp.activitePratique.length : 0;
     const allStepsValidated = validatedStepsCount === totalPracticalSteps;
 
     const handleCompetenceChange = (competenceId: string, value: EvaluationStatus) => {
@@ -91,8 +99,9 @@ export default function EvaluationPage() {
         router.push(`/teacher/dashboard/tps-to-evaluate?${params.toString()}`);
     }
 
-    const handleSave = (isFinal: boolean) => {
+    const handleSave = async (isFinal: boolean) => {
         if (!studentName || !tpId) return;
+        setIsSaving(true);
 
         saveFeedback(studentName, tpId, teacherFeedback, 'teacher');
         
@@ -102,39 +111,44 @@ export default function EvaluationPage() {
                 title: 'Évaluation incomplète',
                 description: 'Veuillez évaluer toutes les compétences avant de finaliser.',
             });
+            setIsSaving(false);
             return;
         }
 
-        saveEvaluation(studentName, tpId, competenceEvals, prelimNote, tpNote, isFinal);
+        await saveEvaluation(studentName, tpId, competenceEvals, prelimNote, tpNote, isFinal);
         
         toast({
             title: isFinal ? "Évaluation finalisée" : "Brouillon sauvegardé",
             description: `Le feedback et les notes pour le TP ${tpId} ont été enregistrés.`,
         });
 
+        setIsSaving(false);
         if (isFinal) {
             redirectToTpsToEvaluate();
         }
     };
     
-    const handleRequestRedo = () => {
+    const handleRequestRedo = async () => {
         if (!studentName || !tpId) return;
-        updateTpStatus(studentName, tpId, 'à-refaire');
+        setIsSaving(true);
+        await updateTpStatus(studentName, tpId, 'à-refaire');
         saveFeedback(studentName, tpId, teacherFeedback, 'teacher');
         toast({
             title: "Demande envoyée",
             description: `L'élève a été notifié qu'il doit refaire ce TP.`
         });
+        setIsSaving(false);
         redirectToTpsToEvaluate();
+    }
+
+    const isLoading = prelimLoading || feedbackLoading || storedEvalLoading || validationsLoading || !isFirebaseLoaded;
+    
+    if (isLoading) {
+        return <div className="flex justify-center items-center h-full"><Loader2 className="w-12 h-12 animate-spin text-primary" /></div>;
     }
 
     if (!tp) {
         return <div className="text-center">TP non trouvé.</div>;
-    }
-    
-    const isLoading = prelimLoading || feedbackLoading || storedEvalLoading || validationsLoading;
-    if (isLoading) {
-        return <div className="flex justify-center items-center h-full"><Loader2 className="w-12 h-12 animate-spin text-primary" /></div>;
     }
 
     return (
@@ -148,6 +162,17 @@ export default function EvaluationPage() {
                     <CardDescription className="text-lg">TP {tp.id}: {tp.titre}</CardDescription>
                 </CardHeader>
             </Card>
+
+             {studentComment && (
+                <Card>
+                    <CardHeader>
+                         <CardTitle className="flex items-center gap-2"><MessageSquare /> Commentaire de l'élève</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="italic text-muted-foreground p-4 bg-background/50 rounded-md">"{studentComment}"</p>
+                    </CardContent>
+                </Card>
+            )}
 
             {tp.etudePrelim.length > 0 && (
                 <Card>
@@ -242,9 +267,12 @@ export default function EvaluationPage() {
             </Card>
 
             <div className="flex justify-end gap-4">
-                 <Button variant="secondary" onClick={handleRequestRedo}><RefreshCw className="mr-2"/>Demander de refaire le TP</Button>
-                 <Button variant="outline" onClick={() => handleSave(false)}><Save className="mr-2"/>Enregistrer le brouillon</Button>
-                 <Button onClick={() => handleSave(true)}><Send className="mr-2"/>Finaliser et Rendre l'évaluation</Button>
+                 <Button variant="secondary" onClick={handleRequestRedo} disabled={isSaving}><RefreshCw className="mr-2"/>Demander de refaire le TP</Button>
+                 <Button variant="outline" onClick={() => handleSave(false)} disabled={isSaving}><Save className="mr-2"/>Enregistrer le brouillon</Button>
+                 <Button onClick={() => handleSave(true)} disabled={isSaving}>
+                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2"/>}
+                    Finaliser et Rendre l'évaluation
+                </Button>
             </div>
         </div>
     );
