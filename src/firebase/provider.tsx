@@ -56,7 +56,7 @@ type Feedback = {
   teacher?: string;
 }
 
-type StoredEvaluation = {
+export type StoredEvaluation = {
   date: string;
   prelimNote?: string;
   tpNote?: string;
@@ -120,6 +120,7 @@ export interface FirebaseContextState {
   tps: Record<number, TP>;
   assignedTps: Record<string, AssignedTp[]>;
   evaluations: Record<string, Record<string, EvaluationStatus[]>>;
+  storedEvals: Record<string, Record<string, StoredEvaluation>>;
 }
 
 // React Context
@@ -155,6 +156,33 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const evaluationsQuery = useMemoFirebase(() => (firestore && user && !user.isAnonymous) ? collection(firestore, 'evaluations') : null, [firestore, user]);
   const { data: evaluationsData, isLoading: isEvaluationsLoading } = useCollection(evaluationsQuery);
+
+  const [storedEvals, setStoredEvals] = useState<Record<string, Record<string, StoredEvaluation>>>({});
+  const [isStoredEvalsLoading, setIsStoredEvalsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!firestore || !classesData) return;
+
+    const fetchAllEvals = async () => {
+        setIsStoredEvalsLoading(true);
+        const allEvals: Record<string, Record<string, StoredEvaluation>> = {};
+        const allStudents = classesData.flatMap(c => c.studentNames);
+
+        for (const studentName of allStudents) {
+            const evalsCollectionRef = collection(firestore, `students/${studentName}/storedEvals`);
+            const evalsSnapshot = await getDocs(evalsCollectionRef);
+            const studentEvals: Record<string, StoredEvaluation> = {};
+            evalsSnapshot.forEach(doc => {
+                studentEvals[doc.id] = doc.data() as StoredEvaluation;
+            });
+            allEvals[studentName] = studentEvals;
+        }
+        setStoredEvals(allEvals);
+        setIsStoredEvalsLoading(false);
+    };
+
+    fetchAllEvals();
+  }, [firestore, classesData]);
   
   const assignedTps = useMemo(() => {
     if (!assignedTpsData) return {};
@@ -190,7 +218,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     }
   }, []);
 
-  const isLoaded = !userAuthState.isUserLoading && !isClassesLoading && !isTeachersLoading && !isTpsLoading && !isAssignedTpsLoading && (!user || user.isAnonymous || !isEvaluationsLoading);
+  const isLoaded = !userAuthState.isUserLoading && !isClassesLoading && !isTeachersLoading && !isTpsLoading && !isAssignedTpsLoading && !isStoredEvalsLoading && (!user || user.isAnonymous || !isEvaluationsLoading);
 
   useEffect(() => {
     if (!auth) {
@@ -301,6 +329,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     tps,
     assignedTps,
     evaluations,
+    storedEvals,
     assignTp: (studentNames: string[], tpId: number) => {
       if (!firestore) return;
       assignTpToStudents(firestore, studentNames, tpId, assignedTps);

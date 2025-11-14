@@ -3,7 +3,7 @@
 'use client';
 import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase, StoredEvaluation } from '@/firebase';
 import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -30,7 +30,7 @@ import {
 export default function ClassProgressPage() {
     const searchParams = useSearchParams();
     const { toast } = useToast();
-    const { firestore, tps: allTps, assignedTps, assignTp, unassignTp, isLoaded: isFirebaseLoaded } = useFirebase();
+    const { firestore, tps: allTps, assignedTps, assignTp, unassignTp, isLoaded: isFirebaseLoaded, storedEvals } = useFirebase();
 
     const currentClassName = searchParams.get('class');
     const level = (searchParams.get('level') as Niveau) || 'seconde';
@@ -83,18 +83,25 @@ export default function ClassProgressPage() {
 
     const studentProgressData = useMemo(() => {
         if (!studentsInClass || !assignedTps) return {};
-        const progressMap: Record<string, Record<string, { status: string; date?: string }>> = {};
+        const progressMap: Record<string, Record<string, { status: string; date?: string; isEvaluated?: boolean }>> = {};
 
         studentsInClass.forEach(studentName => {
             progressMap[studentName] = {};
             const studentTps = assignedTps[studentName] || [];
+            const studentEvals = storedEvals[studentName] || {};
+            
             studentTps.forEach(assignedTp => {
-                progressMap[studentName][assignedTp.id] = { status: assignedTp.status };
+                const evaluation = studentEvals[assignedTp.id];
+                progressMap[studentName][assignedTp.id] = { 
+                    status: assignedTp.status,
+                    isEvaluated: evaluation?.isFinal,
+                    date: evaluation?.date
+                };
             });
         });
         
         return progressMap;
-    }, [studentsInClass, assignedTps]);
+    }, [studentsInClass, assignedTps, storedEvals]);
 
 
     const allAssignedTpIdsInClass = useMemo(() => {
@@ -131,36 +138,42 @@ export default function ClassProgressPage() {
         );
     }
     
-    const StatusIcon = ({ status, date }: { status: string; date?: string }) => {
+    const StatusIcon = ({ status, date, isEvaluated }: { status: string; date?: string; isEvaluated?: boolean }) => {
         let icon, tooltipText, className;
 
-        switch (status) {
-            case 'terminé':
-                icon = <Check className="text-green-400" />;
-                tooltipText = date ? `Évalué le ${date}` : 'Terminé, en attente d\'évaluation';
-                className = date ? 'bg-green-500/20' : 'bg-blue-500/20';
-                break;
-            case 'en-cours':
-                icon = <Clock className="text-yellow-400" />;
-                tooltipText = 'En cours';
-                className = 'bg-yellow-500/20';
-                break;
-             case 'à-refaire':
-                icon = <AlertTriangle className="text-orange-400" />;
-                tooltipText = 'À refaire';
-                className = 'bg-orange-500/20';
-                break;
-            case 'non-commencé':
-                icon = <X className="text-red-500" />;
-                tooltipText = 'Non commencé';
-                className = 'bg-red-500/20';
-                break;
-            default:
-                icon = <span className="text-muted-foreground text-xs"></span>;
-                tooltipText = 'Non assigné';
-                className = 'bg-muted/10';
+        if (status === 'terminé' && isEvaluated) {
+            icon = <Check className="text-green-400" />;
+            tooltipText = `Évalué le ${date}`;
+            className = 'bg-green-500/20';
+        } else {
+             switch (status) {
+                case 'terminé':
+                    icon = <Clock className="text-blue-400" />;
+                    tooltipText = 'Terminé, en attente d\'évaluation';
+                    className = 'bg-blue-500/20';
+                    break;
+                case 'en-cours':
+                    icon = <Clock className="text-yellow-400" />;
+                    tooltipText = 'En cours';
+                    className = 'bg-yellow-500/20';
+                    break;
+                 case 'à-refaire':
+                    icon = <AlertTriangle className="text-orange-400" />;
+                    tooltipText = 'À refaire';
+                    className = 'bg-orange-500/20';
+                    break;
+                case 'non-commencé':
+                    icon = <X className="text-red-500" />;
+                    tooltipText = 'Non commencé';
+                    className = 'bg-red-500/20';
+                    break;
+                default:
+                    icon = <span className="text-muted-foreground text-xs"></span>;
+                    tooltipText = 'Non assigné';
+                    className = 'bg-muted/10';
+            }
         }
-
+       
         return (
             <TooltipProvider>
                 <Tooltip>
@@ -191,7 +204,7 @@ export default function ClassProgressPage() {
                                 Vue d'ensemble de la progression des élèves. Sélectionnez des élèves et un TP pour une assignation ou une suppression.
                             </CardDescription>
                         </div>
-                        {studentsInClass.length > 0 && (
+                        {studentsInClass.length > 0 && allTps && (
                             <div className="flex items-start gap-4">
                                 <div className="flex flex-col gap-2">
                                     <p className="text-sm font-medium text-muted-foreground">Assigner un nouveau TP :</p>
@@ -221,7 +234,7 @@ export default function ClassProgressPage() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {allAssignedTpIdsInClass.map(tpId => {
-                                                    const tp = allTps ? allTps[tpId] : null;
+                                                    const tp = allTps[tpId];
                                                     return (
                                                         <SelectItem key={tpId} value={tpId.toString()}>TP {tpId} - {tp?.titre || 'Titre inconnu'}</SelectItem>
                                                     )
@@ -320,7 +333,7 @@ export default function ClassProgressPage() {
                                                 const progress = studentProgressData[studentName]?.[tpId.toString()];
                                                 return (
                                                     <TableCell key={tpId} className="p-1 h-12">
-                                                        <StatusIcon status={progress?.status || 'non-assigné'} date={progress?.date} />
+                                                        <StatusIcon status={progress?.status || 'non-assigné'} date={progress?.date} isEvaluated={progress?.isEvaluated} />
                                                     </TableCell>
                                                 )
                                             })}

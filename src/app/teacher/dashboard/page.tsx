@@ -4,7 +4,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { AlertTriangle, ArrowLeft, Users, ClipboardCheck, Percent, UserCheck, BookOpen } from 'lucide-react';
-import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase, StoredEvaluation } from '@/firebase';
 import Loading from './loading';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ import {
 
 export default function DashboardPage() {
   const searchParams = useSearchParams();
-  const { firestore, isLoaded, classes, assignedTps } = useFirebase();
+  const { firestore, isLoaded, classes, assignedTps, storedEvals } = useFirebase();
   const currentClassName = searchParams.get('class');
   
   const { data: classData, isLoading: isClassLoading } = useDoc(useMemoFirebase(() => {
@@ -42,8 +42,8 @@ export default function DashboardPage() {
   }, [classData]);
 
   const stats = useMemo(() => {
-    if (!isLoaded || !studentsInClass || !assignedTps) {
-      return { studentCount: 0, tpsToEvaluate: 0, overallProgress: 0 };
+    if (!isLoaded || !studentsInClass.length || !assignedTps || !storedEvals) {
+        return { studentCount: 0, tpsToEvaluate: 0, overallProgress: 0 };
     }
 
     let tpsToEvaluate = 0;
@@ -51,28 +51,30 @@ export default function DashboardPage() {
     let totalCompletedTps = 0;
 
     studentsInClass.forEach(studentName => {
-      const studentTps = assignedTps[studentName];
-      if (studentTps && Array.isArray(studentTps)) {
+        const studentTps = assignedTps[studentName] || [];
+        const studentEvals = storedEvals[studentName] || {};
+        
         totalAssignedTps += studentTps.length;
+        
         studentTps.forEach(tp => {
-          if (tp.status === 'terminé') {
-            totalCompletedTps++;
-            // This logic should be refined to check if the TP has already been evaluated.
-            // For now, we count all completed TPs.
-            tpsToEvaluate++;
-          }
+            if (tp.status === 'terminé') {
+                totalCompletedTps++;
+                const isEvaluated = studentEvals[tp.id]?.isFinal === true;
+                if (!isEvaluated) {
+                    tpsToEvaluate++;
+                }
+            }
         });
-      }
     });
 
     const overallProgress = totalAssignedTps > 0 ? Math.round((totalCompletedTps / totalAssignedTps) * 100) : 0;
 
     return {
-      studentCount: studentsInClass.length,
-      tpsToEvaluate,
-      overallProgress,
+        studentCount: studentsInClass.length,
+        tpsToEvaluate,
+        overallProgress,
     };
-  }, [studentsInClass, assignedTps, isLoaded]);
+}, [studentsInClass, assignedTps, storedEvals, isLoaded]);
   
   const studentProgressList = useMemo(() => {
      if (!isLoaded || !studentsInClass || !assignedTps) return [];
