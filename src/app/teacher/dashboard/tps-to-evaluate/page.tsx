@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ClipboardCheck, User, Clock, Loader2 } from 'lucide-react';
@@ -10,23 +10,10 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { useSearchParams } from 'next/navigation';
-import { doc } from 'firebase/firestore';
+import { collection, doc } from 'firebase/firestore';
 
-function TpToEvaluateItem({ studentName, tpId, titre, className }: { studentName: string, tpId: number, titre: string, className: string }) {
-    const { firestore } = useFirebase();
+function TpToEvaluateItem({ studentName, tpId, titre }: { studentName: string, tpId: number, titre: string }) {
     const searchParams = useSearchParams();
-
-    // Vérifie si une évaluation finale existe déjà pour ce TP
-    const { data: storedEval, isLoading } = useDoc(useMemoFirebase(
-        () => firestore ? doc(firestore, `students/${studentName}/storedEvals`, tpId.toString()) : null,
-        [firestore, studentName, tpId]
-    ));
-
-    // On n'affiche le TP que s'il n'a pas d'évaluation finale (isFinal is not true)
-    if (isLoading || (storedEval && storedEval.isFinal)) {
-        return null;
-    }
-
     const params = new URLSearchParams(searchParams.toString());
 
     return (
@@ -44,44 +31,49 @@ function TpToEvaluateItem({ studentName, tpId, titre, className }: { studentName
 
 
 function StudentTpsToEvaluate({ studentName }: { studentName: string }) {
-    const { assignedTps, tps: allTps, classes } = useFirebase();
-    const searchParams = useSearchParams();
-    const selectedClassName = searchParams.get('class');
+    const { firestore, assignedTps, tps: allTps } = useFirebase();
 
-    const finishedTps = useMemo(() => {
-        const studentTps = assignedTps[studentName];
-        if (!studentTps) return [];
-        return studentTps.filter(tp => tp.status === 'terminé');
-    }, [assignedTps, studentName]);
+    // 1. Get all "storedEvals" for the student.
+    const { data: storedEvals, isLoading: isLoadingEvals } = useCollection(
+        useMemoFirebase(() => firestore ? collection(firestore, `students/${studentName}/storedEvals`) : null, [firestore, studentName])
+    );
 
-    if (finishedTps.length === 0) {
-        return null; // Pas besoin de rendre si aucun TP n'est terminé
+    // 2. Filter TPs based on status and evaluation status in a memoized calculation.
+    const tpsToEvaluate = useMemo(() => {
+        const studentFinishedTps = (assignedTps[studentName] || []).filter(tp => tp.status === 'terminé');
+        if (!studentFinishedTps.length || !storedEvals) {
+            return [];
+        }
+
+        const evaluatedTpIds = new Set(
+            storedEvals.filter(ev => ev.isFinal).map(ev => parseInt(ev.id, 10))
+        );
+
+        return studentFinishedTps
+            .filter(assignedTp => !evaluatedTpIds.has(assignedTp.id))
+            .map(assignedTp => {
+                const tpDetail = allTps[assignedTp.id];
+                return tpDetail ? { tpId: assignedTp.id, titre: tpDetail.titre } : null;
+            })
+            .filter((tp): tp is { tpId: number, titre: string } => tp !== null);
+
+    }, [assignedTps, studentName, allTps, storedEvals]);
+    
+    if (isLoadingEvals) {
+         return (
+            <AccordionItem value={studentName}>
+                <AccordionTrigger className="text-xl font-headline hover:no-underline">
+                     <div className="flex items-center gap-4">
+                        <User className="w-6 h-6 text-accent" />
+                        <span>{studentName}</span>
+                        <Badge><Loader2 className="h-4 w-4 animate-spin"/></Badge>
+                    </div>
+                </AccordionTrigger>
+            </AccordionItem>
+        );
     }
-
-    const tpsForAccordion = finishedTps.map(assignedTp => {
-        const tpDetail = allTps[assignedTp.id];
-        return tpDetail ? {
-            tpId: assignedTp.id,
-            titre: tpDetail.titre,
-            className: selectedClassName,
-        } : null;
-    }).filter(Boolean) as { tpId: number, titre: string, className: string | null }[];
-
-    // Il faut un conteneur pour afficher les items et savoir s'il faut afficher l'accordéon
-    const itemsToRender = tpsForAccordion.map(tp => (
-        <TpToEvaluateItem
-            key={tp.tpId}
-            studentName={studentName}
-            tpId={tp.tpId}
-            titre={tp.titre}
-            className={tp.className || ''}
-        />
-    ));
     
-    // On enlève les nulls au cas où des TPs seraient déjà évalués
-    const validItems = itemsToRender.filter(item => item !== null);
-    
-    if (validItems.length === 0) {
+    if (tpsToEvaluate.length === 0) {
         return null;
     }
 
@@ -91,12 +83,19 @@ function StudentTpsToEvaluate({ studentName }: { studentName: string }) {
                 <div className="flex items-center gap-4">
                     <User className="w-6 h-6 text-accent" />
                     <span>{studentName}</span>
-                    <Badge>{validItems.length} TP à évaluer</Badge>
+                    <Badge>{tpsToEvaluate.length} TP à évaluer</Badge>
                 </div>
             </AccordionTrigger>
             <AccordionContent>
                 <div className="space-y-2 pt-2 pl-4">
-                    {validItems}
+                    {tpsToEvaluate.map(tp => (
+                        <TpToEvaluateItem
+                            key={tp.tpId}
+                            studentName={studentName}
+                            tpId={tp.tpId}
+                            titre={tp.titre}
+                        />
+                    ))}
                 </div>
             </AccordionContent>
         </AccordionItem>
@@ -104,19 +103,23 @@ function StudentTpsToEvaluate({ studentName }: { studentName: string }) {
 }
 
 export default function TpsToEvaluatePage() {
-    const { classes } = useFirebase();
+    const { classes, isLoaded } = useFirebase();
     const searchParams = useSearchParams();
     const selectedClassName = searchParams.get('class');
 
     const studentsInSelectedClass = useMemo(() => {
         if (!selectedClassName || !classes) return [];
         const selectedClassData = classes.find(c => c.id === selectedClassName);
-        return selectedClassData?.studentNames || [];
+        return selectedClassData?.studentNames.sort() || [];
     }, [classes, selectedClassName]);
     
-    const renderedStudents = studentsInSelectedClass.map(studentName => (
-        <StudentTpsToEvaluate key={studentName} studentName={studentName} />
-    ));
+    if (!isLoaded) {
+        return (
+            <div className="flex justify-center items-center h-full">
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -134,15 +137,22 @@ export default function TpsToEvaluatePage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {selectedClassName ? (
+                    {selectedClassName && studentsInSelectedClass.length > 0 ? (
                         <Accordion type="multiple" className="w-full">
-                           {renderedStudents}
+                           {studentsInSelectedClass.map(studentName => (
+                                <StudentTpsToEvaluate key={studentName} studentName={studentName} />
+                            ))}
                         </Accordion>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-primary/30 rounded-lg">
-                            <h2 className="font-headline text-2xl tracking-wide">Aucune classe sélectionnée</h2>
+                             <h2 className="font-headline text-2xl tracking-wide">
+                                {selectedClassName ? "Aucun élève dans cette classe." : "Aucune classe sélectionnée"}
+                            </h2>
                             <p className="text-muted-foreground text-lg mt-2 max-w-md">
-                                Veuillez sélectionner une classe dans la barre latérale pour commencer.
+                                {selectedClassName 
+                                    ? "Ajoutez des élèves dans la page Paramètres pour commencer."
+                                    : "Veuillez sélectionner une classe dans la barre latérale pour voir les TP à évaluer."
+                                }
                             </p>
                         </div>
                     )}
