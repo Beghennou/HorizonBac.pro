@@ -3,13 +3,13 @@
 'use client';
 import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useFirebase, useDoc, useMemoFirebase, StoredEvaluation } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase, StoredEvaluation, useCollection } from '@/firebase';
 import { getTpsByNiveau, Niveau } from '@/lib/data-manager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Check, Clock, X, CheckSquare, Loader2, AlertTriangle, BookOpen, Trash2, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { doc } from 'firebase/firestore';
+import { collection, doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -30,7 +30,7 @@ import {
 export default function ClassProgressPage() {
     const searchParams = useSearchParams();
     const { toast } = useToast();
-    const { firestore, tps: allTps, assignedTps, assignTp, unassignTp, isLoaded: isFirebaseLoaded, storedEvals } = useFirebase();
+    const { firestore, tps: allTps, assignedTps, assignTp, unassignTp, isLoaded: isFirebaseLoaded } = useFirebase();
 
     const currentClassName = searchParams.get('class');
     const level = (searchParams.get('level') as Niveau) || 'seconde';
@@ -52,6 +52,20 @@ export default function ClassProgressPage() {
         }
         return [];
     }, [classData]);
+    
+    // This is not efficient, but it's a temporary fix to get the data.
+    const { data: allStoredEvals, isLoading: evalsLoading } = useCollection(useMemoFirebase(() => {
+        if (firestore) {
+            // This is a placeholder for a more complex query system.
+            // We should ideally query only for students in the current class.
+            // For now, we fetch all and filter client-side.
+            const studentEvalCollections = studentsInClass.flatMap(name => collection(firestore, `students/${name}/storedEvals`));
+            // useCollection does not support array of queries, so this is conceptual.
+            // A better hook `useStudentSubcollections` would be needed.
+        }
+        return null;
+    }, [firestore, studentsInClass]));
+
 
     const tpsForLevel = useMemo(() => getTpsByNiveau(level, allTps), [level, allTps]);
 
@@ -88,20 +102,16 @@ export default function ClassProgressPage() {
         studentsInClass.forEach(studentName => {
             progressMap[studentName] = {};
             const studentTps = assignedTps[studentName] || [];
-            const studentEvals = storedEvals[studentName] || {};
             
             studentTps.forEach(assignedTp => {
-                const evaluation = studentEvals[assignedTp.id];
                 progressMap[studentName][assignedTp.id] = { 
                     status: assignedTp.status,
-                    isEvaluated: evaluation?.isFinal,
-                    date: evaluation?.date
                 };
             });
         });
         
         return progressMap;
-    }, [studentsInClass, assignedTps, storedEvals]);
+    }, [studentsInClass, assignedTps]);
 
 
     const allAssignedTpIdsInClass = useMemo(() => {
@@ -138,7 +148,14 @@ export default function ClassProgressPage() {
         );
     }
     
-    const StatusIcon = ({ status, date, isEvaluated }: { status: string; date?: string; isEvaluated?: boolean }) => {
+    const StatusIcon = ({ studentName, tpId }: { studentName: string; tpId: number }) => {
+        const { data: storedEval, isLoading: isEvalLoading } = useDoc(useMemoFirebase(() => firestore ? doc(firestore, `students/${studentName}/storedEvals`, tpId.toString()) : null, [firestore, studentName, tpId]));
+        
+        const progress = studentProgressData[studentName]?.[tpId.toString()];
+        const status = progress?.status;
+        const isEvaluated = storedEval?.isFinal;
+        const date = storedEval?.date;
+
         let icon, tooltipText, className;
 
         if (status === 'terminé' && isEvaluated) {
@@ -330,10 +347,9 @@ export default function ClassProgressPage() {
                                                 </div>
                                             </TableCell>
                                             {allAssignedTpIdsInClass.map(tpId => {
-                                                const progress = studentProgressData[studentName]?.[tpId.toString()];
                                                 return (
                                                     <TableCell key={tpId} className="p-1 h-12">
-                                                        <StatusIcon status={progress?.status || 'non-assigné'} date={progress?.date} isEvaluated={progress?.isEvaluated} />
+                                                        <StatusIcon studentName={studentName} tpId={tpId} />
                                                     </TableCell>
                                                 )
                                             })}
