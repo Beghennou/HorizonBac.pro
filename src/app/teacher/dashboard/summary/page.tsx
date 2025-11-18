@@ -1,10 +1,10 @@
 
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Loader2, MessageSquare, User, AlertTriangle, Users, Download } from 'lucide-react';
@@ -19,61 +19,96 @@ import { fr } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
 import Papa from 'papaparse';
+import { useToast } from '@/hooks/use-toast';
 
 
-function ExportDialog({ students, tps }: { students: string[], tps: any }) {
+function ExportDialog({ students, tps, className }: { students: string[], tps: any, className: string | null }) {
     const [date, setDate] = useState<DateRange | undefined>();
     const { firestore } = useFirebase();
+    const { toast } = useToast();
+    const [isExporting, setIsExporting] = useState(false);
 
-    const { data: storedEvalsData, isLoading } = useCollection(useMemoFirebase(() => {
-        if (!firestore) return null;
-        // This is a placeholder for a more complex query setup.
-        // For real-world scenarios, consider a backend function to aggregate this data.
-        return collection(firestore, 'storedEvals');
-    }, [firestore]));
-
-    const handleExport = () => {
+    const handleExport = async () => {
         if (!date || !date.from || !date.to) {
-            alert("Veuillez sélectionner une plage de dates.");
+            toast({ variant: 'destructive', title: 'Veuillez sélectionner une plage de dates.' });
             return;
         }
-
-        const filteredEvals: any[] = [];
-         if (storedEvalsData) {
-            // This is a placeholder for filtering logic as we are not fetching per-student data here.
-            // A more robust implementation would fetch evaluations for `students` and then filter.
-         }
-
-        if (filteredEvals.length === 0) {
-            alert("Aucune note à exporter pour la période sélectionnée.");
-            return;
+        if (!students || students.length === 0) {
+             toast({ variant: 'destructive', title: 'Aucun élève dans la classe sélectionnée.' });
+             return;
         }
 
-        const uniqueTps = [...new Map(filteredEvals.map(item => [item.tpId, {id: item.tpId, titre: tps[item.tpId]?.titre || `TP ${item.tpId}`}])).values()].sort((a,b) => a.id - b.id);
-        const headers = ['Élève', ...uniqueTps.map(tp => tp.titre)];
-        
-        const dataForCsv = students.map(studentName => {
-            const studentRow: Record<string, any> = { 'Élève': studentName };
-            uniqueTps.forEach(tp => {
-                 const studentEval = filteredEvals.find(ev => ev.studentName === studentName && ev.tpId === tp.id);
-                 studentRow[tp.titre] = studentEval ? studentEval.tpNote : '';
+        setIsExporting(true);
+
+        try {
+            const allEvalsForClass: any[] = [];
+            // Fetch evaluations for each student in the class
+            for (const studentName of students) {
+                const evalsRef = collection(firestore, `students/${studentName}/storedEvals`);
+                const evalsSnapshot = await getDocs(query(
+                    evalsRef, 
+                    where('isFinal', '==', true)
+                ));
+                
+                evalsSnapshot.forEach(doc => {
+                    const evalData = doc.data();
+                    let evalDate: Date | null = null;
+                    try {
+                        // Handle date parsing for "DD/MM/YYYY" format
+                        evalDate = parse(evalData.date, 'dd/MM/yyyy', new Date());
+                    } catch (e) {
+                       // ignore invalid date
+                    }
+
+                    if (evalDate && evalDate >= date.from! && evalDate <= date.to!) {
+                        allEvalsForClass.push({
+                            studentName,
+                            tpId: parseInt(doc.id, 10),
+                            tpNote: evalData.tpNote,
+                            ...evalData
+                        });
+                    }
+                });
+            }
+
+            if (allEvalsForClass.length === 0) {
+                alert("Aucune note à exporter pour la période sélectionnée.");
+                setIsExporting(false);
+                return;
+            }
+
+            const uniqueTps = [...new Map(allEvalsForClass.map(item => [item.tpId, {id: item.tpId, titre: tps[item.tpId]?.titre || `TP ${item.tpId}`}])).values()].sort((a,b) => a.id - b.id);
+            const headers = ['Élève', ...uniqueTps.map(tp => tp.titre)];
+            
+            const dataForCsv = students.map(studentName => {
+                const studentRow: Record<string, any> = { 'Élève': studentName };
+                uniqueTps.forEach(tp => {
+                     const studentEval = allEvalsForClass.find(ev => ev.studentName === studentName && ev.tpId === tp.id);
+                     studentRow[tp.titre] = studentEval ? studentEval.tpNote : '';
+                });
+                return studentRow;
             });
-            return studentRow;
-        });
 
-        const csv = Papa.unparse(dataForCsv, {
-            columns: headers,
-            delimiter: ';',
-        });
+            const csv = Papa.unparse(dataForCsv, {
+                columns: headers,
+                delimiter: ';',
+            });
 
-        const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `export_notes_${format(new Date(), 'yyyy-MM-dd')}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `export_notes_${className}_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+        } catch (error) {
+            console.error("Error exporting data: ", error);
+            toast({ variant: 'destructive', title: 'Erreur lors de l\'exportation', description: 'Une erreur est survenue. Veuillez réessayer.' });
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     return (
@@ -129,7 +164,8 @@ function ExportDialog({ students, tps }: { students: string[], tps: any }) {
                         </PopoverContent>
                     </Popover>
                 </div>
-                <Button onClick={handleExport} disabled={!date || !date.from || !date.to}>
+                <Button onClick={handleExport} disabled={!date || !date.from || !date.to || isExporting}>
+                    {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
                     Générer et Télécharger le CSV
                 </Button>
             </DialogContent>
@@ -269,7 +305,7 @@ export default function SummaryPage() {
                                 Retrouvez ici un résumé de toutes les notes et appréciations pour chaque élève de la classe.
                             </CardDescription>
                         </div>
-                        <ExportDialog students={studentsInClass} tps={tps} />
+                        <ExportDialog students={studentsInClass} tps={tps} className={currentClassName} />
                     </div>
                 </CardHeader>
                 <CardContent>
