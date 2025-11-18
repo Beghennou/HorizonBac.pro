@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Book, Cog, Users, FileText, BarChart3, DraftingCompass, CheckSquare, ClipboardCheck, LayoutDashboard } from 'lucide-react';
+import { Book, Cog, Users, FileText, BarChart3, DraftingCompass, CheckSquare, ClipboardCheck, LayoutDashboard, MessageSquare } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from './ui/sidebar';
@@ -16,6 +16,7 @@ export function DashboardNav() {
     { href: '/teacher/dashboard', label: 'Tableau de Bord', icon: LayoutDashboard, base: '/teacher/dashboard', exact: true },
     { href: `/teacher/dashboard/class-progress`, label: 'Progression', icon: CheckSquare, base: '/teacher/dashboard/class-progress' },
     { href: `/teacher/dashboard/tps-to-evaluate`, label: 'TP à Évaluer', icon: ClipboardCheck, base: '/teacher/dashboard/tps-to-evaluate' },
+    { href: `/teacher/dashboard/summary`, label: 'Synthèse', icon: MessageSquare, base: '/teacher/dashboard/summary' },
     { href: '/teacher/dashboard/students', label: 'Assigner des TP', icon: Users, base: '/teacher/dashboard/students' },
     { href: '/teacher/dashboard/analytics', label: 'Analyses', icon: BarChart3, base: '/teacher/dashboard/analytics' },
     { href: '/teacher/dashboard/tp-designer', label: 'Concepteur TP', icon: DraftingCompass, base: '/teacher/dashboard/tp-designer' },
