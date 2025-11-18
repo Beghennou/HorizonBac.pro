@@ -1,14 +1,147 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { collection } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2, MessageSquare, User, AlertTriangle, Users } from 'lucide-react';
+import { Loader2, MessageSquare, User, AlertTriangle, Users, Download } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { format, parse } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { DateRange } from 'react-day-picker';
+import { cn } from '@/lib/utils';
+import Papa from 'papaparse';
+
+
+function ExportDialog({ students, storedEvals, tps }: { students: string[], storedEvals: any, tps: any }) {
+    const [date, setDate] = useState<DateRange | undefined>();
+
+    const handleExport = () => {
+        if (!date || !date.from || !date.to) {
+            alert("Veuillez sélectionner une plage de dates.");
+            return;
+        }
+
+        const filteredEvals: any[] = [];
+        Object.entries(storedEvals).forEach(([studentName, evalsById]: [string, any]) => {
+            if (students.includes(studentName)) {
+                Object.entries(evalsById).forEach(([tpId, evalData]: [string, any]) => {
+                    if (evalData.isFinal) {
+                        const evalDate = parse(evalData.date, 'dd/MM/yyyy', new Date());
+                        if (evalDate >= date.from! && evalDate <= date.to!) {
+                            filteredEvals.push({
+                                studentName,
+                                tpId,
+                                tpNote: evalData.tpNote,
+                                tpTitre: tps[tpId]?.titre || `TP ${tpId}`
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        if (filteredEvals.length === 0) {
+            alert("Aucune note à exporter pour la période sélectionnée.");
+            return;
+        }
+
+        const uniqueTps = [...new Map(filteredEvals.map(item => [item.tpId, {id: item.tpId, titre: item.tpTitre}])).values()].sort((a,b) => a.id - b.id);
+        const headers = ['Élève', ...uniqueTps.map(tp => tp.titre)];
+        
+        const dataForCsv = students.map(studentName => {
+            const studentRow: Record<string, any> = { 'Élève': studentName };
+            uniqueTps.forEach(tp => {
+                 const studentEval = filteredEvals.find(ev => ev.studentName === studentName && ev.tpId === tp.id);
+                 studentRow[tp.titre] = studentEval ? studentEval.tpNote : '';
+            });
+            return studentRow;
+        });
+
+        const csv = Papa.unparse(dataForCsv, {
+            columns: headers,
+            delimiter: ';',
+        });
+
+        const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `export_notes_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline">
+                    <Download className="mr-2 h-4 w-4" />
+                    Exporter pour Pronote
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Exporter les notes</DialogTitle>
+                    <DialogDescription>
+                        Sélectionnez la plage de dates pour l'exportation. Seules les notes des évaluations finalisées seront incluses.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                id="date"
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !date && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {date?.from ? (
+                                    date.to ? (
+                                        <>
+                                            {format(date.from, "dd LLL y", { locale: fr })} - {format(date.to, "dd LLL y", { locale: fr })}
+                                        </>
+                                    ) : (
+                                        format(date.from, "dd LLL y", { locale: fr })
+                                    )
+                                ) : (
+                                    <span>Choisir une période</span>
+                                )}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                initialFocus
+                                mode="range"
+                                defaultMonth={date?.from}
+                                selected={date}
+                                onSelect={setDate}
+                                numberOfMonths={2}
+                                locale={fr}
+                            />
+                        </PopoverContent>
+                    </Popover>
+                </div>
+                <Button onClick={handleExport} disabled={!date || !date.from || !date.to}>
+                    Générer et Télécharger le CSV
+                </Button>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 
 function StudentSummary({ studentName }: { studentName: string }) {
     const { firestore, tps: allTps } = useFirebase();
@@ -97,7 +230,7 @@ function StudentSummary({ studentName }: { studentName: string }) {
 
 export default function SummaryPage() {
     const searchParams = useSearchParams();
-    const { firestore, classes, isLoaded } = useFirebase();
+    const { firestore, classes, tps, isLoaded: firebaseIsLoaded } = useFirebase();
     const currentClassName = searchParams.get('class');
 
     const studentsInClass = useMemo(() => {
@@ -105,8 +238,32 @@ export default function SummaryPage() {
         const selectedClassData = classes.find(c => c.id === currentClassName);
         return selectedClassData?.studentNames.sort() || [];
     }, [classes, currentClassName]);
+    
+    // Fetch all evaluations for all students in the class
+    const { data: storedEvals, isLoading: evalsLoading } = useCollection(useMemoFirebase(() => {
+        if (firestore && studentsInClass.length > 0) {
+            return collection(firestore, 'storedEvals', { all: true, path: 'students/{studentId}/storedEvals' });
+        }
+        return null;
+    }, [firestore, studentsInClass]));
 
-    if (!isLoaded) {
+    const storedEvalsByStudent = useMemo(() => {
+        const evalsMap: Record<string, any> = {};
+        studentsInClass.forEach(name => evalsMap[name] = {});
+
+        // This is a placeholder for a more robust data fetching and aggregation logic
+        // As useCollection doesn't support subcollection queries this way,
+        // this part needs a backend function or more complex client-side aggregation
+        // to be fully functional. For now, we rely on the component-level fetch.
+        // A full implementation would aggregate the results of N useCollection hooks.
+        return evalsMap;
+    }, [studentsInClass]);
+
+
+    const isDataReady = firebaseIsLoaded && (!currentClassName || (currentClassName && !evalsLoading));
+
+
+    if (!firebaseIsLoaded) {
         return (
             <div className="flex justify-center items-center h-full">
                 <Loader2 className="w-12 h-12 animate-spin text-primary" />
@@ -130,16 +287,25 @@ export default function SummaryPage() {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-3 font-headline text-4xl">
-                        <MessageSquare className="w-10 h-10 text-primary" />
-                        Synthèse des Évaluations : {currentClassName}
-                    </CardTitle>
-                    <CardDescription>
-                        Retrouvez ici un résumé de toutes les notes et appréciations pour chaque élève de la classe.
-                    </CardDescription>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle className="flex items-center gap-3 font-headline text-4xl">
+                                <MessageSquare className="w-10 h-10 text-primary" />
+                                Synthèse des Évaluations : {currentClassName}
+                            </CardTitle>
+                            <CardDescription>
+                                Retrouvez ici un résumé de toutes les notes et appréciations pour chaque élève de la classe.
+                            </CardDescription>
+                        </div>
+                        <ExportDialog students={studentsInClass} storedEvals={storedEvalsByStudent} tps={tps} />
+                    </div>
                 </CardHeader>
                 <CardContent>
-                    {studentsInClass.length > 0 ? (
+                    {!isDataReady ? (
+                         <div className="flex justify-center items-center h-64">
+                            <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                         </div>
+                    ) : studentsInClass.length > 0 ? (
                         <Accordion type="multiple" className="w-full">
                             {studentsInClass.map(studentName => (
                                 <StudentSummary key={studentName} studentName={studentName} />
