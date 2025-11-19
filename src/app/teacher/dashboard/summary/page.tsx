@@ -41,6 +41,10 @@ function ExportDialog({ students, tps, className }: { students: string[], tps: a
         setIsExporting(true);
 
         try {
+            if (!firestore) {
+                toast({ variant: 'destructive', title: 'Erreur de connexion à la base de données.' });
+                return;
+            }
             const allEvalsForClass: any[] = [];
             // Fetch evaluations for each student in the class
             for (const studentName of students) {
