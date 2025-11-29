@@ -1,0 +1,212 @@
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:12:56.987Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:12:56.990Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[debug] [2025-11-29T23:12:57.010Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.011Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.012Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.018Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.018Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.026Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.026Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.027Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.028Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.029Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.034Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.034Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.035Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.040Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.040Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.045Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.046Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.046Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.047Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.047Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.052Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.052Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.052Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.053Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.053Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.073Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.074Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.074Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.075Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.075Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:12:57.096Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:12:57.097Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[debug] [2025-11-29T23:12:57.102Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.102Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.102Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.102Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.103Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.113Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.114Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.114Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.118Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.118Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.124Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.124Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.124Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.128Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.128Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.136Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.136Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.136Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.137Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.137Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.146Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.146Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.146Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.147Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.147Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.162Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.163Z] Checked if tokens are valid: false, expires at: 1763571667459
+[debug] [2025-11-29T23:12:57.163Z] > refreshing access token with scopes: []
+[debug] [2025-11-29T23:12:57.164Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-29T23:12:57.164Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.654Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:57.655Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.746Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/identitytoolkit.googleapis.com [none]
+[debug] [2025-11-29T23:12:57.746Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/identitytoolkit.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:57.765Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:57.768Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.795Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-11-29T23:12:57.795Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:57.806Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:57.806Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.840Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseremoteconfig.googleapis.com [none]
+[debug] [2025-11-29T23:12:57.842Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseremoteconfig.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:57.859Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:57.861Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.885Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com [none]
+[debug] [2025-11-29T23:12:57.886Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:57.910Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:57.910Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:57.941Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com [none]
+[debug] [2025-11-29T23:12:57.941Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:57.983Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:57.983Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:58.009Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/storage.googleapis.com [none]
+[debug] [2025-11-29T23:12:58.009Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/storage.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:58.013Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:58.013Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:58.036Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/fcm.googleapis.com [none]
+[debug] [2025-11-29T23:12:58.036Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/fcm.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:58.062Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:58.065Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:58.083Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-11-29T23:12:58.083Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:58.106Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:58.108Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:58.143Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/fcm.googleapis.com [none]
+[debug] [2025-11-29T23:12:58.144Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/fcm.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:58.177Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:58.179Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:58.213Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/storage.googleapis.com [none]
+[debug] [2025-11-29T23:12:58.213Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/storage.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:58.215Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:58.215Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:58.289Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/identitytoolkit.googleapis.com [none]
+[debug] [2025-11-29T23:12:58.289Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/identitytoolkit.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:58.294Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-29T23:12:58.295Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-29T23:12:58.339Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseremoteconfig.googleapis.com [none]
+[debug] [2025-11-29T23:12:58.339Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseremoteconfig.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:12:58.723Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/identitytoolkit.googleapis.com 200
+[debug] [2025-11-29T23:12:58.723Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/identitytoolkit.googleapis.com [omitted]
+[debug] [2025-11-29T23:12:58.776Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com 403
+[debug] [2025-11-29T23:12:58.776Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com [omitted]
+[debug] [2025-11-29T23:12:58.782Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-11-29T23:12:58.782Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-11-29T23:12:58.796Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com 403
+[debug] [2025-11-29T23:12:58.796Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com [omitted]
+[debug] [2025-11-29T23:12:58.813Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseremoteconfig.googleapis.com 200
+[debug] [2025-11-29T23:12:58.815Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseremoteconfig.googleapis.com [omitted]
+[debug] [2025-11-29T23:12:58.943Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/fcm.googleapis.com 200
+[debug] [2025-11-29T23:12:58.943Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/fcm.googleapis.com [omitted]
+[debug] [2025-11-29T23:12:59.000Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/storage.googleapis.com 200
+[debug] [2025-11-29T23:12:59.000Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/storage.googleapis.com [omitted]
+[debug] [2025-11-29T23:12:59.023Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-11-29T23:12:59.023Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-11-29T23:12:59.027Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/fcm.googleapis.com 200
+[debug] [2025-11-29T23:12:59.028Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/fcm.googleapis.com [omitted]
+[debug] [2025-11-29T23:12:59.104Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseremoteconfig.googleapis.com 200
+[debug] [2025-11-29T23:12:59.105Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseremoteconfig.googleapis.com [omitted]
+[debug] [2025-11-29T23:12:59.139Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/identitytoolkit.googleapis.com 200
+[debug] [2025-11-29T23:12:59.139Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/identitytoolkit.googleapis.com [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:12:59.214Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/storage.googleapis.com 200
+[debug] [2025-11-29T23:12:59.214Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/storage.googleapis.com [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:12:59.243Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:12:59.243Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:12:59.246Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:12:59.246Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:13:07.543Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:13:07.543Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:13:07.551Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:13:07.551Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:14:36.800Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:14:36.802Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[debug] [2025-11-29T23:14:36.816Z] Checked if tokens are valid: true, expires at: 1764461577295
+[debug] [2025-11-29T23:14:36.816Z] Checked if tokens are valid: true, expires at: 1764461577295
+[debug] [2025-11-29T23:14:36.845Z] Checked if tokens are valid: true, expires at: 1764461577295
+[debug] [2025-11-29T23:14:36.846Z] Checked if tokens are valid: true, expires at: 1764461577295
+[debug] [2025-11-29T23:14:36.846Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:14:36.847Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[debug] [2025-11-29T23:14:36.853Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-11-29T23:14:36.854Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:14:36.860Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com [none]
+[debug] [2025-11-29T23:14:36.860Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:14:36.867Z] Checked if tokens are valid: true, expires at: 1764461577295
+[debug] [2025-11-29T23:14:36.867Z] Checked if tokens are valid: true, expires at: 1764461577295
+[debug] [2025-11-29T23:14:36.879Z] Checked if tokens are valid: true, expires at: 1764461577295
+[debug] [2025-11-29T23:14:36.879Z] Checked if tokens are valid: true, expires at: 1764461577295
+[debug] [2025-11-29T23:14:36.879Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-11-29T23:14:36.879Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:14:36.883Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com [none]
+[debug] [2025-11-29T23:14:36.884Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com x-goog-quota-user=projects/horizon-bacpro-v10-04357-fd0fe
+[debug] [2025-11-29T23:14:37.561Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com 403
+[debug] [2025-11-29T23:14:37.570Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com [omitted]
+[debug] [2025-11-29T23:14:37.598Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com 403
+[debug] [2025-11-29T23:14:37.602Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebaseio.com [omitted]
+[debug] [2025-11-29T23:14:37.683Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-11-29T23:14:37.685Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:14:37.752Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:14:37.753Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:14:37.767Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:14:37.767Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[debug] [2025-11-29T23:14:37.788Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-11-29T23:14:37.788Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/horizon-bacpro-v10-04357-fd0fe/services/firebasedataconnect.googleapis.com [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:14:37.888Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:14:37.894Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:14:37.900Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:14:37.901Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:14:37.954Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:14:37.959Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-11-29T23:14:37.966Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-11-29T23:14:37.966Z] > authorizing via signed-in user (hamed.beghennou@gmail.com)

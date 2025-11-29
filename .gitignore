@@ -33,8 +33,14 @@ yarn-error.log*
 # vercel
 .vercel
 
-# firebase
-.firebase
+# typescript
+*.tsbuildinfo
+next-env.d.ts
 
-# Cache
-.eslintcache
+# firebase
+.firebase/
+*--export-*.zip
+.firebaserc
+
+# backup file
+backup.tar.gz
