@@ -4,6 +4,7 @@ import tp302 from './tp-302';
 import tp303 from './tp-303';
 import tp304 from './tp-304';
 import tp305 from './tp-305';
+import tp306 from './tp-306';
 import tp307 from './tp-307';
 import tp308 from './tp-308';
 import tp309 from './tp-309';
@@ -28,6 +29,7 @@ export const tps = {
     [tp303.id]: tp303,
     [tp304.id]: tp304,
     [tp305.id]: tp305,
+    [tp306.id]: tp306,
     [tp307.id]: tp307,
     [tp308.id]: tp308,
     [tp309.id]: tp309,
